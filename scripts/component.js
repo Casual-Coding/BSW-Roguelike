@@ -73,6 +73,7 @@ BSWG.component_CommandCenter = {
 
 		polyWorld.destroy();
 		poly.destroy();
+
 	},
 
 	update: function(dt) {

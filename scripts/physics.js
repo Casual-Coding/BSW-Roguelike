@@ -15,13 +15,13 @@ window.b2createPolygonShape = function (vertices) {
 };
 
 Array.prototype.destroy = function () {
-	var len = this.len;
+	var len = this.length;
 	for (var i=0; i<len; i++)
 	{
-		if (this[i].destroy)
+		if (typeof this[i] === 'array')
 			this[i].destroy();
 		else
-			b2free(this[i]);
+			Box2D.destroy(this[i]);
 	}
 };
 
@@ -39,7 +39,6 @@ BSWG.physics = new function(){
 			if (key.substring(0, 2) == 'b2' && key.length >= 3)
 				window[key] = Box2D[key];
 		}
-		window['b2free'] = Box2D.destroy;
 
 		this.world = new b2World( new b2Vec2(0.0, 0.0) );
 		this.world.SetAllowSleeping(false);
