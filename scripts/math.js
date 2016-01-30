@@ -13,10 +13,10 @@ Math.rotVec2 = function(vec, angle)
 	var x = vec.get_x(),
 		y = vec.get_y();
 	if (!angle)
-		return new b2Vec(x, y);
+		return new b2Vec2(x, y);
 	var ca = Math.cos(angle),
 		sa = Math.sin(angle);
-	return new b2Vec(
+	return new b2Vec2(
 		x * ca - y * sa,
 		y * ca + x * sa
 	);

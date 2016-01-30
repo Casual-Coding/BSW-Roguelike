@@ -1,5 +1,19 @@
 // BlockShip Wars Physics
 
+window.b2createPolygonShape = function (vertices) {
+    var shape = new Box2D.b2PolygonShape();            
+    var buffer = Box2D.allocate(vertices.length * 8, 'float', Box2D.ALLOC_STACK);
+    var offset = 0;
+    for (var i=0;i<vertices.length;i++) {
+        Box2D.setValue(buffer+(offset), vertices[i].get_x(), 'float'); // x
+        Box2D.setValue(buffer+(offset+4), vertices[i].get_y(), 'float'); // y
+        offset += 8;
+    }            
+    var ptr_wrapped = Box2D.wrapPointer(buffer, Box2D.b2Vec2);
+    shape.Set(ptr_wrapped, vertices.length);
+    return shape;
+};
+
 BSWG.physics = new function(){
 
 	this.physicsDT 			= 1.0/60.0;
@@ -19,6 +33,24 @@ BSWG.physics = new function(){
 
 	};
 
+	this.localToWorld = function (vec, body) {
+
+		if (typeof vec === typeof []) {
+			var ret = [];
+			var len = vec.length;
+			for (var i=0; i<len; i++)
+			{
+				var tmp = body.GetWorldPoint(vec[i]);
+				ret.push(new b2Vec2(tmp.get_x(), tmp.get_y()));
+			}
+			return ret;
+		}
+		else {
+			return body.GetWorldPoint(vec);
+		}
+
+	};
+
 	this.createObject = function (type, pos, angle, def){
 
 		var obj = {
@@ -26,6 +58,7 @@ BSWG.physics = new function(){
 			body:  	    null,
 			shape:      null,
 			fixtureDef: null,
+			verts:      []
 		};
 
 		obj.bodyDef = new b2BodyDef();
@@ -51,18 +84,20 @@ BSWG.physics = new function(){
 				var verts = [];
 				for (var i=0; i<def.verts.length; i++)
 					verts.push(Math.rotVec2(def.verts[i], def.offsetAngle));
-				obj.shape = createPolygonShape( verts );
+				obj.verts = verts;
+				obj.shape = b2createPolygonShape( verts );
 				break;
 
 			case 'box':
 
 				var verts = [
-					Math.rotVec2(new b2Vec2(-def.w * 0.5, -def.h * 0.5), def.offsetAngle),
-					Math.rotVec2(new b2Vec2( def.w * 0.5, -def.h * 0.5), def.offsetAngle),
-					Math.rotVec2(new b2Vec2( def.w * 0.5,  def.h * 0.5), def.offsetAngle),
-					Math.rotVec2(new b2Vec2(-def.w * 0.5,  def.h * 0.5), def.offsetAngle)
+					Math.rotVec2(new b2Vec2(-def.width * 0.5, -def.height * 0.5), def.offsetAngle),
+					Math.rotVec2(new b2Vec2( def.width * 0.5, -def.height * 0.5), def.offsetAngle),
+					Math.rotVec2(new b2Vec2( def.width * 0.5,  def.height * 0.5), def.offsetAngle),
+					Math.rotVec2(new b2Vec2(-def.width * 0.5,  def.height * 0.5), def.offsetAngle)
 				];
-				obj.shape = createPolygonShape( verts );
+				obj.verts = verts;
+				obj.shape = b2createPolygonShape( verts );
 				break;
 
 			default:

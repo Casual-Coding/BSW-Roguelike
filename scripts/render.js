@@ -1,3 +1,74 @@
+BSWG.camera = function() {
+
+    this.x = 0;
+    this.y = 0;
+    this.z = 0.01;
+
+    this.panTo = function (dt, x, y) {
+
+        if (typeof x === "object") {
+            y = x.get_y();
+            x = x.get_x();
+        }
+
+        this.x += (x - this.x) * Math.min(dt, 1.0);
+        this.y += (y - this.y) * Math.min(dt, 1.0);
+    };
+
+    this.zoomTo = function (dt, z) {
+        
+        this.z += (z - this.z) * Math.min(dt, 1.0);
+    };
+
+    this.toScreenList = function (viewport, list) {
+
+        var vpsz = Math.max(viewport.w, viewport.h);
+        var ret = [];
+        for (var i=0, len=list.length; i<len; i++)
+        {
+            ret.push(new b2Vec2(
+                (list[i].get_x() - this.x) * this.z * vpsz + viewport.w * 0.5,
+                (list[i].get_y() - this.y) * this.z * vpsz + viewport.h * 0.5
+            ));
+        }
+        return ret;
+
+    };
+
+    this.toScreen = function (viewport, x, y) {
+
+        if (typeof x === "object") {
+            y = x.get_y();
+            x = x.get_x();
+        }
+
+        var vpsz = Math.max(viewport.w, viewport.h);
+
+        return new b2Vec2(
+            (x - this.x) * this.z * vpsz + viewport.w * 0.5,
+            (y - this.y) * this.z * vpsz + viewport.h * 0.5
+        );
+
+    };
+
+    this.toWorld = function (viewport, x, y) {
+
+        if (typeof x === typeof b2Vec2) {
+            y = x.get_y();
+            x = x.get_x();
+        }
+
+        var vpsz = Math.max(viewport.w, viewport.h);
+
+        return new b2Vec2(
+            (x - viewport.w * 0.5) / (this.z * vpsz) + this.x,
+            (y - viewport.h * 0.5) / (this.z * vpsz) + this.y
+        );
+
+    };
+
+};
+
 BSWG.render = new function(){
 
     this.canvas = null;
@@ -57,7 +128,7 @@ BSWG.render = new function(){
 
             self.sizeViewport();
             if (self.renderCbk)
-                self.renderCbk(self.dt, self.time);
+                self.renderCbk(self.dt, self.time, self.ctx);
 
             BSWG.input.newFrame();
 
