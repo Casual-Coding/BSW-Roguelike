@@ -14,6 +14,17 @@ window.b2createPolygonShape = function (vertices) {
     return shape;
 };
 
+Array.prototype.destroy = function () {
+	var len = this.len;
+	for (var i=0; i<len; i++)
+	{
+		if (this[i].destroy)
+			this[i].destroy();
+		else
+			b2free(this[i]);
+	}
+};
+
 BSWG.physics = new function(){
 
 	this.physicsDT 			= 1.0/60.0;
@@ -28,6 +39,7 @@ BSWG.physics = new function(){
 			if (key.substring(0, 2) == 'b2' && key.length >= 3)
 				window[key] = Box2D[key];
 		}
+		window['b2free'] = Box2D.destroy;
 
 		this.world = new b2World( new b2Vec2(0.0, 0.0) );
 		this.world.SetAllowSleeping(false);

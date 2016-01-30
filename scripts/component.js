@@ -29,12 +29,16 @@ BSWG.component_CommandCenter = {
 		ctx.fillStyle = '#888';
 		ctx.fill();
 
-		poly = cam.toScreenList(BSWG.render.viewport, BSWG.physics.localToWorld([
-			new b2Vec2(-this.width * 0.5 * 0.8, -this.height * 0.5 * 0.9),
-			new b2Vec2( this.width * 0.5 * 0.8, -this.height * 0.5 * 0.9),
+		polyWorld.destroy();
+		poly.destroy();
+
+		polyWorld = BSWG.physics.localToWorld([
+			new b2Vec2(-this.width * 0.5 * 0.8, -this.height * 0.5 * 0.85),
+			new b2Vec2( this.width * 0.5 * 0.8, -this.height * 0.5 * 0.85),
 			new b2Vec2( this.width * 0.5 * 0.8, -this.height * 0.5 * 0.0),
 			new b2Vec2(-this.width * 0.5 * 0.8, -this.height * 0.5 * 0.0)
-		], this.obj.body));
+		], this.obj.body);
+		poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
 
 		ctx.beginPath();
 		ctx.moveTo(poly[0].get_x(), poly[0].get_y());
@@ -46,12 +50,16 @@ BSWG.component_CommandCenter = {
 		ctx.fillStyle = '#fff';
 		ctx.fill();
 
-		poly = cam.toScreenList(BSWG.render.viewport, BSWG.physics.localToWorld([
+		polyWorld.destroy();
+		poly.destroy();
+
+		polyWorld = BSWG.physics.localToWorld([
 			new b2Vec2(-this.width * 0.5 * 0.8, this.height * 0.5 * 0.85),
 			new b2Vec2( this.width * 0.5 * 0.8, this.height * 0.5 * 0.85),
 			new b2Vec2( this.width * 0.5 * 0.8, this.height * 0.5 * 0.15),
 			new b2Vec2(-this.width * 0.5 * 0.8, this.height * 0.5 * 0.15)
-		], this.obj.body));
+		], this.obj.body);
+		poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
 
 		ctx.beginPath();
 		ctx.moveTo(poly[0].get_x(), poly[0].get_y());
@@ -62,6 +70,9 @@ BSWG.component_CommandCenter = {
 
 		ctx.fillStyle = '#66d';
 		ctx.fill();
+
+		polyWorld.destroy();
+		poly.destroy();
 	},
 
 	update: function(dt) {
@@ -122,6 +133,9 @@ BSWG.component_Block = {
 
 		ctx.fillStyle = '#888';
 		ctx.fill();
+
+		polyWorld.destroy();
+		poly.destroy();
 
 	},
 

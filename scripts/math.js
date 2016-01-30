@@ -8,6 +8,9 @@ Math.clamp = function(val, min, max)
         return val;
 };
 
+// https://gist.github.com/wteuber/6241786
+Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
+
 Math.rotVec2 = function(vec, angle)
 {
 	var x = vec.get_x(),
