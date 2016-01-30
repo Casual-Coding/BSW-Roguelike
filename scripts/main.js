@@ -6,6 +6,8 @@ var BSWG = new function(){
         'game.js',
         'render.js',
         'input.js',
+        'physics.js',
+        'component.js'
     ];
 
     this.init = function ()
@@ -19,6 +21,7 @@ var BSWG = new function(){
                 return;
 
             BSWG.render.init(function(){
+                BSWG.physics.init();
                 BSWG.input.init();
                 BSWG.game.createNew();
                 BSWG.game.start();

@@ -8,6 +8,8 @@ BSWG.game = new function(){
     this.createNew = function ()
     {
         // Init game state
+
+        BSWG.physics.reset();
     };
 
     this.start = function ()
@@ -15,6 +17,10 @@ BSWG.game = new function(){
         var self = this;
 
         BSWG.render.startRenderer(function(dt){
+
+            BSWG.physics.update();
+
+            
 
         });
     };
