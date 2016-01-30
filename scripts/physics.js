@@ -48,16 +48,19 @@ BSWG.physics = new function(){
 
 			case 'polygon':
 
-				obj.shape = createPolygonShape( def.verts );
+				var verts = [];
+				for (var i=0; i<def.verts.length; i++)
+					verts.push(Math.rotVec2(def.verts[i], def.offsetAngle));
+				obj.shape = createPolygonShape( verts );
 				break;
 
 			case 'box':
 
 				var verts = [
-					b2Vec2(-def.w * 0.5, -def.h * 0.5),
-					b2Vec2( def.w * 0.5, -def.h * 0.5),
-					b2Vec2( def.w * 0.5,  def.h * 0.5),
-					b2Vec2(-def.w * 0.5,  def.h * 0.5)
+					Math.rotVec2(new b2Vec2(-def.w * 0.5, -def.h * 0.5), def.offsetAngle),
+					Math.rotVec2(new b2Vec2( def.w * 0.5, -def.h * 0.5), def.offsetAngle),
+					Math.rotVec2(new b2Vec2( def.w * 0.5,  def.h * 0.5), def.offsetAngle),
+					Math.rotVec2(new b2Vec2(-def.w * 0.5,  def.h * 0.5), def.offsetAngle)
 				];
 				obj.shape = createPolygonShape( verts );
 				break;
