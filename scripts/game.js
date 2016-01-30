@@ -28,12 +28,17 @@ BSWG.game = new function(){
 
         });
 
+        var wheelStart = BSWG.input.MOUSE_WHEEL_ABS();
+        BSWG.input.wheelLimits(wheelStart-10, wheelStart+10);
+
         BSWG.render.startRenderer(function(dt){
 
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
 
-            //self.cam.zoomTo(dt*0.1, 0.2);
+            var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
+            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
+            self.cam.zoomTo(dt*5.0, toZ);
             //self.cam.panTo(dt, -2, 0);
 
             var ctx = BSWG.render.ctx;

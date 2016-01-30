@@ -10,9 +10,18 @@ BSWG.input = new function(){
         right: false,
         wheel: 0,
     };
+    var minWheel = null,
+        maxWheel = null;
     var lmouseState = {};
     for (k in mouseState)
         lmouseState[k] = mouseState[k];
+
+    this.wheelLimits = function ( w1, w2 ) {
+
+        minWheel = w1;
+        maxWheel = w2;
+
+    };
 
     this.KEY_DOWN = function (k) {
         return keyMap[k] || false;
@@ -65,6 +74,10 @@ BSWG.input = new function(){
 
     this.MOUSE_WHEEL = function (k) {
         return mouseState.wheel - lmouseState.wheel;
+    };
+
+    this.MOUSE_WHEEL_ABS = function () {
+        return mouseState.wheel;
     };
 
     this.init = function () {
@@ -126,6 +139,10 @@ BSWG.input = new function(){
 
         $(div).mousewheel(function(e){
             mouseState.wheel += e.deltaY;
+            if ((minWheel || minWheel === 0) && mouseState.wheel < minWheel)
+                mouseState.wheel = minWheel;
+            if ((maxWheel || maxWheel === 0) && mouseState.wheel > maxWheel)
+                mouseState.wheel = maxWheel;
         });
 
     };
