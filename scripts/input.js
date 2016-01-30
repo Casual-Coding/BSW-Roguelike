@@ -1,3 +1,13 @@
+BSWG.KEY = {
+    LEFT:  37,
+    RIGHT: 39,
+    UP:    38,
+    DOWN:  40,
+
+    SPACE: 32,
+    ESC:   27
+};
+
 BSWG.input = new function(){
 
     var keyMap = {};
@@ -78,6 +88,10 @@ BSWG.input = new function(){
 
     this.MOUSE_WHEEL_ABS = function () {
         return mouseState.wheel;
+    };
+
+    this.getKeyMap = function () {
+        return keyMap;
     };
 
     this.init = function () {

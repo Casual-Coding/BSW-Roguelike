@@ -30,6 +30,7 @@ BSWG.physics = new function(){
 		}
 
 		this.world = new b2World( new b2Vec2(0.0, 0.0) );
+		this.world.SetAllowSleeping(false);
 
 	};
 
@@ -66,6 +67,8 @@ BSWG.physics = new function(){
 		obj.bodyDef.set_position( pos );
 		obj.bodyDef.set_angle( angle );
 		obj.body = this.world.CreateBody( obj.bodyDef );
+		obj.body.SetLinearDamping(0.1);
+		obj.body.SetAngularDamping(0.1);
 
 		obj.fixtureDef = new b2FixtureDef();
 		obj.fixtureDef.set_density( def.density || 1.0 );
@@ -115,9 +118,9 @@ BSWG.physics = new function(){
 
 	};
 
-	this.update = function (){
+	this.update = function (dt){
 
-		this.world.Step(this.physicsDT, this.positionIterations, this.velocityIterations);
+		this.world.Step(dt, this.positionIterations, this.velocityIterations);
 
 	};
 

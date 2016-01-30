@@ -28,13 +28,25 @@ BSWG.game = new function(){
 
         });
 
+        this.ccblock = new BSWG.component(BSWG.component_CommandCenter, {
+
+            pos: new b2Vec2(3, 0),
+            angle: -Math.PI/3.5
+
+        });
+
         var wheelStart = BSWG.input.MOUSE_WHEEL_ABS();
         BSWG.input.wheelLimits(wheelStart-10, wheelStart+10);
 
-        BSWG.render.startRenderer(function(dt){
+        BSWG.render.startRenderer(function(dt, time){
+
+            document.title = "BSWR - " + Math.floor(1/dt) + " fps";
+            //document.title = BSWG.input.getKeyMap()[BSWG.KEY.LEFT];
 
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
+
+            self.ccblock.handleInput(BSWG.input.getKeyMap());
 
             var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
             var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
