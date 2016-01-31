@@ -12,6 +12,19 @@ BSWG.game = new function(){
         BSWG.physics.reset();
         BSWG.componentList.clear();
         this.cam = new BSWG.camera();
+        this.editMode = false;
+        var self = this;
+
+        var editBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 100, h: 50,
+            text: "Build Mode",
+            selected: this.editMode,
+            click: function (me) {
+                me.selected = !me.selected;
+                self.editMode = me.selected;
+            }
+        });
     };
 
     this.start = function ()
@@ -64,6 +77,10 @@ BSWG.game = new function(){
         var wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
         BSWG.input.wheelLimits(wheelStart-10, wheelStart+10);
 
+        var grabbedBlock = null;
+        var grabbedLocal = null;
+        var grabbedRot = false;
+
         BSWG.render.startRenderer(function(dt, time){
 
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
@@ -71,6 +88,80 @@ BSWG.game = new function(){
 
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
+            BSWG.ui.update();
+
+            var mx = BSWG.input.MOUSE('x');
+            var my = BSWG.input.MOUSE('y');
+            var mps = new b2Vec2(mx, my);
+            var mp = self.cam.toWorld(BSWG.render.viewport, mps);
+
+            if (self.editMode) {
+
+                if (BSWG.input.MOUSE_PRESSED('left')) {
+                    if (BSWG.componentList.mouseOver) {
+                        grabbedBlock = BSWG.componentList.mouseOver;
+                        if (grabbedBlock.type === 'cc') {
+                            grabbedBlock = null;
+                        }
+                        else {
+                            grabbedLocal = grabbedBlock.getLocalPoint(mp);
+                            grabbedBlock.obj.body.SetLinearDamping(0.75);
+                            grabbedBlock.obj.body.SetAngularDamping(0.75);
+                        }
+                    }
+                }
+                if (BSWG.input.MOUSE_RELEASED('left') && grabbedBlock) {
+                    grabbedBlock.obj.body.SetLinearDamping(0.1);
+                    grabbedBlock.obj.body.SetAngularDamping(0.1);
+                    grabbedBlock = null;
+                    [grabbedLocal].destroy();
+                    grabbedLocal = null;
+                }
+
+                if (grabbedBlock) {
+
+                    var cl = new b2Vec2(0, 0);
+                    var cw = grabbedBlock.getWorldPoint(cl);
+                    var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
+                    var dx = mp.get_x() - gpw.get_x();
+                    var dy = mp.get_y() - gpw.get_y();
+                    var len = Math.sqrt(dx*dx+dy*dy);
+                    var dx2 = mp.get_x() - cw.get_x();
+                    var dy2 = mp.get_y() - cw.get_y();
+                    var len2 = Math.sqrt(dx2*dx2+dy2*dy2);
+
+                    var mass = grabbedBlock.obj.body.GetMass();
+
+                    if (BSWG.input.MOUSE('shift')) {
+
+                        var ang1 = Math.atan2(dy, dx);
+                        var ang2 = Math.atan2(dy2, dx2);
+                        var dang = Math.atan2(Math.sin(ang1-ang2), Math.cos(ang1-ang2));
+                        grabbedBlock.obj.body.ApplyTorque(dang*2*mass);
+                    }
+                    else {
+
+                        if (len > 1)
+                        {
+                            dx /= len;
+                            dy /= len;
+                        }
+                        var vel = new b2Vec2(dx*2.0 * mass, dy*2.0 * mass);
+                        grabbedBlock.addForce(vel);
+                        [vel].destroy();
+                    }
+
+                    [gpw, cl, cw].destroy();
+
+                }
+            }
+            else if (grabbedBlock) {
+                grabbedBlock.obj.body.SetLinearDamping(0.1);
+                grabbedBlock.obj.body.SetAngularDamping(0.1);
+                grabbedBlock = null;
+                [grabbedLocal].destroy();
+                grabbedLocal = null;
+            }
 
             self.ccblock.handleInput(BSWG.input.getKeyMap());
 
@@ -88,6 +179,27 @@ BSWG.game = new function(){
             self.stars.render(ctx, self.cam, viewport);
             BSWG.componentList.render(ctx, self.cam, dt);
 
+            if (grabbedBlock) {
+
+                var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
+                var gp = self.cam.toScreen(viewport, gpw);
+
+                ctx.lineWidth = 2.0;
+                ctx.strokeStyle = 'rgba(0,255,0,0.7)';
+                ctx.beginPath();
+                ctx.moveTo(mps.get_x(), mps.get_y());
+                ctx.lineTo(gp.get_x(), gp.get_y());
+                ctx.stroke();
+                ctx.lineWidth = 1.0;
+
+                [gpw, gp].destroy();
+
+            }
+
+            BSWG.ui.render(ctx, viewport);
+
+            [mp, mps].destroy();
+
         });
     };
 
@@ -99,7 +211,7 @@ BSWG.starfield = function(){
     var imageSize = 384;
     var images = [];
     var starSizeO = [ 1, 8 ];
-    var layers = 1;
+    var layers = 2;
 
     Math.seedrandom(Date.timeStamp());
 
@@ -182,7 +294,7 @@ BSWG.starfield = function(){
         for (var l=layers; l>=1; l--) {
 
             var sz = imageSize / l;
-            var camz = 0.02 / l;
+            var camz = 0.005 / l;
             var offx = (-cam.x * vpsz * camz);
             var offy = (-cam.y * vpsz * camz);
             var ix = Math.floor(offx / sz);
@@ -194,6 +306,11 @@ BSWG.starfield = function(){
 
             cx = Math.floor(cx / (imageSize / (vpsz * camz)));
             cy = Math.floor(cy / (imageSize / (vpsz * camz)));
+
+            if (l === 2)
+            {
+                offx = offy = cx = cy = 0;
+            }
 
             ctx.globalAlpha = 1/l;
 

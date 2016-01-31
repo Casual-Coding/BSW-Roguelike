@@ -63,14 +63,34 @@ BSWG.physics = new function(){
 
 	};
 
-	this.createObject = function (type, pos, angle, def){
+	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide) {
+
+		var obj = {
+			jointDef: null,
+			joint:    null
+		};
+
+		obj.jointDef = new b2RevoluteJointDef();
+		obj.jointDef.set_bodyA( bodyA );
+		obj.jointDef.set_bodyB( bodyB );
+		obj.jointDef.set_localAnchorA( new b2Vec2( anchorA.get_x(), anchorA.get_y() ) );
+		obj.jointDef.set_localAnchorB( new b2Vec2( anchorB.get_x(), anchorB.get_y() ) );
+		obj.jointDef.set_collideConnected( !noCollide );
+		obj.joint = this.world.CreateJoint( obj.jointDef );
+
+		return obj;
+
+	};
+
+	this.createObject = function (type, pos, angle, def) {
 
 		var obj = {
 			bodyDef:    null,
 			body:  	    null,
 			shape:      null,
 			fixtureDef: null,
-			verts:      []
+			verts:      [],
+			radius:     0,
 		};
 
 		obj.bodyDef = new b2BodyDef();
@@ -91,6 +111,7 @@ BSWG.physics = new function(){
 
 				obj.shape = new b2CircleShape();
 				obj.shape.set_m_radius( def.radius );
+				obj.radius = def.radius;
 				break;
 
 			case 'polygon':
@@ -118,8 +139,20 @@ BSWG.physics = new function(){
 				break;
 		}
 
+		if (obj.verts) {
+			obj.radius = 0;
+			for (var i=0; i<obj.verts.length; i++)
+			{
+				var v = obj.verts[i];
+				obj.radius = Math.max(obj.radius,
+					v.get_x()*v.get_x() + v.get_y()*v.get_y()
+				);
+			}
+			obj.radius = Math.sqrt(obj.radius);
+		}
+
 		obj.fixtureDef.set_shape( obj.shape );
-		obj.body.CreateFixture( obj.fixtureDef );
+		obj.fixture = obj.body.CreateFixture( obj.fixtureDef );
 
 		return obj;
 

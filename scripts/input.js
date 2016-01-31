@@ -19,6 +19,7 @@ BSWG.input = new function(){
         middle: false,
         right: false,
         wheel: 0,
+        shift: false
     };
     var minWheel = null,
         maxWheel = null;
@@ -115,6 +116,7 @@ BSWG.input = new function(){
         $(div).mousemove(function(e){
             mouseState.x = e.pageX;
             mouseState.y = e.pageY;
+            mouseState.shift = !!e.shiftKey;
         });
 
         $(div).mousedown(function(e){
@@ -132,6 +134,7 @@ BSWG.input = new function(){
                 default:
                     break;
             }
+            mouseState.shift = !!e.shiftKey;
         });
 
         $(div).mouseup(function(e){
@@ -149,6 +152,7 @@ BSWG.input = new function(){
                 default:
                     break;
             }
+            mouseState.shift = !!e.shiftKey;
         });
 
         $(div).mousewheel(function(e){
@@ -157,6 +161,7 @@ BSWG.input = new function(){
                 mouseState.wheel = minWheel;
             if ((maxWheel || maxWheel === 0) && mouseState.wheel > maxWheel)
                 mouseState.wheel = maxWheel;
+            mouseState.shift = !!e.shiftKey;
         });
 
     };

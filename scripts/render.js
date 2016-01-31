@@ -53,7 +53,7 @@ BSWG.camera = function() {
 
     this.toWorld = function (viewport, x, y) {
 
-        if (typeof x === typeof b2Vec2) {
+        if (typeof x === "object") {
             y = x.get_y();
             x = x.get_x();
         }

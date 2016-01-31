@@ -7,7 +7,8 @@ var BSWG = new function(){
         'render.js',
         'input.js',
         'physics.js',
-        'component.js'
+        'component.js',
+        'ui.js',
     ];
 
     this.init = function ()
