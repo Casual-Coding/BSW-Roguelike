@@ -5,13 +5,13 @@ BSWG.createBoxJPoints = function(w, h) {
 	var jp = [];
 
 	for (var y=0; y<h; y++) {
-		jp.push(new b2Vec2(-w * 0.5, y - h * 0.5 + 0.5));
-		jp.push(new b2Vec2( w * 0.5, y - h * 0.5 + 0.5));
+		jp.push(new b2Vec2(-w * 0.5005, y - h * 0.5 + 0.5));
+		jp.push(new b2Vec2( w * 0.5005, y - h * 0.5 + 0.5));
 	}
 
 	for (var x=0; x<w; x++) {
-		jp.push(new b2Vec2(x - w * 0.5 + 0.5, -h * 0.5));
-		jp.push(new b2Vec2(x - w * 0.5 + 0.5,  h * 0.5));
+		jp.push(new b2Vec2(x - w * 0.5 + 0.5, -h * 0.5005));
+		jp.push(new b2Vec2(x - w * 0.5 + 0.5,  h * 0.5005));
 	}
 
 	return jp;
@@ -127,6 +127,136 @@ BSWG.component_CommandCenter = {
 
 };
 
+BSWG.component_Thruster = {
+
+	type: 'thruster',
+
+	init: function(args) {
+
+		var offsetAngle = this.offsetAngle = 0.0;
+
+		var verts = [
+			Math.rotVec2(new b2Vec2(-0.2, -0.5), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.2, -0.5), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.4,  0.5), offsetAngle),
+			Math.rotVec2(new b2Vec2(-0.4,  0.5), offsetAngle)
+		];
+
+		this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
+			verts: verts
+		});
+
+		this.jpoints = [ new b2Vec2(0.0, 0.5005) ];
+
+		this.thrustKey = args.thrustKey || BSWG.KEY.UP;
+		this.thrustT = 0.0;
+
+	},
+
+	render: function(ctx, cam, dt) {
+
+		var polyWorld = BSWG.physics.localToWorld(this.obj.verts, this.obj.body);
+		var poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
+
+		ctx.beginPath();
+		ctx.moveTo(poly[0].get_x(), poly[0].get_y());
+		ctx.lineTo(poly[1].get_x(), poly[1].get_y());
+		ctx.lineTo(poly[2].get_x(), poly[2].get_y());
+		ctx.lineTo(poly[3].get_x(), poly[3].get_y());
+		ctx.closePath();
+
+		ctx.fillStyle = '#aea';
+		ctx.fill();
+
+		if (this.thrustT > 0) {
+
+			var tpl = [
+				Math.rotVec2(new b2Vec2(-0.2, -0.5), this.offsetAngle),
+				Math.rotVec2(new b2Vec2( 0.0, -0.5 - this.thrustT * (2.0 + Math.random())), this.offsetAngle),
+				Math.rotVec2(new b2Vec2( 0.2, -0.5), this.offsetAngle)
+			];
+			var tpw = BSWG.physics.localToWorld(tpl, this.obj.body);
+			var tp = cam.toScreenList(BSWG.render.viewport, tpw);
+
+			ctx.beginPath();
+			ctx.moveTo(tp[0].get_x(), tp[0].get_y());
+			ctx.lineTo(tp[1].get_x(), tp[1].get_y());
+			ctx.lineTo(tp[2].get_x(), tp[2].get_y());
+			ctx.closePath();
+
+			ctx.globalAlpha = Math.min(this.thrustT / 0.3, 1.0);
+
+			var r = Math.random();
+			if (r<0.5)
+				ctx.fillStyle = '#f40';
+			else if (r<0.75)
+				ctx.fillStyle = '#ff0';
+			else
+				ctx.fillStyle = '#fff';
+			ctx.fill();
+
+			ctx.globalAlpha = 1.0;
+
+			tpl.destroy();
+			tpw.destroy();
+			tp.destroy();
+
+			this.thrustT -= dt;
+
+		}
+		else
+			this.thrustT = 0.0;
+
+		polyWorld.destroy();
+		poly.destroy();
+
+	},
+
+	update: function(dt) {
+
+	},
+
+	openConfigMenu: function() {
+
+		var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
+
+		var self = this;
+        this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+            x: p.get_x()-100, y: p.get_y()-25,
+            w: 200, h: 50,
+            key: this.thrustKey,
+            close: function (key) {
+            	if (key)
+                	self.thrustKey = key;
+            }
+        });
+
+        [p].destroy();
+
+	},
+
+	closeConfigMenu: function() {
+
+	},
+
+	handleInput: function(keys) {
+
+		var accel = 0;
+
+		if (keys[this.thrustKey]) accel += 1;
+		
+		if (accel)
+		{
+			var a = this.obj.body.GetAngle() + Math.PI/2.0;
+			accel *= 20.0;
+			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
+			this.thrustT = 0.3;
+		}
+
+	},
+
+};
+
 BSWG.component_Block = {
 
 	type: 'block',
@@ -185,6 +315,9 @@ BSWG.component = function (desc, args) {
 	this.jmatch = [];
 	this.jmatch = -1;
 	this.welds = {};
+	this.onCC = null;
+	if (this.type === 'cc')
+		this.onCC = this;
 
 	this.init(args);
 
@@ -291,10 +424,16 @@ BSWG.component = function (desc, args) {
 		if (this.jmhover >= 0 && BSWG.input.MOUSE_PRESSED('left')) {
 			for (var i=0; i<this.jmatch.length; i++) {
 				if (this.jmatch[i][0] === this.jmhover && this.jmatch[i][1].id > this.id) {
-					if (!this.welds[i]) {
+					if (!this.welds[this.jmatch[i][0]]) {
 						var obj = BSWG.physics.createWeld(this.obj.body, this.jmatch[i][1].obj.body,
 														  this.jpoints[this.jmatch[i][0]],
 														  this.jmatch[i][1].jpoints[this.jmatch[i][2]]);
+
+						if (this.onCC && !this.jmatch[i][1].onCC)
+							this.jmatch[i][1].onCC = this.onCC;
+						if (!this.onCC && this.jmatch[i][1].onCC)
+							this.onCC = this.jmatch[i][1].onCC;
+
 						this.welds[this.jmatch[i][0]] = obj;
 						this.jmatch[i][1].welds[this.jmatch[i][2]] = obj;
 					}
@@ -369,6 +508,22 @@ BSWG.componentList = new function () {
 				return true;
 			}
 		return false;
+
+	};
+
+	this.handleInput = function (cc, keys) {
+
+		var len = this.compList.length;
+		for (var i=0; i<len; i++)
+		{
+			if (!cc || this.compList[i].onCC === cc)
+			{
+				this.compList[i].handleInput(keys);
+			}
+		}
+
+		if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.input.MOUSE_PRESSED('right') && BSWG.game.editMode)
+		 	this.mouseOver.openConfigMenu();
 
 	};
 

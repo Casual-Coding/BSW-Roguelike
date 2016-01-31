@@ -54,15 +54,23 @@ BSWG.game = new function(){
 
             pastPositions.push(p);
 
-            new BSWG.component(BSWG.component_Block, {
+            if (Math.random() < 1/5) 
+                new BSWG.component(BSWG.component_Thruster, {
 
-                pos: p,
-                angle: Math.random()*Math.PI*2.0,
-                width: Math.floor(Math.random()*3)+1,
-                height: Math.floor(Math.random()*3)+1,
-                armour: false
+                    pos: p,
+                    angle: Math.random()*Math.PI*2.0,
 
-            });
+                });
+            else
+                new BSWG.component(BSWG.component_Block, {
+
+                    pos: p,
+                    angle: Math.random()*Math.PI*2.0,
+                    width: Math.floor(Math.random()*3)+1,
+                    height: Math.floor(Math.random()*3)+1,
+                    armour: false
+
+                });
         }
 
         this.ccblock = new BSWG.component(BSWG.component_CommandCenter, {
@@ -163,7 +171,7 @@ BSWG.game = new function(){
                 grabbedLocal = null;
             }
 
-            self.ccblock.handleInput(BSWG.input.getKeyMap());
+            BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
 
             var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
             var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);

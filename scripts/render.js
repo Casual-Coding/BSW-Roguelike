@@ -87,6 +87,7 @@ BSWG.render = new function(){
         document.body.innerHTML = '';
 
         this.canvas = document.createElement('canvas');
+        this.canvas.oncontextmenu = function(){ return false; };
         this.sizeViewport();
         this.ctx = this.canvas.getContext('2d');
 

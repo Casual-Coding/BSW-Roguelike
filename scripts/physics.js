@@ -28,8 +28,8 @@ Array.prototype.destroy = function () {
 BSWG.physics = new function(){
 
 	this.physicsDT 			= 1.0/60.0;
-	this.positionIterations = 10;
-	this.velocityIterations = 10;
+	this.positionIterations = 60;
+	this.velocityIterations = 60;
 	this.world 				= null;
 
 	this.init = function (){
