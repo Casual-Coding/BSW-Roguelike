@@ -153,7 +153,9 @@ BSWG.game = new function(){
                         var ang1 = Math.atan2(dy, dx);
                         var ang2 = Math.atan2(dy2, dx2);
                         var dang = Math.atan2(Math.sin(ang1-ang2), Math.cos(ang1-ang2));
-                        grabbedBlock.obj.body.ApplyTorque(dang*2*mass);
+                        var sign = dang / Math.abs(dang);
+                        dang = dang*dang * sign;
+                        grabbedBlock.obj.body.ApplyAngularImpulse(dang*1.0);
                     }
                     else {
 
