@@ -9,6 +9,7 @@ var BSWG = new function(){
         'physics.js',
         'component.js',
         'ui.js',
+        'blaster.js',
     ];
 
     this.init = function ()

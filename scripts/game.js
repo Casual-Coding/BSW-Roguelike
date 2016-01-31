@@ -11,6 +11,7 @@ BSWG.game = new function(){
 
         BSWG.physics.reset();
         BSWG.componentList.clear();
+        BSWG.blasterList.clear();
         this.cam = new BSWG.camera();
         this.editMode = false;
         var self = this;
@@ -56,6 +57,13 @@ BSWG.game = new function(){
 
             if (Math.random() < 1/5) 
                 new BSWG.component(BSWG.component_Thruster, {
+
+                    pos: p,
+                    angle: Math.random()*Math.PI*2.0,
+
+                });
+            else if (Math.random() < 1/6)
+                new BSWG.component(BSWG.component_Blaster, {
 
                     pos: p,
                     angle: Math.random()*Math.PI*2.0,
@@ -154,7 +162,7 @@ BSWG.game = new function(){
                             dx /= len;
                             dy /= len;
                         }
-                        var vel = new b2Vec2(dx*2.0 * mass, dy*2.0 * mass);
+                        var vel = new b2Vec2(dx*4.0 * mass, dy*4.0 * mass);
                         grabbedBlock.addForce(vel);
                         [vel].destroy();
                     }
@@ -186,6 +194,7 @@ BSWG.game = new function(){
 
             self.stars.render(ctx, self.cam, viewport);
             BSWG.componentList.render(ctx, self.cam, dt);
+            BSWG.blasterList.updateRender(ctx, self.cam, dt);
 
             if (grabbedBlock) {
 

@@ -127,6 +127,122 @@ BSWG.component_CommandCenter = {
 
 };
 
+BSWG.component_Blaster = {
+
+	type: 'blaster',
+
+	init: function(args) {
+
+		var offsetAngle = this.offsetAngle = 0.0;
+
+		var verts = [
+			Math.rotVec2(new b2Vec2(-0.3, -0.3), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.3, -0.3), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.3,  0.3), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.05,  1.5), offsetAngle),
+			Math.rotVec2(new b2Vec2(-0.05,  1.5), offsetAngle),
+			Math.rotVec2(new b2Vec2(-0.3,  0.3), offsetAngle)
+		];
+
+		this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
+			verts: verts
+		});
+
+		this.jpoints = [ new b2Vec2(0.0, -0.3),
+						 new b2Vec2(-0.3, 0.0),
+						 new b2Vec2(0.3, 0.0) ];
+
+		this.fireKey = args.fireKey || BSWG.KEY.SPACE;
+		this.thrustT = 0.0;
+
+	},
+
+	render: function(ctx, cam, dt) {
+
+		var polyWorld = BSWG.physics.localToWorld(this.obj.verts, this.obj.body);
+		var poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
+
+		ctx.beginPath();
+		ctx.moveTo(poly[0].get_x(), poly[0].get_y());
+		ctx.lineTo(poly[1].get_x(), poly[1].get_y());
+		ctx.lineTo(poly[2].get_x(), poly[2].get_y());
+		ctx.lineTo(poly[3].get_x(), poly[3].get_y());
+		ctx.lineTo(poly[4].get_x(), poly[4].get_y());
+		ctx.lineTo(poly[5].get_x(), poly[5].get_y());
+		ctx.closePath();
+
+		ctx.fillStyle = '#f55';
+		ctx.fill();
+
+		polyWorld.destroy();
+		poly.destroy();
+
+	},
+
+	update: function(dt) {
+
+		if (this.fireT) {
+			this.fireT -= dt;
+			if (this.fireT <= 0)
+				this.fireT = 0.0;
+		}
+
+	},
+
+	openConfigMenu: function() {
+
+		var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
+
+		var self = this;
+        this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+            x: p.get_x()-100, y: p.get_y()-25,
+            w: 200, h: 50,
+            key: this.fireKey,
+            close: function (key) {
+            	if (key)
+                	self.fireKey = key;
+            }
+        });
+
+        [p].destroy();
+
+	},
+
+	closeConfigMenu: function() {
+
+	},
+
+	handleInput: function(keys) {
+
+		var accel = 0;
+
+		if (keys[this.fireKey] && !this.fireT) {
+
+			var a = this.obj.body.GetAngle() - Math.PI/2.0;
+
+			var pl = new b2Vec2(0.0,  1.5);
+			var p = BSWG.physics.localToWorld([pl], this.obj.body);
+
+			BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0, -Math.sin(a)*15.0));
+			accel = 1;
+
+			[pl].destroy();
+
+			this.fireT = 0.5;
+		}
+		
+		if (accel)
+		{
+			var a = this.obj.body.GetAngle() + Math.PI/2.0;
+			accel *= -4.0;
+			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
+			this.thrustT = 0.3;
+		}
+
+	},
+
+};
+
 BSWG.component_Thruster = {
 
 	type: 'thruster',
