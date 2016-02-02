@@ -341,10 +341,13 @@ BSWG.component_Thruster = {
 
 	openConfigMenu: function() {
 
+		if (BSWG.compActiveConfMenu)
+			BSWG.compActiveConfMenu.remove();
+
 		var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
 
 		var self = this;
-        this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+        BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.get_x()-100, y: p.get_y()-25,
             w: 200, h: 50,
             key: this.thrustKey,

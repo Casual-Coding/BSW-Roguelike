@@ -79,7 +79,7 @@ BSWG.control_KeyConfig = {
 	update: function () {
 
 		var keys = BSWG.input.getKeyMap();
-		if (keys[BSWG.KEY.ESC]) {
+		if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left')) {
 			this.close(null);
 			return;
 		}
