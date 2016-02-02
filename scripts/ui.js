@@ -70,7 +70,7 @@ BSWG.control_KeyConfig = {
 		ctx.textAlign = 'center';
 		ctx.fillStyle = '#000';
 
-		ctx.fillText("Hit key to bind to (" + this.key + "): ", this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+		ctx.fillText("Hit key to bind to (" + BSWG.KEY_NAMES[this.key] + "): ", this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
 
 		ctx.textAlign = 'left';
 
@@ -79,13 +79,15 @@ BSWG.control_KeyConfig = {
 	update: function () {
 
 		var keys = BSWG.input.getKeyMap();
-		if (keys[27]) {
+		if (keys[BSWG.KEY.ESC]) {
 			this.close(null);
+			return;
 		}
 
 		for (var k in keys) {
 			if (keys[k] === true) {
 				this.close(parseInt(k));
+				return;
 			}
 		}
 

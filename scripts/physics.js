@@ -41,7 +41,7 @@ BSWG.physics = new function(){
 		}
 
 		this.world = new b2World( new b2Vec2(0.0, 0.0) );
-		this.world.SetAllowSleeping(false);
+		this.ground = this.world.CreateBody(new b2BodyDef());
 
 	};
 
@@ -79,6 +79,50 @@ BSWG.physics = new function(){
 		obj.joint = this.world.CreateJoint( obj.jointDef );
 
 		return obj;
+
+	};
+
+	this.mouseJoint = null;
+
+	this.mousePosWorld = function () {
+
+		var cam = BSWG.game.cam;
+		var viewport = BSWG.render.viewport;
+		var ps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
+		var ret = cam.toWorld(viewport, ps);
+		[ps].destroy();
+		return ret;
+
+	};
+
+	this.startMouseDrag = function (body, maxForce) {
+
+		if (this.mouseJoint)
+			this.endMouseDrag();
+
+		var mouseJointDef = new b2MouseJointDef();
+		mouseJointDef.set_bodyA(this.ground);
+		mouseJointDef.set_bodyB(body);
+		mouseJointDef.set_maxForce(maxForce || 10.0);
+		mouseJointDef.set_target(this.mousePosWorld());
+		this.mouseJoint = this.world.CreateJoint(mouseJointDef);
+		this.mouseJoint = Box2D.castObject(this.mouseJoint, b2MouseJoint);
+
+	};
+
+	this.endMouseDrag = function () {
+
+		if (this.mouseJoint) {
+			this.world.DestroyJoint( this.mouseJoint );
+			this.mouseJoint = null;
+		}
+
+	};
+
+	this.updateMouseDrag = function () {
+
+		if (this.mouseJoint)
+			this.mouseJoint.SetTarget(this.mousePosWorld());
 
 	};
 
@@ -165,6 +209,7 @@ BSWG.physics = new function(){
 	this.update = function (dt){
 
 		this.world.Step(dt, this.positionIterations, this.velocityIterations);
+		this.updateMouseDrag();
 
 	};
 

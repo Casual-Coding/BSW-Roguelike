@@ -1,5 +1,7 @@
 // BlockShip Wars Component
 
+BSWG.compActiveConfMenu = null;
+
 BSWG.createBoxJPoints = function(w, h) {
 
 	var jp = [];
@@ -120,6 +122,7 @@ BSWG.component_CommandCenter = {
 		{
 			var a = this.obj.body.GetAngle() + Math.PI/2.0;
 			accel *= 5.0;
+			this.obj.body.SetAwake(true);
 			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
 		}
 
@@ -191,10 +194,13 @@ BSWG.component_Blaster = {
 
 	openConfigMenu: function() {
 
+		if (BSWG.compActiveConfMenu)
+			BSWG.compActiveConfMenu.remove();
+
 		var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
 
 		var self = this;
-        this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+        BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.get_x()-100, y: p.get_y()-25,
             w: 200, h: 50,
             key: this.fireKey,
@@ -234,7 +240,8 @@ BSWG.component_Blaster = {
 		if (accel)
 		{
 			var a = this.obj.body.GetAngle() + Math.PI/2.0;
-			accel *= -4.0;
+			accel *= -8.0;
+			this.obj.body.SetAwake(true);
 			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
 			this.thrustT = 0.3;
 		}
@@ -365,6 +372,7 @@ BSWG.component_Thruster = {
 		{
 			var a = this.obj.body.GetAngle() + Math.PI/2.0;
 			accel *= 20.0;
+			this.obj.body.SetAwake(true);
 			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
 			this.thrustT = 0.3;
 		}

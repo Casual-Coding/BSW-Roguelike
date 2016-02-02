@@ -116,69 +116,27 @@ BSWG.game = new function(){
                 if (BSWG.input.MOUSE_PRESSED('left')) {
                     if (BSWG.componentList.mouseOver) {
                         grabbedBlock = BSWG.componentList.mouseOver;
-                        if (grabbedBlock.type === 'cc') {
+                        if (grabbedBlock.type === 'cc' || grabbedBlock.onCC) {
                             grabbedBlock = null;
                         }
                         else {
                             grabbedLocal = grabbedBlock.getLocalPoint(mp);
-                            grabbedBlock.obj.body.SetLinearDamping(0.75);
-                            grabbedBlock.obj.body.SetAngularDamping(0.75);
+                            BSWG.physics.startMouseDrag(grabbedBlock.obj.body, grabbedBlock.obj.body.GetMass()*1.75);
                         }
                     }
                 }
                 if (BSWG.input.MOUSE_RELEASED('left') && grabbedBlock) {
-                    grabbedBlock.obj.body.SetLinearDamping(0.1);
-                    grabbedBlock.obj.body.SetAngularDamping(0.1);
                     grabbedBlock = null;
                     [grabbedLocal].destroy();
                     grabbedLocal = null;
-                }
-
-                if (grabbedBlock) {
-
-                    var cl = new b2Vec2(0, 0);
-                    var cw = grabbedBlock.getWorldPoint(cl);
-                    var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
-                    var dx = mp.get_x() - gpw.get_x();
-                    var dy = mp.get_y() - gpw.get_y();
-                    var len = Math.sqrt(dx*dx+dy*dy);
-                    var dx2 = mp.get_x() - cw.get_x();
-                    var dy2 = mp.get_y() - cw.get_y();
-                    var len2 = Math.sqrt(dx2*dx2+dy2*dy2);
-
-                    var mass = grabbedBlock.obj.body.GetMass();
-
-                    if (BSWG.input.MOUSE('shift')) {
-
-                        var ang1 = Math.atan2(dy, dx);
-                        var ang2 = Math.atan2(dy2, dx2);
-                        var dang = Math.atan2(Math.sin(ang1-ang2), Math.cos(ang1-ang2));
-                        var sign = dang / Math.abs(dang);
-                        dang = dang*dang * sign;
-                        grabbedBlock.obj.body.ApplyAngularImpulse(dang*1.0);
-                    }
-                    else {
-
-                        if (len > 1)
-                        {
-                            dx /= len;
-                            dy /= len;
-                        }
-                        var vel = new b2Vec2(dx*4.0 * mass, dy*4.0 * mass);
-                        grabbedBlock.addForce(vel);
-                        [vel].destroy();
-                    }
-
-                    [gpw, cl, cw].destroy();
-
+                    BSWG.physics.endMouseDrag();
                 }
             }
             else if (grabbedBlock) {
-                grabbedBlock.obj.body.SetLinearDamping(0.1);
-                grabbedBlock.obj.body.SetAngularDamping(0.1);
                 grabbedBlock = null;
                 [grabbedLocal].destroy();
                 grabbedLocal = null;
+                BSWG.physics.endMouseDrag();
             }
 
             BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
