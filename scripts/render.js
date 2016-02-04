@@ -23,13 +23,12 @@ BSWG.camera = function() {
     this.toScreenList = function (viewport, list) {
 
         var vpsz = Math.max(viewport.w, viewport.h);
-        var ret = [];
-        for (var i=0, len=list.length; i<len; i++)
-        {
-            ret.push(new b2Vec2(
+        var ret = new Array(list.length);
+        for (var i=0, len=list.length; i<len; i++) {
+            ret[i] = new b2Vec2(
                 (list[i].get_x() - this.x) * this.z * vpsz + viewport.w * 0.5,
                 (list[i].get_y() - this.y) * this.z * vpsz + viewport.h * 0.5
-            ));
+            );
         }
         return ret;
 

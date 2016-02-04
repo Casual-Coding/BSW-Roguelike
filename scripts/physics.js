@@ -14,18 +14,31 @@ window.b2createPolygonShape = function (vertices) {
     return shape;
 };
 
+window.__DC = 0;
+
 Array.prototype.destroy = function () {
 	var len = this.length;
 	for (var i=0; i<len; i++)
 	{
-		if (typeof this[i] === 'array')
+		if (typeof this[i] === 'object' && this[i].destroy)
 			this[i].destroy();
 		else
+		{
+			window.__DC += 1;
 			Box2D.destroy(this[i]);
+		}
 	}
 };
 
 BSWG.physics = new function(){
+
+	var fnToStringI = 1;
+	var fnToString = function () {
+		if (!this.prototype.____FNTSI) {
+			this.prototype.____FNTSI = fnToStringI ++;
+		}
+		return "" + this.prototype.____FNTSI;
+	};
 
 	this.physicsDT 			= 1.0/60.0;
 	this.positionIterations = 60;
@@ -36,6 +49,8 @@ BSWG.physics = new function(){
 
 		for (var key in Box2D)
 		{
+			if (typeof Box2D[key] === "function")
+				Box2D[key].toString = fnToString;
 			if (key.substring(0, 2) == 'b2' && key.length >= 3)
 				window[key] = Box2D[key];
 		}
@@ -47,13 +62,12 @@ BSWG.physics = new function(){
 
 	this.localToWorld = function (vec, body) {
 
-		if (typeof vec === typeof []) {
-			var ret = [];
+		if (typeof vec === 'object') {
 			var len = vec.length;
-			for (var i=0; i<len; i++)
-			{
+			var ret = new Array(len);
+			for (var i=0; i<len; i++) {
 				var tmp = body.GetWorldPoint(vec[i]);
-				ret.push(new b2Vec2(tmp.get_x(), tmp.get_y()));
+				ret[i] = new b2Vec2(tmp.get_x(), tmp.get_y());
 			}
 			return ret;
 		}
@@ -115,6 +129,14 @@ BSWG.physics = new function(){
 		if (this.mouseJoint) {
 			this.world.DestroyJoint( this.mouseJoint );
 			this.mouseJoint = null;
+		}
+
+	};
+
+	this.mouseDragSetMaxForce = function (maxForce) {
+
+		if (this.mouseJoint) {
+			this.mouseJoint.SetMaxForce(maxForce || 10.0);
 		}
 
 	};

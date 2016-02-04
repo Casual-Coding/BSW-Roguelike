@@ -4,16 +4,26 @@ BSWG.compActiveConfMenu = null;
 
 BSWG.createBoxJPoints = function(w, h) {
 
-	var jp = [];
+	var jp = new Array();
 
 	for (var y=0; y<h; y++) {
-		jp.push(new b2Vec2(-w * 0.5005, y - h * 0.5 + 0.5));
-		jp.push(new b2Vec2( w * 0.5005, y - h * 0.5 + 0.5));
+		jp.push(new b2Vec2(-w * 0.5, y - h * 0.5 + 0.5));
+		jp.push(new b2Vec2( w * 0.5, y - h * 0.5 + 0.5));
+	}
+
+	if (!(h%2)) {
+		jp.push(new b2Vec2(-w * 0.5, 0.0));
+		jp.push(new b2Vec2( w * 0.5, 0.0));
 	}
 
 	for (var x=0; x<w; x++) {
-		jp.push(new b2Vec2(x - w * 0.5 + 0.5, -h * 0.5005));
-		jp.push(new b2Vec2(x - w * 0.5 + 0.5,  h * 0.5005));
+		jp.push(new b2Vec2(x - w * 0.5 + 0.5, -h * 0.5));
+		jp.push(new b2Vec2(x - w * 0.5 + 0.5,  h * 0.5));
+	}
+
+	if (!(w%2)) {
+		jp.push(new b2Vec2(0.0, -h * 0.5));
+		jp.push(new b2Vec2(0.0,  h * 0.5));
 	}
 
 	return jp;
@@ -115,15 +125,18 @@ BSWG.component_CommandCenter = {
 		if (keys[BSWG.KEY.UP]) accel -= 1;
 		if (keys[BSWG.KEY.DOWN]) accel += 1;
 
-		if (rot)
+		if (rot) {
+			this.obj.body.SetAwake(true);
 			this.obj.body.ApplyTorque(rot*7.0);
+		}
 		
-		if (accel)
-		{
+		if (accel) {
 			var a = this.obj.body.GetAngle() + Math.PI/2.0;
 			accel *= 5.0;
 			this.obj.body.SetAwake(true);
-			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
+			var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
+			this.obj.body.ApplyForceToCenter(force);
+			[force].destroy();
 		}
 
 	},
@@ -242,7 +255,9 @@ BSWG.component_Blaster = {
 			var a = this.obj.body.GetAngle() + Math.PI/2.0;
 			accel *= -8.0;
 			this.obj.body.SetAwake(true);
-			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
+			var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
+			this.obj.body.ApplyForceToCenter(force);	
+			[force].destroy();
 			this.thrustT = 0.3;
 		}
 
@@ -269,7 +284,7 @@ BSWG.component_Thruster = {
 			verts: verts
 		});
 
-		this.jpoints = [ new b2Vec2(0.0, 0.5005) ];
+		this.jpoints = [ new b2Vec2(0.0, 0.5) ];
 
 		this.thrustKey = args.thrustKey || BSWG.KEY.UP;
 		this.thrustT = 0.0;
@@ -376,8 +391,10 @@ BSWG.component_Thruster = {
 			var a = this.obj.body.GetAngle() + Math.PI/2.0;
 			accel *= 20.0;
 			this.obj.body.SetAwake(true);
-			this.obj.body.ApplyForceToCenter(new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel));	
+			var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
+			this.obj.body.ApplyForceToCenter(force);
 			this.thrustT = 0.3;
+			[force].destroy();
 		}
 
 	},
@@ -438,10 +455,10 @@ BSWG.component = function (desc, args) {
 		this[key] = desc[key];
 
 	this.id = BSWG.nextCompID++;
-	this.jpoints = [];
-	this.jmatch = [];
+	this.jpoints = new Array();
+	this.jmatch = new Array();
 	this.jmatch = -1;
-	this.welds = {};
+	this.welds = new Object();
 	this.onCC = null;
 	if (this.type === 'cc')
 		this.onCC = this;
@@ -464,8 +481,10 @@ BSWG.component = function (desc, args) {
 
 		// <-- Render wires here
 
-		var jpw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
-		var jp = cam.toScreenList(BSWG.render.viewport, jpw);
+		if (!this.jpointsw)
+			return;
+
+		var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
 
 		var map = {};
 		for (var i=0; i<this.jmatch.length; i++) {
@@ -489,9 +508,16 @@ BSWG.component = function (desc, args) {
    		}
    		ctx.globalAlpha = 1.0;
 
-		jpw.destroy();
 		jp.destroy();
 
+	};
+
+	this.cacheJPW = function() {
+		if (this.jpointsw) {
+			this.jpointsw.destroy();
+			this.jpointsw = null;
+		}
+		this.jpointsw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
 	};
 
 	this.baseUpdate = function(dt) {
@@ -499,14 +525,17 @@ BSWG.component = function (desc, args) {
 		if (!BSWG.game.editMode)
 			return;
 
-		this.jmatch = [];
+		if (!this.jpointsw)
+			return;
+
+		this.jmatch = new Array();
 		this.jmhover = -1;
 
 		var _p = this.obj.body.GetWorldCenter();
 		var p = new b2Vec2(_p.get_x(), _p.get_y());
 		var cl = BSWG.componentList.withinRadius(p, this.obj.radius+0.5);
 
-		var jpw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
+		var jpw = this.jpointsw;
 
         var mps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
         var mp = BSWG.game.cam.toWorld(BSWG.render.viewport, mps);
@@ -527,7 +556,7 @@ BSWG.component = function (desc, args) {
 
 		for (var i=0; i<cl.length; i++) {
 			if (cl[i] !== this) {
-				var jpw2 = BSWG.physics.localToWorld(cl[i].jpoints, cl[i].obj.body);
+				var jpw2 = cl[i].jpointsw;
 
 				for (var k1=0; k1<jpw.length; k1++)
 					for (var k2=0; k2<jpw2.length; k2++)
@@ -544,7 +573,7 @@ BSWG.component = function (desc, args) {
 						}
 					}
 
-				jpw2.destroy();
+				//jpw2.destroy();
 			}
 		}
 
@@ -569,7 +598,7 @@ BSWG.component = function (desc, args) {
 		}
 
 		[p, mp, mps].destroy();
-		jpw.destroy();
+		//jpw.destroy();
 
 	};
 
@@ -608,15 +637,15 @@ BSWG.component = function (desc, args) {
 
 BSWG.componentList = new function () {
 
-	this.compList = [];
-	this.compRemove = [];
+	this.compList = new Array();
+	this.compRemove = new Array();
 
 	this.clear = function () {
 
 		while (this.compList.length)
 			this.compList[0].remove();
 
-		this.compRemove = [];
+		this.compRemove.length = 0;
 
 	};
 
@@ -657,15 +686,18 @@ BSWG.componentList = new function () {
 	this.update = function (dt) {
 
 		var len = this.compList.length;
-		for (var i=0; i<len; i++)
-		{
+		for (var i=0; i<len; i++) {
+			this.compList[i].cacheJPW();
+		}
+		for (var i=0; i<len; i++) {
 			this.compList[i].baseUpdate(dt);
 			this.compList[i].update(dt);
 		}
 
 		len = this.compRemove.length;
-		for (var i=0; i<len; i++)
+		for (var i=0; i<len; i++) {
 			this.remove(this.compRemove[i]);
+		}
 		this.compRemove.length = 0;
 
 	};
@@ -695,7 +727,7 @@ BSWG.componentList = new function () {
 	};
 
 	this.withinRadius = function (p, r) {
-		var ret = [];
+		var ret = new Array();
 		var len = this.compList.length;
 		for (var i=0; i<len; i++)
 		{

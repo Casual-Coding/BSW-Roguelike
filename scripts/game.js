@@ -102,6 +102,9 @@ BSWG.game = new function(){
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
             //document.title = BSWG.input.getKeyMap()[BSWG.KEY.LEFT];
 
+            //console.log(window.__DC);
+            window.__DC = 0;
+
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
             BSWG.ui.update();
@@ -130,6 +133,12 @@ BSWG.game = new function(){
                     [grabbedLocal].destroy();
                     grabbedLocal = null;
                     BSWG.physics.endMouseDrag();
+                }
+
+                if (grabbedBlock && BSWG.input.MOUSE('shift')) {
+                    BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*0.5);
+                } else if (grabbedBlock) {
+                    BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75);
                 }
             }
             else if (grabbedBlock) {
@@ -161,15 +170,34 @@ BSWG.game = new function(){
                 var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
                 var gp = self.cam.toScreen(viewport, gpw);
 
+                var ccl = new b2Vec2(0.0, -0.5);
+                var ccw = self.ccblock.getWorldPoint(ccl);
+                var cc = self.cam.toScreen(viewport, ccw);
+
                 ctx.lineWidth = 2.0;
-                ctx.strokeStyle = 'rgba(0,255,0,0.7)';
+                ctx.strokeStyle = 'rgba(192, 192, 255, ' + (BSWG.input.MOUSE('shift') ? 0.3 : 0.75) + ')';
                 ctx.beginPath();
-                ctx.moveTo(mps.get_x(), mps.get_y());
+                ctx.moveTo(cc.get_x(), cc.get_y());
                 ctx.lineTo(gp.get_x(), gp.get_y());
+                ctx.lineTo(mps.get_x(), mps.get_y());
                 ctx.stroke();
+                
+                ctx.fillStyle = ctx.strokeStyle;
+
+                ctx.beginPath();
+                ctx.arc(cc.get_x(), cc.get_y(), 5, 0, 2*Math.PI);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(gp.get_x(), gp.get_y(), 5, 0, 2*Math.PI);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(mps.get_x(), mps.get_y(), 5, 0, 2*Math.PI);
+                ctx.fill();
                 ctx.lineWidth = 1.0;
 
-                [gpw, gp].destroy();
+                [gpw, gp, ccl, ccw, cc].destroy();
 
             }
 
@@ -284,19 +312,18 @@ BSWG.starfield = function(){
             cx = Math.floor(cx / (imageSize / (vpsz * camz)));
             cy = Math.floor(cy / (imageSize / (vpsz * camz)));
 
-            if (l === 2)
-            {
-                offx = offy = cx = cy = 0;
+            if (l === 2) {
+                offx = offy = cx = cy = 0; // 2nd layer fixed in position as temp-fix to bug
             }
 
-            ctx.globalAlpha = 1/l;
+            ctx.globalAlpha = 1/(l*l);
 
             var _cx=cx;
-            for (var x=offx-sz; x<viewport.w; x+=sz)
-            {
+            for (var x=offx-sz; x<viewport.w; x+=sz) {
+
                 var _cy=cy;
-                for (var y=offy-sz; y<viewport.h; y+=sz)
-                {
+                for (var y=offy-sz; y<viewport.h; y+=sz) {
+
                     var k = Math.floor(Math.abs((_cx+1000) * 13 + (_cy+1000) * 7));
                     ctx.drawImage(images[k % images.length], x, y, sz, sz);
                     _cy += 1;
