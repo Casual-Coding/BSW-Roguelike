@@ -43,7 +43,7 @@ BSWG.game = new function(){
                 p = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
                 for (var j=0; j<pastPositions.length && p; j++) {
                     var jp = pastPositions[j];
-                    if (Math.pow(jp.get_x() - p.get_x(), 2.0) + Math.pow(jp.get_y() - p.get_y(), 2.0) < 4*4)
+                    if (Math.pow(jp.x - p.x, 2.0) + Math.pow(jp.y - p.y, 2.0) < 4*4)
                         p = null;
                 }
                 if (p)
@@ -100,10 +100,6 @@ BSWG.game = new function(){
         BSWG.render.startRenderer(function(dt, time){
 
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
-            //document.title = BSWG.input.getKeyMap()[BSWG.KEY.LEFT];
-
-            //console.log(window.__DC);
-            window.__DC = 0;
 
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
@@ -130,7 +126,6 @@ BSWG.game = new function(){
                 }
                 if (BSWG.input.MOUSE_RELEASED('left') && grabbedBlock) {
                     grabbedBlock = null;
-                    [grabbedLocal].destroy();
                     grabbedLocal = null;
                     BSWG.physics.endMouseDrag();
                 }
@@ -143,7 +138,6 @@ BSWG.game = new function(){
             }
             else if (grabbedBlock) {
                 grabbedBlock = null;
-                [grabbedLocal].destroy();
                 grabbedLocal = null;
                 BSWG.physics.endMouseDrag();
             }
@@ -177,33 +171,29 @@ BSWG.game = new function(){
                 ctx.lineWidth = 2.0;
                 ctx.strokeStyle = 'rgba(192, 192, 255, ' + (BSWG.input.MOUSE('shift') ? 0.3 : 0.75) + ')';
                 ctx.beginPath();
-                ctx.moveTo(cc.get_x(), cc.get_y());
-                ctx.lineTo(gp.get_x(), gp.get_y());
-                ctx.lineTo(mps.get_x(), mps.get_y());
+                ctx.moveTo(cc.x, cc.y);
+                ctx.lineTo(gp.x, gp.y);
+                ctx.lineTo(mps.x, mps.y);
                 ctx.stroke();
                 
                 ctx.fillStyle = ctx.strokeStyle;
 
                 ctx.beginPath();
-                ctx.arc(cc.get_x(), cc.get_y(), 5, 0, 2*Math.PI);
+                ctx.arc(cc.x, cc.y, 5, 0, 2*Math.PI);
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.arc(gp.get_x(), gp.get_y(), 5, 0, 2*Math.PI);
+                ctx.arc(gp.x, gp.y, 5, 0, 2*Math.PI);
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.arc(mps.get_x(), mps.get_y(), 5, 0, 2*Math.PI);
+                ctx.arc(mps.x, mps.y, 5, 0, 2*Math.PI);
                 ctx.fill();
                 ctx.lineWidth = 1.0;
-
-                [gpw, gp, ccl, ccw, cc].destroy();
 
             }
 
             BSWG.ui.render(ctx, viewport);
-
-            [mp, mps].destroy();
 
         });
     };

@@ -7,8 +7,8 @@ BSWG.camera = function() {
     this.panTo = function (dt, x, y) {
 
         if (typeof x === "object") {
-            y = x.get_y();
-            x = x.get_x();
+            y = x.y;
+            x = x.x;
         }
 
         this.x += (x - this.x) * Math.min(dt, 1.0);
@@ -26,8 +26,8 @@ BSWG.camera = function() {
         var ret = new Array(list.length);
         for (var i=0, len=list.length; i<len; i++) {
             ret[i] = new b2Vec2(
-                (list[i].get_x() - this.x) * this.z * vpsz + viewport.w * 0.5,
-                (list[i].get_y() - this.y) * this.z * vpsz + viewport.h * 0.5
+                (list[i].x - this.x) * this.z * vpsz + viewport.w * 0.5,
+                (list[i].y - this.y) * this.z * vpsz + viewport.h * 0.5
             );
         }
         return ret;
@@ -37,8 +37,8 @@ BSWG.camera = function() {
     this.toScreen = function (viewport, x, y) {
 
         if (typeof x === "object") {
-            y = x.get_y();
-            x = x.get_x();
+            y = x.y;
+            x = x.x;
         }
 
         var vpsz = Math.max(viewport.w, viewport.h);
@@ -53,8 +53,8 @@ BSWG.camera = function() {
     this.toWorld = function (viewport, x, y) {
 
         if (typeof x === "object") {
-            y = x.get_y();
-            x = x.get_x();
+            y = x.y;
+            x = x.x;
         }
 
         var vpsz = Math.max(viewport.w, viewport.h);

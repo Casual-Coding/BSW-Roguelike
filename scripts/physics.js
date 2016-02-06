@@ -1,44 +1,6 @@
 // BlockShip Wars Physics
 
-window.b2createPolygonShape = function (vertices) {
-    var shape = new Box2D.b2PolygonShape();            
-    var buffer = Box2D.allocate(vertices.length * 8, 'float', Box2D.ALLOC_STACK);
-    var offset = 0;
-    for (var i=0;i<vertices.length;i++) {
-        Box2D.setValue(buffer+(offset), vertices[i].get_x(), 'float'); // x
-        Box2D.setValue(buffer+(offset+4), vertices[i].get_y(), 'float'); // y
-        offset += 8;
-    }            
-    var ptr_wrapped = Box2D.wrapPointer(buffer, Box2D.b2Vec2);
-    shape.Set(ptr_wrapped, vertices.length);
-    return shape;
-};
-
-window.__DC = 0;
-
-Array.prototype.destroy = function () {
-	var len = this.length;
-	for (var i=0; i<len; i++)
-	{
-		if (typeof this[i] === 'object' && this[i].destroy)
-			this[i].destroy();
-		else
-		{
-			window.__DC += 1;
-			Box2D.destroy(this[i]);
-		}
-	}
-};
-
 BSWG.physics = new function(){
-
-	var fnToStringI = 1;
-	var fnToString = function () {
-		if (!this.prototype.____FNTSI) {
-			this.prototype.____FNTSI = fnToStringI ++;
-		}
-		return "" + this.prototype.____FNTSI;
-	};
 
 	this.physicsDT 			= 1.0/60.0;
 	this.positionIterations = 60;
@@ -47,13 +9,24 @@ BSWG.physics = new function(){
 
 	this.init = function (){
 
-		for (var key in Box2D)
-		{
-			if (typeof Box2D[key] === "function")
-				Box2D[key].toString = fnToString;
-			if (key.substring(0, 2) == 'b2' && key.length >= 3)
-				window[key] = Box2D[key];
-		}
+		var scan = function (map) {
+			for (var key in map) {
+				if (key.substring(0, 2) == 'b2' && key.length >= 3)	{
+					if (window[key]) {
+						console.log('Collision: ' + key);
+					}
+					window[key] = map[key];
+				}
+				else if (typeof map[key] === 'object') {
+					scan(map[key]);
+				}
+			}
+		};
+		scan(Box2D);
+
+		b2Body.prototype.ApplyForceToCenter = function(v) {
+			this.ApplyForce(v, this.GetWorldCenter());
+		};
 
 		this.world = new b2World( new b2Vec2(0.0, 0.0) );
 		this.ground = this.world.CreateBody(new b2BodyDef());
@@ -67,7 +40,7 @@ BSWG.physics = new function(){
 			var ret = new Array(len);
 			for (var i=0; i<len; i++) {
 				var tmp = body.GetWorldPoint(vec[i]);
-				ret[i] = new b2Vec2(tmp.get_x(), tmp.get_y());
+				ret[i] = new b2Vec2(tmp.x, tmp.y);
 			}
 			return ret;
 		}
@@ -77,19 +50,25 @@ BSWG.physics = new function(){
 
 	};
 
-	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide) {
+	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB) {
 
 		var obj = {
 			jointDef: null,
 			joint:    null
 		};
 
-		obj.jointDef = new b2RevoluteJointDef();
-		obj.jointDef.set_bodyA( bodyA );
-		obj.jointDef.set_bodyB( bodyB );
-		obj.jointDef.set_localAnchorA( new b2Vec2( anchorA.get_x(), anchorA.get_y() ) );
-		obj.jointDef.set_localAnchorB( new b2Vec2( anchorB.get_x(), anchorB.get_y() ) );
-		obj.jointDef.set_collideConnected( !noCollide );
+		obj.jointDef = new b2WeldJointDef();
+		obj.jointDef.bodyA = bodyA;
+		obj.jointDef.bodyB = bodyB;
+		obj.jointDef.localAnchorA = new b2Vec2( anchorA.x, anchorA.y );
+		obj.jointDef.localAnchorB = new b2Vec2( anchorB.x, anchorB.y );
+		obj.jointDef.collideConnected = !noCollide;
+		var a1 = Math.atan2(normalA.y, normalA.x);
+		var a2 = Math.atan2(normalB.y, normalB.x);
+		var am = Math.min(Math.abs(a1), Math.abs(a2));
+		if (am <= 0.0)
+			am = Math.PI / 2.0;
+		obj.jointDef.referenceAngle = Math.round((bodyB.GetAngle() - bodyA.GetAngle()) / am) * am;
 		obj.joint = this.world.CreateJoint( obj.jointDef );
 
 		return obj;
@@ -104,7 +83,6 @@ BSWG.physics = new function(){
 		var viewport = BSWG.render.viewport;
 		var ps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
 		var ret = cam.toWorld(viewport, ps);
-		[ps].destroy();
 		return ret;
 
 	};
@@ -115,12 +93,12 @@ BSWG.physics = new function(){
 			this.endMouseDrag();
 
 		var mouseJointDef = new b2MouseJointDef();
-		mouseJointDef.set_bodyA(this.ground);
-		mouseJointDef.set_bodyB(body);
-		mouseJointDef.set_maxForce(maxForce || 10.0);
-		mouseJointDef.set_target(this.mousePosWorld());
+		mouseJointDef.bodyA = this.ground;
+		mouseJointDef.bodyB = body;
+		mouseJointDef.maxForce = maxForce || 10.0;
+		mouseJointDef.target = this.mousePosWorld();
 		this.mouseJoint = this.world.CreateJoint(mouseJointDef);
-		this.mouseJoint = Box2D.castObject(this.mouseJoint, b2MouseJoint);
+		//this.mouseJoint = Box2D.castObject(this.mouseJoint, b2MouseJoint);
 
 	};
 
@@ -148,6 +126,38 @@ BSWG.physics = new function(){
 
 	};
 
+	this.getNormalAt = function (obj, p) {
+
+		if (obj.verts.length < 2) {
+			return new b2Vec2(0, 0);
+		}
+
+		var best = null;
+		var besti = 0;
+
+		for (var i=0; i<obj.verts.length; i++) {
+			var p1 = obj.verts[i],
+				p2 = obj.verts[(i+1)%obj.verts.length];
+			var dist = Math.pointLineDistance(p1, p2, p);
+			if (best === null || dist < best) {
+				best = dist;
+				besti = i;
+			}
+		}
+
+		var p1 = obj.verts[besti],
+			p2 = obj.verts[(besti+1)%obj.verts.length];
+
+		var dx = p2.x - p1.x,
+			dy = p2.y - p1.y;
+		var len = Math.sqrt(dx*dx + dy*dy);
+		dx /= len;
+		dy /= len;
+
+		return new b2Vec2(-dy, dx);
+
+	};
+
 	this.createObject = function (type, pos, angle, def) {
 
 		var obj = {
@@ -160,23 +170,23 @@ BSWG.physics = new function(){
 		};
 
 		obj.bodyDef = new b2BodyDef();
-		obj.bodyDef.set_type( b2_dynamicBody );
-		obj.bodyDef.set_position( pos );
-		obj.bodyDef.set_angle( angle );
+		obj.bodyDef.type = b2Body.b2_dynamicBody;
+		obj.bodyDef.position = pos;
+		obj.bodyDef.angle = angle;
 		obj.body = this.world.CreateBody( obj.bodyDef );
 		obj.body.SetLinearDamping(0.1);
 		obj.body.SetAngularDamping(0.1);
 
 		obj.fixtureDef = new b2FixtureDef();
-		obj.fixtureDef.set_density( def.density || 1.0 );
-		obj.fixtureDef.set_friction( (def.friction || def.friction === 0) ? def.friction : 0.5 );
+		obj.fixtureDef.density = def.density || 1.0;
+		obj.fixtureDef.friction = (def.friction || def.friction === 0) ? def.friction : 0.5;
 		
 		switch (type)
 		{
 			case 'circle':
 
 				obj.shape = new b2CircleShape();
-				obj.shape.set_m_radius( def.radius );
+				obj.shape.m_radius = def.radius;
 				obj.radius = def.radius;
 				break;
 
@@ -186,7 +196,7 @@ BSWG.physics = new function(){
 				for (var i=0; i<def.verts.length; i++)
 					verts.push(Math.rotVec2(def.verts[i], def.offsetAngle));
 				obj.verts = verts;
-				obj.shape = b2createPolygonShape( verts );
+				obj.shape = b2PolygonShape.AsArray(verts, verts.length);
 				break;
 
 			case 'box':
@@ -198,7 +208,7 @@ BSWG.physics = new function(){
 					Math.rotVec2(new b2Vec2(-def.width * 0.5,  def.height * 0.5), def.offsetAngle)
 				];
 				obj.verts = verts;
-				obj.shape = b2createPolygonShape( verts );
+				obj.shape = b2PolygonShape.AsArray(verts, verts.length);
 				break;
 
 			default:
@@ -207,18 +217,18 @@ BSWG.physics = new function(){
 
 		if (obj.verts) {
 			obj.radius = 0;
-			for (var i=0; i<obj.verts.length; i++)
-			{
+			for (var i=0; i<obj.verts.length; i++) {
 				var v = obj.verts[i];
 				obj.radius = Math.max(obj.radius,
-					v.get_x()*v.get_x() + v.get_y()*v.get_y()
+					v.x*v.x + v.y*v.y
 				);
 			}
 			obj.radius = Math.sqrt(obj.radius);
 		}
 
-		obj.fixtureDef.set_shape( obj.shape );
+		obj.fixtureDef.shape = obj.shape;
 		obj.fixture = obj.body.CreateFixture( obj.fixtureDef );
+		obj.body.ResetMassData();
 
 		return obj;
 
@@ -231,6 +241,7 @@ BSWG.physics = new function(){
 	this.update = function (dt){
 
 		this.world.Step(dt, this.positionIterations, this.velocityIterations);
+		this.world.ClearForces();
 		this.updateMouseDrag();
 
 	};

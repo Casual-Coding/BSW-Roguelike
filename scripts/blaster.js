@@ -10,13 +10,11 @@ BSWG.blasterList = new function () {
 		for (var i=0; i<this.list.length; i++) {
 
 			var B = this.list[i];
-			B.p.set_x(B.p.get_x() + B.v.get_x() * dt);
-			B.p.set_y(B.p.get_y() + B.v.get_y() * dt);
-
+			B.p.x += B.v.x * dt;
+			B.p.y += B.v.y * dt;
 			B.t -= dt;
 
 			if (B.t <= 0.0 || BSWG.componentList.atPoint(B.p)) {
-				[B.p, B.v].destroy();
 				this.list.splice(i, 1);
 				i -= 1;
 				continue;
@@ -30,8 +28,8 @@ BSWG.blasterList = new function () {
 			ctx.globalAlpha = t * 0.75;
 			ctx.strokeStyle = Math.random() < 0.5 ? '#fff' : '#f11';
 			ctx.beginPath();
-			ctx.moveTo(p.get_x(), p.get_y());
-			ctx.lineTo(p.get_x() - B.v.get_x() * dt * cam.z * 5000.0, p.get_y() - B.v.get_y() * dt * cam.z * 5000.0);
+			ctx.moveTo(p.x, p.y);
+			ctx.lineTo(p.x - B.v.x * dt * cam.z * 5000.0, p.y - B.v.y * dt * cam.z * 5000.0);
 			ctx.stroke();
 		}
 		ctx.globalAlpha = 1.0;
