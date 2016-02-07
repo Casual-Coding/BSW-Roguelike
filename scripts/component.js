@@ -110,7 +110,7 @@ BSWG.createBoxJPoints = function(w, h, t) {
 			x0, y0
 		));
 
-		for (var i=0.75; i<l*0.5 - 0.2; i+=0.75) {
+		for (var i=1.0; i<l*0.5 - 0.5; i+=1.0) {
 			jp.push(new b2Vec2(
 				x0 - dx * i,
 				y0 - dy * i
@@ -146,6 +146,67 @@ BSWG.createBoxJPoints = function(w, h, t) {
 	}
 
 	return jp;
+
+};
+
+BSWG.updateOnCC = function (a, b) {
+
+	var cc = a.onCC || b.onCC;
+
+	var scan = function(n, u) {
+
+		if (!n)
+			return false;
+
+		if (!u) u = {};
+		if (u[n.id])
+			return false;
+		u[n.id] = true;
+
+		if (cc === n) {
+			return true;
+		}
+
+		if (n.welds) {
+			for (var key in n.welds) {
+				if (n.welds[key]) {
+					if (scan(n.welds[key].other, u)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+
+	};
+
+	var mark = function(n, flag, u) {
+
+		if (!n)
+			return false;
+
+		if (!u) u = {};
+		if (u[n.id])
+			return false;
+		u[n.id] = true;
+
+		n.onCC = flag ? cc : null;
+
+		if (n.welds) {
+			for (var key in n.welds) {
+				if (n.welds[key]) {
+					mark(n.welds[key].other, flag, u);
+				}
+			}
+		}
+
+		return false;
+
+	};
+
+	mark(a, scan(a));
+	mark(b, scan(b));
 
 };
 
@@ -503,6 +564,11 @@ BSWG.component = function (desc, args) {
 
 	if (this.jpoints && this.jpoints.length && this.obj) {
 
+		for (var i=0; i<this.jpoints.length; i++) {
+			this.jpoints[i].x *= 1.0025;
+			this.jpoints[i].y *= 1.0025;
+		}
+
 		this.jpointsNormals = new Array(this.jpoints.length);
 		for (var i=0; i<this.jpointsNormals.length; i++) {
 			this.jpointsNormals[i] = BSWG.physics.getNormalAt(this.obj, this.jpoints[i]);
@@ -540,8 +606,9 @@ BSWG.component = function (desc, args) {
 			for (var i=0; i<jp.length; i++) {
 				ctx.beginPath();
 				var r = map[i]?(this.jmhover===i?160:110):80;
-				if (this.welds[i])
+				if (this.welds[i] && this.jmhover !== i) {
 					r = 110;
+				}
 	        	ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
 	        	ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
 	            ctx.globalAlpha = 0.9;
@@ -549,6 +616,9 @@ BSWG.component = function (desc, args) {
 	        	{
 	        		ctx.fillStyle = '#ccf';
 	        		ctx.globalAlpha = 1.0;
+	        		if (this.jmhover === i) {
+	        			ctx.fillStyle = '#f22';
+	        		}
 	        	}
 	            ctx.fill();
 
@@ -650,8 +720,19 @@ BSWG.component = function (desc, args) {
 						if (!this.onCC && this.jmatch[i][1].onCC)
 							this.onCC = this.jmatch[i][1].onCC;
 
-						this.welds[this.jmatch[i][0]] = obj;
-						this.jmatch[i][1].welds[this.jmatch[i][2]] = obj;
+						this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
+						this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
+
+						BSWG.updateOnCC(this, this.jmatch[i][1]);
+					}
+					else {
+						BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
+						this.welds[this.jmatch[i][0]].other = null;
+						this.welds[this.jmatch[i][0]] = null;
+						this.jmatch[i][1].welds[this.jmatch[i][2]].other = null;
+						this.jmatch[i][1].welds[this.jmatch[i][2]] = null;	
+
+						BSWG.updateOnCC(this, this.jmatch[i][1]);
 					}
 				}
 			}

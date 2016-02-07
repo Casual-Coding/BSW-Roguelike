@@ -64,7 +64,7 @@ BSWG.physics = new function(){
 		obj.jointDef.localAnchorB = new b2Vec2( anchorB.x, anchorB.y );
 		obj.jointDef.collideConnected = !noCollide;
 
-		var k = 32;
+		var k = 64;
 		var amt = Math.PI/16.0;
 		var angle = bodyB.GetAngle();
 
@@ -97,6 +97,14 @@ BSWG.physics = new function(){
 		obj.joint = this.world.CreateJoint( obj.jointDef );
 
 		return obj;
+
+	};
+
+	this.removeWeld = function ( obj ) {
+
+		this.world.DestroyJoint( obj.joint );
+		obj.joint = null;
+		obj.jointDef = null;
 
 	};
 
