@@ -323,7 +323,7 @@ BSWG.component_Blaster = {
 	render: function(ctx, cam, dt) {
 
 		ctx.fillStyle = '#600';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentList.mouseOver === this);
+		BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
 
 	},
 
@@ -423,7 +423,7 @@ BSWG.component_Thruster = {
 		ctx.fillStyle = '#282';
 		BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5),
-						   BSWG.componentList.mouseOver === this);
+						   BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
 
 		if (this.thrustT > 0) {
 
@@ -533,7 +533,7 @@ BSWG.component_Block = {
 	render: function(ctx, cam, dt) {
 
 		ctx.fillStyle = '#444';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this);
+		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
 
 	},
 
@@ -595,48 +595,36 @@ BSWG.component = function (desc, args) {
 		if (!this.jpointsw)
 			return;
 
-		if (BSWG.game.editMode) {
-			var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
+		var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
 
-			var map = {};
-			for (var i=0; i<this.jmatch.length; i++) {
-				map[this.jmatch[i][0]] = true;
+		var map = {};
+		for (var i=0; i<this.jmatch.length; i++) {
+			map[this.jmatch[i][0]] = true;
+		}
+
+		for (var i=0; i<jp.length; i++) {
+
+			if (!BSWG.game.editMode && !this.welds[i])
+				continue;
+
+			ctx.beginPath();
+			var r = map[i]?(this.jmhover===i?160:110):80;
+			if (this.welds[i] && this.jmhover !== i) {
+				r = 110;
 			}
+        	ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
+        	ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
+            ctx.globalAlpha = 0.9;
+        	if (this.welds[i])
+        	{
+        		ctx.fillStyle = '#ccf';
+        		ctx.globalAlpha = 1.0;
+        		if (this.jmhover === i) {
+        			ctx.fillStyle = '#f22';
+        		}
+        	}
+            ctx.fill();
 
-			for (var i=0; i<jp.length; i++) {
-				ctx.beginPath();
-				var r = map[i]?(this.jmhover===i?160:110):80;
-				if (this.welds[i] && this.jmhover !== i) {
-					r = 110;
-				}
-	        	ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
-	        	ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
-	            ctx.globalAlpha = 0.9;
-	        	if (this.welds[i])
-	        	{
-	        		ctx.fillStyle = '#ccf';
-	        		ctx.globalAlpha = 1.0;
-	        		if (this.jmhover === i) {
-	        			ctx.fillStyle = '#f22';
-	        		}
-	        	}
-	            ctx.fill();
-
-	            /*if (this.jpointsNormals && this.jpointsNormals[i]) {
-	            	var n = this.jpointsNormals[i];
-	            	ctx.strokeStyle = '#0f0';
-	            	ctx.beginPath();
-	            	ctx.moveTo(jp[i].x, jp[i].y);
-	            	ctx.lineTo(jp[i].x + n.x * 10, jp[i].y + n.y * 10);
-	            	ctx.stroke();
-	            	ctx.strokeStyle = '#fff';
-	            	ctx.beginPath();
-	            	ctx.moveTo(jp[i].x, jp[i].y);
-	            	ctx.lineTo(jp[i].x + Math.cos(this.obj.body.GetAngle())*10, jp[i].y + Math.sin(this.obj.body.GetAngle())*10);
-	            	ctx.stroke();
-
-	            }*/
-	   		}
 	   		ctx.globalAlpha = 1.0;
 	   	}
 
