@@ -4,10 +4,10 @@ BSWG.compActiveConfMenu = null;
 
 BSWG.component_minJMatch = 0.02;
 
-BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter) {
+BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 	var body = obj.body, verts = obj.verts;
-	if (!zcenter) zcenter = new b2Vec2(0, 0);
+	if (!zcenter) zcenter = body.GetLocalCenter();
 
 	var overts = BSWG.physics.localToWorld(verts, body);
 	var iverts = new Array(verts.length),
@@ -33,6 +33,13 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter) {
 	ctx.closePath();
 	ctx.fill();
 
+	if (outline) {
+		ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+		ctx.lineWidth = 2.0;
+		ctx.stroke();
+		ctx.lineWidth = 1.0;
+	}
+
 	var oAlpha = parseFloat(ctx.globalAlpha);
 	ctx.fillStyle = '#fff';
 
@@ -56,7 +63,7 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter) {
 	}
 
 	ctx.beginPath();
-	ctx.globalAlpha = 0.5;
+	ctx.globalAlpha = 0.65;
 	ctx.moveTo(iverts[0].x, iverts[0].y);
 	for (var i=1; i<len; i++) {
 		ctx.lineTo(iverts[i].x, iverts[i].y);
@@ -68,9 +75,55 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter) {
 
 };
 
-BSWG.createBoxJPoints = function(w, h) {
+BSWG.createBoxJPoints = function(w, h, t) {
 
 	var jp = new Array();
+
+	if (t) {
+
+		for (var y=0; y<h; y++) {
+			jp.push(new b2Vec2(t*-w * 0.5, y - h * 0.5 + 0.5));
+		}
+
+		if (!(h%2)) {
+			jp.push(new b2Vec2(t*-w * 0.5, 0.0));
+		}
+
+		for (var x=0; x<w; x++) {
+			jp.push(new b2Vec2(x - w * 0.5 + 0.5,  h * 0.5));
+		}
+
+		if (!(w%2)) {
+			jp.push(new b2Vec2(0.0,  h * 0.5));
+		}
+
+		var l = Math.sqrt(w*w + h*h);
+		var dx = w/l, dy = h/l;
+		var x0 = dx * 0.5 * l - w * 0.5, 
+			y0 = dy * 0.5 * l - h * 0.5;
+		if (t === -1) {
+			x0 = -x0;
+			dx = -dx;
+		}
+
+		jp.push(new b2Vec2(
+			x0, y0
+		));
+
+		for (var i=0.75; i<l*0.5 - 0.2; i+=0.75) {
+			jp.push(new b2Vec2(
+				x0 - dx * i,
+				y0 - dy * i
+			));
+			jp.push(new b2Vec2(
+				x0 + dx * i,
+				y0 + dy * i
+			));
+		}
+
+		return jp;
+
+	};
 
 	for (var y=0; y<h; y++) {
 		jp.push(new b2Vec2(-w * 0.5, y - h * 0.5 + 0.5));
@@ -208,8 +261,8 @@ BSWG.component_Blaster = {
 
 	render: function(ctx, cam, dt) {
 
-		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#900' : '#600';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.5);
+		ctx.fillStyle = '#600';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentList.mouseOver === this);
 
 	},
 
@@ -306,9 +359,10 @@ BSWG.component_Thruster = {
 
 	render: function(ctx, cam, dt) {
 
-		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#3a3' : '#282';
+		ctx.fillStyle = '#282';
 		BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
-														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5));
+														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5),
+						   BSWG.componentList.mouseOver === this);
 
 		if (this.thrustT > 0) {
 
@@ -400,23 +454,25 @@ BSWG.component_Block = {
 
 	init: function(args) {
 
-		this.width  = args.width || 1;
-		this.height = args.height || 1;
-		this.armour = args.armour || false;
+		this.width    = args.width || 1;
+		this.height   = args.height || 1;
+		this.armour   = args.armour || false;
+		this.triangle = args.triangle || 0;
 
 		this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
-			width:  this.width,
-			height: this.height
+			width:    this.width,
+			height:   this.height,
+			triangle: this.triangle
 		});
 
-		this.jpoints = BSWG.createBoxJPoints(this.width, this.height);
+		this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
 	},
 
 	render: function(ctx, cam, dt) {
 
-		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#666' : '#444';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.8);
+		ctx.fillStyle = '#444';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this);
 
 	},
 
@@ -495,6 +551,21 @@ BSWG.component = function (desc, args) {
 	        		ctx.globalAlpha = 1.0;
 	        	}
 	            ctx.fill();
+
+	            /*if (this.jpointsNormals && this.jpointsNormals[i]) {
+	            	var n = this.jpointsNormals[i];
+	            	ctx.strokeStyle = '#0f0';
+	            	ctx.beginPath();
+	            	ctx.moveTo(jp[i].x, jp[i].y);
+	            	ctx.lineTo(jp[i].x + n.x * 10, jp[i].y + n.y * 10);
+	            	ctx.stroke();
+	            	ctx.strokeStyle = '#fff';
+	            	ctx.beginPath();
+	            	ctx.moveTo(jp[i].x, jp[i].y);
+	            	ctx.lineTo(jp[i].x + Math.cos(this.obj.body.GetAngle())*10, jp[i].y + Math.sin(this.obj.body.GetAngle())*10);
+	            	ctx.stroke();
+
+	            }*/
 	   		}
 	   		ctx.globalAlpha = 1.0;
 	   	}

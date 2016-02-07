@@ -63,12 +63,37 @@ BSWG.physics = new function(){
 		obj.jointDef.localAnchorA = new b2Vec2( anchorA.x, anchorA.y );
 		obj.jointDef.localAnchorB = new b2Vec2( anchorB.x, anchorB.y );
 		obj.jointDef.collideConnected = !noCollide;
-		var a1 = Math.atan2(normalA.y, normalA.x);
-		var a2 = Math.atan2(normalB.y, normalB.x);
-		var am = Math.min(Math.abs(a1), Math.abs(a2));
-		if (am <= 0.0)
-			am = Math.PI / 2.0;
-		obj.jointDef.referenceAngle = Math.round((bodyB.GetAngle() - bodyA.GetAngle()) / am) * am;
+
+		var k = 32;
+		var amt = Math.PI/16.0;
+		var angle = bodyB.GetAngle();
+
+		var na = Math.rotVec2(new b2Vec2(normalA.x, normalA.y), bodyA.GetAngle());
+
+		while (--k >= 0) {
+
+			var a1 = angle - amt;
+			var a2 = angle + amt;
+
+			var n1 = Math.rotVec2(normalB, a1);
+			var n2 = Math.rotVec2(normalB, a2);
+
+			var d1 = Math.pow(n1.x+na.x, 2.0) + Math.pow(n1.y+na.y, 2.0);
+			var d2 = Math.pow(n2.x+na.x, 2.0) + Math.pow(n2.y+na.y, 2.0);
+
+			if (d1 < d2) {
+				angle = a1;
+			}
+			else {
+				angle = a2;
+			}
+
+			amt /= 2.0;
+		}
+
+		angle -= bodyA.GetAngle();
+
+		obj.jointDef.referenceAngle = angle;
 		obj.joint = this.world.CreateJoint( obj.jointDef );
 
 		return obj;
@@ -154,7 +179,7 @@ BSWG.physics = new function(){
 		dx /= len;
 		dy /= len;
 
-		return new b2Vec2(-dy, dx);
+		return new b2Vec2(dy, -dx);
 
 	};
 
@@ -207,6 +232,12 @@ BSWG.physics = new function(){
 					Math.rotVec2(new b2Vec2( def.width * 0.5,  def.height * 0.5), def.offsetAngle),
 					Math.rotVec2(new b2Vec2(-def.width * 0.5,  def.height * 0.5), def.offsetAngle)
 				];
+
+				if (def.triangle === -1)
+					verts.splice(0, 1);
+				else if (def.triangle === 1)
+					verts.splice(1, 1);
+
 				obj.verts = verts;
 				obj.shape = b2PolygonShape.AsArray(verts, verts.length);
 				break;

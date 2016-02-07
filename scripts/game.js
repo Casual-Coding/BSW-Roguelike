@@ -33,13 +33,13 @@ BSWG.game = new function(){
         var self = this;
 
         var pastPositions = [ new b2Vec2(0, 0) ];
-        for (var i=0; i<50; i++) {
+        for (var i=0; i<80; i++) {
 
             var p = null;
             for (var k=0; k<500; k++)
             {
                 var a = Math.random() * Math.PI * 2.0;
-                var r = Math.random() * 25;
+                var r = Math.random() * 32;
                 p = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
                 for (var j=0; j<pastPositions.length && p; j++) {
                     var jp = pastPositions[j];
@@ -76,6 +76,7 @@ BSWG.game = new function(){
                     angle: Math.random()*Math.PI*2.0,
                     width: Math.floor(Math.random()*3)+1,
                     height: Math.floor(Math.random()*3)+1,
+                    triangle: Math.random() < 0.4 ? (Math.random() < 0.5 ? -1 : 1) : 0.0,
                     armour: false
 
                 });
