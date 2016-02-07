@@ -4,6 +4,70 @@ BSWG.compActiveConfMenu = null;
 
 BSWG.component_minJMatch = 0.02;
 
+BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter) {
+
+	var body = obj.body, verts = obj.verts;
+	if (!zcenter) zcenter = new b2Vec2(0, 0);
+
+	var overts = BSWG.physics.localToWorld(verts, body);
+	var iverts = new Array(verts.length),
+		len = verts.length;
+	for (var i=0; i<len; i++) {
+		var vec = new b2Vec2(
+			(verts[i].x - zcenter.x) * iscale + zcenter.x,
+			(verts[i].y - zcenter.y) * iscale + zcenter.y
+		);
+		iverts[i] = BSWG.physics.localToWorld(vec, body);
+	}
+
+	ctx.save();
+
+	overts = BSWG.game.cam.toScreenList(BSWG.render.viewport, overts);
+	iverts = BSWG.game.cam.toScreenList(BSWG.render.viewport, iverts);
+
+	ctx.beginPath();
+	ctx.moveTo(overts[0].x, overts[0].y);
+	for (var i=1; i<len; i++) {
+		ctx.lineTo(overts[i].x, overts[i].y);
+	}
+	ctx.closePath();
+	ctx.fill();
+
+	var oAlpha = parseFloat(ctx.globalAlpha);
+	ctx.fillStyle = '#fff';
+
+	for (var i=0; i<len; i++) {
+		var j = (i+1) % len;
+
+		var a = overts[i], b = overts[j],
+			c = iverts[j], d = iverts[i];
+
+		var angle = Math.atan2(b.y - a.y, b.x - a.x);
+		var alpha = Math.sin(angle) * 0.5 + 0.5;
+		ctx.globalAlpha = oAlpha * alpha * 0.6;
+
+		ctx.beginPath();
+		ctx.moveTo(a.x, a.y);
+		ctx.lineTo(b.x, b.y);
+		ctx.lineTo(c.x, c.y);
+		ctx.lineTo(d.x, d.y);
+		ctx.closePath();
+		ctx.fill();
+	}
+
+	ctx.beginPath();
+	ctx.globalAlpha = 0.5;
+	ctx.moveTo(iverts[0].x, iverts[0].y);
+	for (var i=1; i<len; i++) {
+		ctx.lineTo(iverts[i].x, iverts[i].y);
+	}
+	ctx.closePath();
+	ctx.fill();
+
+	ctx.restore();
+
+};
+
 BSWG.createBoxJPoints = function(w, h) {
 
 	var jp = new Array();
@@ -52,55 +116,32 @@ BSWG.component_CommandCenter = {
 
 	render: function(ctx, cam, dt) {
 
-		var polyWorld = BSWG.physics.localToWorld(this.obj.verts, this.obj.body);
-		var poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
+		ctx.fillStyle = '#444';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.8);
 
-		ctx.beginPath();
-		ctx.moveTo(poly[0].x, poly[0].y);
-		ctx.lineTo(poly[1].x, poly[1].y);
-		ctx.lineTo(poly[2].x, poly[2].y);
-		ctx.lineTo(poly[3].x, poly[3].y);
-		ctx.closePath();
+		var poly = [
+			new b2Vec2(-this.width * 0.5 * 0.75, -this.height * 0.5 * 0.0),
+			new b2Vec2( this.width * 0.5 * 0.75, -this.height * 0.5 * 0.0),
+			new b2Vec2( this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75),
+			new b2Vec2(-this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75)
+		].reverse();
 
-		ctx.fillStyle = '#888';
-		ctx.fill();
+		ctx.fillStyle = '#0b0';
+		BSWG.drawBlockPoly(ctx, { body: this.obj.body, verts: poly }, 0.8,
+			new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5)
+			);
 
-		polyWorld = BSWG.physics.localToWorld([
-			new b2Vec2(-this.width * 0.5 * 0.8, -this.height * 0.5 * 0.85),
-			new b2Vec2( this.width * 0.5 * 0.8, -this.height * 0.5 * 0.85),
-			new b2Vec2( this.width * 0.5 * 0.8, -this.height * 0.5 * 0.0),
-			new b2Vec2(-this.width * 0.5 * 0.8, -this.height * 0.5 * 0.0)
-		], this.obj.body);
-		poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
+		var poly = [
+			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
+			new b2Vec2( this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
+			new b2Vec2( this.width * 0.5 * 0.7, this.height * 0.5 * 0.05),
+			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.05)
+		].reverse();
 
-		ctx.beginPath();
-		ctx.moveTo(poly[0].x, poly[0].y);
-		ctx.lineTo(poly[1].x, poly[1].y);
-		ctx.lineTo(poly[2].x, poly[2].y);
-		ctx.lineTo(poly[3].x, poly[3].y);
-		ctx.closePath();
-
-		ctx.fillStyle = '#fff';
-		ctx.fill();
-
-		polyWorld = BSWG.physics.localToWorld([
-			new b2Vec2(-this.width * 0.5 * 0.8, this.height * 0.5 * 0.85),
-			new b2Vec2( this.width * 0.5 * 0.8, this.height * 0.5 * 0.85),
-			new b2Vec2( this.width * 0.5 * 0.8, this.height * 0.5 * 0.15),
-			new b2Vec2(-this.width * 0.5 * 0.8, this.height * 0.5 * 0.15)
-		], this.obj.body);
-		poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
-
-		ctx.beginPath();
-		ctx.moveTo(poly[0].x, poly[0].y);
-		ctx.lineTo(poly[1].x, poly[1].y);
-		ctx.lineTo(poly[2].x, poly[2].y);
-		ctx.lineTo(poly[3].x, poly[3].y);
-		ctx.closePath();
-
-		ctx.fillStyle = '#66d';
-		ctx.fill();
-
+		ctx.fillStyle = '#00b';
+		BSWG.drawBlockPoly(ctx, { body: this.obj.body, verts: poly }, 0.8,
+			new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5)
+			);
 	},
 
 	update: function(dt) {
@@ -167,20 +208,8 @@ BSWG.component_Blaster = {
 
 	render: function(ctx, cam, dt) {
 
-		var polyWorld = BSWG.physics.localToWorld(this.obj.verts, this.obj.body);
-		var poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
-
-		ctx.beginPath();
-		ctx.moveTo(poly[0].x, poly[0].y);
-		ctx.lineTo(poly[1].x, poly[1].y);
-		ctx.lineTo(poly[2].x, poly[2].y);
-		ctx.lineTo(poly[3].x, poly[3].y);
-		ctx.lineTo(poly[4].x, poly[4].y);
-		ctx.lineTo(poly[5].x, poly[5].y);
-		ctx.closePath();
-
-		ctx.fillStyle = '#f55';
-		ctx.fill();
+		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#900' : '#600';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.5);
 
 	},
 
@@ -277,34 +306,17 @@ BSWG.component_Thruster = {
 
 	render: function(ctx, cam, dt) {
 
-		var polyWorld = BSWG.physics.localToWorld(this.obj.verts, this.obj.body);
-		var poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
-
-		ctx.beginPath();
-		ctx.moveTo(poly[0].x, poly[0].y);
-		ctx.lineTo(poly[1].x, poly[1].y);
-		ctx.lineTo(poly[2].x, poly[2].y);
-		ctx.lineTo(poly[3].x, poly[3].y);
-		ctx.closePath();
-
-		ctx.fillStyle = '#aea';
-		ctx.fill();
+		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#3a3' : '#282';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
+														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5));
 
 		if (this.thrustT > 0) {
 
 			var tpl = [
-				Math.rotVec2(new b2Vec2(-0.2, -0.5), this.offsetAngle),
+				Math.rotVec2(new b2Vec2(-0.15, -0.4), this.offsetAngle),
 				Math.rotVec2(new b2Vec2( 0.0, -0.5 - this.thrustT * (2.0 + Math.random())), this.offsetAngle),
-				Math.rotVec2(new b2Vec2( 0.2, -0.5), this.offsetAngle)
+				Math.rotVec2(new b2Vec2( 0.15, -0.4), this.offsetAngle)
 			];
-			var tpw = BSWG.physics.localToWorld(tpl, this.obj.body);
-			var tp = cam.toScreenList(BSWG.render.viewport, tpw);
-
-			ctx.beginPath();
-			ctx.moveTo(tp[0].x, tp[0].y);
-			ctx.lineTo(tp[1].x, tp[1].y);
-			ctx.lineTo(tp[2].x, tp[2].y);
-			ctx.closePath();
 
 			ctx.globalAlpha = Math.min(this.thrustT / 0.3, 1.0);
 
@@ -315,7 +327,14 @@ BSWG.component_Thruster = {
 				ctx.fillStyle = '#ff0';
 			else
 				ctx.fillStyle = '#fff';
-			ctx.fill();
+
+			BSWG.drawBlockPoly(ctx, {
+				body: this.obj.body,
+				verts: tpl
+			}, 0.5, new b2Vec2(
+				(tpl[0].x + tpl[2].x) * 0.5,
+				(tpl[0].y + tpl[2].y) * 0.5
+			));
 
 			ctx.globalAlpha = 1.0;
 
@@ -396,18 +415,8 @@ BSWG.component_Block = {
 
 	render: function(ctx, cam, dt) {
 
-		var polyWorld = BSWG.physics.localToWorld(this.obj.verts, this.obj.body);
-		var poly = cam.toScreenList(BSWG.render.viewport, polyWorld);
-
-		ctx.beginPath();
-		ctx.moveTo(poly[0].x, poly[0].y);
-		ctx.lineTo(poly[1].x, poly[1].y);
-		ctx.lineTo(poly[2].x, poly[2].y);
-		ctx.lineTo(poly[3].x, poly[3].y);
-		ctx.closePath();
-
-		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#aaa' : '#888';
-		ctx.fill();
+		ctx.fillStyle = BSWG.componentList.mouseOver === this ? '#666' : '#444';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.8);
 
 	},
 
@@ -464,29 +473,31 @@ BSWG.component = function (desc, args) {
 		if (!this.jpointsw)
 			return;
 
-		var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
+		if (BSWG.game.editMode) {
+			var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
 
-		var map = {};
-		for (var i=0; i<this.jmatch.length; i++) {
-			map[this.jmatch[i][0]] = true;
-		}
+			var map = {};
+			for (var i=0; i<this.jmatch.length; i++) {
+				map[this.jmatch[i][0]] = true;
+			}
 
-		for (var i=0; i<jp.length; i++) {
-			ctx.beginPath();
-			var r = map[i]?(this.jmhover===i?160:110):80;
-			if (this.welds[i])
-				r = 110;
-        	ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
-        	ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
-            ctx.globalAlpha = 0.9;
-        	if (this.welds[i])
-        	{
-        		ctx.fillStyle = '#ccf';
-        		ctx.globalAlpha = 1.0;
-        	}
-            ctx.fill();
-   		}
-   		ctx.globalAlpha = 1.0;
+			for (var i=0; i<jp.length; i++) {
+				ctx.beginPath();
+				var r = map[i]?(this.jmhover===i?160:110):80;
+				if (this.welds[i])
+					r = 110;
+	        	ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
+	        	ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
+	            ctx.globalAlpha = 0.9;
+	        	if (this.welds[i])
+	        	{
+	        		ctx.fillStyle = '#ccf';
+	        		ctx.globalAlpha = 1.0;
+	        	}
+	            ctx.fill();
+	   		}
+	   		ctx.globalAlpha = 1.0;
+	   	}
 
 	};
 

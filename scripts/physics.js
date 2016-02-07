@@ -35,7 +35,7 @@ BSWG.physics = new function(){
 
 	this.localToWorld = function (vec, body) {
 
-		if (typeof vec === 'object') {
+		if (vec instanceof Array) {
 			var len = vec.length;
 			var ret = new Array(len);
 			for (var i=0; i<len; i++) {
