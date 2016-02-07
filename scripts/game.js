@@ -131,7 +131,7 @@ BSWG.game = new function(){
                     BSWG.physics.endMouseDrag();
                 }
 
-                if (grabbedBlock && BSWG.input.MOUSE('shift')) {
+                if (grabbedBlock && BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT)) {
                     BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*0.5);
                 } else if (grabbedBlock) {
                     BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75);

@@ -85,7 +85,8 @@ BSWG.control_KeyConfig = {
 		}
 
 		for (var k in keys) {
-			if (keys[k] === true) {
+			k = parseInt(k);
+			if (keys[k] === true && k !== BSWG.KEY.ALT && k !== BSWG.KEY.WINDOWS && k !== BSWG.KEY.SHIFT) {
 				this.close(parseInt(k));
 				return;
 			}

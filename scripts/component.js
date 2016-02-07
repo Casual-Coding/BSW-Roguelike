@@ -726,6 +726,24 @@ BSWG.component = function (desc, args) {
 			}
 		}
 
+		for (var k in this.welds) {
+			if (this.welds[k] && this.welds[k].obj.broken) {
+				var other = this.welds[k].other;
+				var k2;
+				for (k2 in other.welds) {
+					if (other.welds[k2] && other.welds[k2].obj === this.welds[k].obj) {
+						BSWG.physics.removeWeld(this.welds[k].obj);
+						this.welds[k].other = null;
+						this.welds[k] = null;
+						other.welds[k2].other = null;
+						other.welds[k2] = null;	
+						BSWG.updateOnCC(this, other);
+						break;
+					}
+				}
+			}
+		}
+
 	};
 
 	this.pointIn = function(p) {

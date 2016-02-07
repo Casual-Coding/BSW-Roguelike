@@ -6,6 +6,8 @@ BSWG.physics = new function(){
 	this.positionIterations = 60;
 	this.velocityIterations = 60;
 	this.world 				= null;
+	this.maxWeldForce       = 1000.0;
+	this.welds              = [];
 
 	this.init = function (){
 
@@ -96,11 +98,20 @@ BSWG.physics = new function(){
 		obj.jointDef.referenceAngle = angle;
 		obj.joint = this.world.CreateJoint( obj.jointDef );
 
+		this.welds.push(obj);
+
 		return obj;
 
 	};
 
 	this.removeWeld = function ( obj ) {
+
+		for (var i=0; i<this.welds.length; i++) {
+			if (this.welds[i] === obj) {
+				this.welds.splice(i, 1);
+				break;
+			}
+		}
 
 		this.world.DestroyJoint( obj.joint );
 		obj.joint = null;
@@ -278,6 +289,16 @@ BSWG.physics = new function(){
 	};
 
 	this.update = function (dt){
+
+		for (var i=0; i<this.welds.length; i++) {
+			var t = this.welds[i].joint.GetReactionTorque(1.0/dt);
+			var f = this.welds[i].joint.GetReactionForce(1.0/dt);
+			var tn = Math.abs(t);
+			var fn = Math.sqrt(f.x*f.x + f.y*f.y);
+			if (Math.max(tn, fn) > this.maxWeldForce) {
+				this.welds[i].broken = true;
+			}
+		}
 
 		this.world.Step(dt, this.positionIterations, this.velocityIterations);
 		this.world.ClearForces();
