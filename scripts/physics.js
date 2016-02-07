@@ -56,7 +56,9 @@ BSWG.physics = new function(){
 
 		var obj = {
 			jointDef: null,
-			joint:    null
+			joint:    null,
+			age:      0,
+			other:    null
 		};
 
 		obj.jointDef = new b2WeldJointDef();
@@ -298,6 +300,15 @@ BSWG.physics = new function(){
 			if (Math.max(tn, fn) > this.maxWeldForce) {
 				this.welds[i].broken = true;
 			}
+			if (this.welds[i].age === 3) {
+				var ref = this.welds[i].jointDef.referenceAngle;
+				var aref = this.welds[i].joint.GetBodyB().GetAngle() - this.welds[i].joint.GetBodyA().GetAngle();
+				var diff = Math.abs(Math.atan2(Math.sin(aref-ref), Math.cos(aref-ref)));
+				if (diff > 0.0001) {
+					this.welds[i].broken = true;
+				}
+			}
+			this.welds[i].age += 1;
 		}
 
 		this.world.Step(dt, this.positionIterations, this.velocityIterations);

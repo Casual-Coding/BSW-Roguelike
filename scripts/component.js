@@ -75,6 +75,12 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 };
 
+BSWG.createPolyJPoints = function(verts) {
+
+	// TODO
+
+};
+
 BSWG.createBoxJPoints = function(w, h, t) {
 
 	var jp = new Array();
@@ -565,8 +571,8 @@ BSWG.component = function (desc, args) {
 	if (this.jpoints && this.jpoints.length && this.obj) {
 
 		for (var i=0; i<this.jpoints.length; i++) {
-			this.jpoints[i].x *= 1.0025;
-			this.jpoints[i].y *= 1.0025;
+			this.jpoints[i].x *= 1.0005;
+			this.jpoints[i].y *= 1.0005;
 		}
 
 		this.jpointsNormals = new Array(this.jpoints.length);
