@@ -1,3 +1,12 @@
+Math.random2d = function(x,y) {
+    var x2 = 12.9898, y2 = 78.233;
+    if (x === 0)
+        x = 0.0001;
+    var dot = (x*x2 + y*y2) / (Math.sqrt(x*x+y*y) * Math.sqrt(x2*x2+y2*y2));
+    var whole = (Math.sin(dot)*0.5+0.5) * 43758.5453;
+    return whole - Math.floor(whole);
+};
+
 Math.clamp = function(val, min, max)
 {
     if (val < min)

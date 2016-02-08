@@ -16,9 +16,9 @@ BSWG.game = new function(){
         this.editMode = false;
         var self = this;
 
-        var editBtn = new BSWG.uiControl(BSWG.control_Button, {
+        this.editBtn = new BSWG.uiControl(BSWG.control_Button, {
             x: 10, y: 10,
-            w: 100, h: 50,
+            w: 150, h: 50,
             text: "Build Mode",
             selected: this.editMode,
             click: function (me) {
@@ -33,7 +33,7 @@ BSWG.game = new function(){
         var self = this;
 
         var pastPositions = [ new b2Vec2(0, 0) ];
-        for (var i=0; i<80; i++) {
+        for (var i=0; i<88; i++) {
 
             var p = null;
             for (var k=0; k<500; k++)
@@ -55,7 +55,16 @@ BSWG.game = new function(){
 
             pastPositions.push(p);
 
-            if (Math.random() < 1/5) 
+            if (i<8)
+                new BSWG.component(BSWG.component_HingeHalf, {
+
+                    pos: p,
+                    angle: Math.random()*Math.PI*2.0,
+                    size: Math.floor(Math.floor(i/2)%2)+1,
+                    motor: Math.floor(i%2) === 0,
+
+                });
+            else if (Math.random() < 1/5)
                 new BSWG.component(BSWG.component_Thruster, {
 
                     pos: p,
@@ -146,9 +155,9 @@ BSWG.game = new function(){
             BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
 
             var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
-            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
-            self.cam.zoomTo(dt*5.0, toZ);
-            self.cam.panTo(dt, self.ccblock.obj.body.GetWorldCenter());
+            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / (1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1);
+            self.cam.zoomTo(dt*2.5, toZ);
+            self.cam.panTo(dt*2.0, self.ccblock.obj.body.GetWorldCenter());
 
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
@@ -193,6 +202,9 @@ BSWG.game = new function(){
                 ctx.lineWidth = 1.0;
 
             }
+
+            self.editBtn.x = 10;
+            self.editBtn.y = 10;
 
             BSWG.ui.render(ctx, viewport);
 
@@ -315,7 +327,7 @@ BSWG.starfield = function(){
                 var _cy=cy;
                 for (var y=offy-sz; y<viewport.h; y+=sz) {
 
-                    var k = Math.floor(Math.abs((_cx+1000) * 13 + (_cy+1000) * 7));
+                    var k = Math.floor(Math.random2d(_cx+1000*l, _cy+555*l) * 100000);
                     ctx.drawImage(images[k % images.length], x, y, sz, sz);
                     _cy += 1;
                 }

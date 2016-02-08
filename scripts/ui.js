@@ -1,3 +1,81 @@
+BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
+
+	ctx.save();
+
+	var x2 = x1+w, y2 = y1+h;
+
+	var zcenter = new b2Vec2((x1+x2)*0.5, (y1+y2)*0.5);
+	var iscaleh = (w-insz) / w, iscalev = (h-insz) / h;
+
+	var overts = [
+		new b2Vec2(x1, y1),
+		new b2Vec2(x2, y1),
+		new b2Vec2(x2, y2),
+		new b2Vec2(x1, y2)
+	];
+	if (pressedIn) overts.reverse();
+	var len = overts.length;
+	var iverts = new Array(len);
+
+	for (var i=0; i<len; i++) {
+		var vec = new b2Vec2(
+			(overts[i].x - zcenter.x) * iscaleh + zcenter.x,
+			(overts[i].y - zcenter.y) * iscalev + zcenter.y
+		);
+		iverts[i] = vec;
+	}
+
+	ctx.beginPath();
+	ctx.moveTo(overts[0].x, overts[0].y);
+	for (var i=1; i<len; i++) {
+		ctx.lineTo(overts[i].x, overts[i].y);
+	}
+	ctx.closePath();
+	ctx.fill();
+
+	if (outline) {
+		ctx.strokeStyle = outline;
+		ctx.lineWidth = 2.0;
+		ctx.stroke();
+		ctx.lineWidth = 1.0;
+	}
+
+	var oAlpha = parseFloat(ctx.globalAlpha);
+	ctx.fillStyle = '#fff';
+
+	for (var i=0; i<len; i++) {
+		var j = (i+1) % len;
+
+		var a = overts[i], b = overts[j],
+			c = iverts[j], d = iverts[i];
+
+		var angle = Math.atan2(b.y - a.y, b.x - a.x);
+		var alpha = Math.sin(angle + Math.PI/4.0) * 0.5 + 0.5;
+		ctx.globalAlpha = oAlpha * alpha * 0.6;
+
+		ctx.beginPath();
+		ctx.moveTo(a.x, a.y);
+		ctx.lineTo(b.x, b.y);
+		ctx.lineTo(c.x, c.y);
+		ctx.lineTo(d.x, d.y);
+		ctx.closePath();
+		ctx.fill();
+	}
+
+	if (pressedIn) ctx.fillStyle = '#000';
+	ctx.beginPath();
+	ctx.globalAlpha = 0.65 * (pressedIn ? 0.4 : 1.0);
+	ctx.moveTo(iverts[0].x, iverts[0].y);
+	for (var i=1; i<len; i++) {
+		ctx.lineTo(iverts[i].x, iverts[i].y);
+	}
+	ctx.closePath();
+	ctx.fill();
+
+	ctx.restore();
+
+};
+
 BSWG.control_Button = {
 
 	render: function (ctx, viewport) {
@@ -5,24 +83,22 @@ BSWG.control_Button = {
 		ctx.font = '16px Helvetica';
 
 		if (this.selected)
-			ctx.strokeStyle = '#8f8';
+			ctx.strokeStyle = '#484';
 		else
-			ctx.strokeStyle = '#fff';
+			ctx.strokeStyle = '#888';
 		if (this.selected)
-			ctx.fillStyle = 'rgba(101,205,101,' + (this.mouseIn ? 1.0 : 0.8) + ')';
+			ctx.fillStyle = 'rgba(70,70,70,1)';
 		else
-			ctx.fillStyle = 'rgba(205,205,205,' + (this.mouseIn ? 1.0 : 0.8) + ')';
+			ctx.fillStyle = 'rgba(40,40,40,1)';
 			
-
 		ctx.lineWidth = 2.0;
 
-		ctx.fillRect(this.p.x, this.p.y, this.w, this.h);
-		ctx.strokeRect(this.p.x, this.p.y, this.w, this.h);
+		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected, this.mouseIn ? 'rgba(255,255,255,0.35)' : null);
 
 		ctx.lineWidth = 1.0;
 
 		ctx.textAlign = 'center';
-		ctx.fillStyle = '#000';
+		ctx.fillStyle = '#fff';
 
 		ctx.fillText(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
 
@@ -58,19 +134,18 @@ BSWG.control_KeyConfig = {
 		ctx.font = '16px Helvetica';
 
 		ctx.strokeStyle = '#8f8';
-		ctx.fillStyle = 'rgba(101,205,101,' + (this.mouseIn ? 1.0 : 0.8) + ')';
+		ctx.fillStyle = 'rgba(50,100,50,1.0)';
 
 		ctx.lineWidth = 2.0;
 
-		ctx.fillRect(this.p.x, this.p.y, this.w, this.h);
-		ctx.strokeRect(this.p.x, this.p.y, this.w, this.h);
+		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, this.mouseIn ? 'rgba(255,255,255,0.35)' : null);
 
 		ctx.lineWidth = 1.0;
 
 		ctx.textAlign = 'center';
-		ctx.fillStyle = '#000';
+		ctx.fillStyle = '#fff';
 
-		ctx.fillText("Hit key to bind to (" + BSWG.KEY_NAMES[this.key] + "): ", this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+		ctx.fillText("Hit key to bind to (Current: " + BSWG.KEY_NAMES[this.key].toUpperCase() + "): ", this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
 
 		ctx.textAlign = 'left';
 

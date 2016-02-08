@@ -75,9 +75,45 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 };
 
-BSWG.createPolyJPoints = function(verts) {
+BSWG.addJPointsForSeg = function(jp, a, b) {
 
-	// TODO
+	var dx = b.x - a.x;
+	var dy = b.y - a.y;
+	var len = Math.sqrt(dx*dx + dy*dy);
+	dx /= len;
+	dy /= len;
+
+	for (var i=0; i<Math.max(0.9, len*0.5-0.5); i+=1.0) {
+		if (i === 0) {
+			jp.push(new b2Vec2(a.x + dx * len * 0.5, a.y + dy * len * 0.5));
+		}
+		else {
+			jp.push(new b2Vec2(a.x + dx * len * 0.5 - i * dx, a.y + dy * len * 0.5 - i * dy));
+			jp.push(new b2Vec2(a.x + dx * len * 0.5 + i * dx, a.y + dy * len * 0.5 + i * dy));
+		}
+	}
+
+};
+
+BSWG.createPolyJPoints = function(verts, exclude) {
+
+	var jp = new Array();
+	var ex = {};
+
+	if (exclude) {
+		for (var i=0; i<exclude.length; i++) {
+			ex[exclude[i]] = true;
+		}
+	}
+
+	for (var i=0; i<verts.length; i++) {
+		if (ex[i]) {
+			continue;
+		}
+		BSWG.addJPointsForSeg(jp, verts[i], verts[(i+1)%verts.length]);
+	}
+
+	return jp;
 
 };
 
@@ -352,8 +388,8 @@ BSWG.component_Blaster = {
 
 		var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
-            x: p.x-100, y: p.y-25,
-            w: 200, h: 50,
+            x: p.x-150, y: p.y-25,
+            w: 300, h: 50,
             key: this.fireKey,
             close: function (key) {
             	if (key)
@@ -428,8 +464,11 @@ BSWG.component_Thruster = {
 
 		ctx.fillStyle = '#282';
 		BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
-														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5),
+														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
 						   BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+	},
+
+	renderOver: function(ctx, cam, dt) {
 
 		if (this.thrustT > 0) {
 
@@ -480,8 +519,8 @@ BSWG.component_Thruster = {
 
 		var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
-            x: p.x-100, y: p.y-25,
-            w: 200, h: 50,
+            x: p.x-150, y: p.y-25,
+            w: 300, h: 50,
             key: this.thrustKey,
             close: function (key) {
             	if (key)
@@ -549,6 +588,75 @@ BSWG.component_Block = {
 
 };
 
+BSWG.component_HingeHalf = {
+
+	type: 'hingehalf',
+
+	init: function(args) {
+
+		this.size  = args.size || 1;
+		this.motor = args.motor || false;
+
+		var verts = [
+			new b2Vec2(this.size * -0.5, this.size * -0.5),
+			new b2Vec2(this.size *  0.5, this.size * -0.5),
+			new b2Vec2(this.size *  0.95,             0.0),
+			new b2Vec2(this.size *  0.5, this.size *  0.5),
+			new b2Vec2(this.size * -0.5, this.size *  0.5)
+		];
+
+		this.motorC = new b2Vec2(this.size * 1.0, 0.0);
+
+		this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
+			verts: verts
+		});
+
+		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [1, 2]);
+
+		var cjp = new b2Vec2(this.motorC.x, this.motorC.y);
+		cjp.motorType = this.motor ? 1 : 2;
+		this.jpoints.push(cjp)
+
+		var len = Math.floor(this.size * 6 * (this.motor ? 2 : 1.5));
+		this.cverts = new Array(len);
+		var r = this.size * (this.motor ? 0.6 : 0.45) * 0.5;
+		for (var i=0; i<len; i++) {
+			var a = (i/len)*Math.PI*2.0;
+			this.cverts[i] = new b2Vec2(
+				this.motorC.x + Math.cos(a) * r,
+				this.motorC.y + Math.sin(a) * r
+			);
+		}
+
+	},
+
+	render: function(ctx, cam, dt) {
+
+		ctx.fillStyle = '#353';
+		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+
+		if (this.motor) {
+			ctx.fillStyle = this.motor ? '#484' : '#888';
+			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+		}
+
+	},
+
+	renderOver: function(ctx, cam, dt) {
+
+		if (!this.motor) {
+			ctx.fillStyle = this.motor ? '#484' : '#888';
+			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+		}
+
+	},
+
+	update: function(dt) {
+
+	},
+
+};
+
 BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
 
@@ -596,7 +704,9 @@ BSWG.component = function (desc, args) {
 
 	this.baseRenderOver = function(ctx, cam, dt) {
 
-		// <-- Render wires here
+		if (this.renderOver) {
+			this.renderOver(ctx, cam, dt);
+		}
 
 		if (!this.jpointsw)
 			return;
@@ -641,6 +751,9 @@ BSWG.component = function (desc, args) {
 			this.jpointsw = null;
 		}
 		this.jpointsw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
+		for (var i=0; i<this.jpoints.length; i++) {
+			this.jpointsw[i].motorType = this.jpoints[i].motorType || 0;
+		}
 	};
 
 	this.baseUpdate = function(dt) {
@@ -688,9 +801,12 @@ BSWG.component = function (desc, args) {
 						var p2 = jpw2[k2];
 						var d2 = Math.pow(p1.x - p2.x, 2.0) +
 								 Math.pow(p1.y - p2.y, 2.0);
+						if ((p1.motorType && !p2.motorType) || (p2.motorType && !p1.motorType)) {
+							continue;
+						}
 						if (d2 < BSWG.component_minJMatch) {
 							this.jmatch.push([
-								k1, cl[i], k2
+								k1, cl[i], k2, p1.motorType || 0, p2.motorType || 0
 							]);
 							break;
 						}
@@ -707,7 +823,10 @@ BSWG.component = function (desc, args) {
 														  this.jmatch[i][1].jpoints[this.jmatch[i][2]],
 														  true,
 														  this.jpointsNormals[this.jmatch[i][0]],
-														  this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]]);
+														  this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
+														  this.jmatch[i][3],
+														  this.jmatch[i][4]
+														  );
 
 						if (this.onCC && !this.jmatch[i][1].onCC)
 							this.jmatch[i][1].onCC = this.onCC;

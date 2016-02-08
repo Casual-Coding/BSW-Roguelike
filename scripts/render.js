@@ -141,7 +141,8 @@ BSWG.render = new function(){
         var renderFrame = function ()
         {
             var frameTime = Date.timeStamp();
-            self.dt = self.lastFrameTime - frameTime;
+            self.dt = frameTime - self.lastFrameTime;
+            self.lastFrameTime = frameTime;
             self.dt = Math.clamp(self.dt, 1.0/60.0, 1.0/10.0);
             self.time += self.dt;
 

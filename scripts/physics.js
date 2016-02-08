@@ -6,7 +6,7 @@ BSWG.physics = new function(){
 	this.positionIterations = 60;
 	this.velocityIterations = 60;
 	this.world 				= null;
-	this.maxWeldForce       = 1000.0;
+	this.maxWeldForce       = 2000.0;
 	this.welds              = [];
 
 	this.init = function (){
@@ -52,52 +52,64 @@ BSWG.physics = new function(){
 
 	};
 
-	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB) {
+	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB, motorA, motorB) {
 
 		var obj = {
 			jointDef: null,
 			joint:    null,
 			age:      0,
-			other:    null
+			other:    null,
+			revolute: motorA ? true : false
 		};
 
-		obj.jointDef = new b2WeldJointDef();
+		if (!motorA) {
+			obj.jointDef = new b2WeldJointDef();
+			obj.jointDef.collideConnected = !noCollide;
+		}
+		else {
+			obj.jointDef = new b2RevoluteJointDef();
+			obj.jointDef.collideConnected = true;
+		}
+	
 		obj.jointDef.bodyA = bodyA;
 		obj.jointDef.bodyB = bodyB;
 		obj.jointDef.localAnchorA = new b2Vec2( anchorA.x, anchorA.y );
 		obj.jointDef.localAnchorB = new b2Vec2( anchorB.x, anchorB.y );
-		obj.jointDef.collideConnected = !noCollide;
 
-		var k = 64;
-		var amt = Math.PI/16.0;
-		var angle = bodyB.GetAngle();
+		if (!motorA) {
 
-		var na = Math.rotVec2(new b2Vec2(normalA.x, normalA.y), bodyA.GetAngle());
+			var k = 64;
+			var amt = Math.PI/16.0;
+			var angle = bodyB.GetAngle();
 
-		while (--k >= 0) {
+			var na = Math.rotVec2(new b2Vec2(normalA.x, normalA.y), bodyA.GetAngle());
 
-			var a1 = angle - amt;
-			var a2 = angle + amt;
+			while (--k >= 0) {
 
-			var n1 = Math.rotVec2(normalB, a1);
-			var n2 = Math.rotVec2(normalB, a2);
+				var a1 = angle - amt;
+				var a2 = angle + amt;
 
-			var d1 = Math.pow(n1.x+na.x, 2.0) + Math.pow(n1.y+na.y, 2.0);
-			var d2 = Math.pow(n2.x+na.x, 2.0) + Math.pow(n2.y+na.y, 2.0);
+				var n1 = Math.rotVec2(normalB, a1);
+				var n2 = Math.rotVec2(normalB, a2);
 
-			if (d1 < d2) {
-				angle = a1;
+				var d1 = Math.pow(n1.x+na.x, 2.0) + Math.pow(n1.y+na.y, 2.0);
+				var d2 = Math.pow(n2.x+na.x, 2.0) + Math.pow(n2.y+na.y, 2.0);
+
+				if (d1 < d2) {
+					angle = a1;
+				}
+				else {
+					angle = a2;
+				}
+
+				amt /= 2.0;
 			}
-			else {
-				angle = a2;
-			}
 
-			amt /= 2.0;
+			angle -= bodyA.GetAngle();
+			obj.jointDef.referenceAngle = angle;
+
 		}
 
-		angle -= bodyA.GetAngle();
-
-		obj.jointDef.referenceAngle = angle;
 		obj.joint = this.world.CreateJoint( obj.jointDef );
 
 		this.welds.push(obj);
@@ -300,7 +312,7 @@ BSWG.physics = new function(){
 			if (Math.max(tn, fn) > this.maxWeldForce) {
 				this.welds[i].broken = true;
 			}
-			if (this.welds[i].age === 3) {
+			if (this.welds[i].age === 10 && !this.welds[i].revolute) {
 				var ref = this.welds[i].jointDef.referenceAngle;
 				var aref = this.welds[i].joint.GetBodyB().GetAngle() - this.welds[i].joint.GetBodyA().GetAngle();
 				var diff = Math.abs(Math.atan2(Math.sin(aref-ref), Math.cos(aref-ref)));
