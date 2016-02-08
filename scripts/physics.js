@@ -69,6 +69,9 @@ BSWG.physics = new function(){
 		else {
 			obj.jointDef = new b2RevoluteJointDef();
 			obj.jointDef.collideConnected = true;
+			obj.jointDef.enableMotor = true;
+			obj.jointDef.motorSpeed = 0.0;
+			obj.jointDef.maxMotorTorque = bodyA.GetMass() * 15.0;
 		}
 	
 		obj.jointDef.bodyA = bodyA;
@@ -326,6 +329,12 @@ BSWG.physics = new function(){
 		this.world.Step(dt, this.positionIterations, this.velocityIterations);
 		this.world.ClearForces();
 		this.updateMouseDrag();
+
+		for (var i=0; i<this.welds.length; i++) {
+			if (this.welds[i].revolute) {
+				this.welds[i].joint.SetMotorSpeed(0);
+			}
+		}
 
 	};
 

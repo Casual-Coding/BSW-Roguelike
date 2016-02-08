@@ -414,11 +414,12 @@ BSWG.component_Blaster = {
 		if (keys[this.fireKey] && !this.fireT) {
 
 			var a = this.obj.body.GetAngle() - Math.PI/2.0;
+			var v = this.obj.body.GetLinearVelocity();
 
 			var pl = new b2Vec2(0.0,  1.5);
 			var p = BSWG.physics.localToWorld([pl], this.obj.body);
 
-			BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0, -Math.sin(a)*15.0));
+			BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0 + v.x, -Math.sin(a)*15.0 + v.y));
 			accel = 1;
 
 			this.fireT = 0.5;
@@ -604,8 +605,9 @@ BSWG.component_HingeHalf = {
 
 	init: function(args) {
 
-		this.size  = args.size || 1;
-		this.motor = args.motor || false;
+		this.size   = args.size || 1;
+		this.motor  = args.motor || false;
+		this.rotKey = args.rotKey || (this.motor ? BSWG.KEY.A : BSWG.KEY.D);
 
 		var verts = [
 			//new b2Vec2(this.size * -0.5, this.size * -0.5),
@@ -627,9 +629,9 @@ BSWG.component_HingeHalf = {
 		cjp.motorType = (this.motor ? 1 : 2) * 10 + this.size;
 		this.jpoints.push(cjp)
 
-		var len = Math.floor(this.size * 6 * (this.motor ? 2 : 1.5));
+		var len = Math.floor(this.size * 5 * (this.motor ? 2 : 1.5));
 		this.cverts = new Array(len);
-		var r = this.size * (this.motor ? 0.6 : 0.45) * 0.5;
+		var r = this.size * (this.motor ? 0.6 : 0.45) * 0.3;
 		for (var i=0; i<len; i++) {
 			var a = (i/len)*Math.PI*2.0;
 			this.cverts[i] = new b2Vec2(
@@ -661,7 +663,49 @@ BSWG.component_HingeHalf = {
 
 	},
 
+	openConfigMenu: function() {
+
+		if (BSWG.compActiveConfMenu)
+			BSWG.compActiveConfMenu.remove();
+
+		var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
+
+		var self = this;
+        BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+            x: p.x-150, y: p.y-25,
+            w: 300, h: 50,
+            key: this.rotKey,
+            close: function (key) {
+            	if (key)
+                	self.rotKey = key;
+            }
+        });
+
+	},
+
+	closeConfigMenu: function() {
+
+	},
+
 	update: function(dt) {
+
+	},
+
+	handleInput: function(keys) {
+
+		var robj = null;
+		for (var k in this.welds) {
+			if (this.welds[k] && this.welds[k].obj.revolute) {
+				robj = this.welds[k].obj;
+				break;
+			}
+		}
+
+		if (robj) {
+			if (keys[this.rotKey]) {
+				robj.joint.SetMotorSpeed(this.motor ? -1 : 1);
+			}
+		}
 
 	},
 
