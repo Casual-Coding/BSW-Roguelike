@@ -256,6 +256,8 @@ BSWG.component_CommandCenter = {
 
 	type: 'cc',
 
+	sortOrder: 2,
+
 	init: function(args) {
 
 		this.width  = 2;
@@ -335,6 +337,8 @@ BSWG.component_CommandCenter = {
 BSWG.component_Blaster = {
 
 	type: 'blaster',
+
+	sortOrder: 2,
 
 	init: function(args) {
 
@@ -437,6 +441,8 @@ BSWG.component_Blaster = {
 BSWG.component_Thruster = {
 
 	type: 'thruster',
+
+	sortOrder: 2,
 
 	init: function(args) {
 
@@ -558,6 +564,8 @@ BSWG.component_Block = {
 
 	type: 'block',
 
+	sortOrder: 3,
+
 	init: function(args) {
 
 		this.width    = args.width || 1;
@@ -592,17 +600,19 @@ BSWG.component_HingeHalf = {
 
 	type: 'hingehalf',
 
+	sortOrder: 1,
+
 	init: function(args) {
 
 		this.size  = args.size || 1;
 		this.motor = args.motor || false;
 
 		var verts = [
-			new b2Vec2(this.size * -0.5, this.size * -0.5),
+			//new b2Vec2(this.size * -0.5, this.size * -0.5),
 			new b2Vec2(this.size *  0.5, this.size * -0.5),
 			new b2Vec2(this.size *  0.95,             0.0),
 			new b2Vec2(this.size *  0.5, this.size *  0.5),
-			new b2Vec2(this.size * -0.5, this.size *  0.5)
+			//new b2Vec2(this.size * -0.5, this.size *  0.5)
 		];
 
 		this.motorC = new b2Vec2(this.size * 1.0, 0.0);
@@ -611,10 +621,10 @@ BSWG.component_HingeHalf = {
 			verts: verts
 		});
 
-		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [1, 2]);
+		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [0, 1]);
 
 		var cjp = new b2Vec2(this.motorC.x, this.motorC.y);
-		cjp.motorType = this.motor ? 1 : 2;
+		cjp.motorType = (this.motor ? 1 : 2) * 10 + this.size;
 		this.jpoints.push(cjp)
 
 		var len = Math.floor(this.size * 6 * (this.motor ? 2 : 1.5));
@@ -636,7 +646,7 @@ BSWG.component_HingeHalf = {
 		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
 
 		if (this.motor) {
-			ctx.fillStyle = this.motor ? '#484' : '#888';
+			ctx.fillStyle = this.motor ? '#080' : '#aaa';
 			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
 		}
 
@@ -645,7 +655,7 @@ BSWG.component_HingeHalf = {
 	renderOver: function(ctx, cam, dt) {
 
 		if (!this.motor) {
-			ctx.fillStyle = this.motor ? '#484' : '#888';
+			ctx.fillStyle = this.motor ? '#080' : '#aaa';
 			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
 		}
 
@@ -801,7 +811,9 @@ BSWG.component = function (desc, args) {
 						var p2 = jpw2[k2];
 						var d2 = Math.pow(p1.x - p2.x, 2.0) +
 								 Math.pow(p1.y - p2.y, 2.0);
-						if ((p1.motorType && !p2.motorType) || (p2.motorType && !p1.motorType)) {
+						if ((p1.motorType && !p2.motorType) || (p2.motorType && !p1.motorType) ||
+							(p1.motorType && p1.motorType === p2.motorType) ||
+							(p1.motorType && (p1.motorType%10) != (p2.motorType%10))) {
 							continue;
 						}
 						if (d2 < BSWG.component_minJMatch) {
@@ -921,6 +933,11 @@ BSWG.componentList = new function () {
 	this.add = function (comp) {
 
 		this.compList.push(comp);
+		this.compList.sort(function(a,b){
+
+			return a.sortOrder - b.sortOrder;
+
+		});
 		return true;
 
 	};

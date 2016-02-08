@@ -316,7 +316,7 @@ BSWG.physics = new function(){
 				var ref = this.welds[i].jointDef.referenceAngle;
 				var aref = this.welds[i].joint.GetBodyB().GetAngle() - this.welds[i].joint.GetBodyA().GetAngle();
 				var diff = Math.abs(Math.atan2(Math.sin(aref-ref), Math.cos(aref-ref)));
-				if (diff > 0.0001) {
+				if (diff > 0.0005) {
 					this.welds[i].broken = true;
 				}
 			}
