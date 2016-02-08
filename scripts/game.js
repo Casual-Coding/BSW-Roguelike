@@ -261,9 +261,9 @@ BSWG.starfield = function(){
             {
                 var r = Math.random();
 
-                if (r < 1/3) ctx.fillStyle = '#f33';
-                else if (r < 2/3) ctx.fillStyle = '#3f3';
-                else ctx.fillStyle = '#33f';
+                if (r < 1/3) ctx.fillStyle = '#844';
+                else if (r < 2/3) ctx.fillStyle = '#484';
+                else ctx.fillStyle = '#448';
 
                 var L = [ [w*0.5, w*0.5, w*0.15] ];
                 ctx.beginPath();

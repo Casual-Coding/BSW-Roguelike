@@ -161,7 +161,7 @@ BSWG.control_KeyConfig = {
 
 		for (var k in keys) {
 			k = parseInt(k);
-			if (keys[k] === true && k !== BSWG.KEY.ALT && k !== BSWG.KEY.WINDOWS && k !== BSWG.KEY.SHIFT) {
+			if (keys[k] === true && k !== BSWG.KEY.ALT && k !== BSWG.KEY.WINDOWS && k !== BSWG.KEY.SHIFT && k !== BSWG.KEY.CTRL && k !== BSWG.KEY['RIGHT CLICK']) {
 				this.close(parseInt(k));
 				return;
 			}

@@ -75,7 +75,7 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 };
 
-BSWG.addJPointsForSeg = function(jp, a, b) {
+BSWG.addJPointsForSeg = function(jp, a, b, boxMethod) {
 
 	var dx = b.x - a.x;
 	var dy = b.y - a.y;
@@ -83,19 +83,29 @@ BSWG.addJPointsForSeg = function(jp, a, b) {
 	dx /= len;
 	dy /= len;
 
-	for (var i=0; i<Math.max(0.9, len*0.5-0.5); i+=1.0) {
-		if (i === 0) {
+	if (boxMethod) {
+		if (!(Math.floor(len)%2)) {
 			jp.push(new b2Vec2(a.x + dx * len * 0.5, a.y + dy * len * 0.5));
 		}
-		else {
-			jp.push(new b2Vec2(a.x + dx * len * 0.5 - i * dx, a.y + dy * len * 0.5 - i * dy));
-			jp.push(new b2Vec2(a.x + dx * len * 0.5 + i * dx, a.y + dy * len * 0.5 + i * dy));
+		for (var i=0; i<len; i++) {
+			jp.push(new b2Vec2(a.x + dx * 0.5 + i * dx, a.y + dy * 0.5 + i * dy));
+		}
+	}
+	else {
+		for (var i=0; i<Math.max(0.9, len*0.5-0.5); i+=1.0) {
+			if (i === 0) {
+				jp.push(new b2Vec2(a.x + dx * len * 0.5, a.y + dy * len * 0.5));
+			}
+			else {
+				jp.push(new b2Vec2(a.x + dx * len * 0.5 - i * dx, a.y + dy * len * 0.5 - i * dy));
+				jp.push(new b2Vec2(a.x + dx * len * 0.5 + i * dx, a.y + dy * len * 0.5 + i * dy));
+			}
 		}
 	}
 
 };
 
-BSWG.createPolyJPoints = function(verts, exclude) {
+BSWG.createPolyJPoints = function(verts, exclude, boxMethod) {
 
 	var jp = new Array();
 	var ex = {};
@@ -110,7 +120,7 @@ BSWG.createPolyJPoints = function(verts, exclude) {
 		if (ex[i]) {
 			continue;
 		}
-		BSWG.addJPointsForSeg(jp, verts[i], verts[(i+1)%verts.length]);
+		BSWG.addJPointsForSeg(jp, verts[i], verts[(i+1)%verts.length], boxMethod);
 	}
 
 	return jp;
@@ -623,7 +633,7 @@ BSWG.component_HingeHalf = {
 			verts: verts
 		});
 
-		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [0, 1]);
+		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [0, 1], true);
 
 		var cjp = new b2Vec2(this.motorC.x, this.motorC.y);
 		cjp.motorType = (this.motor ? 1 : 2) * 10 + this.size;

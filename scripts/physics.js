@@ -71,7 +71,7 @@ BSWG.physics = new function(){
 			obj.jointDef.collideConnected = true;
 			obj.jointDef.enableMotor = true;
 			obj.jointDef.motorSpeed = 0.0;
-			obj.jointDef.maxMotorTorque = bodyA.GetMass() * 15.0;
+			obj.jointDef.maxMotorTorque = bodyA.GetMass() * 30.0;
 		}
 	
 		obj.jointDef.bodyA = bodyA;
