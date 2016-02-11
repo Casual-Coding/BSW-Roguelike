@@ -32,9 +32,9 @@
                     var dt = 1.0/60.0;
                     cboom.render(ctx, dt);
 
-                    if (Math.random() < 0.5) {
-                        var sz = Math.random()*300+10;
-                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, sz/150);
+                    if (Math.random() < 0.4) {
+                        var sz = Math.random()*350+5;
+                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, sz/100);
                     }
 
                 }, 1000/60);

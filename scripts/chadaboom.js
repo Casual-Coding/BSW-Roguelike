@@ -77,7 +77,15 @@ chadaboom.prototype.add = function(posFn, sizeFn, res, life) {
 
     var bb = null;
     for (var i=0; i<this.batches.length; i++) {
-        if (!bb || Math.abs(res-bb.size) > Math.abs(res-this.batches[i].size)) {
+        var d0 = bb ? Math.abs(res-bb.size) : 100000;
+        var d1 = Math.abs(res-this.batches[i].size);
+        if (bb && res < bb.size) {
+            d0 = Math.sqrt(d0);
+        }
+        if (res < this.batches[i].size) {
+            d1 = Math.sqrt(d1);
+        }
+        if (!bb || d0 > d1) {
             bb = this.batches[i];
         }
     }
