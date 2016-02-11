@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <script src="scripts/chadaboom.js"></script>
+    </head>
+    <body style='background-color: black; color: white;'>
+        <noscript>JavaScript is required.</noscript>
+
+        <canvas id='test' width='1284' height='768' style='border: 1px solid #666'></canvas>
+
+        <script>
+
+            var canvas = document.getElementById('test');
+            var ctx = canvas.getContext('2d');
+
+            var cboom = new chadaboom([
+                {
+                    'name': 'images/explosion',
+                    'size': 64,
+                    'count': 2
+                },
+                {
+                    'name': 'images/explosion',
+                    'size': 256,
+                    'count': 2
+                }                
+            ], function(){
+                window.setInterval(function(){
+
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, 1284, 768);
+
+                    var dt = 1.0/60.0;
+                    cboom.render(ctx, dt);
+
+                    for (var i=0; i<6; i++) {
+                        var sz = Math.random()*300+10;
+                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, sz/150);
+                    }
+
+                }, 1000/60);
+            });
+        </script>
+    </body>
+</html>
