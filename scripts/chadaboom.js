@@ -1,8 +1,8 @@
 window.chadaboom = function(batches, onLoad) {
 
-    this.nframes = 2 * 60;
-    this.bwidth = 12;
-    this.bheight = 10;
+    this.bwidth = 9;
+    this.bheight = 5;
+    this.nframes = this.bwidth * this.bheight;
 
     var toLoad = 0;
     for (var i=0; i<batches.length; i++) {
@@ -37,6 +37,8 @@ window.chadaboom = function(batches, onLoad) {
 
 chadaboom.prototype.render = function(ctx, dt) {
 
+    var oAlpha = parseFloat(ctx.globalAlpha);
+
     for (var i=0; i<this.list.length; i++) {
         var B = this.list[i];
         B.t -= dt;
@@ -50,18 +52,25 @@ chadaboom.prototype.render = function(ctx, dt) {
         var sz = B.sz(B.res);
         var bb = this.batches[B.bbi];
 
-        var frame = Math.floor((1.0-(B.t / B.maxt)) * this.nframes);
+        var frame = (1.0-(B.t / B.maxt)) * this.nframes;
         if (frame < 0) {
             frame = 0;
         }
-        if (frame >= this.nframes) {
-            frame = this.nframes-1;
+        if (frame > this.nframes-2) {
+            frame = this.nframes-2;
         }
+
+        var f1 = Math.floor(frame);
+        var f2 = f1 + 1;
+        var ft = frame - f1;
 
         ctx.save();
         ctx.translate(p.x-sz*0.5, p.y-sz*0.5);
         ctx.rotate(B.rot);
-        ctx.drawImage(bb.img[B.img], (frame%this.bwidth)*bb.size, Math.floor(frame/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
+        //ctx.globalAlpha = oAlpha * (1.0 - ft);
+        ctx.drawImage(bb.img[B.img], (f1%this.bwidth)*bb.size, Math.floor(f1/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
+        //ctx.globalAlpha = oAlpha * ft;
+        //ctx.drawImage(bb.img[B.img], (f2%this.bwidth)*bb.size, Math.floor(f2/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
         ctx.restore();
     }
 
@@ -80,10 +89,10 @@ chadaboom.prototype.add = function(posFn, sizeFn, res, life) {
         var d0 = bb ? Math.abs(res-bb.size) : 100000;
         var d1 = Math.abs(res-this.batches[i].size);
         if (bb && res < bb.size) {
-            d0 = Math.sqrt(d0);
+            d0 = Math.pow(d0, 0.75);
         }
         if (res < this.batches[i].size) {
-            d1 = Math.sqrt(d1);
+            d1 = Math.pow(d1, 0.75);
         }
         if (!bb || d0 > d1) {
             bb = this.batches[i];

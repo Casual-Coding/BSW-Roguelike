@@ -16,28 +16,38 @@
                 {
                     'name': 'images/explosion',
                     'size': 64,
-                    'count': 2
+                    'count': 4
                 },
                 {
                     'name': 'images/explosion',
                     'size': 256,
                     'count': 2
-                }                
+                },
+                {
+                    'name': 'images/explosion',
+                    'size': 512,
+                    'count': 1
+                }
             ], function(){
-                window.setInterval(function(){
+                var lastTime = new Date().getTime() / 1000.0;
+                var renderLoop = function(){
+
+                    var time = new Date().getTime() / 1000.0;
+                    var dt = time-lastTime;
+                    lastTime = time;
+
+                    if (Math.random() < (0.25*60*dt)) {
+                        var sz = Math.random()*512;
+                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, Math.sqrt(sz/512)*2.25);
+                    }
 
                     ctx.fillStyle = '#000';
                     ctx.fillRect(0, 0, 1284, 768);
-
-                    var dt = 1.0/60.0;
                     cboom.render(ctx, dt);
 
-                    if (Math.random() < 0.4) {
-                        var sz = Math.random()*350+5;
-                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, sz/100);
-                    }
-
-                }, 1000/60);
+                    requestAnimationFrame(renderLoop);
+                };
+                requestAnimationFrame(renderLoop);
             });
         </script>
     </body>
