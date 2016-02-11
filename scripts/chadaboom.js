@@ -60,7 +60,7 @@ chadaboom.prototype.render = function(ctx, dt) {
 
         ctx.save();
         ctx.translate(p.x-sz*0.5, p.y-sz*0.5);
-        ctx.rotate(p.rot);
+        ctx.rotate(B.rot);
         ctx.drawImage(bb.img[B.img], (frame%this.bwidth)*bb.size, Math.floor(frame/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
         ctx.restore();
     }
