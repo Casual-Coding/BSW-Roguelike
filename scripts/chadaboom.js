@@ -52,7 +52,8 @@ chadaboom.prototype.render = function(ctx, dt) {
         var sz = B.sz(B.res);
         var bb = this.batches[B.bbi];
 
-        var frame = (1.0-(B.t / B.maxt)) * this.nframes;
+        var t = Math.pow(1.0-(B.t / B.maxt), 1.0/B.attack);
+        var frame = t * this.nframes;
         if (frame < 0) {
             frame = 0;
         }
@@ -76,13 +77,17 @@ chadaboom.prototype.render = function(ctx, dt) {
 
 };
 
-chadaboom.prototype.add = function(posFn, sizeFn, res, life) {
+chadaboom.prototype.add = function(posFn, sizeFn, res, life, attack) {
 
     res = res || 256;
     if (res < 0) {
         res = 0;
     }
     life = life || 2.0;
+    attack = attack || 2.0;
+    if (attack <= 0) {
+        attack = 0;
+    }
 
     var bb = null;
     for (var i=0; i<this.batches.length; i++) {
@@ -127,6 +132,7 @@ chadaboom.prototype.add = function(posFn, sizeFn, res, life) {
         t: life,
         maxt: life,
         rot: Math.random() * Math.PI * 2.0,
+        attack: attack
 
     });
 
