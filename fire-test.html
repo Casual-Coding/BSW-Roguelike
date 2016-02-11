@@ -20,6 +20,11 @@
                 },
                 {
                     'name': 'images/explosion',
+                    'size': 128,
+                    'count': 2
+                },
+                {
+                    'name': 'images/explosion',
                     'size': 256,
                     'count': 2
                 },
@@ -36,9 +41,9 @@
                     var dt = time-lastTime;
                     lastTime = time;
 
-                    if (Math.random() < (0.25*60*dt)) {
+                    if (Math.random() < (0.125*60*dt)) {
                         var sz = Math.random()*512;
-                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, Math.sqrt(sz/512)*2.25);
+                        cboom.add({x: Math.random()*1284, y: Math.random()*768}, sz, sz, Math.sqrt(sz/512)*1.25+1.0);
                     }
 
                     ctx.fillStyle = '#000';

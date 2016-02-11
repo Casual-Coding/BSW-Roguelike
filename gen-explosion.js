@@ -5,6 +5,7 @@ var fs = require('fs'),
 
 var fwidth = 9, fheight = 5;
 var frameSkip = 1;
+var smooth = 1;
 
 var sz = parseInt(process.argv[2] || '256');
 var outfile = fs.createWriteStream((process.argv[3] || 'out') + '.png');
@@ -89,6 +90,10 @@ for (var xx=-3; xx<=3; xx++) {
 }
 
 var pngSub = new PNG({width: sz, height: sz, palette: true});
+var smoothBfr = [
+    newArr(sz, 0.0),
+    newArr(sz, 0.0)
+];
 
 var rframe = 0;
 for (var frame=0; frame<nframes; frame++) {
@@ -110,19 +115,38 @@ for (var frame=0; frame<nframes; frame++) {
 
     var t = Math.max(0, 1.0 - Math.pow(frame/nframes, 8.0));
 
+    var k = 0;
+    for (var i=0; i<(sz*sz); i++) {
+        smoothBfr[k][i] = ex.heat[i];
+    }
+    for (; k<smooth; k++) {
+        var k1 = k%2;
+        var k2 = 1-k1;
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                smoothBfr[k2].set(
+                    x, y,
+                    (smoothBfr[k1].get(x, y)*0.65 + (smoothBfr[k1].get(x-1, y) + smoothBfr[k1].get(x+1, y) + smoothBfr[k1].get(x, y-1) + smoothBfr[k1].get(x, y+1)) * 0.35 * 0.25)
+                )
+            }
+        }
+    }
+
     var dat = pngSub.data;
     for (var i=0; i<dat.length; i+=4) {
-        var vv = (ex.heat[i/4]
-               + (i/4>=1?ex.heat[i/4-1]:0)
-               + (i/4<(sz*sz-1)?ex.heat[i/4+1]:0)
-               + (i/4>=sz?ex.heat[i/4-sz]:0)
-               + (i/4<(sz*sz-sz)?ex.heat[i/4+sz]:0)) / 5.0;
+        var vv = smooth > 0 ? smoothBfr[k%2][i/4] : ex.heat[i/4];
         var v = Math.floor(Math.pow(Math.min(vv / 10, 1), 0.5) * 255 * t);
         dat[i]   = pal[v][0];
         dat[i+1] = pal[v][1];
         dat[i+2] = pal[v][2];
         dat[i+3] = v;
-        ex.heat[i/4] *= heatDisRate;
+        if (v < 63) {
+            ex.heat[i/4] *= 0.65;
+            dat[i+3] = Math.floor(v/4);
+        }
+        else {
+            ex.heat[i/4] *= heatDisRate;
+        }
     }
 
     if (!(frame%(frameSkip+1))) {
