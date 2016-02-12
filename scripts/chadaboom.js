@@ -53,6 +53,7 @@ chadaboom.prototype.render = function(ctx, dt) {
         var bb = this.batches[B.bbi];
 
         var t = Math.pow(1.0-(B.t / B.maxt), 1.0/B.attack);
+        sz *= Math.pow(t, 0.25);
         var frame = t * this.nframes;
         if (frame < 0) {
             frame = 0;
@@ -66,8 +67,9 @@ chadaboom.prototype.render = function(ctx, dt) {
         var ft = frame - f1;
 
         ctx.save();
-        ctx.translate(p.x-sz*0.5, p.y-sz*0.5);
+        ctx.translate(p.x, p.y);
         ctx.rotate(B.rot);
+        ctx.translate(-sz*0.5, -sz*0.5);
         //ctx.globalAlpha = oAlpha * (1.0 - ft);
         ctx.drawImage(bb.img[B.img], (f1%this.bwidth)*bb.size, Math.floor(f1/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
         //ctx.globalAlpha = oAlpha * ft;
