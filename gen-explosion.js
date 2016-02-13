@@ -10,7 +10,9 @@ var smooth = 0;
 var startSkip = Math.floor(fwidth*1.5);
 
 var sz = parseInt(process.argv[2] || '256');
-var outfile = fs.createWriteStream((process.argv[3] || 'out') + '.png');
+var outfileJPG = (process.argv[3] || 'out') + '.jpg';
+var outfilePNG = (process.argv[3] || 'out') + '.png';
+var outfile = fs.createWriteStream(outfilePNG);
 var png = new PNG({width: sz*fwidth, height: sz*fheight});
 
 var newArr = function(size, val) {
@@ -239,13 +241,14 @@ for (var frame=-startSkip; frame<nframes; frame++) {
             var vel = Math.sqrt(Math.pow(ex.xv.get(x,y), 2.0) + Math.pow(ex.yv.get(x,y), 2.0));
             var vv = smoothBfr[k%2][i/4];
             var v = Math.floor(Math.pow(Math.min(vv, 1), 0.5) * 255 * t);
+            //v = Math.floor(v/8)*8;
             if (v < 63) {
                 //v = Math.floor(v/4);
                 //ex.heat[i/4] *= 0.4;
             }
-            dat[i]   = pal[v][0];
-            dat[i+1] = pal[v][1];
-            dat[i+2] = pal[v][2];
+            dat[i]   = 255;
+            dat[i+1] = 255;
+            dat[i+2] = 255;
             dat[i+3] = Math.floor(v * Math.min((vel+vv/6.0)*10.0, 1.0));
         }
 
@@ -258,4 +261,6 @@ for (var frame=-startSkip; frame<nframes; frame++) {
 
 }
 
-png.pack().pipe(outfile);
+png.pack().pipe(outfile).on('close', function(){
+    //images(outfilePNG).save(outfileJPG, {quality: 100});
+});

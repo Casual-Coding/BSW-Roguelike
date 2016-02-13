@@ -1,8 +1,9 @@
-window.chadaboom = function(batches, onLoad) {
+window.chadaboom = function(batches, palette, onLoad) {
 
     this.bwidth = 9;
     this.bheight = 5;
     this.nframes = this.bwidth * this.bheight;
+    var pal = palette || chadaboom.fire;
 
     var toLoad = 0;
     for (var i=0; i<batches.length; i++) {
@@ -20,6 +21,30 @@ window.chadaboom = function(batches, onLoad) {
             img.onload = function() {
                 toLoad -= 1;
                 if (toLoad === 0) {
+
+                    for (var k=0; k<batches.length; k++) {
+                        var bk = batches[k];
+                        for (var k2=0; k2<bk.img.length; k2++) {
+                            var timg = bk.img[k2];
+                            var canvas = document.createElement('canvas');
+                            var width = parseInt(timg.width),
+                                height = parseInt(timg.height);
+                            canvas.width = width;
+                            canvas.height = height;
+                            var ctx = canvas.getContext("2d");
+                            ctx.drawImage(timg, 0, 0);
+                            var pdata = ctx.getImageData(0, 0, width, height);
+                            for (var l=0; l<pdata.data.length; l+=4) {
+                                var index = pdata.data[l+3];
+                                pdata.data[l+0] = pal[index][0];
+                                pdata.data[l+1] = pal[index][1];
+                                pdata.data[l+2] = pal[index][2];
+                            }
+                            ctx.putImageData(pdata, 0, 0);
+                            bk.img[k2] = canvas;
+                        }
+                    }
+
                     if (onLoad)
                         onLoad();
                 }
@@ -34,6 +59,51 @@ window.chadaboom = function(batches, onLoad) {
     this.list = [];
 
 };
+
+chadaboom.fire = function() {
+    var pal = [];
+    for (var i=0; i<64; i++) {
+        pal.push([i, i, i]);
+    }
+    for (var i=0; i<64; i++) {
+        pal.push([63+i*3, 63-i, 63-i]);
+    }
+    for (var i=0; i<64; i++) {
+        pal.push([255, i*4, 0]);
+    }
+    for (var i=0; i<64; i++) {
+        pal.push([255, 255, (i+1)*4])
+    }
+    return pal;
+}();
+
+chadaboom.blue_flame = function() {
+    var pal = [];
+    for (var i=0; i<64; i++) {
+        pal.push([i, i, i]);
+    }
+    for (var i=0; i<96; i++) {
+        pal.push([Math.max(0, 63-i), Math.max(0, 63-i), 63+i*2]);
+    }
+    for (var i=0; i<96; i++) {
+        pal.push([i*256/96, i*256/96, 255]);
+    }
+    return pal;
+}();
+
+chadaboom.green_flame = function() {
+    var pal = [];
+    for (var i=0; i<64; i++) {
+        pal.push([i, i, i]);
+    }
+    for (var i=0; i<96; i++) {
+        pal.push([Math.max(0, 63-i), 63+i*2, Math.max(0, 63-i)]);
+    }
+    for (var i=0; i<96; i++) {
+        pal.push([i*256/96, 255, i*256/96]);
+    }
+    return pal;
+}();
 
 chadaboom.prototype.render = function(ctx, dt) {
 
@@ -70,10 +140,8 @@ chadaboom.prototype.render = function(ctx, dt) {
         ctx.translate(p.x, p.y);
         ctx.rotate(B.rot);
         ctx.translate(-sz*0.5, -sz*0.5);
-        //ctx.globalAlpha = oAlpha * (1.0 - ft);
         ctx.drawImage(bb.img[B.img], (f1%this.bwidth)*bb.size, Math.floor(f1/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
-        //ctx.globalAlpha = oAlpha * ft;
-        //ctx.drawImage(bb.img[B.img], (f2%this.bwidth)*bb.size, Math.floor(f2/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
+
         ctx.restore();
     }
 
