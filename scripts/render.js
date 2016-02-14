@@ -78,10 +78,11 @@ BSWG.render = new function(){
     this.lastFrameTime = Date.timeStamp();
     this.dt = 1.0/60.0;
     this.time = 0.0;
+    this.images = {};
 
     var maxRes = { w: 1920, h: 1080 };
 
-    this.init = function(complete)
+    this.init = function(complete, images)
     {
         document.body.innerHTML = '';
 
@@ -92,7 +93,27 @@ BSWG.render = new function(){
 
         document.body.appendChild(this.canvas);
 
-        if (complete)
+        this.images = images = images || {};
+
+        var toLoad = 0;
+        for (var key in images) {
+            toLoad += 1;
+        }
+        var totalImages = toLoad;
+        for (var key in images) {
+            var img = new Image();
+            img.src = '/images/' + images[key];
+            img.onload = function() {
+                toLoad -= 1;
+                if (toLoad === 0) {
+                    if (complete)
+                        complete();
+                }
+            };
+            images[key] = img;
+        }
+
+        if (!totalImages && complete)
             complete();
     };
 

@@ -18,7 +18,7 @@ for (var i=0; i<(countNeb * nebTypes.length); i++) {
 
 for (var i=0; i<countStars; i++) {
     waiting += 1;
-    var ge = spawn('node', ['gen-starfield.js', ''+100, ''+sz, '../images/stars-' + sz + '-' + i]);
+    var ge = spawn('node', ['gen-starfield.js', ''+50, ''+sz, '../images/stars-' + sz + '-' + i]);
     ge.on('close', function(code) {
         console.log((--waiting) + ' left');
     });

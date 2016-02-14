@@ -215,11 +215,22 @@ BSWG.game = new function(){
 
 BSWG.starfield = function(){
 
-    var imageCount = 32;
+    var imageCount = 64;
     var imageSize = 384;
     var images = [];
+    var dustCount = 32;
+    var dustImages = [];
     var starSizeO = [ 1, 8 ];
     var layers = 2;
+
+    var starImg = [];
+    for (var i=0; i<15; i++) {
+        starImg.push(BSWG.render.images['stars_' + i]);
+    }
+    var nebulaImg = [];
+    for (var i=0; i<15; i++) {
+        nebulaImg.push(BSWG.render.images['nebula_' + i]);
+    }
 
     Math.seedrandom(Date.timeStamp());
 
@@ -228,68 +239,36 @@ BSWG.starfield = function(){
 
             ctx.clearRect(0, 0, w, h);
 
-            for (var k=0; k<128; k++)
-            {
-                var rr = Math.random();
-
-                if (rr < 0.7)
-                    ctx.fillStyle = '#fff';
-                else if (rr < 0.85)
-                    ctx.fillStyle = '#f88';
-                else
-                    ctx.fillStyle = '#88f';
-
-                var x = Math.random() * (w - starSizeO[1] * 2) + starSizeO[1];
-                var y = Math.random() * (w - starSizeO[1] * 2) + starSizeO[1];
-                var r = Math.random() * (starSizeO[1] - starSizeO[0]) + starSizeO[0];
-                var l = Math.random();
-
-                ctx.beginPath();
-                ctx.arc(x, y, r, 0, 2*Math.PI);
-                ctx.globalAlpha = l * 0.15;
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(x, y, r*0.2, 0, 2*Math.PI);
-                ctx.globalAlpha = l;
-                ctx.fill();
-            }
-
-            ctx.globalAlpha = 1.0;
+            var img = starImg[Math.floor(Math.random() * starImg.length)];
+            ctx.globalAlpha = 0.65;
+            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
 
             if (!(i%4))
             {
-                var r = Math.random();
+                var img = nebulaImg[Math.floor(Math.random() * nebulaImg.length)];
+                var sz = (Math.random()*0.5+0.5)*Math.min(w,h);
+                ctx.save();
+                ctx.translate(sz*0.5, sz*0.5);
+                ctx.rotate(Math.PI*2.0);
+                ctx.translate(-sz*0.5, -sz*0.5);
+                ctx.globalAlpha = 0.45;
+                ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, sz, sz);
+                ctx.restore();
+            }
 
-                if (r < 1/3) ctx.fillStyle = '#844';
-                else if (r < 2/3) ctx.fillStyle = '#484';
-                else ctx.fillStyle = '#448';
+        }));
+    }
 
-                var L = [ [w*0.5, w*0.5, w*0.15] ];
-                ctx.beginPath();
-                ctx.arc(w*0.5, h*0.5, w*0.15, 0, 2*Math.PI);
-                ctx.globalAlpha = 0.2;
-                ctx.fill();
+    for (var i=0; i<dustCount; i++) {
+        dustImages.push(BSWG.render.proceduralImage(imageSize, imageSize, function(ctx, w, h){
 
-                for (var k=0; k<64; k++)
-                {
-                    var j = Math.floor(Math.random()*L.length);
-                    var rr = Math.random() * L[j][2];
-                    var ra = Math.random() * Math.PI * 2.0;
-                    var x = L[j][0] + Math.cos(ra) * rr;
-                    var y = L[j][1] + Math.sin(ra) * rr;
-                    var r = Math.random() * L[j][2] * 0.25 + L[j][2] * 0.75;
+            ctx.clearRect(0, 0, w, h);
 
-                    if (x-r < 0 || y-r < 0 || x+r >= w || y+r >= h)
-                        continue;
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#bbb';
 
-                    L.push([x, y, r]);
-
-                    ctx.beginPath();
-                    ctx.arc(x, y, r, 0, 2*Math.PI);
-                    ctx.globalAlpha = 0.1;
-                    ctx.fill();
-                }
+            for (var k=0; k<125; k++) {
+                ctx.fillRect(Math.random()*w, Math.random()*h, 1, 1);
             }
 
         }));
@@ -297,45 +276,41 @@ BSWG.starfield = function(){
 
     this.render = function(ctx, cam, viewport) {
 
-        var vpsz = Math.max(viewport.w, viewport.h);
+        var oz = cam.z;
 
-        for (var l=layers; l>=1; l--) {
+        for (var l=3; l>=1; l--) {
 
-            var sz = imageSize / l;
-            var camz = 0.005 / l;
-            var offx = (-cam.x * vpsz * camz);
-            var offy = (-cam.y * vpsz * camz);
-            var ix = Math.floor(offx / sz);
-            var iy = Math.floor(offy / sz);
-            offx -= ix * sz;
-            offy -= iy * sz;
-            var cx = ((offx-imageSize) - viewport.w * 0.5) / (camz * vpsz) + cam.x;
-            var cy = ((offy-imageSize) - viewport.h * 0.5) / (camz * vpsz) + cam.y;
+            var t = (l-1)/2;
+            cam.z = (oz*(1.0-t) + t*0.1) / Math.pow(l, 4.0);
+            ctx.globalAlpha = 1.0/Math.pow(l, 1.25);
 
-            cx = Math.floor(cx / (imageSize / (vpsz * camz)));
-            cy = Math.floor(cy / (imageSize / (vpsz * camz)));
+            var tsize = [25, 80, 120][l-1];
 
-            if (l === 2) {
-                offx = offy = cx = cy = 0; // 2nd layer fixed in position as temp-fix to bug
-            }
+            var p1 = cam.toWorld(viewport, new b2Vec2(0, 0));
+            var p2 = cam.toWorld(viewport, new b2Vec2(viewport.w, viewport.h));
+            p1.x = (Math.floor(p1.x / tsize)-1) * tsize;
+            p1.y = (Math.floor(p1.y / tsize)-1) * tsize;
+            p2.x = (Math.floor(p2.x / tsize)+1) * tsize;
+            p2.y = (Math.floor(p2.y / tsize)+1) * tsize;
 
-            ctx.globalAlpha = 1/(l*l);
+            var img = l === 1 ? dustImages : images;
 
-            var _cx=cx;
-            for (var x=offx-sz; x<viewport.w; x+=sz) {
-
-                var _cy=cy;
-                for (var y=offy-sz; y<viewport.h; y+=sz) {
-
-                    var k = Math.floor(Math.random2d(_cx+1000*l, _cy+555*l) * 100000);
-                    ctx.drawImage(images[k % images.length], x, y, sz, sz);
-                    _cy += 1;
+            var p = new b2Vec2(p1.x, p1.y);
+            for (p.x = p1.x; p.x <= p2.x; p.x += tsize) {
+                for (p.y = p1.y; p.y <= p2.y; p.y += tsize) {
+                    var x = p.x / tsize, y = p.y / tsize;
+                    var ps = cam.toScreenList(viewport, [p, new b2Vec2(p.x+tsize, p.y+tsize)]);
+                    var w = ps[1].x - ps[0].x,
+                        h = ps[1].y - ps[0].y;
+                    var k = Math.floor(Math.random2d(x*13.5+100*l, y*7.431+55*l) * 100000);
+                    ctx.drawImage(img[k % img.length], ps[0].x, ps[0].y, w, h);
                 }
-                _cx += 1;
             }
+
+            ctx.globalAlpha = 1.0;
         }
 
-        ctx.globalAlpha = 1.0;
+        cam.z = oz;
 
     };
 
