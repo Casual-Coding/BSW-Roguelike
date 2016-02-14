@@ -232,7 +232,7 @@ BSWG.starfield = function(){
         nebulaImg.push(BSWG.render.images['nebula_' + i]);
     }
 
-    Math.seedrandom(Date.timeStamp());
+    Math.seedrandom(666);
 
     for (var i=0; i<imageCount; i++) {
         images.push(BSWG.render.proceduralImage(imageSize, imageSize, function(ctx, w, h){
@@ -240,7 +240,7 @@ BSWG.starfield = function(){
             ctx.clearRect(0, 0, w, h);
 
             var img = starImg[Math.floor(Math.random() * starImg.length)];
-            ctx.globalAlpha = 0.65;
+            ctx.globalAlpha = 0.4;
             ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
 
             if (!(i%4))
@@ -251,7 +251,7 @@ BSWG.starfield = function(){
                 ctx.translate(sz*0.5, sz*0.5);
                 ctx.rotate(Math.PI*2.0);
                 ctx.translate(-sz*0.5, -sz*0.5);
-                ctx.globalAlpha = 0.45;
+                ctx.globalAlpha = 0.3;
                 ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, sz, sz);
                 ctx.restore();
             }
@@ -282,7 +282,7 @@ BSWG.starfield = function(){
 
             var t = (l-1)/2;
             cam.z = (oz*(1.0-t) + t*0.1) / Math.pow(l, 4.0);
-            ctx.globalAlpha = 1.0/Math.pow(l, 1.25);
+            ctx.globalAlpha = 1.0/Math.pow(Math.max(1, l-1), 2.0);
 
             var tsize = [25, 80, 120][l-1];
 
@@ -302,7 +302,7 @@ BSWG.starfield = function(){
                     var ps = cam.toScreenList(viewport, [p, new b2Vec2(p.x+tsize, p.y+tsize)]);
                     var w = ps[1].x - ps[0].x,
                         h = ps[1].y - ps[0].y;
-                    var k = Math.floor(Math.random2d(x*13.5+100*l, y*7.431+55*l) * 100000);
+                    var k = Math.floor(Math.random2d(x*13.5+97*l*l, y*7.431+55*l*l) * 100000);
                     ctx.drawImage(img[k % img.length], ps[0].x, ps[0].y, w, h);
                 }
             }
