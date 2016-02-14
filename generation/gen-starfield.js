@@ -37,17 +37,17 @@ for (var i=0; i<dat.length; i+=4) {
         var v = stars[j].r / (0.001 + len*len*len);
         a += v;
         if (stars[j].type === 0) {
-            r += v; g += v * 0.75; b += v * 0.75;
+            r += v * 0.75; g += v * 0.75; b += v;
         }
         else if (stars[j].type === 1) {
             b += v;
-            g += v * 0.5;
-            r += v * 0.5;
+            g += v * 0.25;
+            r += v * 0.25;
         }
         else if (stars[j].type === 2) {
             r += v;
-            g += v * 0.5;
-            b += v * 0.5;
+            g += v * 0.25;
+            b += v * 0.25;
         }
     }
     dat[i]   = scaleClamp(r);

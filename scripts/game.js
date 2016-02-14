@@ -217,10 +217,8 @@ BSWG.game = new function(){
 
 BSWG.starfield = function(){
 
-    var imageCount = 64;
-    var imageSize = 384;
-    var images = [];
-    var dustCount = 32;
+    var dustCount = 16;
+    var dustImageSize = 1024;
     var dustImages = [];
     var starSizeO = [ 1, 8 ];
     var layers = 2;
@@ -236,41 +234,16 @@ BSWG.starfield = function(){
 
     Math.seedrandom(666);
 
-    for (var i=0; i<imageCount; i++) {
-        images.push(BSWG.render.proceduralImage(imageSize, imageSize, function(ctx, w, h){
-
-            ctx.clearRect(0, 0, w, h);
-
-            var img = starImg[Math.floor(Math.random() * starImg.length)];
-            ctx.globalAlpha = 0.4;
-            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
-
-            if (!(i%4))
-            {
-                var img = nebulaImg[Math.floor(Math.random() * nebulaImg.length)];
-                var sz = (Math.random()*0.5+0.5)*Math.min(w,h);
-                ctx.save();
-                ctx.translate(sz*0.5, sz*0.5);
-                ctx.rotate(Math.PI*2.0);
-                ctx.translate(-sz*0.5, -sz*0.5);
-                ctx.globalAlpha = 0.3;
-                ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, sz, sz);
-                ctx.restore();
-            }
-
-        }));
-    }
-
     for (var i=0; i<dustCount; i++) {
-        dustImages.push(BSWG.render.proceduralImage(imageSize, imageSize, function(ctx, w, h){
+        dustImages.push(BSWG.render.proceduralImage(dustImageSize, dustImageSize, function(ctx, w, h){
 
             ctx.clearRect(0, 0, w, h);
 
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = '#bbb';
 
-            for (var k=0; k<125; k++) {
-                ctx.fillRect(Math.random()*w, Math.random()*h, 1, 1);
+            for (var k=0; k<185; k++) {
+                ctx.fillRect(Math.random()*w, Math.random()*h, 2, 2);
             }
 
         }));
@@ -283,19 +256,19 @@ BSWG.starfield = function(){
         for (var l=3; l>=1; l--) {
 
             var t = (l-1)/2;
-            cam.z = (oz*(1.0-t) + t*0.1) / Math.pow(l, 4.0);
-            ctx.globalAlpha = 1.0/Math.pow(Math.max(1, l-1), 2.0);
+            cam.z = (oz*(1.0-t) + t*0.1) / Math.pow(l, 5.0);
+            var alpha = 1.0/Math.pow(Math.max(1, l-1), 2.0);
 
-            var tsize = [25, 80, 120][l-1];
+            var tsize = [25, 150, 225][l-1];
 
             var p1 = cam.toWorld(viewport, new b2Vec2(0, 0));
             var p2 = cam.toWorld(viewport, new b2Vec2(viewport.w, viewport.h));
-            p1.x = (Math.floor(p1.x / tsize)-1) * tsize;
-            p1.y = (Math.floor(p1.y / tsize)-1) * tsize;
-            p2.x = (Math.floor(p2.x / tsize)+1) * tsize;
-            p2.y = (Math.floor(p2.y / tsize)+1) * tsize;
+            p1.x = (Math.floor(p1.x / tsize)-6) * tsize;
+            p1.y = (Math.floor(p1.y / tsize)-6) * tsize;
+            p2.x = (Math.floor(p2.x / tsize)+7) * tsize;
+            p2.y = (Math.floor(p2.y / tsize)+7) * tsize;
 
-            var img = l === 1 ? dustImages : images;
+            var img = l === 1 ? dustImages : starImg;
 
             var p = new b2Vec2(p1.x, p1.y);
             for (p.x = p1.x; p.x <= p2.x; p.x += tsize) {
@@ -304,7 +277,21 @@ BSWG.starfield = function(){
                     var ps = cam.toScreenList(viewport, [p, new b2Vec2(p.x+tsize, p.y+tsize)]);
                     var w = ps[1].x - ps[0].x,
                         h = ps[1].y - ps[0].y;
-                    var k = Math.floor(Math.random2d(x*13.5+97*l*l, y*7.431+55*l*l) * 100000);
+                    var k = Math.floor(Math.random2d(x*13.5+97*l*l, y*7.431+55*l*l) * 1000000);
+                    if (~~(k/37)%5 === 0 && l>1) {
+                        var r1 = (k%100)/100;
+                        var r2 = ((k+371)%1000)/1000;
+                        var nimg = nebulaImg[k % nebulaImg.length];
+                        var sz = (r1*3.0*(l-1)+0.5)*Math.min(w,h);
+                        ctx.save();
+                        ctx.translate(ps[0].x, ps[0].y);
+                        ctx.rotate(Math.PI*2.0*r2);
+                        ctx.translate(-sz*0.5, -sz*0.5);
+                        ctx.globalAlpha = 0.3 * alpha;
+                        ctx.drawImage(nimg, 0, 0, nimg.width, nimg.height, 0, 0, sz, sz);
+                        ctx.restore();
+                    }
+                    ctx.globalAlpha = 0.4 * alpha;
                     ctx.drawImage(img[k % img.length], ps[0].x, ps[0].y, w, h);
                 }
             }

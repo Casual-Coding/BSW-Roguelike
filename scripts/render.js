@@ -190,15 +190,9 @@ BSWG.render = new function(){
         var canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
-        canvas.style.position = 'fixed';
-        canvas.style.top = '200%';
-        canvas.style.left = '0px';
         var ctx = canvas.getContext('2d');
-        document.body.appendChild(canvas);
 
         cbk(ctx, w, h);
-
-        document.body.removeChild(canvas);
 
         return canvas;
 

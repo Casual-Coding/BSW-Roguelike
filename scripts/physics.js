@@ -6,7 +6,7 @@ BSWG.physics = new function(){
 	this.positionIterations = 60;
 	this.velocityIterations = 60;
 	this.world 				= null;
-	this.maxWeldForce       = 2000.0;
+	this.maxWeldForce       = 5000.0;
 	this.welds              = [];
 
 	this.init = function (){
