@@ -50,6 +50,31 @@ BSWG.camera = function() {
 
     };
 
+    this.toScreenSize = function (viewport, sz) {
+
+        var vpsz = Math.max(viewport.w, viewport.h);
+        return sz * this.z * vpsz;
+
+    };
+
+    this.wrapToScreen = function (viewport, x, y) {
+
+        var self = this;
+        return function() {
+            return self.toScreen(viewport, x, y);
+        };
+
+    }
+
+    this.wrapToScreenSize = function (viewport, sz) {
+
+        var self = this;
+        return function() {
+            return self.toScreenSize(viewport, sz);
+        };
+
+    };
+
     this.toWorld = function (viewport, x, y) {
 
         if (typeof x === "object") {
@@ -94,6 +119,49 @@ BSWG.render = new function(){
         document.body.appendChild(this.canvas);
 
         this.images = images = images || {};
+
+        var ocomplete = complete;
+        var self = this;
+        complete = function() {
+            self.boom = new chadaboom([
+                {
+                    'name': 'images/explosion',
+                    'size': 64,
+                    'count': 4
+                },
+                {
+                    'name': 'images/explosion',
+                    'size': 128,
+                    'count': 2
+                },
+                {
+                    'name': 'images/explosion',
+                    'size': 256,
+                    'count': 2
+                },
+                {
+                    'name': 'images/explosion',
+                    'size': 512,
+                    'count': 1
+                }
+            ],
+            chadaboom.fire,
+            function(){            
+                self.blueBoom = new chadaboom([
+                    {
+                        'name': 'images/explosion',
+                        'size': 64,
+                        'count': 4
+                    }
+                ],
+                chadaboom.blue_flame,
+                function(){  
+                    if (ocomplete) {
+                        ocomplete();
+                    }
+                });
+            });
+        };
 
         var toLoad = 0;
         for (var key in images) {

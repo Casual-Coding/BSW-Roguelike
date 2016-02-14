@@ -101,7 +101,7 @@ BSWG.game = new function(){
         this.stars = new BSWG.starfield();
 
         var wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
-        BSWG.input.wheelLimits(wheelStart-10, wheelStart+10);
+        BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
 
         var grabbedBlock = null;
         var grabbedLocal = null;
@@ -168,6 +168,8 @@ BSWG.game = new function(){
             self.stars.render(ctx, self.cam, viewport);
             BSWG.componentList.render(ctx, self.cam, dt);
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
+            BSWG.render.blueBoom.render(ctx, dt);
+            BSWG.render.boom.render(ctx, dt);
 
             if (grabbedBlock) {
 

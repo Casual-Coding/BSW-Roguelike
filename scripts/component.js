@@ -903,6 +903,14 @@ BSWG.component = function (desc, args) {
 						this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
 
 						BSWG.updateOnCC(this, this.jmatch[i][1]);
+
+						BSWG.render.blueBoom.add(
+							BSWG.game.cam.wrapToScreen(BSWG.render.viewport, this.jpointsw[this.jmatch[i][0]]),
+							BSWG.game.cam.wrapToScreenSize(BSWG.render.viewport, 0.75),
+							32,
+							0.4,
+							1.0
+						);
 					}
 					else {
 						BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
@@ -912,6 +920,14 @@ BSWG.component = function (desc, args) {
 						this.jmatch[i][1].welds[this.jmatch[i][2]] = null;	
 
 						BSWG.updateOnCC(this, this.jmatch[i][1]);
+
+						BSWG.render.boom.add(
+							BSWG.game.cam.wrapToScreen(BSWG.render.viewport, this.jpointsw[this.jmatch[i][0]]),
+							BSWG.game.cam.wrapToScreenSize(BSWG.render.viewport, 1.25),
+							32,
+							0.4,
+							1.0
+						);
 					}
 				}
 			}

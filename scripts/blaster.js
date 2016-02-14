@@ -15,6 +15,15 @@ BSWG.blasterList = new function () {
 			B.t -= dt;
 
 			if (B.t <= 0.0 || BSWG.componentList.atPoint(B.p)) {
+				if (B.t > 0.0) {
+					BSWG.render.boom.add(
+						cam.wrapToScreen(BSWG.render.viewport, B.p),
+						cam.wrapToScreenSize(BSWG.render.viewport, 1.25),
+						32,
+						0.4,
+						1.0
+					);
+				}
 				this.list.splice(i, 1);
 				i -= 1;
 				continue;
