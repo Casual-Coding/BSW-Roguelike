@@ -71,6 +71,18 @@ for (var i=0; i<64; i++) {
     pal.push(clrRot(clr, [255, i*4, 255]));
 }
 
+var clampClr = function(v) {
+    return Math.min(255, Math.max(0, ~~v));
+};
+
+for (var i=0; i<pal.length; i++) {
+    var t = Math.pow(i/pal.length, 2.0);
+    var v = (pal[i][0] + pal[i][1] + pal[i][2]) / 3.0;
+    pal[i][0] = clampClr(v * (1.0-t) + pal[i][0] * t);
+    pal[i][1] = clampClr(v * (1.0-t) + pal[i][1] * t);
+    pal[i][2] = clampClr(v * (1.0-t) + pal[i][2] * t);
+}
+
 for (var i=0; i<nCircles; i++) {
     var radVel = ((Math.random() * 0.5) + 0.5) * (Math.random() < 0.5 ? -1 : 1);
     if (i === 0) {
@@ -197,7 +209,7 @@ for (var frame=0; frame<nframes; frame++) {
             dat[i]   = pal[v][0];
             dat[i+1] = pal[v][1];
             dat[i+2] = pal[v][2];
-            dat[i+3] = Math.floor(Math.pow(v/255, 0.35)*255);
+            dat[i+3] = Math.floor(Math.pow(v/255, 0.75)*255);
         }
 
     });

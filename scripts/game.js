@@ -278,11 +278,11 @@ BSWG.starfield = function(){
                     var w = ps[1].x - ps[0].x,
                         h = ps[1].y - ps[0].y;
                     var k = Math.floor(Math.random2d(x*13.5+97*l*l, y*7.431+55*l*l) * 1000000);
-                    if (~~(k/37)%5 === 0 && l>1) {
+                    if (l>1 && (~~(k/37))%[2,5][l-2] === 0) {
                         var r1 = (k%100)/100;
                         var r2 = ((k+371)%1000)/1000;
                         var nimg = nebulaImg[k % nebulaImg.length];
-                        var sz = (r1*3.0*(l-1)+0.5)*Math.min(w,h);
+                        var sz = (r1*([1.7, 6.0][l-2])+0.5)*Math.min(w,h);
                         ctx.save();
                         ctx.translate(ps[0].x, ps[0].y);
                         ctx.rotate(Math.PI*2.0*r2);
@@ -291,7 +291,7 @@ BSWG.starfield = function(){
                         ctx.drawImage(nimg, 0, 0, nimg.width, nimg.height, 0, 0, sz, sz);
                         ctx.restore();
                     }
-                    ctx.globalAlpha = 0.4 * alpha;
+                    ctx.globalAlpha = [0.4, 0.4, 0.95][l-1] * alpha;
                     ctx.drawImage(img[k % img.length], ps[0].x, ps[0].y, w, h);
                 }
             }

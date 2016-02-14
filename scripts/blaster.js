@@ -10,6 +10,7 @@ BSWG.blasterList = new function () {
 		for (var i=0; i<this.list.length; i++) {
 
 			var B = this.list[i];
+			var ox = B.p.x, oy = B.p.y;
 			B.p.x += B.v.x * dt;
 			B.p.y += B.v.y * dt;
 			B.t -= dt;
@@ -17,7 +18,7 @@ BSWG.blasterList = new function () {
 			if (B.t <= 0.0 || BSWG.componentList.atPoint(B.p)) {
 				if (B.t > 0.0) {
 					BSWG.render.boom.add(
-						cam.wrapToScreen(BSWG.render.viewport, B.p),
+						cam.wrapToScreen(BSWG.render.viewport, {x: (ox+B.p.x)*0.5, y: (oy+B.p.y)*0.5}),
 						cam.wrapToScreenSize(BSWG.render.viewport, 1.25),
 						32,
 						0.4,
