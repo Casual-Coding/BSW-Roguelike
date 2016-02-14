@@ -2,7 +2,9 @@
 
 var fs = require('fs'),
     PNG = require('node-png').PNG,
-    NS = require('./navier-stokes').NavierStokes;
+    NavierStokes = require('./navier-stokes');
+var NS = NavierStokes.NavierStokes,
+    nsArrayWrap = NavierStokes.ArrayWrap;
 
 var fwidth = 9, fheight = 5;
 var frameSkip = 1;
@@ -42,30 +44,6 @@ var newArr = function(size, val) {
     };
     return ret;
 };
-
-var nsArrayWrap = function(size, array) {
-    var ret = new Object();
-    ret.get = function(x, y, b) {
-        b = b || 0;
-        if (x < (-1+b) || y < (-1+b) || x > (size-b) || y > (size-b)) {
-            return 0.0;
-        }
-        return array[Math.floor(x+1)+Math.floor(y+1)*(size+2)];
-    };
-    ret.set = function(x, y, val) {
-        if (x < -1 || y < -1 || x > size || y > size) {
-            return;
-        }
-        array[Math.floor(x+1)+Math.floor(y+1)*(size+2)] = val;
-    };
-    ret.inc = function(x, y, val) {
-        if (x < -1 || y < -1 || x > size || y > size) {
-            return;
-        }
-        array[Math.floor(x+1)+Math.floor(y+1)*(size+2)] += val;
-    };
-    return ret;
-}
 
 var pcount = Math.floor(125000*Math.pow(sz/768, 1.5));
 var heatTransferRate = 0.5;

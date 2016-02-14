@@ -7,7 +7,7 @@ var count = parseInt(process.argv[3] || '2');
 var waiting = count;
 
 for (var i=0; i<count; i++) {
-    var ge = spawn('node', ['gen-explosion.js', ''+sz, 'images/explosion-' + sz + '-' + i]);
+    var ge = spawn('node', ['gen-explosion.js', ''+sz, '../images/explosion-' + sz + '-' + i]);
     ge.on('close', function(code) {
         console.log((--waiting) + ' left');
     });

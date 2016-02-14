@@ -278,6 +278,31 @@ NavierStokes.prototype = {
         }
 };
 
+var nsArrayWrap = function(size, array) {
+    var ret = new Object();
+    ret.get = function(x, y, b) {
+        b = b || 0;
+        if (x < (-1+b) || y < (-1+b) || x > (size-b) || y > (size-b)) {
+            return 0.0;
+        }
+        return array[Math.floor(x+1)+Math.floor(y+1)*(size+2)];
+    };
+    ret.set = function(x, y, val) {
+        if (x < -1 || y < -1 || x > size || y > size) {
+            return;
+        }
+        array[Math.floor(x+1)+Math.floor(y+1)*(size+2)] = val;
+    };
+    ret.inc = function(x, y, val) {
+        if (x < -1 || y < -1 || x > size || y > size) {
+            return;
+        }
+        array[Math.floor(x+1)+Math.floor(y+1)*(size+2)] += val;
+    };
+    return ret;
+}
+
 module.exports = {
-  NavierStokes: NavierStokes
+  NavierStokes: NavierStokes,
+  ArrayWrap: nsArrayWrap
 };

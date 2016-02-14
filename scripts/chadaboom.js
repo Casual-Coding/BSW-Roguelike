@@ -105,6 +105,27 @@ chadaboom.green_flame = function() {
     return pal;
 }();
 
+chadaboom.make_loopable = function(pal) {
+    var opal = [];
+    for (var i=0; i<256; i++) {
+        var k = i*2;
+        if (k > 255) {
+            k = 255 - (k-255);
+        }
+        opal.push(pal[k]);
+    }
+    return opal;
+};
+
+chadaboom.loop_palette = function(pal, times) {
+    var opal = [];
+    for (var i=0; i<256; i++) {
+        var k = (i*times)%256;
+        opal.push(pal[k]);
+    }
+    return opal;
+}
+
 chadaboom.prototype.render = function(ctx, dt) {
 
     var oAlpha = parseFloat(ctx.globalAlpha);
