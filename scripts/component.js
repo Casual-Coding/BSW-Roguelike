@@ -14,6 +14,7 @@ BSWG.componentHoverFn = function(self) {
 	return true;
 }
 
+BSWG.drawBlockPolyOffset = null;
 BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 	var body = obj.body, verts = obj.verts;
@@ -28,6 +29,12 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 			(verts[i].y - zcenter.y) * iscale + zcenter.y
 		);
 		iverts[i] = BSWG.physics.localToWorld(vec, body);
+		if (BSWG.drawBlockPolyOffset) {
+			iverts[i].x += BSWG.drawBlockPolyOffset.x;
+			iverts[i].y += BSWG.drawBlockPolyOffset.y;
+			overts[i].x += BSWG.drawBlockPolyOffset.x;
+			overts[i].y += BSWG.drawBlockPolyOffset.y;
+		}
 	}
 
 	ctx.save();
@@ -387,13 +394,24 @@ BSWG.component_Blaster = {
 
 		this.fireKey = args.fireKey || BSWG.KEY.SPACE;
 		this.thrustT = 0.0;
+		this.kickBack = 0.0;
 
 	},
 
 	render: function(ctx, cam, dt) {
 
 		ctx.fillStyle = '#600';
+
+		if (this.kickBack > 0.0) {
+			BSWG.drawBlockPolyOffset = Math.rotVec2(new b2Vec2(0.0, -this.kickBack*0.1), this.obj.body.GetAngle());
+			this.kickBack *= 0.65;
+		}
+		else {
+			this.kickBack = 0.0;
+		}
+		
 		BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
+		BSWG.drawBlockPolyOffset = null;
 
 	},
 
@@ -448,6 +466,7 @@ BSWG.component_Blaster = {
 			accel = 1;
 
 			this.fireT = 0.5;
+			this.kickBack = 1.0;
 		}
 		
 		if (accel)

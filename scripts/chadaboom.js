@@ -139,7 +139,9 @@ chadaboom.prototype.render = function(ctx, dt) {
             continue;
         }
 
-        var p = B.p();
+        var p = B.p(B.vel.x*dt, B.vel.y*dt);
+        B.vel.x *= 0.995;
+        B.vel.y *= 0.995;
         var sz = B.sz(B.res);
         var bb = this.batches[B.bbi];
 
@@ -168,7 +170,7 @@ chadaboom.prototype.render = function(ctx, dt) {
 
 };
 
-chadaboom.prototype.add = function(posFn, sizeFn, res, life, attack) {
+chadaboom.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
 
     res = res || 256;
     if (res < 0) {
@@ -178,6 +180,10 @@ chadaboom.prototype.add = function(posFn, sizeFn, res, life, attack) {
     attack = attack || 2.0;
     if (attack <= 0) {
         attack = 0;
+    }
+
+    if (!vel) {
+        vel = { x:0, y:0 };
     }
 
     var bb = null;
@@ -217,6 +223,7 @@ chadaboom.prototype.add = function(posFn, sizeFn, res, life, attack) {
 
         p: posFn,
         sz: sizeFn,
+        vel: vel,
         res: res,
         bbi: bb.i,
         img: Math.floor(Math.random()*1000000) % bb.count,

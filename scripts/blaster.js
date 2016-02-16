@@ -15,14 +15,16 @@ BSWG.blasterList = new function () {
 			B.p.y += B.v.y * dt;
 			B.t -= dt;
 
-			if (B.t <= 0.0 || BSWG.componentList.atPoint(B.p)) {
+			var comp = null;
+			if (B.t <= 0.0 || (comp=BSWG.componentList.atPoint(B.p))) {
 				if (B.t > 0.0) {
 					BSWG.render.boom.add(
 						cam.wrapToScreen(BSWG.render.viewport, {x: (ox+B.p.x)*0.5, y: (oy+B.p.y)*0.5}),
 						cam.wrapToScreenSize(BSWG.render.viewport, 1.25),
 						32,
 						0.4,
-						1.0
+						1.0,
+						new b2Vec2(comp.obj.body.GetLinearVelocity().x, comp.obj.body.GetLinearVelocity().y)
 					);
 				}
 				this.list.splice(i, 1);

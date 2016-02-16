@@ -59,8 +59,15 @@ BSWG.camera = function() {
 
     this.wrapToScreen = function (viewport, x, y) {
 
+        if (typeof x === "object") {
+            y = x.y;
+            x = x.x;
+        }
+
         var self = this;
-        return function() {
+        return function(vx, vy) {
+            x += vx;
+            y += vy;
             return self.toScreen(viewport, x, y);
         };
 
