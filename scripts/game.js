@@ -107,6 +107,8 @@ BSWG.game = new function(){
         var grabbedLocal = null;
         var grabbedRot = false;
 
+        var blackoutT = 1.0;
+
         BSWG.render.startRenderer(function(dt, time){
 
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
@@ -211,6 +213,17 @@ BSWG.game = new function(){
             self.editBtn.y = 10;
 
             BSWG.ui.render(ctx, viewport);
+
+            if (blackoutT >= 0) {
+                ctx.globalAlpha = Math.min(blackoutT, 1.0);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, viewport.w, viewport.h);
+                ctx.globalAlpha = 1.0;
+                blackoutT -= dt * 1.5;
+            }
+            else {
+                blackoutT = 0.0;
+            }
 
         });
     };
