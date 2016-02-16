@@ -100,6 +100,74 @@ BSWG.camera = function() {
 
 };
 
+BSWG.initCanvasContext = function(ctx) {
+
+    ctx.fontSpacing = 1.0;
+    ctx.fillTextB = function(text, x, y, noBorder) {
+
+        //var ostyle = ctx.font || '16px Orbitron';
+        //ctx.font = parseFloat(ostyle.split()[0]) * 100.0 + 'px Orbitron';
+
+        if (!text || !text.trim || !text.trim().length) {
+            return;
+        }
+
+        var widths = new Array(text.length);
+        var total = 0.0;
+        for (var i=0; i<widths.length; i++) {
+            if ((i+1) < widths.length) {
+                widths[i] = ctx.measureText(text.charAt(i) + '' + text.charAt(i+1)).width - 
+                            ctx.measureText(text.charAt(i+1) + '').width;
+                widths[i] += (ctx.fontSpacing || 0.0);// * 100.0;
+            }
+            else {
+                widths[i] = ctx.measureText(text.charAt(i) + '').width;
+            }
+            //widths[i] /= 100.0;
+            total += widths[i];
+        }
+
+        //ctx.font = ostyle;
+        var oalign = ctx.textAlign;
+
+        if (ctx.textAlign === 'center') {
+            x -= total * 0.5;
+        }
+        else if (ctx.textAlign === 'right') {
+            x -= total;
+        }
+
+        var x0 = x;
+
+        ctx.textAlign = 'left';
+
+        if (!noBorder) {
+            var tmp = ctx.fillStyle;
+            ctx.fillStyle = ctx.strokeStyle;
+            for (var i=0; i<widths.length; i++) {
+                var ch = text.charAt(i) + '';
+                ctx.fillText(ch, x-2, y);
+                ctx.fillText(ch, x+2, y);
+                ctx.fillText(ch, x, y-2);
+                ctx.fillText(ch, x, y+2);
+                x += widths[i];
+            }
+            ctx.fillStyle = tmp;
+        }
+
+        x = x0;
+
+        for (var i=0; i<widths.length; i++) {
+            var ch = text.charAt(i) + '';
+            ctx.fillText(ch, x, y);
+            x += widths[i];
+        }
+
+        ctx.textAlign = oalign;
+    };
+
+};
+
 BSWG.render = new function(){
 
     this.canvas = null;
@@ -123,10 +191,12 @@ BSWG.render = new function(){
         this.sizeViewport();
         this.ctx = this.canvas.getContext('2d');
 
+        BSWG.initCanvasContext(this.ctx);
+
         this.ctx.font = '48px Orbitron';
         this.ctx.textAlign = 'left';
         this.ctx.fillStyle = '#7d7';
-        this.ctx.fillText('Loading ...', 48, this.viewport.h - 48);
+        this.ctx.fillTextB('Loading ...', 48, this.viewport.h - 48, true);
 
         document.body.appendChild(this.canvas);
 
@@ -203,6 +273,8 @@ BSWG.render = new function(){
         canvas.width = w;
         canvas.height = h;
         var ctx = canvas.getContext('2d');
+
+        BSWG.initCanvasContext(ctx);
 
         cbk(ctx, w, h);
 

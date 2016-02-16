@@ -100,7 +100,8 @@ BSWG.control_Button = {
 		ctx.textAlign = 'center';
 		ctx.fillStyle = '#fff';
 
-		ctx.fillText(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+		ctx.strokeStyle = '#111';
+		ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
 
 		ctx.textAlign = 'left';
 
@@ -144,13 +145,14 @@ BSWG.control_KeyConfig = {
 
 		ctx.lineWidth = 1.0;
 
+		ctx.strokeStyle = '#111';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#fff';
-		ctx.fillText(this.title, this.p.x + 16, this.p.y + 25);
+		ctx.fillTextB(this.title, this.p.x + 16, this.p.y + 25);
 		ctx.fillStyle = '#ddd';
-		ctx.fillText("Current: [" + BSWG.KEY_NAMES[this.key].toUpperCase() + "]", this.p.x + 16, this.p.y + 25 + 22);
+		ctx.fillTextB("Currently: " + BSWG.KEY_NAMES[this.key].toTitleCase() + "", this.p.x + 16, this.p.y + 25 + 22);
 		ctx.fillStyle = '#afa';
-		ctx.fillText("Press a key to bind (ESC Cancels)", this.p.x + 16, this.p.y + 25 + 44);
+		ctx.fillTextB("Press a key to bind", this.p.x + 16, this.p.y + 25 + 44);
 
 		ctx.textAlign = 'left';
 
