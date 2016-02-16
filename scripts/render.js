@@ -116,6 +116,11 @@ BSWG.render = new function(){
         this.sizeViewport();
         this.ctx = this.canvas.getContext('2d');
 
+        this.ctx.font = '48px Orbitron';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillStyle = '#7d7';
+        this.ctx.fillText('Loading ...', 48, this.viewport.h - 48);
+
         document.body.appendChild(this.canvas);
 
         this.images = images = images || {};
@@ -170,7 +175,7 @@ BSWG.render = new function(){
         var totalImages = toLoad;
         for (var key in images) {
             var img = new Image();
-            img.src = '/images/' + images[key];
+            img.src = 'images/' + images[key];
             img.onload = function() {
                 toLoad -= 1;
                 if (toLoad === 0) {
