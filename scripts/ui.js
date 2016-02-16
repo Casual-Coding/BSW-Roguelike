@@ -35,7 +35,7 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
 	if (outline) {
 		ctx.strokeStyle = outline;
-		ctx.lineWidth = 2.0;
+		ctx.lineWidth = 3.0;
 		ctx.stroke();
 		ctx.lineWidth = 1.0;
 	}
@@ -80,7 +80,7 @@ BSWG.control_Button = {
 
 	render: function (ctx, viewport) {
 
-		ctx.font = '16px Helvetica';
+		ctx.font = '16px Orbitron';
 
 		if (this.selected)
 			ctx.strokeStyle = '#484';
@@ -93,7 +93,7 @@ BSWG.control_Button = {
 			
 		ctx.lineWidth = 2.0;
 
-		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected, this.mouseIn ? 'rgba(255,255,255,0.35)' : null);
+		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected, this.mouseIn ? 'rgba(155,255,155,0.65)' : null);
 
 		ctx.lineWidth = 1.0;
 
@@ -107,8 +107,6 @@ BSWG.control_Button = {
 	},
 
 	update: function () {
-
-
 
 	},
 
@@ -125,27 +123,34 @@ BSWG.control_KeyConfig = {
 			self.remove();
 		};
 
+		this.title = args.title || 'Keybinding';
+
 		this.key = args.key;
 
 	},
 
 	render: function (ctx, viewport) {
 
-		ctx.font = '16px Helvetica';
+		ctx.font = '16px Orbitron';
 
 		ctx.strokeStyle = '#8f8';
-		ctx.fillStyle = 'rgba(50,100,50,1.0)';
+		ctx.fillStyle = 'rgba(25,50,25,1.0)';
 
 		ctx.lineWidth = 2.0;
 
-		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, this.mouseIn ? 'rgba(255,255,255,0.35)' : null);
+		ctx.globalAlpha = 0.75;
+		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, this.mouseIn ? 'rgba(155,255,155,0.65)' : null);
+		ctx.globalAlpha = 1.0;
 
 		ctx.lineWidth = 1.0;
 
-		ctx.textAlign = 'center';
+		ctx.textAlign = 'left';
 		ctx.fillStyle = '#fff';
-
-		ctx.fillText("Hit key to bind to (Current: " + BSWG.KEY_NAMES[this.key].toUpperCase() + "): ", this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+		ctx.fillText(this.title, this.p.x + 16, this.p.y + 25);
+		ctx.fillStyle = '#ddd';
+		ctx.fillText("Current: [" + BSWG.KEY_NAMES[this.key].toUpperCase() + "]", this.p.x + 16, this.p.y + 25 + 22);
+		ctx.fillStyle = '#afa';
+		ctx.fillText("Press a key to bind (ESC Cancels)", this.p.x + 16, this.p.y + 25 + 44);
 
 		ctx.textAlign = 'left';
 
@@ -155,6 +160,8 @@ BSWG.control_KeyConfig = {
 
 		var keys = BSWG.input.getKeyMap();
 		if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left')) {
+			BSWG.input.EAT_KEY(BSWG.KEY.ESC);
+			BSWG.input.EAT_MOUSE('left');
 			this.close(null);
 			return;
 		}
@@ -162,9 +169,14 @@ BSWG.control_KeyConfig = {
 		for (var k in keys) {
 			k = parseInt(k);
 			if (keys[k] === true && k !== BSWG.KEY.ALT && k !== BSWG.KEY.WINDOWS && k !== BSWG.KEY.SHIFT && k !== BSWG.KEY.CTRL && k !== BSWG.KEY['RIGHT CLICK']) {
+				BSWG.input.EAT_KEY(k);
 				this.close(parseInt(k));
 				return;
 			}
+		}
+
+		if (this.key) {
+			BSWG.input.EAT_KEY(this.key);
 		}
 
 	},
@@ -211,9 +223,17 @@ BSWG.uiControl = function (desc, args) {
 			this.mouseIn = false;
 
 		if (this.mouseIn && this.click && BSWG.input.MOUSE_PRESSED('left'))
+		{
 			this.click(this);
+		}
 
 		this.update();
+
+		if (this.mouseIn) {
+			BSWG.input.EAT_MOUSE('left');
+			BSWG.input.EAT_MOUSE('right');
+			BSWG.input.EAT_MOUSE('middle');
+		}
 
 	};
 
@@ -238,6 +258,10 @@ BSWG.ui = new function () {
 	};
 
 	this.remove = function(el) {
+		if (el === BSWG.compActiveConfMenu) {
+			BSWG.compActiveConfMenu = null;
+			el.confm = null;
+		}
 		for (var i=0; i<this.list.length; i++)
 			if (this.list[i] === el)
 			{

@@ -4,6 +4,16 @@ BSWG.compActiveConfMenu = null;
 
 BSWG.component_minJMatch = 0.02;
 
+BSWG.componentHoverFn = function(self) {
+	if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
+		return false;
+	}
+	if (self.onCC && !self.hasConfig) {
+		return false;
+	}
+	return true;
+}
+
 BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 	var body = obj.body, verts = obj.verts;
@@ -34,8 +44,8 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 	ctx.fill();
 
 	if (outline) {
-		ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-		ctx.lineWidth = 2.0;
+		ctx.strokeStyle = 'rgba(155,255,155,0.65)';
+		ctx.lineWidth = 3.0;
 		ctx.stroke();
 		ctx.lineWidth = 1.0;
 	}
@@ -268,6 +278,8 @@ BSWG.component_CommandCenter = {
 
 	sortOrder: 2,
 
+	hasConfig: false,
+
 	init: function(args) {
 
 		this.width  = 2;
@@ -350,6 +362,8 @@ BSWG.component_Blaster = {
 
 	sortOrder: 2,
 
+	hasConfig: true,
+
 	init: function(args) {
 
 		var offsetAngle = this.offsetAngle = 0.0;
@@ -379,7 +393,7 @@ BSWG.component_Blaster = {
 	render: function(ctx, cam, dt) {
 
 		ctx.fillStyle = '#600';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+		BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
 
 	},
 
@@ -403,8 +417,9 @@ BSWG.component_Blaster = {
 		var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 300, h: 50,
+            w: 350, h: 50+32,
             key: this.fireKey,
+            title: 'Blaster fire key',
             close: function (key) {
             	if (key)
                 	self.fireKey = key;
@@ -455,6 +470,8 @@ BSWG.component_Thruster = {
 
 	sortOrder: 2,
 
+	hasConfig: true,
+
 	init: function(args) {
 
 		var offsetAngle = this.offsetAngle = 0.0;
@@ -482,7 +499,7 @@ BSWG.component_Thruster = {
 		ctx.fillStyle = '#282';
 		BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 														   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
-						   BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+						   BSWG.componentHoverFn(this));
 	},
 
 	renderOver: function(ctx, cam, dt) {
@@ -537,8 +554,9 @@ BSWG.component_Thruster = {
 		var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 300, h: 50,
+            w: 350, h: 50+32,
             key: this.thrustKey,
+            title: 'Thruster key',
             close: function (key) {
             	if (key)
                 	self.thrustKey = key;
@@ -577,6 +595,8 @@ BSWG.component_Block = {
 
 	sortOrder: 3,
 
+	hasConfig: false,
+
 	init: function(args) {
 
 		this.width    = args.width || 1;
@@ -597,7 +617,7 @@ BSWG.component_Block = {
 	render: function(ctx, cam, dt) {
 
 		ctx.fillStyle = '#444';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
 
 	},
 
@@ -612,6 +632,8 @@ BSWG.component_HingeHalf = {
 	type: 'hingehalf',
 
 	sortOrder: 1,
+
+	hasConfig: true,
 
 	init: function(args) {
 
@@ -655,11 +677,11 @@ BSWG.component_HingeHalf = {
 	render: function(ctx, cam, dt) {
 
 		ctx.fillStyle = '#353';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
 
 		if (this.motor) {
 			ctx.fillStyle = this.motor ? '#080' : '#aaa';
-			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentHoverFn(this));
 		}
 
 	},
@@ -668,7 +690,7 @@ BSWG.component_HingeHalf = {
 
 		if (!this.motor) {
 			ctx.fillStyle = this.motor ? '#080' : '#aaa';
-			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentList.mouseOver === this && BSWG.game.editMode && !this.onCC);
+			BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentHoverFn(this));
 		}
 
 	},
@@ -683,8 +705,9 @@ BSWG.component_HingeHalf = {
 		var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 300, h: 50,
+            w: 350, h: 50+32,
             key: this.rotKey,
+            title: this.motor ? 'Hinge rotate key' : 'Hinge rotate reverse key',
             close: function (key) {
             	if (key)
                 	self.rotKey = key;
@@ -851,7 +874,7 @@ BSWG.component = function (desc, args) {
         		mind = d;
         	}
         }
-        if (mind > 0.075)
+        if (mind > 0.075*0.5 || BSWG.compActiveConfMenu)
         	this.jmhover = -1;
 
 		for (var i=0; i<cl.length; i++) {
@@ -904,13 +927,18 @@ BSWG.component = function (desc, args) {
 
 						BSWG.updateOnCC(this, this.jmatch[i][1]);
 
+						var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
+						var p1 = this.jpointsw[this.jmatch[i][0]];
+
 						BSWG.render.blueBoom.add(
-							BSWG.game.cam.wrapToScreen(BSWG.render.viewport, this.jpointsw[this.jmatch[i][0]]),
+							BSWG.game.cam.wrapToScreen(BSWG.render.viewport, {x: (p1.x+p2.x)*0.5, y: (p1.y+p2.y)*0.5}),
 							BSWG.game.cam.wrapToScreenSize(BSWG.render.viewport, 0.75),
 							32,
 							0.4,
 							1.0
 						);
+
+						BSWG.input.EAT_MOUSE('left');
 					}
 					else {
 						BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
@@ -928,6 +956,8 @@ BSWG.component = function (desc, args) {
 							0.4,
 							1.0
 						);
+
+						BSWG.input.EAT_MOUSE('left');
 					}
 				}
 			}
@@ -1034,8 +1064,10 @@ BSWG.componentList = new function () {
 			}
 		}
 
-		if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.input.MOUSE_PRESSED('right') && BSWG.game.editMode)
+		if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.input.MOUSE_PRESSED('left') && BSWG.game.editMode) {
+			BSWG.input.EAT_MOUSE('left');
 		 	this.mouseOver.openConfigMenu();
+		}
 
 	};
 
@@ -1062,21 +1094,39 @@ BSWG.componentList = new function () {
 
 		var p = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
 		var pw = cam.toWorld(BSWG.render.viewport, p);
-		this.mouseOver = this.atPoint(pw);
-
 		var len = this.compList.length;
-		for (var i=0; i<len; i++)
+
+		this.mouseOver = null;
+		for (var i=0; i<len; i++) {
+			if (this.compList[i].confm && this.compList[i].confm === BSWG.compActiveConfMenu) {
+				this.mouseOver = this.compList[i];
+				break;
+			}
+			if (BSWG.game.grabbedBlock === this.compList[i]) {
+				this.mouseOver = this.compList[i];
+				break;
+			}
+		}
+		if (!this.mouseOver) {
+			this.mouseOver = this.atPoint(pw);
+		}
+
+		for (var i=0; i<len; i++) {
 			this.compList[i].render(ctx, cam, dt);
-		for (var i=0; i<len; i++)
+		}
+		for (var i=0; i<len; i++) {
 			this.compList[i].baseRenderOver(ctx, cam, dt);
+		}
 	};
 
 	this.atPoint = function (p) {
 
 		var len = this.compList.length;
-		for (var i=0; i<len; i++)
-			if (this.compList[i].pointIn(p))
+		for (var i=0; i<len; i++) {
+			if (this.compList[i].pointIn(p)) {
 				return this.compList[i];
+			}
+		}
 		return null;
 
 	};

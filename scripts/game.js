@@ -111,9 +111,9 @@ BSWG.game = new function(){
 
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
 
+            BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
-            BSWG.ui.update();
 
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');
@@ -151,6 +151,8 @@ BSWG.game = new function(){
                 grabbedLocal = null;
                 BSWG.physics.endMouseDrag();
             }
+
+            self.grabbedBlock = grabbedBlock;
 
             BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
 
@@ -239,11 +241,11 @@ BSWG.starfield = function(){
 
             ctx.clearRect(0, 0, w, h);
 
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#bbb';
+            ctx.globalAlpha = 0.25;
+            ctx.fillStyle = '#fff';
 
-            for (var k=0; k<185; k++) {
-                ctx.fillRect(Math.random()*w, Math.random()*h, 2, 2);
+            for (var k=0; k<60; k++) {
+                ctx.fillRect(Math.random()*w, Math.random()*h, 4, 4);
             }
 
         }));

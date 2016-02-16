@@ -3,72 +3,72 @@ BSWG.KEY = (function(){
     // From: https://github.com/timoxley/keycode/blob/master/index.js
 
     var codes = {
-      'backspace': 8,
-      'tab': 9,
-      'enter': 13,
-      'shift': 16,
-      'ctrl': 17,
-      'alt': 18,
-      'pause/break': 19,
-      'caps lock': 20,
-      'esc': 27,
-      'space': 32,
-      'page up': 33,
-      'page down': 34,
-      'end': 35,
-      'home': 36,
-      'left': 37,
-      'up': 38,
-      'right': 39,
-      'down': 40,
-      'insert': 45,
-      'delete': 46,
-      'command': 91,
-      'right click': 93,
-      'numpad *': 106,
-      'numpad +': 107,
-      'numpad -': 109,
-      'numpad .': 110,
-      'numpad /': 111,
-      'num lock': 144,
-      'scroll lock': 145,
-      'my computer': 182,
-      'my calculator': 183,
-      ';': 186,
-      '=': 187,
-      ',': 188,
-      '-': 189,
-      '.': 190,
-      '/': 191,
-      '`': 192,
-      '[': 219,
-      '\\': 220,
-      ']': 221,
-      "'": 222,
+        'backspace': 8,
+        'tab': 9,
+        'enter': 13,
+        'shift': 16,
+        'ctrl': 17,
+        'alt': 18,
+        'pause/break': 19,
+        'caps lock': 20,
+        'esc': 27,
+        'space': 32,
+        'page up': 33,
+        'page down': 34,
+        'end': 35,
+        'home': 36,
+        'left': 37,
+        'up': 38,
+        'right': 39,
+        'down': 40,
+        'insert': 45,
+        'delete': 46,
+        'command': 91,
+        'right click': 93,
+        'numpad *': 106,
+        'numpad +': 107,
+        'numpad -': 109,
+        'numpad .': 110,
+        'numpad /': 111,
+        'num lock': 144,
+        'scroll lock': 145,
+        'my computer': 182,
+        'my calculator': 183,
+        ';': 186,
+        '=': 187,
+        ',': 188,
+        '-': 189,
+        '.': 190,
+        '/': 191,
+        '`': 192,
+        '[': 219,
+        '\\': 220,
+        ']': 221,
+        "'": 222,
     }
 
     // Helper aliases
 
     var aliases = {
-      'windows': 91,
-      '⇧': 16,
-      '⌥': 18,
-      '⌃': 17,
-      '⌘': 91,
-      'ctl': 17,
-      'control': 17,
-      'option': 18,
-      'pause': 19,
-      'break': 19,
-      'caps': 20,
-      'return': 13,
-      'escape': 27,
-      'spc': 32,
-      'pgup': 33,
-      'pgdn': 33,
-      'ins': 45,
-      'del': 46,
-      'cmd': 91
+        'windows': 91,
+        '⇧': 16,
+        '⌥': 18,
+        '⌃': 17,
+        '⌘': 91,
+        'ctl': 17,
+        'control': 17,
+        'option': 18,
+        'pause': 19,
+        'break': 19,
+        'caps': 20,
+        'return': 13,
+        'escape': 27,
+        'spc': 32,
+        'pgup': 33,
+        'pgdn': 33,
+        'ins': 45,
+        'del': 46,
+        'cmd': 91
     }
 
 
@@ -101,7 +101,7 @@ BSWG.KEY = (function(){
 
     // Add aliases
     for (var alias in aliases) {
-      codes[alias] = aliases[alias]
+        codes[alias] = aliases[alias]
     }
 
     BSWG.KEY_NAMES = names;
@@ -132,6 +132,16 @@ BSWG.input = new function(){
     var lmouseState = {};
     for (k in mouseState)
         lmouseState[k] = mouseState[k];
+
+    this.EAT_KEY = function (k) {
+        keyMap[k] = lkeyMap[k] = false;
+    };
+
+    this.EAT_MOUSE = function(v) {
+        if (v === 'left' || v === 'middle' || v === 'right' || v === 'shift') {
+            mouseState[v] = lmouseState[v] = false;
+        }
+    };
 
     this.wheelLimits = function ( w1, w2 ) {
 
@@ -197,7 +207,17 @@ BSWG.input = new function(){
         return mouseState.wheel;
     };
 
-    this.getKeyMap = function () {
+    this.getKeyMap = function (released) {
+        if (released) {
+            var retMap = {};
+            for (var k in lkeyMap)
+            {
+                if (lkeyMap[k] && !keyMap[k]) {
+                    retMap[k] = true;
+                }
+            }
+            return retMap;
+        }
         return keyMap;
     };
 
