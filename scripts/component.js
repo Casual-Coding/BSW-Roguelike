@@ -367,7 +367,7 @@ BSWG.component_CommandCenter = {
 		if (rot) {
 			this.obj.body.SetAwake(true);
 			this.obj.body.ApplyTorque(rot*7.0);
-			this.moveT = 0.3;
+			this.moveT = 0.21;
 		}
 		
 		if (accel) {
@@ -376,7 +376,7 @@ BSWG.component_CommandCenter = {
 			this.obj.body.SetAwake(true);
 			var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
 			this.obj.body.ApplyForceToCenter(force);
-			this.moveT = 0.3;
+			this.moveT = 0.21;
 		}
 
 	},
@@ -880,15 +880,18 @@ BSWG.component = function (desc, args) {
 		for (var i=0; i<this.jpoints.length; i++) {
 			this.jpointsw[i].motorType = this.jpoints[i].motorType || 0;
 		}
+		this.jmhover = -1;
 	};
 
-	this.baseUpdate = function(dt) {
+	this.updateJCache = function() {
 
-		if (!BSWG.game.editMode)
+		if (!BSWG.game.editMode) {
 			return;
+		}
 
-		if (!this.jpointsw)
+		if (!this.jpointsw) {
 			return;
+		}
 
 		this.jmatch = new Array();
 		this.jmhover = -1;
@@ -913,8 +916,9 @@ BSWG.component = function (desc, args) {
         		mind = d;
         	}
         }
-        if (mind > 0.075*0.125 || BSWG.compActiveConfMenu)
+        if (mind > 0.075*0.125 || BSWG.compActiveConfMenu) {
         	this.jmhover = -1;
+        }
 
 		for (var i=0; i<cl.length; i++) {
 			if (cl[i] !== this) {
@@ -936,10 +940,27 @@ BSWG.component = function (desc, args) {
 							this.jmatch.push([
 								k1, cl[i], k2, p1.motorType || 0, p2.motorType || 0
 							]);
+							if (cl[i].jmhover === k2) {
+								this.jmhover = k1;
+							}
+							else if (this.jmhover === k1) {
+								cl[i].jmhover = k2;
+							}
 							break;
 						}
 					}
 			}
+		}		
+	}	
+
+	this.baseUpdate = function(dt) {
+
+		if (!BSWG.game.editMode) {
+			return;
+		}
+
+		if (!this.jpointsw || !this.jmatch) {
+			return;
 		}
 
 		if (this.jmhover >= 0 && BSWG.input.MOUSE_PRESSED('left')) {
@@ -1115,6 +1136,9 @@ BSWG.componentList = new function () {
 		var len = this.compList.length;
 		for (var i=0; i<len; i++) {
 			this.compList[i].cacheJPW();
+		}
+		for (var i=0; i<len; i++) {
+			this.compList[i].updateJCache();
 		}
 		for (var i=0; i<len; i++) {
 			this.compList[i].baseUpdate(dt);

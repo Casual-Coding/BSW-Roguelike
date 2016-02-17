@@ -177,7 +177,7 @@ BSWG.game = new function(){
 
             if (grabbedBlock) {
 
-                self.ccblock.grabT = 0.3;
+                self.ccblock.grabT = 0.19;
 
                 var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
                 var gp = self.cam.toScreen(viewport, gpw);
