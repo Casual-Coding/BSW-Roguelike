@@ -73,3 +73,21 @@ Math.rotVec2 = function(vec, angle)
 		y * ca + x * sa
 	);
 };
+
+Math.lenVec2 = function(vec) {
+    return Math.sqrt(vec.x*vec.x + vec.y*vec.y);
+};
+
+Math.lenSqVec2 = function(vec) {
+    return vec.x*vec.x + vec.y*vec.y;
+};
+
+Math.distVec2 = function(a, b) {
+    var x = a.x - b.x, y = a.y - b.y;
+    return Math.sqrt(x*x + y*y);
+};
+
+Math.distSqVec2 = function(a, b) {
+    var x = a.x - b.x, y = a.y - b.y;
+    return x*x + y*y;
+};

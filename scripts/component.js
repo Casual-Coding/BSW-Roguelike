@@ -921,7 +921,7 @@ BSWG.component = function (desc, args) {
         }
 
 		for (var i=0; i<cl.length; i++) {
-			if (cl[i] !== this) {
+			if (cl[i] !== this && BSWG.physics.bodyDistance(this.obj.body, cl[i].obj.body) < 1.0) {
 				var jpw2 = cl[i].jpointsw;
 
 				for (var k1=0; k1<jpw.length; k1++)

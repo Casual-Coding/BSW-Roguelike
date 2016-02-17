@@ -301,6 +301,49 @@ BSWG.physics = new function(){
 
 	};
 
+	this.getBounds = function(body) {
+		var aabb = null;
+		var fixture = body.GetFixtureList();
+		while (fixture)
+		{
+			var fb = fixture.GetAABB();
+			if (!aabb) {
+				aabb = new b2AABB();
+				aabb.lowerBound = new b2Vec2(fb.lowerBound.x, fb.lowerBound.y);
+				aabb.upperBound = new b2Vec2(fb.upperBound.x, fb.upperBound.y);
+			}
+			else {
+    			aabb.Combine(aabb, fb);
+    		}
+    		fixture = fixture.GetNext();
+		}
+		return aabb;
+	};
+
+	this.getRadiusCenter = function(body) {
+		var bounds = this.getBounds(body);
+		var center = new b2Vec2(
+			(bounds.lowerBound.x + bounds.upperBound.x) * 0.5,
+			(bounds.lowerBound.y + bounds.upperBound.y) * 0.5
+		);
+		var r = Math.sqrt(
+			Math.min(
+				Math.distSqVec2(bounds.lowerBound, center),
+				Math.distSqVec2(bounds.upperBound, center)
+			)
+		);
+		return {
+			p: center,
+			r: r
+		};
+	};
+
+	this.bodyDistance = function(a, b) {
+		var arc = this.getRadiusCenter(a);
+		var brc = this.getRadiusCenter(b);
+		return Math.distVec2(arc.p, brc.p) - (arc.r + brc.r);
+	};
+
 	this.reset = function (){
 
 	};
