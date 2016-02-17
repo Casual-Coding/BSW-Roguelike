@@ -105,9 +105,6 @@ BSWG.initCanvasContext = function(ctx) {
     ctx.fontSpacing = 1.0;
     ctx.fillTextB = function(text, x, y, noBorder) {
 
-        //var ostyle = ctx.font || '16px Orbitron';
-        //ctx.font = parseFloat(ostyle.split()[0]) * 100.0 + 'px Orbitron';
-
         if (!text || !text.trim || !text.trim().length) {
             return;
         }
@@ -118,16 +115,14 @@ BSWG.initCanvasContext = function(ctx) {
             if ((i+1) < widths.length) {
                 widths[i] = ctx.measureText(text.charAt(i) + '' + text.charAt(i+1)).width - 
                             ctx.measureText(text.charAt(i+1) + '').width;
-                widths[i] += (ctx.fontSpacing || 0.0);// * 100.0;
+                widths[i] += (ctx.fontSpacing || 0.0);
             }
             else {
                 widths[i] = ctx.measureText(text.charAt(i) + '').width;
             }
-            //widths[i] /= 100.0;
             total += widths[i];
         }
 
-        //ctx.font = ostyle;
         var oalign = ctx.textAlign;
 
         if (ctx.textAlign === 'center') {

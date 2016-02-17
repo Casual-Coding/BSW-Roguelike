@@ -292,6 +292,8 @@ BSWG.component_CommandCenter = {
 		this.width  = 2;
 		this.height = 3;
 
+		this.moveT = 0.0;
+
 		this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
 			width:  this.width,
 			height: this.height
@@ -313,10 +315,18 @@ BSWG.component_CommandCenter = {
 			new b2Vec2(-this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75)
 		].reverse();
 
-		ctx.fillStyle = '#0b0';
+		var l = Math.floor((this.moveT/0.3) * 128);
+		ctx.fillStyle = 'rgb(' + l + ',176,' + l + ')';
 		BSWG.drawBlockPoly(ctx, { body: this.obj.body, verts: poly }, 0.8,
 			new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5)
 			);
+
+		if (this.moveT >= 0) {
+			this.moveT -= dt;
+		}
+		else {
+			this.moveT = 0.0;
+		}
 
 		var poly = [
 			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
@@ -325,10 +335,18 @@ BSWG.component_CommandCenter = {
 			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.05)
 		].reverse();
 
-		ctx.fillStyle = '#00b';
+		var l = Math.floor((this.grabT/0.3) * 128);
+		ctx.fillStyle = 'rgb(' + l + ',' + l + ',176)';
 		BSWG.drawBlockPoly(ctx, { body: this.obj.body, verts: poly }, 0.8,
 			new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5)
 			);
+
+		if (this.grabT >= 0) {
+			this.grabT -= dt;
+		}
+		else {
+			this.grabT = 0.0;
+		}
 	},
 
 	update: function(dt) {
@@ -349,6 +367,7 @@ BSWG.component_CommandCenter = {
 		if (rot) {
 			this.obj.body.SetAwake(true);
 			this.obj.body.ApplyTorque(rot*7.0);
+			this.moveT = 0.3;
 		}
 		
 		if (accel) {
@@ -357,6 +376,7 @@ BSWG.component_CommandCenter = {
 			this.obj.body.SetAwake(true);
 			var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
 			this.obj.body.ApplyForceToCenter(force);
+			this.moveT = 0.3;
 		}
 
 	},
@@ -893,7 +913,7 @@ BSWG.component = function (desc, args) {
         		mind = d;
         	}
         }
-        if (mind > 0.075*0.5 || BSWG.compActiveConfMenu)
+        if (mind > 0.075*0.125 || BSWG.compActiveConfMenu)
         	this.jmhover = -1;
 
 		for (var i=0; i<cl.length; i++) {
