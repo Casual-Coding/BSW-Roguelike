@@ -299,6 +299,13 @@ BSWG.component_CommandCenter = {
 			height: this.height
 		});
 
+		this.dispKeys = {
+			'left': [ 'Left', new b2Vec2(-0.3 * this.width, 0.0) ],
+			'right': [ 'Right', new b2Vec2(0.3 * this.width, 0.0) ],
+			'forward': [ 'Up', new b2Vec2(0.0, -this.height * 0.4) ],
+			'reverse': [ 'Down', new b2Vec2(0.0, this.height * 0.4) ]
+		};
+
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height);
 
 	},
@@ -350,6 +357,11 @@ BSWG.component_CommandCenter = {
 	},
 
 	update: function(dt) {
+
+		this.dispKeys['left'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.LEFT);
+		this.dispKeys['right'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.RIGHT);
+		this.dispKeys['forward'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.UP);
+		this.dispKeys['reverse'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.DOWN);
 
 	},
 
@@ -408,11 +420,15 @@ BSWG.component_Blaster = {
 			verts: verts
 		});
 
+		this.fireKey = args.fireKey || BSWG.KEY.SPACE;
+		this.dispKeys = {
+			'fire': [ '', new b2Vec2(0.0, 0.0) ],
+		};
+
 		this.jpoints = [ new b2Vec2(0.0, -0.3),
 						 new b2Vec2(-0.3, 0.0),
 						 new b2Vec2(0.3, 0.0) ];
 
-		this.fireKey = args.fireKey || BSWG.KEY.SPACE;
 		this.thrustT = 0.0;
 		this.kickBack = 0.0;
 
@@ -437,6 +453,11 @@ BSWG.component_Blaster = {
 
 	update: function(dt) {
 
+		if (this.dispKeys) {
+			this.dispKeys['fire'][0] = BSWG.KEY_NAMES[this.fireKey].toTitleCase();
+			this.dispKeys['fire'][2] = BSWG.input.KEY_DOWN(this.fireKey);
+		}
+
 		if (this.fireT) {
 			this.fireT -= dt;
 			if (this.fireT <= 0)
@@ -457,7 +478,7 @@ BSWG.component_Blaster = {
             x: p.x-150, y: p.y-25,
             w: 350, h: 50+32,
             key: this.fireKey,
-            title: 'Blaster fire key',
+            title: 'Blaster fire',
             close: function (key) {
             	if (key)
                 	self.fireKey = key;
@@ -526,6 +547,10 @@ BSWG.component_Thruster = {
 			verts: verts
 		});
 
+		this.dispKeys = {
+			'thrust': [ '', new b2Vec2(0.0, 0.0) ],
+		};
+
 		this.jpoints = [ new b2Vec2(0.0, 0.5) ];
 
 		this.thrustKey = args.thrustKey || BSWG.KEY.UP;
@@ -581,6 +606,11 @@ BSWG.component_Thruster = {
 
 	update: function(dt) {
 
+		if (this.dispKeys) {
+			this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase();
+			this.dispKeys['thrust'][2] = BSWG.input.KEY_DOWN(this.thrustKey);
+		}
+
 	},
 
 	openConfigMenu: function() {
@@ -595,7 +625,7 @@ BSWG.component_Thruster = {
             x: p.x-150, y: p.y-25,
             w: 350, h: 50+32,
             key: this.thrustKey,
-            title: 'Thruster key',
+            title: 'Thruster fire',
             close: function (key) {
             	if (key)
                 	self.thrustKey = key;
@@ -696,6 +726,10 @@ BSWG.component_HingeHalf = {
 
 		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [0, 1], true);
 
+		this.dispKeys = {
+			'rotate': [ '', new b2Vec2(this.size * 0.75, 0.0) ],
+		};
+
 		var cjp = new b2Vec2(this.motorC.x, this.motorC.y);
 		cjp.motorType = (this.motor ? 1 : 2) * 10 + this.size;
 		this.jpoints.push(cjp)
@@ -746,7 +780,7 @@ BSWG.component_HingeHalf = {
             x: p.x-150, y: p.y-25,
             w: 350, h: 50+32,
             key: this.rotKey,
-            title: this.motor ? 'Hinge rotate key' : 'Hinge rotate reverse key',
+            title: this.motor ? 'Hinge rotate' : 'Hinge rotate reverse',
             close: function (key) {
             	if (key)
                 	self.rotKey = key;
@@ -760,6 +794,11 @@ BSWG.component_HingeHalf = {
 	},
 
 	update: function(dt) {
+
+		//if (this.dispKeys) {
+			this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
+			this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
+		//}
 
 	},
 
@@ -834,8 +873,9 @@ BSWG.component = function (desc, args) {
 			this.renderOver(ctx, cam, dt);
 		}
 
-		if (!this.jpointsw)
+		if (!this.jpointsw) {
 			return;
+		}
 
 		var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
 
@@ -868,6 +908,24 @@ BSWG.component = function (desc, args) {
             ctx.fill();
 
 	   		ctx.globalAlpha = 1.0;
+	   	}
+
+	   	if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock && cam.z > 0.021) {
+	   		for (var key in this.dispKeys) {
+	   			var info = this.dispKeys[key];
+	   			if (info) {
+	   				var p = cam.toScreen(BSWG.render.viewport, BSWG.physics.localToWorld(info[1], this.obj.body));
+	   				var w = Math.floor(5* 2 + ctx.textWidthB(info[0])+1.0);
+	   				ctx.fillStyle = '#444';
+	   				ctx.font = '10px Orbitron';
+	   				BSWG.draw3DRect(ctx, Math.floor(p.x) - w * 0.5, Math.floor(p.y) - 10, w, 20, 3, info[2] || false);
+	   				ctx.strokeStyle = '#000';
+	   				ctx.fillStyle = '#fff';
+	   				ctx.textAlign = 'center';
+	   				ctx.fillTextB(info[0], Math.floor(p.x), Math.floor(p.y)+3);
+	   				ctx.textAlign = 'left';
+	   			}
+	   		}
 	   	}
 
 	};
@@ -977,10 +1035,12 @@ BSWG.component = function (desc, args) {
 														  this.jmatch[i][4]
 														  );
 
-						if (this.onCC && !this.jmatch[i][1].onCC)
+						if (this.onCC && !this.jmatch[i][1].onCC) {
 							this.jmatch[i][1].onCC = this.onCC;
-						if (!this.onCC && this.jmatch[i][1].onCC)
+						}
+						if (!this.onCC && this.jmatch[i][1].onCC) {
 							this.onCC = this.jmatch[i][1].onCC;
+						}
 
 						this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
 						this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
@@ -1083,8 +1143,9 @@ BSWG.componentList = new function () {
 
 	this.clear = function () {
 
-		while (this.compList.length)
+		while (this.compList.length) {
 			this.compList[0].remove();
+		}
 
 		this.compRemove.length = 0;
 
@@ -1116,10 +1177,8 @@ BSWG.componentList = new function () {
 	this.handleInput = function (cc, keys) {
 
 		var len = this.compList.length;
-		for (var i=0; i<len; i++)
-		{
-			if (!cc || this.compList[i].onCC === cc)
-			{
+		for (var i=0; i<len; i++) {
+			if (!cc || this.compList[i].onCC === cc) {
 				this.compList[i].handleInput(keys);
 			}
 		}
@@ -1197,8 +1256,7 @@ BSWG.componentList = new function () {
 	this.withinRadius = function (p, r) {
 		var ret = new Array();
 		var len = this.compList.length;
-		for (var i=0; i<len; i++)
-		{
+		for (var i=0; i<len; i++) {
 			var p2 = this.compList[i].obj.body.GetWorldCenter();
 			var dist = Math.pow(p2.x - p.x, 2.0) +
 					   Math.pow(p2.y - p.y, 2.0);

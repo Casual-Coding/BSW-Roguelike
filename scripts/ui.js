@@ -82,14 +82,19 @@ BSWG.control_Button = {
 
 		ctx.font = '16px Orbitron';
 
-		if (this.selected)
+		if (this.selected) {
 			ctx.strokeStyle = '#484';
-		else
+		}
+		else {
 			ctx.strokeStyle = '#888';
-		if (this.selected)
+		}
+
+		if (this.selected) {
 			ctx.fillStyle = 'rgba(70,70,70,1)';
-		else
+		}
+		else {
 			ctx.fillStyle = 'rgba(40,40,40,1)';
+		}
 			
 		ctx.lineWidth = 2.0;
 
@@ -98,7 +103,12 @@ BSWG.control_Button = {
 		ctx.lineWidth = 1.0;
 
 		ctx.textAlign = 'center';
-		ctx.fillStyle = '#fff';
+		if (this.selected) {
+			ctx.fillStyle = '#aea';
+		}
+		else {
+			ctx.fillStyle = '#fff';
+		}
 
 		ctx.strokeStyle = '#111';
 		ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
@@ -140,18 +150,27 @@ BSWG.control_KeyConfig = {
 		ctx.lineWidth = 2.0;
 
 		ctx.globalAlpha = 0.75;
-		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, this.mouseIn ? 'rgba(155,255,155,0.65)' : null);
+		BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, true ? 'rgba(155,255,155,0.65)' : null);
 		ctx.globalAlpha = 1.0;
 
 		ctx.lineWidth = 1.0;
+
+		ctx.beginPath();
+		ctx.moveTo(this.p.x + 16, this.p.y + 30);
+		ctx.lineTo(this.p.x + this.w - 16, this.p.y + 30);
+		ctx.closePath();
+		ctx.strokeStyle = '#aaa';
+		ctx.stroke();
 
 		ctx.strokeStyle = '#111';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#fff';
 		ctx.fillTextB(this.title, this.p.x + 16, this.p.y + 25);
 		ctx.fillStyle = '#ddd';
-		ctx.fillTextB("Currently: " + BSWG.KEY_NAMES[this.key].toTitleCase() + "", this.p.x + 16, this.p.y + 25 + 22);
+		ctx.fillTextB("Bound to ", this.p.x + 16, this.p.y + 25 + 25);
 		ctx.fillStyle = '#afa';
+		ctx.fillTextB("" + BSWG.KEY_NAMES[this.key].toTitleCase(), this.p.x + 16 + 93, this.p.y + 25 + 25);
+		ctx.fillStyle = '#aaf';
 		ctx.fillTextB("Press a key to bind", this.p.x + 16, this.p.y + 25 + 44);
 
 		ctx.textAlign = 'left';

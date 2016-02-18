@@ -14,6 +14,7 @@ BSWG.game = new function(){
         BSWG.blasterList.clear();
         this.cam = new BSWG.camera();
         this.editMode = false;
+        this.showControls = true;
         var self = this;
 
         this.editBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -24,6 +25,17 @@ BSWG.game = new function(){
             click: function (me) {
                 me.selected = !me.selected;
                 self.editMode = me.selected;
+            }
+        });
+
+        this.showControlsBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10 + 150 + 10, y: 10,
+            w: 200, h: 50,
+            text: "Show Controls",
+            selected: this.showControls,
+            click: function (me) {
+                me.selected = !me.selected;
+                self.showControls = me.selected;
             }
         });
     };

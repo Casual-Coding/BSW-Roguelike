@@ -103,6 +103,22 @@ BSWG.camera = function() {
 BSWG.initCanvasContext = function(ctx) {
 
     ctx.fontSpacing = 1.0;
+    ctx.textWidthB = function(text) {
+        var total = 0.0;
+        for (var i=0; i<text.length; i++) {
+            var width = 0.0;
+            if ((i+1) < text.length) {
+                width = ctx.measureText(text.charAt(i) + '' + text.charAt(i+1)).width - 
+                        ctx.measureText(text.charAt(i+1) + '').width;
+                width += (ctx.fontSpacing || 0.0);
+            }
+            else {
+                width = ctx.measureText(text.charAt(i) + '').width;
+            }
+            total += width;
+        }
+        return total;
+    };
     ctx.fillTextB = function(text, x, y, noBorder) {
 
         if (!text || !text.trim || !text.trim().length) {

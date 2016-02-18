@@ -159,7 +159,6 @@ BSWG.physics = new function(){
 		mouseJointDef.maxForce = maxForce || 10.0;
 		mouseJointDef.target = this.mousePosWorld();
 		this.mouseJoint = this.world.CreateJoint(mouseJointDef);
-		//this.mouseJoint = Box2D.castObject(this.mouseJoint, b2MouseJoint);
 
 	};
 
@@ -358,11 +357,11 @@ BSWG.physics = new function(){
 			if (Math.max(tn, fn) > this.maxWeldForce) {
 				this.welds[i].broken = true;
 			}
-			if (this.welds[i].age === 10 && !this.welds[i].revolute) {
+			if (this.welds[i].age > 10 && this.welds[i].age < 20 && !this.welds[i].revolute) {
 				var ref = this.welds[i].jointDef.referenceAngle;
 				var aref = this.welds[i].joint.GetBodyB().GetAngle() - this.welds[i].joint.GetBodyA().GetAngle();
 				var diff = Math.abs(Math.atan2(Math.sin(aref-ref), Math.cos(aref-ref)));
-				if (diff > 0.0005) {
+				if (diff > (Math.PI/3600.0)) {
 					this.welds[i].broken = true;
 				}
 			}
