@@ -910,17 +910,19 @@ BSWG.component = function (desc, args) {
 	   		ctx.globalAlpha = 1.0;
 	   	}
 
-	   	if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock && cam.z > 0.021) {
+	   	if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
 	   		for (var key in this.dispKeys) {
 	   			var info = this.dispKeys[key];
 	   			if (info) {
 	   				var p = cam.toScreen(BSWG.render.viewport, BSWG.physics.localToWorld(info[1], this.obj.body));
-	   				var w = Math.floor(5* 2 + ctx.textWidthB(info[0])+1.0);
+	   				var w = Math.floor(8* 2 + ctx.textWidthB(info[0])+1.0);
+	   				ctx.globalAlpha = 0.25;
 	   				ctx.fillStyle = '#444';
-	   				ctx.font = '10px Orbitron';
 	   				BSWG.draw3DRect(ctx, Math.floor(p.x) - w * 0.5, Math.floor(p.y) - 10, w, 20, 3, info[2] || false);
-	   				ctx.strokeStyle = '#000';
-	   				ctx.fillStyle = '#fff';
+	   				ctx.font = '10px Orbitron';
+	   				ctx.globalAlpha = 1.0;
+	   				ctx.strokeStyle = 'rgba(0,0,0,0)';
+	   				ctx.fillStyle = info[2] ? '#fff' : '#000';
 	   				ctx.textAlign = 'center';
 	   				ctx.fillTextB(info[0], Math.floor(p.x), Math.floor(p.y)+3);
 	   				ctx.textAlign = 'left';
