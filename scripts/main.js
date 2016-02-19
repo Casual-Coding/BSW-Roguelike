@@ -43,6 +43,14 @@ var BSWG = new function(){
         'stars_13': 'stars-512-13.png',
         'stars_14': 'stars-512-14.png'
     };
+    var shaders = {
+        'vertex': [
+            'basicVertex'
+        ],
+        'fragment': [
+            'basicFragment'
+        ]
+    };
 
     this.init = function ()
     {
@@ -59,7 +67,7 @@ var BSWG = new function(){
                 BSWG.input.init();
                 BSWG.game.createNew();
                 BSWG.game.start();
-            }, images);
+            }, images, shaders);
         };
 
         for (var i=0; i<scripts.length; i++)

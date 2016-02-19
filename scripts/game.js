@@ -14,7 +14,7 @@ BSWG.game = new function(){
         BSWG.blasterList.clear();
         this.cam = new BSWG.camera();
         this.editMode = false;
-        this.showControls = true;
+        this.showControls = false;
         var self = this;
 
         this.editBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -145,22 +145,30 @@ BSWG.game = new function(){
                         else {
                             grabbedLocal = grabbedBlock.getLocalPoint(mp);
                             BSWG.physics.startMouseDrag(grabbedBlock.obj.body, grabbedBlock.obj.body.GetMass()*1.75);
+                            grabbedBlock.obj.body.SetLinearDamping(0.5);
+                            grabbedBlock.obj.body.SetAngularDamping(0.25);
                         }
                     }
                 }
                 if (BSWG.input.MOUSE_RELEASED('left') && grabbedBlock) {
+                    grabbedBlock.obj.body.SetLinearDamping(0.1);
+                    grabbedBlock.obj.body.SetAngularDamping(0.1);
                     grabbedBlock = null;
                     grabbedLocal = null;
                     BSWG.physics.endMouseDrag();
                 }
 
                 if (grabbedBlock && BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT)) {
-                    BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*0.5);
+                    grabbedBlock.obj.body.SetAngularDamping(1.0);
+                    grabbedBlock.obj.body.SetLinearDamping(10.0);
                 } else if (grabbedBlock) {
-                    BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75);
+                    grabbedBlock.obj.body.SetAngularDamping(0.1);
+                    grabbedBlock.obj.body.SetLinearDamping(0.1);
                 }
             }
             else if (grabbedBlock) {
+                grabbedBlock.obj.body.SetLinearDamping(0.1);
+                grabbedBlock.obj.body.SetAngularDamping(0.1);
                 grabbedBlock = null;
                 grabbedLocal = null;
                 BSWG.physics.endMouseDrag();
@@ -238,6 +246,8 @@ BSWG.game = new function(){
             else {
                 blackoutT = 0.0;
             }
+
+            return self.cam;
 
         });
     };

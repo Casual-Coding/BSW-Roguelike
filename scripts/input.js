@@ -231,21 +231,21 @@ BSWG.input = new function(){
             return;
         }
 
-        $(div).keydown(function(e){
+        jQuery(div).keydown(function(e){
             keyMap[e.which] = true;
         });
 
-        $(div).keyup(function(e){
+        jQuery(div).keyup(function(e){
             keyMap[e.which] = false;
         });
 
-        $(div).mousemove(function(e){
+        jQuery(div).mousemove(function(e){
             mouseState.x = e.pageX;
             mouseState.y = e.pageY;
             mouseState.shift = !!e.shiftKey;
         });
 
-        $(div).mousedown(function(e){
+        jQuery(div).mousedown(function(e){
             switch (e.which)
             {
                 case 1:
@@ -263,7 +263,7 @@ BSWG.input = new function(){
             mouseState.shift = !!e.shiftKey;
         });
 
-        $(div).mouseup(function(e){
+        jQuery(div).mouseup(function(e){
             switch (e.which)
             {
                 case 1:
@@ -281,7 +281,7 @@ BSWG.input = new function(){
             mouseState.shift = !!e.shiftKey;
         });
 
-        $(div).mousewheel(function(e){
+        jQuery(div).mousewheel(function(e){
             mouseState.wheel += e.deltaY;
             if ((minWheel || minWheel === 0) && mouseState.wheel < minWheel)
                 mouseState.wheel = minWheel;

@@ -27,7 +27,7 @@ BSWG.camera = function() {
         for (var i=0, len=list.length; i<len; i++) {
             ret[i] = new b2Vec2(
                 (list[i].x - this.x) * this.z * vpsz + viewport.w * 0.5,
-                (list[i].y - this.y) * this.z * vpsz + viewport.h * 0.5
+                -(list[i].y - this.y) * this.z * vpsz + viewport.h * 0.5
             );
         }
         return ret;
@@ -45,7 +45,7 @@ BSWG.camera = function() {
 
         return new b2Vec2(
             (x - this.x) * this.z * vpsz + viewport.w * 0.5,
-            (y - this.y) * this.z * vpsz + viewport.h * 0.5
+            -(y - this.y) * this.z * vpsz + viewport.h * 0.5
         );
 
     };
@@ -93,7 +93,7 @@ BSWG.camera = function() {
 
         return new b2Vec2(
             (x - viewport.w * 0.5) / (this.z * vpsz) + this.x,
-            (y - viewport.h * 0.5) / (this.z * vpsz) + this.y
+            -(y - viewport.h * 0.5) / (this.z * vpsz) + this.y
         );
 
     };
@@ -179,7 +179,7 @@ BSWG.initCanvasContext = function(ctx) {
 
 };
 
-BSWG.render = new function(){
+BSWG.render = new function() {
 
     this.canvas = null;
     this.ctx = null;
@@ -190,17 +190,39 @@ BSWG.render = new function(){
     this.dt = 1.0/60.0;
     this.time = 0.0;
     this.images = {};
+    this.cam3D = null;
 
     var maxRes = { w: 1920, h: 1080 };
 
-    this.init = function(complete, images)
-    {
+    this.init = function(complete, images, shaders) {
+
+        if (!Detector.webgl) {
+            alert('WebGL not supported.');
+            return;
+        }
+
         document.body.innerHTML = '';
 
         this.canvas = document.createElement('canvas');
         this.canvas.oncontextmenu = function(){ return false; };
-        this.sizeViewport();
+        this.canvas.style.position = 'fixed';
+        this.canvas.style.zIndex = 1;
         this.ctx = this.canvas.getContext('2d');
+
+        this.canvas3D = document.createElement('canvas');
+        this.canvas3D.style.position = 'fixed';
+        this.canvas3D.style.zIndex = 2;
+        this.canvas3D.oncontextmenu = function(){ return false; };
+
+        this.cam3D = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
+        this.cam3D.position.z = 10.0;
+        this.scene = new THREE.Scene();
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
+        this.renderer.setPixelRatio( window.devicePixelRatio );
+        this.loader = new THREE.JSONLoader();
+        this.raycaster = new THREE.Raycaster();
+    
+        this.sizeViewport();
 
         BSWG.initCanvasContext(this.ctx);
 
@@ -210,6 +232,7 @@ BSWG.render = new function(){
         this.ctx.fillTextB('Loading ...', 48, this.viewport.h - 48, true);
 
         document.body.appendChild(this.canvas);
+        document.body.appendChild(this.canvas3D);
 
         this.images = images = images || {};
 
@@ -248,10 +271,8 @@ BSWG.render = new function(){
                     }
                 ],
                 chadaboom.blue_flame,
-                function(){  
-                    if (ocomplete) {
-                        ocomplete();
-                    }
+                function(){
+                    self.loadShaders(shaders, ocomplete);
                 });
             });
         };
@@ -261,6 +282,8 @@ BSWG.render = new function(){
             toLoad += 1;
         }
         var totalImages = toLoad;
+        if (!totalImages && complete)
+            complete();
         for (var key in images) {
             var img = new Image();
             img.src = 'images/' + images[key];
@@ -273,9 +296,42 @@ BSWG.render = new function(){
             };
             images[key] = img;
         }
+    };
 
-        if (!totalImages && complete)
+    this.loadShaders = function(shadersIn, complete) {
+
+        var shaders = [];
+        
+        for (var i=0; i<shadersIn.vertex.length; i++) {
+            shaders.push([
+                shadersIn.vertex[i],
+                "x-shader/x-vertex"
+            ]);
+        }
+
+        for (var i=0; i<shadersIn.fragment.length; i++) {
+            shaders.push([
+                shadersIn.fragment[i],
+                "x-shader/x-fragment"
+            ]);
+        }
+
+        var count = shaders.length;
+        if (count === 0 && complete) {
             complete();
+        }
+        for (var i=0; i<shaders.length; i++)
+        {
+            jQuery.get("shaders/" + shaders[i][0] + ".glsl", function(shader){ return function(data){
+                var script = jQuery("<script id=\'SHADER_" + shader[0] + "\' type=\'" + shader[1] + "\'>");
+                script.html(data);
+                script.appendTo(jQuery(document.head));
+                count -= 1;
+                if (count === 0 && complete) {
+                    complete();
+                }
+            }; }(shaders[i]));
+        }
     };
 
     this.proceduralImage = function (w, h, cbk) {
@@ -293,8 +349,9 @@ BSWG.render = new function(){
 
     };
 
-    this.sizeViewport = function()
-    {
+    this.sizeViewport = function() {
+
+        var lvp = this.viewport;
         this.viewport = {
             w: Math.min(maxRes.w, window.innerWidth),
             h: Math.min(maxRes.h, window.innerHeight)
@@ -303,12 +360,17 @@ BSWG.render = new function(){
         this.canvas.height = this.viewport.h;
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
+
+        if (!lvp || lvp.w !== this.viewport.w || lvp.h !== this.viewport.h) {
+            this.renderer.setSize( this.viewport.w, this.viewport.h );
+            this.cam3D.aspect = this.viewport.w / this.viewport.h;
+            this.cam3D.updateProjectionMatrix();
+        }
     };
 
-    this.startRenderer = function (cbk)
-    {
-        if (this.animFrameID !== null)
-        {
+    this.startRenderer = function (cbk) {
+        
+        if (this.animFrameID !== null) {
             window.cancelAnimationFrame(this.animFrameID);
             this.animFrameID = null;
         }
@@ -316,8 +378,8 @@ BSWG.render = new function(){
         this.renderCbk = cbk;
 
         var self = this;
-        var renderFrame = function ()
-        {
+        var renderFrame = function () {
+
             var frameTime = Date.timeStamp();
             self.dt = frameTime - self.lastFrameTime;
             self.lastFrameTime = frameTime;
@@ -325,8 +387,19 @@ BSWG.render = new function(){
             self.time += self.dt;
 
             self.sizeViewport();
-            if (self.renderCbk)
-                self.renderCbk(self.dt, self.time, self.ctx);
+            var cam = null;
+            if (self.renderCbk) {
+                cam = self.renderCbk(self.dt, self.time, self.ctx);
+            }
+
+            self.renderer.clear();
+            if (cam) {
+                var f = Math.min(self.viewport.h / self.viewport.w, self.viewport.w / self.viewport.h) * 0.54;
+                self.cam3D.position.set(cam.x, cam.y, f/cam.z);
+                self.cam3D.lookAt(new THREE.Vector3(cam.x, cam.y, 0.0));
+                self.cam3D.updateMatrix();
+            }
+            self.renderer.render( self.scene, self.cam3D );
 
             BSWG.input.newFrame();
 
@@ -336,18 +409,44 @@ BSWG.render = new function(){
         self.animFrameID = window.requestAnimationFrame(renderFrame);
     };
 
-    this.stopRenderer = function ()
-    {
-        if (this.animFrameID !== null)
-        {
+    this.stopRenderer = function () {
+        if (this.animFrameID !== null) {
             window.cancelAnimationFrame(this.animFrameID);
             this.animFrameID = null;
         }
         this.renderCbk = null;
     };
 
-    this.test = function ()
+    this.getShader = function ( id )
     {
+        return document.getElementById('SHADER_' + id).textContent;
+    };
+
+    var lastRandomValue = null;
+    this.newMaterial = function (vertexID, fragmentID, data) {
+        var rand = Math.random();
+        if (lastRandomValue === rand) { // using seed random other places can lead to materials with duplicate UUIDs
+            Math.seedrandom();
+        }
+        lastRandomValue = rand;
+
+        data = data || {};
+        var uniforms = {};
+        for (var key in data) {
+            uniforms[key] = data[key];
+        }
+
+        var material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: this.getShader(vertexID),
+            fragmentShader: this.getShader(fragmentID),
+            transparent: true
+        });
+
+        return material;
+    };
+
+    this.test = function () {
         console.log('b');
     };
 

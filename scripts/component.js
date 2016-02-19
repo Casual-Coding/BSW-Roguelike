@@ -2,7 +2,8 @@
 
 BSWG.compActiveConfMenu = null;
 
-BSWG.component_minJMatch = 0.02;
+BSWG.component_minJMatch = Math.pow(0.25, 2.0);
+BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.componentHoverFn = function(self) {
 	if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
@@ -12,7 +13,130 @@ BSWG.componentHoverFn = function(self) {
 		return false;
 	}
 	return true;
-}
+};
+
+BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
+
+	Math.seedrandom();
+	var ret = new Object();
+
+	var body  = obj.body,
+		verts = obj.verts,
+		len   = verts.length;
+
+	if (!zcenter) {
+		zcenter = body.GetLocalCenter();
+	}
+
+	if (!zoffset) {
+		zoffset = 0.0;
+	}
+
+	if (!depth) {
+		var total = 0.0;
+		for (var i=0; i<len; i++) {
+			total += Math.distVec2(verts[i], zcenter);
+		}
+		depth = (total / len) * 0.3;
+	}
+
+	var overts = new Array(len),
+	    iverts = new Array(len);
+	for (var i=0; i<len; i++) {
+		overts[i] = new THREE.Vector3(
+			verts[i].x - zcenter.x,
+			verts[i].y - zcenter.y,
+			-depth * 0.5
+		);
+		iverts[i] = new THREE.Vector3(
+			(verts[i].x - zcenter.x) * iscale,
+			(verts[i].y - zcenter.y) * iscale,
+			depth * 0.5
+		);
+	}
+	var cvert = new THREE.Vector3(
+		0.0,
+		0.0,
+		depth * 0.5
+	);
+
+    var INNER = function(idx) { return idx+len+1; };
+    var OUTER = function(idx) { return idx+1; };
+
+    ret.geom = new THREE.Geometry();
+
+    var vertices = ret.geom.vertices;
+    vertices.length = len*2 + 1;
+    vertices[0] = cvert;
+    for (var i=0; i<len; i++) {
+    	vertices[OUTER(i)] = overts[i];
+    	vertices[INNER(i)] = iverts[i];
+    }
+
+	var faces = ret.geom.faces;
+    var cf = 0;
+    faces.length = len*3;
+    for (var i=0; i<len; i++) {
+    	var j = (i+1) % len;
+    	faces[cf++] = new THREE.Face3(INNER(i), INNER(j), 0);
+    	faces[cf++] = new THREE.Face3(OUTER(i), OUTER(j), INNER(j));
+    	faces[cf++] = new THREE.Face3(OUTER(i), INNER(j), INNER(i));
+    }
+
+    ret.geom.computeFaceNormals();
+    ret.geom.computeVertexNormals();
+    ret.geom.computeBoundingSphere();
+
+    ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragment", {
+    	clr: {
+    		type: 'v4',
+    		value: new THREE.Vector4(Math.random(), Math.random(), Math.random(), 1.0)
+    	},
+    	light: {
+    		type: 'v4',
+    		value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 10.0, 1.0)
+    	}
+    });
+    ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
+
+    ret.geom.needsUpdate = true;
+	ret.mat.needsUpdate = true;
+    ret.mesh.needsUpdate = true;
+
+    BSWG.render.scene.add( ret.mesh );
+
+    var self = ret;
+
+	ret.update = function() {
+
+		var matrix = self.mesh.matrix;
+
+		var center = body.GetWorldCenter(),
+			angle  = body.GetAngle();
+
+		self.mesh.position.x = center.x;
+		self.mesh.position.y = center.y;
+		self.mesh.position.z = zoffset;
+
+		self.mesh.rotation.z = angle;
+
+		self.mesh.updateMatrix();
+
+		self.mat.uniforms.light.value.x = BSWG.game.cam.x;
+		self.mat.uniforms.light.value.y = BSWG.game.cam.y;
+	};
+
+	ret.destroy = function() {
+
+		BSWG.render.scene.remove( self.mesh );
+
+	};
+
+	ret.update();
+
+	return ret;
+
+};
 
 BSWG.drawBlockPolyOffset = null;
 BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
@@ -378,7 +502,7 @@ BSWG.component_CommandCenter = {
 
 		if (rot) {
 			this.obj.body.SetAwake(true);
-			this.obj.body.ApplyTorque(rot*7.0);
+			this.obj.body.ApplyTorque(-rot*7.0);
 			this.moveT = 0.21;
 		}
 		
@@ -681,12 +805,15 @@ BSWG.component_Block = {
 
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
+		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+
 	},
 
 	render: function(ctx, cam, dt) {
 
-		ctx.fillStyle = '#444';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
+		//ctx.fillStyle = '#444';
+		//BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
+		this.meshObj.update();
 
 	},
 
@@ -814,7 +941,7 @@ BSWG.component_HingeHalf = {
 
 		if (robj) {
 			if (keys[this.rotKey]) {
-				robj.joint.SetMotorSpeed(this.motor ? -1 : 1);
+				robj.joint.SetMotorSpeed(this.motor ? 1 : -1);
 			}
 		}
 
@@ -881,7 +1008,7 @@ BSWG.component = function (desc, args) {
 
 		var map = {};
 		for (var i=0; i<this.jmatch.length; i++) {
-			map[this.jmatch[i][0]] = true;
+			map[this.jmatch[i][0]] = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
 		}
 
 		for (var i=0; i<jp.length; i++) {
@@ -906,6 +1033,18 @@ BSWG.component = function (desc, args) {
         		}
         	}
             ctx.fill();
+            if (map[i]) {
+            	ctx.strokeStyle = ctx.fillStyle;
+            	ctx.lineWidth = 2.0;
+            	ctx.globalAlpha = 0.25;
+            	var p2s = cam.toScreen(BSWG.render.viewport, map[i]);
+            	ctx.beginPath();
+            	ctx.moveTo(jp[i].x, jp[i].y);
+            	ctx.lineTo(p2s.x, p2s.y);
+            	ctx.closePath();
+            	ctx.stroke();
+            	ctx.lineWidth = 1.0;
+            }
 
 	   		ctx.globalAlpha = 1.0;
 	   	}
@@ -914,18 +1053,43 @@ BSWG.component = function (desc, args) {
 	   		for (var key in this.dispKeys) {
 	   			var info = this.dispKeys[key];
 	   			if (info) {
+	   				var text = info[0];
+	   				var rot = 0.0;
+	   				/*if (text === 'Left') {
+	   					text = '<-';
+	   				}
+	   				else if (text === 'Right') {
+	   					text = '->';
+	   				}
+	   				else if (text === 'Up') {
+	   					text = '<-';
+	   					rot = Math.PI/2.0;
+	   				}
+	   				else if (text === 'Down') {
+	   					text = '->';
+	   					rot = Math.PI/2.0;
+	   				}*/
+
 	   				var p = cam.toScreen(BSWG.render.viewport, BSWG.physics.localToWorld(info[1], this.obj.body));
-	   				var w = Math.floor(8* 2 + ctx.textWidthB(info[0])+1.0);
+	   				var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
 	   				ctx.globalAlpha = 0.25;
 	   				ctx.fillStyle = '#444';
-	   				BSWG.draw3DRect(ctx, Math.floor(p.x) - w * 0.5, Math.floor(p.y) - 10, w, 20, 3, info[2] || false);
-	   				ctx.font = '10px Orbitron';
+	   				BSWG.draw3DRect(ctx, p.x - w * 0.5, p.y - 10, w, 20, 3, info[2] || false);
+
+	   				ctx.save();
+
+	   				ctx.translate(Math.floor(p.x), Math.floor(p.y));
+	   				ctx.rotate(rot);
+	   				ctx.translate(0, 3);
+
+	   				ctx.font = '11px Orbitron';
 	   				ctx.globalAlpha = 1.0;
-	   				ctx.strokeStyle = 'rgba(0,0,0,0)';
 	   				ctx.fillStyle = info[2] ? '#fff' : '#000';
 	   				ctx.textAlign = 'center';
-	   				ctx.fillTextB(info[0], Math.floor(p.x), Math.floor(p.y)+3);
+	   				ctx.fillText(text, 0, 0);
 	   				ctx.textAlign = 'left';
+
+	   				ctx.restore();
 	   			}
 	   		}
 	   	}
@@ -976,7 +1140,7 @@ BSWG.component = function (desc, args) {
         		mind = d;
         	}
         }
-        if (mind > 0.075*0.125 || BSWG.compActiveConfMenu) {
+        if (mind > BSWG.component_jMatchClickRange || BSWG.compActiveConfMenu) {
         	this.jmhover = -1;
         }
 
@@ -1023,7 +1187,7 @@ BSWG.component = function (desc, args) {
 			return;
 		}
 
-		if (this.jmhover >= 0 && BSWG.input.MOUSE_PRESSED('left')) {
+		if (this.jmhover >= 0 && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift')) {
 			for (var i=0; i<this.jmatch.length; i++) {
 				if (this.jmatch[i][0] === this.jmhover && this.jmatch[i][1].id > this.id) {
 					if (!this.welds[this.jmatch[i][0]]) {
@@ -1185,9 +1349,16 @@ BSWG.componentList = new function () {
 			}
 		}
 
-		if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.input.MOUSE_PRESSED('left') && BSWG.game.editMode) {
-			BSWG.input.EAT_MOUSE('left');
-		 	this.mouseOver.openConfigMenu();
+		if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.game.editMode) {
+			if (BSWG.input.MOUSE_PRESSED('left') && BSWG.input.MOUSE('shift')) {
+				BSWG.input.EAT_MOUSE('left');
+		 		this.mouseOver.openConfigMenu();
+		 	}
+		 	else if (BSWG.input.MOUSE_PRESSED('right')) {
+				BSWG.input.EAT_MOUSE('right');
+		 		this.mouseOver.openConfigMenu();
+		 	}
+
 		}
 
 	};
