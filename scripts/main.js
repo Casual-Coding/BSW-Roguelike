@@ -45,10 +45,12 @@ var BSWG = new function(){
     };
     var shaders = {
         'vertex': [
-            'basicVertex'
+            'basicVertex',
+            'bgVertex'
         ],
         'fragment': [
-            'basicFragment'
+            'basicFragment',
+            'bgFragment'
         ]
     };
 

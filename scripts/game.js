@@ -186,9 +186,6 @@ BSWG.game = new function(){
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
 
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, viewport.w, viewport.h);
-
             self.stars.render(ctx, self.cam, viewport);
             BSWG.componentList.render(ctx, self.cam, dt);
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
@@ -288,9 +285,76 @@ BSWG.starfield = function(){
         }));
     }
 
+    var bgImg = [],
+        bgImgCount = 0;
+
+    var addBgImg = function(img, x, y, z, w, h, a, clr) {
+
+        if ((x+w) < 0 || (y+h) < 0 || x >= BSWG.render.viewport.w || y >= BSWG.render.viewport.h) {
+            return;
+        }
+
+        x += w * 0.5;
+        y += h * 0.5;
+
+        var x1 = 2 * (x / BSWG.render.viewport.w) - 1;
+        var y1 = 1 - 2 * (y / BSWG.render.viewport.h);
+
+        w = Math.abs(w/BSWG.render.viewport.w) * 2.0;
+        h = Math.abs(h/BSWG.render.viewport.h) * 2.0;
+
+        if (bgImgCount < bgImg.length) { // replace
+            var obj = bgImg[bgImgCount];
+            obj.mat.uniforms.pos.value.set(x1, y1, z);
+            obj.mat.uniforms.sza.value.set(w, h, a);
+            obj.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+            obj.mat.uniforms.img.value = img.texture;
+            obj.mat.needsUpdate = true;
+            bgImgCount ++;
+        }
+        else { // add new
+            var obj = new Object();
+            obj.geom = new THREE.PlaneGeometry(1.0, 1.0, 1, 1);
+            obj.mat = BSWG.render.newMaterial("bgVertex", "bgFragment", {
+                pos: {
+                    type: 'v3',
+                    value: new THREE.Vector3(x1, y1, z)
+                },
+                sza: {
+                    type: 'v3',
+                    value: new THREE.Vector3(w, h, a)
+                },
+                clr: {
+                    type: 'v4',
+                    value: new THREE.Vector4(clr[0], clr[1], clr[2], clr[3])
+                },
+                img: {
+                    type: 't',
+                    value: img.texture
+                }
+            });
+
+            obj.mesh = new THREE.Mesh( obj.geom, obj.mat );
+            obj.mesh.frustumCulled = false;
+
+            obj.mesh.needsUpdate = true;
+            obj.mat.needsUpdate = true;
+            
+            BSWG.render.scene.add( obj.mesh );
+
+            bgImg.push(obj);
+            bgImgCount ++;
+        }
+
+    };
+
     this.render = function(ctx, cam, viewport) {
 
+        //Math.seedrandom();
+
         var oz = cam.z;
+
+        bgImgCount = 0;
 
         for (var l=3; l>=1; l--) {
 
@@ -314,24 +378,17 @@ BSWG.starfield = function(){
                 for (p.y = p1.y; p.y <= p2.y; p.y += tsize) {
                     var x = p.x / tsize, y = p.y / tsize;
                     var ps = cam.toScreenList(viewport, [p, new b2Vec2(p.x+tsize, p.y+tsize)]);
-                    var w = ps[1].x - ps[0].x,
-                        h = ps[1].y - ps[0].y;
+                    var w = Math.abs(ps[1].x - ps[0].x),
+                        h = Math.abs(ps[1].y - ps[0].y);
                     var k = Math.floor(Math.random2d(x*13.5+97*l*l, y*7.431+55*l*l) * 1000000);
                     if (l>1 && (~~(k/37))%[2,5][l-2] === 0) {
                         var r1 = (k%100)/100;
                         var r2 = ((k+371)%1000)/1000;
                         var nimg = nebulaImg[k % nebulaImg.length];
                         var sz = (r1*([1.7, 6.0][l-2])+0.5)*Math.min(w,h);
-                        ctx.save();
-                        ctx.translate(ps[0].x, ps[0].y);
-                        ctx.rotate(Math.PI*2.0*r2);
-                        ctx.translate(-sz*0.5, -sz*0.5);
-                        ctx.globalAlpha = 0.3 * alpha;
-                        ctx.drawImage(nimg, 0, 0, nimg.width, nimg.height, 0, 0, sz, sz);
-                        ctx.restore();
+                        addBgImg(nimg, ps[0].x, ps[0].y, l, sz, sz, Math.PI*2.0*r2, [1,1,1,0.3*alpha]);
                     }
-                    ctx.globalAlpha = [0.4, 0.4, 0.95][l-1] * alpha;
-                    ctx.drawImage(img[k % img.length], ps[0].x, ps[0].y, w, h);
+                    addBgImg(img[k % img.length], ps[0].x, ps[0].y, l, w, h, 0.0, [1,1,1,[0.4, 0.4, 0.95][l-1] * alpha]);
                 }
             }
 
@@ -339,6 +396,20 @@ BSWG.starfield = function(){
         }
 
         cam.z = oz;
+
+        while (bgImgCount < bgImg.length) {
+            var mesh = bgImg[bgImgCount].mesh;
+            BSWG.render.scene.remove(mesh);
+            mesh.geometry.dispose();
+            mesh.material.dispose();
+            mesh.geometry = null;
+            mesh.material = null;
+            mesh = null;
+            bgImg[bgImgCount].mesh = null;
+            bgImg[bgImgCount].mat = null;
+            bgImg[bgImgCount] = null;
+            bgImg.splice(bgImgCount, 1);
+        }
 
     };
 

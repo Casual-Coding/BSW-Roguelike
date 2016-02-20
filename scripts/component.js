@@ -3,7 +3,7 @@
 BSWG.compActiveConfMenu = null;
 
 BSWG.component_minJMatch = Math.pow(0.25, 2.0);
-BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
+BSWG.component_jMatchClickRange = Math.pow(0.1, 2.0);
 
 BSWG.componentHoverFn = function(self) {
 	if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
@@ -102,7 +102,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragment", {
     	clr: {
     		type: 'v4',
-    		value: new THREE.Vector4(Math.random(), Math.random(), Math.random(), 1.0)
+    		value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
     	},
     	light: {
     		type: 'v4',
@@ -119,7 +119,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     var self = ret;
 
-	ret.update = function() {
+	ret.update = function(clr) {
 
 		var matrix = self.mesh.matrix;
 
@@ -138,6 +138,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
 		self.mat.uniforms.light.value.x = BSWG.game.cam.x;
 		self.mat.uniforms.light.value.y = BSWG.game.cam.y;
+
+		if (clr) {
+			self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+			self.mat.needsUpdate = true;
+		}
 	};
 
 	ret.destroy = function() {
@@ -446,12 +451,7 @@ BSWG.component_CommandCenter = {
 
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height);
 
-	},
-
-	render: function(ctx, cam, dt) {
-
-		ctx.fillStyle = '#444';
-		BSWG.drawBlockPoly(ctx, this.obj, 0.8);
+		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.8);
 
 		var poly = [
 			new b2Vec2(-this.width * 0.5 * 0.75, -this.height * 0.5 * 0.0),
@@ -459,12 +459,19 @@ BSWG.component_CommandCenter = {
 			new b2Vec2( this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75),
 			new b2Vec2(-this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75)
 		].reverse();
+		this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5), 0.35);
+		
+		var poly = [
+			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
+			new b2Vec2( this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
+			new b2Vec2( this.width * 0.5 * 0.7, this.height * 0.5 * 0.05),
+			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.05)
+		].reverse();
 
-		var l = Math.floor((this.moveT/0.3) * 128);
-		ctx.fillStyle = 'rgb(' + l + ',176,' + l + ')';
-		BSWG.drawBlockPoly(ctx, { body: this.obj.body, verts: poly }, 0.8,
-			new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5)
-			);
+		this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5), 0.35);
+	},
+
+	render: function(ctx, cam, dt) {
 
 		if (this.moveT >= 0) {
 			this.moveT -= dt;
@@ -473,25 +480,18 @@ BSWG.component_CommandCenter = {
 			this.moveT = 0.0;
 		}
 
-		var poly = [
-			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
-			new b2Vec2( this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
-			new b2Vec2( this.width * 0.5 * 0.7, this.height * 0.5 * 0.05),
-			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.05)
-		].reverse();
-
-		var l = Math.floor((this.grabT/0.3) * 128);
-		ctx.fillStyle = 'rgb(' + l + ',' + l + ',176)';
-		BSWG.drawBlockPoly(ctx, { body: this.obj.body, verts: poly }, 0.8,
-			new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5)
-			);
-
 		if (this.grabT >= 0) {
 			this.grabT -= dt;
 		}
 		else {
 			this.grabT = 0.0;
 		}
+
+		this.meshObj.update([0.6, 0.6, 0.6, 1]);
+		var l = (this.grabT/0.3) * 0.25 + 0.35;
+		this.meshObj3.update([l, l, 0.68, 1]);
+		var l = (this.moveT/0.3) * 0.25 + 0.35;
+		this.meshObj2.update([l, 0.68, l, 1]);
 	},
 
 	update: function(dt) {
@@ -586,7 +586,7 @@ BSWG.component_Blaster = {
 			this.kickBack = 0.0;
 		}
 
-		this.meshObj.update();
+		this.meshObj.update([0.7, 0, 0, 1]);
 		
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
 		BSWG.drawBlockPolyOffset = null;
@@ -705,11 +705,11 @@ BSWG.component_Thruster = {
 
 	render: function(ctx, cam, dt) {
 
-		ctx.fillStyle = '#282';
+		//ctx.fillStyle = '#282';
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 		//												   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
 		//				   BSWG.componentHoverFn(this));
-		this.meshObj.update();
+		this.meshObj.update([0.1, 0.8, 0.1, 1]);
 	},
 
 	renderOver: function(ctx, cam, dt) {
@@ -835,7 +835,7 @@ BSWG.component_Block = {
 
 		//ctx.fillStyle = '#444';
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
-		this.meshObj.update();
+		this.meshObj.update([0.6,0.6,0.6,1]);
 
 	},
 
@@ -901,23 +901,23 @@ BSWG.component_HingeHalf = {
 
 	render: function(ctx, cam, dt) {
 
-		ctx.fillStyle = '#353';
+		//ctx.fillStyle = '#353';
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
 
 		if (this.motor) {
-			ctx.fillStyle = this.motor ? '#080' : '#aaa';
+			//ctx.fillStyle = this.motor ? '#080' : '#aaa';
 			//BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentHoverFn(this));
 		}
 
-		this.meshObj1.update();
-		this.meshObj2.update();
+		this.meshObj1.update([0.5, 0.6, 0.5, 1]);
+		this.meshObj2.update(this.motor ? [0, 0.7, 0, 1] : [0.9, 0.9, 0.9, 1]);
 
 	},
 
 	renderOver: function(ctx, cam, dt) {
 
 		if (!this.motor) {
-			ctx.fillStyle = this.motor ? '#080' : '#aaa';
+			//ctx.fillStyle = this.motor ? '#080' : '#aaa';
 			//BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentHoverFn(this));
 		}
 

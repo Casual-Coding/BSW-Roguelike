@@ -206,12 +206,12 @@ BSWG.render = new function() {
         this.canvas = document.createElement('canvas');
         this.canvas.oncontextmenu = function(){ return false; };
         this.canvas.style.position = 'fixed';
-        this.canvas.style.zIndex = 1;
+        this.canvas.style.zIndex = 2;
         this.ctx = this.canvas.getContext('2d');
 
         this.canvas3D = document.createElement('canvas');
         this.canvas3D.style.position = 'fixed';
-        this.canvas3D.style.zIndex = 2;
+        this.canvas3D.style.zIndex = 1;
         this.canvas3D.oncontextmenu = function(){ return false; };
 
         this.cam3D = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
@@ -226,6 +226,7 @@ BSWG.render = new function() {
 
         BSWG.initCanvasContext(this.ctx);
 
+        this.ctx.clearRect(0, 0, this.viewport.w, this.viewport.h);
         this.ctx.font = '48px Orbitron';
         this.ctx.textAlign = 'left';
         this.ctx.fillStyle = '#7d7';
@@ -288,6 +289,10 @@ BSWG.render = new function() {
             var img = new Image();
             img.src = 'images/' + images[key];
             img.onload = function() {
+
+                this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.LinearMipMapNearestFilter);
+                this.texture.needsUpdate = true;
+
                 toLoad -= 1;
                 if (toLoad === 0) {
                     if (complete)
@@ -345,6 +350,9 @@ BSWG.render = new function() {
 
         cbk(ctx, w, h);
 
+        canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.LinearMipMapNearestFilter);
+        canvas.texture.needsUpdate = true;
+
         return canvas;
 
     };
@@ -387,6 +395,8 @@ BSWG.render = new function() {
             self.time += self.dt;
 
             self.sizeViewport();
+            self.ctx.clearRect(0, 0, self.viewport.w, self.viewport.h);
+            
             var cam = null;
             if (self.renderCbk) {
                 cam = self.renderCbk(self.dt, self.time, self.ctx);
