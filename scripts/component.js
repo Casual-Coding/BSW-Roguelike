@@ -2,7 +2,7 @@
 
 BSWG.compActiveConfMenu = null;
 
-BSWG.component_minJMatch = Math.pow(0.25, 2.0);
+BSWG.component_minJMatch = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.1, 2.0);
 
 BSWG.componentHoverFn = function(self) {
@@ -43,11 +43,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 	zoffset *= BSWG.polyMesh_baseHeight;
 
 	if (!depth) {
-		var total = 0.0;
+		var total = 1000.0;
 		for (var i=0; i<len; i++) {
-			total += Math.distVec2(verts[i], zcenter);
+			total = Math.min(total, Math.distVec2(verts[i], zcenter));
 		}
-		depth = (total / len) * 0.3;
+		depth = total * 0.3;
 	}
 
 	depth *= BSWG.polyMesh_baseHeight;
@@ -58,18 +58,18 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 		overts[i] = new THREE.Vector3(
 			verts[i].x - zcenter.x + (offset?offset.x:0),
 			verts[i].y - zcenter.y + (offset?offset.y:0),
-			-depth * 0.5
+			0.0
 		);
 		iverts[i] = new THREE.Vector3(
 			(verts[i].x - zcenter.x) * iscale + (offset?offset.x:0),
 			(verts[i].y - zcenter.y) * iscale + (offset?offset.y:0),
-			depth * 0.5
+			depth
 		);
 	}
 	var cvert = new THREE.Vector3(
 		(offset?offset.x:0),
 		(offset?offset.y:0),
-		depth * 0.5
+		depth
 	);
 
     var INNER = function(idx) { return idx+len+1; };
@@ -182,8 +182,8 @@ BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
 	ctx.save();
 
-	overts = BSWG.game.cam.toScreenList(BSWG.render.viewport, overts);
-	iverts = BSWG.game.cam.toScreenList(BSWG.render.viewport, iverts);
+	overts = BSWG.render.project3D(overts, 0.0);
+	iverts = BSWG.render.project3D(iverts, 0.0);
 
 	ctx.beginPath();
 	ctx.moveTo(overts[0].x, overts[0].y);
@@ -452,6 +452,7 @@ BSWG.component_CommandCenter = {
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height);
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.8);
+		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 		var poly = [
 			new b2Vec2(-this.width * 0.5 * 0.75, -this.height * 0.5 * 0.0),
@@ -459,7 +460,8 @@ BSWG.component_CommandCenter = {
 			new b2Vec2( this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75),
 			new b2Vec2(-this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75)
 		].reverse();
-		this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5), 0.35);
+		this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5), 0.7);
+		BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
 		
 		var poly = [
 			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.75),
@@ -468,7 +470,8 @@ BSWG.component_CommandCenter = {
 			new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.05)
 		].reverse();
 
-		this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5), 0.35);
+		this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5), 0.7);
+		BSWG.componentList.makeQueryable(this, this.meshObj3.mesh);
 	},
 
 	render: function(ctx, cam, dt) {
@@ -571,6 +574,7 @@ BSWG.component_Blaster = {
 		this.kickBack = 0.0;
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.5);
+		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 	},
 
@@ -700,6 +704,7 @@ BSWG.component_Thruster = {
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 														   					 (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25));
+		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 	},
 
@@ -828,6 +833,7 @@ BSWG.component_Block = {
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 	},
 
@@ -895,7 +901,9 @@ BSWG.component_HingeHalf = {
 		}
 		
 		this.meshObj1 = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+		BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
 		this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, !this.motor ? 0.05 : 0.0, 0.05);
+		BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
 
 	},
 
@@ -1032,7 +1040,7 @@ BSWG.component = function (desc, args) {
 			return;
 		}
 
-		var jp = cam.toScreenList(BSWG.render.viewport, this.jpointsw);
+		var jp = BSWG.render.project3D(this.jpointsw, 0.0);
 
 		var map = {};
 		for (var i=0; i<this.jmatch.length; i++) {
@@ -1155,7 +1163,7 @@ BSWG.component = function (desc, args) {
 		var jpw = this.jpointsw;
 
         var mps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
-        var mp = BSWG.game.cam.toWorld(BSWG.render.viewport, mps);
+        var mp = BSWG.render.unproject3D(mps, 0.0);
 
         var mind = 10.0;
         for (var i=0; i<jpw.length; i++) {
@@ -1416,7 +1424,7 @@ BSWG.componentList = new function () {
 	this.render = function (ctx, cam, dt) {
 
 		var p = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
-		var pw = cam.toWorld(BSWG.render.viewport, p);
+		var pw = BSWG.render.unproject3D(p, 0.0);
 		var len = this.compList.length;
 
 		this.mouseOver = null;
@@ -1444,13 +1452,41 @@ BSWG.componentList = new function () {
 
 	this.atPoint = function (p) {
 
+		var raycaster = BSWG.render.raycaster;
+
+		raycaster.set(new THREE.Vector3(p.x, p.y, 0.4), new THREE.Vector3(0.0, 0.0, -1.0));
+
 		var len = this.compList.length;
 		for (var i=0; i<len; i++) {
-			if (this.compList[i].pointIn(p)) {
+			if (raycaster.intersectObjects(this.compList[i].queryMeshes).length > 0) {
 				return this.compList[i];
 			}
 		}
 		return null;
+
+	};
+
+	this.makeQueryable = function (comp, mesh) {
+
+		mesh.__compid = comp.id;
+		comp.queryMeshes = comp.queryMeshes || new Array();
+		comp.queryMeshes.push(mesh);
+		return true;
+
+	};
+
+	this.removeQueryable = function (comp, mesh) {
+
+		if (!comp.queryMeshes) {
+			return false;
+		}
+		for (var i=0; i<comp.queryMeshes.length; i++) {
+			if (comp.queryMeshes[i].__compid === comp.id) {
+				comp.queryMeshes.splice(i, 1);
+				return true;
+			}
+		}
+		return false;
 
 	};
 

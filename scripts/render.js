@@ -396,19 +396,12 @@ BSWG.render = new function() {
 
             self.sizeViewport();
             self.ctx.clearRect(0, 0, self.viewport.w, self.viewport.h);
-            
-            var cam = null;
+            self.renderer.clear();
+
             if (self.renderCbk) {
-                cam = self.renderCbk(self.dt, self.time, self.ctx);
+                self.renderCbk(self.dt, self.time, self.ctx);
             }
 
-            self.renderer.clear();
-            if (cam) {
-                var f = Math.min(self.viewport.h / self.viewport.w, self.viewport.w / self.viewport.h) * 0.54;
-                self.cam3D.position.set(cam.x, cam.y, f/cam.z);
-                self.cam3D.lookAt(new THREE.Vector3(cam.x, cam.y, 0.0));
-                self.cam3D.updateMatrix();
-            }
             self.renderer.render( self.scene, self.cam3D );
 
             BSWG.input.newFrame();
@@ -417,6 +410,85 @@ BSWG.render = new function() {
         };
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);
+    };
+
+    this.updateCam3D = function ( cam ) {
+        if (cam) {
+            var f = Math.min(this.viewport.h / this.viewport.w, this.viewport.w / this.viewport.h) * 0.54;
+            this.cam3D.position.set(cam.x, cam.y, f/cam.z);
+            this.cam3D.lookAt(new THREE.Vector3(cam.x, cam.y, 0.0));
+            this.cam3D.updateProjectionMatrix();
+            this.cam3D.updateMatrix();
+            this.cam3D.updateMatrixWorld();
+        }       
+    };
+
+    this.project3D = function ( p, z ) {
+
+        if (p.constructor === Array) {
+
+            var len = p.length;
+            var ret = new Array(len);
+            for (var i=0; i<len; i++) {
+                ret[i] = this.project3D(p[i], z);
+            }
+
+            return ret;
+
+        }
+
+        if (this.cam3D && this.viewport) {
+
+            var p2 = new THREE.Vector3(p.x, p.y, z).project(this.cam3D);
+            return new b2Vec2(
+                (p2.x + 1) * this.viewport.w * 0.5,
+                (-p2.y + 1) * this.viewport.h * 0.5
+            );
+
+        }
+        else {
+
+            return new b2Vec2(0, 0);
+
+        }
+
+    };
+
+    this.unproject3D = function ( p, z ) {
+
+        if (p.constructor === Array) {
+
+            var len = p.length;
+            var ret = new Array(len);
+            for (var i=0; i<len; i++) {
+                ret[i] = this.unproject3D(p[i], z);
+            }
+
+            return ret;
+
+        }
+
+        if (this.cam3D && this.viewport) {
+
+            var p2 = new THREE.Vector3(
+                 (p.x / this.viewport.w) * 2 - 1,
+                -(p.y / this.viewport.h) * 2 + 1,
+                0.5
+            ).unproject(this.cam3D);
+
+            var dir = p2.sub( this.cam3D.position ).normalize();
+            var distance = -this.cam3D.position.z / dir.z;
+            p2 = this.cam3D.position.clone().add(dir.multiplyScalar(distance));
+
+            return new b2Vec2(p2.x, p2.y);
+
+        }
+        else {
+
+            return new b2Vec2(0, 0);
+
+        }
+
     };
 
     this.stopRenderer = function () {
@@ -433,7 +505,7 @@ BSWG.render = new function() {
     };
 
     var lastRandomValue = null;
-    this.newMaterial = function (vertexID, fragmentID, data) {
+    this.newMaterial = function (vertexID, fragmentID, data, blendMode) {
         var rand = Math.random();
         if (lastRandomValue === rand) { // using seed random other places can lead to materials with duplicate UUIDs
             Math.seedrandom();
@@ -452,6 +524,11 @@ BSWG.render = new function() {
             fragmentShader: this.getShader(fragmentID),
             transparent: true
         });
+
+        if (blendMode || blendMode === 0) {
+            material.blending = blendMode;
+            material.needsUpdate = true;
+        }
 
         return material;
     };

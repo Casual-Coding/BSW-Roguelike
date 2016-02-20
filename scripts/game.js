@@ -123,6 +123,12 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
+            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / (1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1);
+            self.cam.zoomTo(dt*2.5, toZ);
+            self.cam.panTo(dt*2.0, self.ccblock.obj.body.GetWorldCenter());
+            BSWG.render.updateCam3D(self.cam);
+
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
 
             BSWG.ui.update();
@@ -132,7 +138,7 @@ BSWG.game = new function(){
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');
             var mps = new b2Vec2(mx, my);
-            var mp = self.cam.toWorld(BSWG.render.viewport, mps);
+            var mp = BSWG.render.unproject3D(mps, 0.0);
 
             if (self.editMode) {
 
@@ -177,11 +183,6 @@ BSWG.game = new function(){
             self.grabbedBlock = grabbedBlock;
 
             BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
-
-            var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
-            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / (1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1);
-            self.cam.zoomTo(dt*2.5, toZ);
-            self.cam.panTo(dt*2.0, self.ccblock.obj.body.GetWorldCenter());
 
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
@@ -244,8 +245,6 @@ BSWG.game = new function(){
                 blackoutT = 0.0;
             }
 
-            return self.cam;
-
         });
     };
 
@@ -286,12 +285,15 @@ BSWG.starfield = function(){
     }
 
     var bgImg = [],
-        bgImgCount = 0;
+        bgImgCount = 0,
+        bgGeom = new THREE.PlaneGeometry(1.0, 1.0, 1, 1);
 
-    var addBgImg = function(img, x, y, z, w, h, a, clr) {
+    var addBgImg = function(img, x, y, z, w, h, a, clr, cull) {
 
-        if ((x+w) < 0 || (y+h) < 0 || x >= BSWG.render.viewport.w || y >= BSWG.render.viewport.h) {
-            return;
+        if (true) {
+            if ((x+w) < 0 || (y+h) < 0 || x >= BSWG.render.viewport.w || y >= BSWG.render.viewport.h) {
+                return;
+            }
         }
 
         x += w * 0.5;
@@ -314,7 +316,7 @@ BSWG.starfield = function(){
         }
         else { // add new
             var obj = new Object();
-            obj.geom = new THREE.PlaneGeometry(1.0, 1.0, 1, 1);
+            obj.geom = bgGeom;
             obj.mat = BSWG.render.newMaterial("bgVertex", "bgFragment", {
                 pos: {
                     type: 'v3',
@@ -332,7 +334,7 @@ BSWG.starfield = function(){
                     type: 't',
                     value: img.texture
                 }
-            });
+            }, THREE.AdditiveBlending);
 
             obj.mesh = new THREE.Mesh( obj.geom, obj.mat );
             obj.mesh.frustumCulled = false;
@@ -388,7 +390,7 @@ BSWG.starfield = function(){
                         var sz = (r1*([1.7, 6.0][l-2])+0.5)*Math.min(w,h);
                         addBgImg(nimg, ps[0].x, ps[0].y, l, sz, sz, Math.PI*2.0*r2, [1,1,1,0.3*alpha]);
                     }
-                    addBgImg(img[k % img.length], ps[0].x, ps[0].y, l, w, h, 0.0, [1,1,1,[0.4, 0.4, 0.95][l-1] * alpha]);
+                    addBgImg(img[k % img.length], ps[0].x, ps[0].y, l, w, h, 0.0, [1,1,1,[0.4, 0.4, 0.95][l-1] * alpha], true);
                 }
             }
 
