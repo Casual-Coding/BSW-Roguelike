@@ -106,7 +106,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     	},
     	light: {
     		type: 'v4',
-    		value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 10.0, 1.0)
+    		value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
+    	},
+    	map: {
+    		type: 't',
+    		value: BSWG.render.images['test_nm'].texture
     	}
     });
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
@@ -1059,11 +1063,11 @@ BSWG.component = function (desc, args) {
 			}
         	ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
         	ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
-            ctx.globalAlpha = 0.9;
+            ctx.globalAlpha = 0.7;
         	if (this.welds[i])
         	{
         		ctx.fillStyle = '#ccf';
-        		ctx.globalAlpha = 1.0;
+        		ctx.globalAlpha = 0.4;
         		if (this.jmhover === i) {
         			ctx.fillStyle = '#f22';
         		}

@@ -41,7 +41,7 @@ BSWG.blasterList = new function () {
 			ctx.strokeStyle = Math.random() < 0.5 ? '#fff' : '#f11';
 			ctx.beginPath();
 			ctx.moveTo(p.x, p.y);
-			ctx.lineTo(p.x - B.v.x * dt * cam.z * 5000.0, p.y - B.v.y * dt * cam.z * 5000.0);
+			ctx.lineTo(p.x - B.v.x * dt * cam.z * 5000.0, p.y + B.v.y * dt * cam.z * 5000.0);
 			ctx.stroke();
 		}
 		ctx.globalAlpha = 1.0;
