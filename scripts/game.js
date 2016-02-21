@@ -44,6 +44,8 @@ BSWG.game = new function(){
     {
         var self = this;
 
+        Math.seedrandom();
+
         var pastPositions = [ new b2Vec2(0, 0) ];
         for (var i=0; i<88; i++) {
 

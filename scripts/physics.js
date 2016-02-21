@@ -140,10 +140,8 @@ BSWG.physics = new function(){
 
 	this.mousePosWorld = function () {
 
-		var cam = BSWG.game.cam;
-		var viewport = BSWG.render.viewport;
 		var ps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
-		var ret = cam.toWorld(viewport, ps);
+		var ret = BSWG.render.unproject3D(ps, 0.0);
 		return ret;
 
 	};

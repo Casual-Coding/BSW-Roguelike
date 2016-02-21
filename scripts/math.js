@@ -48,6 +48,22 @@ Math.interpolate = function (p1, p2, u) {
 
 };
 
+Math.smoothPoly = function (poly, f) {
+
+    f = f || 0.1;
+
+    var ret = new Array(poly.length*2);
+    for (var i=0; i<poly.length; i++) {
+        var i1 = (i-1+poly.length) % poly.length;
+        var i2 = (i+1) % poly.length;
+        ret[i*2] = Math.interpolate(poly[i], poly[i1], f);
+        ret[i*2+1] = Math.interpolate(poly[i], poly[i2], f);
+    }
+
+    return ret;
+
+};
+
 Math.pointDistance = function (p1, p2) {
 
     var dx = p2.x - p1.x;
@@ -55,7 +71,7 @@ Math.pointDistance = function (p1, p2) {
 
     return Math.sqrt(dx*dx+dy*dy);
 
-}
+};
 
 // https://gist.github.com/wteuber/6241786
 Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };

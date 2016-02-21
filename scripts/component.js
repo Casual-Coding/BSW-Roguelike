@@ -3,7 +3,7 @@
 BSWG.compActiveConfMenu = null;
 
 BSWG.component_minJMatch = Math.pow(0.15, 2.0);
-BSWG.component_jMatchClickRange = Math.pow(0.1, 2.0);
+BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.componentHoverFn = function(self) {
 	if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
@@ -16,15 +16,20 @@ BSWG.componentHoverFn = function(self) {
 };
 
 BSWG.polyMesh_baseHeight = 0.5;
+BSWG.blockPolySmooth = null;
 
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
-	Math.seedrandom();
 	var ret = new Object();
 
 	var body  = obj.body,
-		verts = obj.verts,
-		len   = verts.length;
+		verts = obj.verts;
+
+	if (BSWG.blockPolySmooth) {
+		verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
+	}
+
+	var len = verts.length;
 
 	var offset = null;
 
@@ -53,12 +58,18 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 	depth *= BSWG.polyMesh_baseHeight;
 
 	var overts = new Array(len),
-	    iverts = new Array(len);
+	    iverts = new Array(len),
+	    mverts = new Array(len);
 	for (var i=0; i<len; i++) {
 		overts[i] = new THREE.Vector3(
 			verts[i].x - zcenter.x + (offset?offset.x:0),
 			verts[i].y - zcenter.y + (offset?offset.y:0),
 			0.0
+		);
+		mverts[i] = new THREE.Vector3(
+			(verts[i].x - zcenter.x) * (iscale*0.1+0.9) + (offset?offset.x:0),
+			(verts[i].y - zcenter.y) * (iscale*0.1+0.9) + (offset?offset.y:0),
+			depth*0.35
 		);
 		iverts[i] = new THREE.Vector3(
 			(verts[i].x - zcenter.x) * iscale + (offset?offset.x:0),
@@ -72,27 +83,31 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 		depth
 	);
 
-    var INNER = function(idx) { return idx+len+1; };
+    var INNER = function(idx) { return idx+len*2+1; };
+    var MIDDLE = function(idx) { return idx+len+1; };
     var OUTER = function(idx) { return idx+1; };
 
     ret.geom = new THREE.Geometry();
 
     var vertices = ret.geom.vertices;
-    vertices.length = len*2 + 1;
+    vertices.length = len*3 + 1;
     vertices[0] = cvert;
     for (var i=0; i<len; i++) {
     	vertices[OUTER(i)] = overts[i];
+    	vertices[MIDDLE(i)] = mverts[i];
     	vertices[INNER(i)] = iverts[i];
     }
 
 	var faces = ret.geom.faces;
     var cf = 0;
-    faces.length = len*3;
+    faces.length = len*5;
     for (var i=0; i<len; i++) {
     	var j = (i+1) % len;
     	faces[cf++] = new THREE.Face3(INNER(i), INNER(j), 0);
-    	faces[cf++] = new THREE.Face3(OUTER(i), OUTER(j), INNER(j));
-    	faces[cf++] = new THREE.Face3(OUTER(i), INNER(j), INNER(i));
+    	faces[cf++] = new THREE.Face3(MIDDLE(i), MIDDLE(j), INNER(j));
+    	faces[cf++] = new THREE.Face3(MIDDLE(i), INNER(j), INNER(i));
+    	faces[cf++] = new THREE.Face3(OUTER(i), OUTER(j), MIDDLE(j));
+    	faces[cf++] = new THREE.Face3(OUTER(i), MIDDLE(j), MIDDLE(i));
     }
 
     ret.geom.computeFaceNormals();
@@ -140,13 +155,17 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
 		self.mesh.updateMatrix();
 
-		self.mat.uniforms.light.value.x = BSWG.game.cam.x;
-		self.mat.uniforms.light.value.y = BSWG.game.cam.y;
+		var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
+
+		self.mat.uniforms.light.value.x = lp.x;
+		self.mat.uniforms.light.value.y = lp.y;
+		self.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
 
 		if (clr) {
 			self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
-			self.mat.needsUpdate = true;
 		}
+
+		self.mat.needsUpdate = true;
 	};
 
 	ret.destroy = function() {
@@ -455,8 +474,12 @@ BSWG.component_CommandCenter = {
 
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height);
 
+		BSWG.blockPolySmooth = 0.02;
+
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.8);
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
+
+		BSWG.blockPolySmooth = 0.1;
 
 		var poly = [
 			new b2Vec2(-this.width * 0.5 * 0.75, -this.height * 0.5 * 0.0),
@@ -476,6 +499,8 @@ BSWG.component_CommandCenter = {
 
 		this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5), 0.7);
 		BSWG.componentList.makeQueryable(this, this.meshObj3.mesh);
+
+		BSWG.blockPolySmooth = null;
 	},
 
 	render: function(ctx, cam, dt) {
@@ -494,7 +519,7 @@ BSWG.component_CommandCenter = {
 			this.grabT = 0.0;
 		}
 
-		this.meshObj.update([0.6, 0.6, 0.6, 1]);
+		this.meshObj.update([0.85, 0.85, 0.85, 1]);
 		var l = (this.grabT/0.3) * 0.25 + 0.35;
 		this.meshObj3.update([l, l, 0.68, 1]);
 		var l = (this.moveT/0.3) * 0.25 + 0.35;
@@ -706,8 +731,11 @@ BSWG.component_Thruster = {
 		this.thrustKey = args.thrustKey || BSWG.KEY.UP;
 		this.thrustT = 0.0;
 
+		BSWG.blockPolySmooth = 0.1;
+
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 														   					 (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25));
+		BSWG.blockPolySmooth = null;
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 	},
@@ -836,7 +864,9 @@ BSWG.component_Block = {
 
 		this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
+		BSWG.blockPolySmooth = 0.03;
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+		BSWG.blockPolySmooth = null;
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 	},
@@ -904,7 +934,9 @@ BSWG.component_HingeHalf = {
 			);
 		}
 		
+		BSWG.blockPolySmooth = 0.05;
 		this.meshObj1 = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+		BSWG.blockPolySmooth = null;
 		BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
 		this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, !this.motor ? 0.05 : 0.0, 0.05);
 		BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
@@ -1110,7 +1142,7 @@ BSWG.component = function (desc, args) {
 	   					rot = Math.PI/2.0;
 	   				}*/
 
-	   				var p = cam.toScreen(BSWG.render.viewport, BSWG.physics.localToWorld(info[1], this.obj.body));
+	   				var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
 	   				var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
 	   				ctx.globalAlpha = 0.25;
 	   				ctx.fillStyle = '#444';

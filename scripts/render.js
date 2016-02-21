@@ -524,11 +524,13 @@ BSWG.render = new function() {
             fragmentShader: this.getShader(fragmentID),
             transparent: true
         });
+        material.side = THREE.DoubleSide;
 
         if (blendMode || blendMode === 0) {
             material.blending = blendMode;
-            material.needsUpdate = true;
         }
+
+        material.needsUpdate = true;
 
         return material;
     };
