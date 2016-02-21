@@ -221,12 +221,12 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
 		overts[cf++] = new THREE.Vector3(
 			verts[i].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
 			verts[i].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
-			-0.001
+			0.001
 		);
 		overts[cf++] = new THREE.Vector3(
 			verts[j].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
 			verts[j].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
-			-0.001
+			0.001
 		);
 	}
 	var cvert = new THREE.Vector3(
@@ -262,7 +262,7 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
     		type: 'v4',
     		value: new THREE.Vector4(0.5, 1.0, 0.5, 0.0)
     	},
-    });
+    }, THREE.NormalBlending, false);
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
 
     ret.geom.needsUpdate = true;
@@ -292,6 +292,12 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
 
 		if (clr) {
 			self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+			if (clr[3] > 0) {
+				self.mesh.visible = true;
+			}
+			else {
+				self.mesh.visible = false;
+			}
 		}
 
 		self.mat.needsUpdate = true;
