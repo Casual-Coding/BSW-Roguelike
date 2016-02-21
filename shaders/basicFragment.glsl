@@ -8,6 +8,7 @@ varying mat3 vNormalMatrix;
 uniform sampler2D map;
 uniform vec4 light;
 uniform vec4 clr;
+uniform vec4 extra;
 
 void main() {
 
@@ -16,7 +17,7 @@ void main() {
     float b = (blending.x + blending.y + blending.z);
     blending /= vec3(b, b, b);
 
-    float scale = 0.5;
+    float scale = 0.5 * extra.x;
 
     vec4 xaxis = texture2D( map, vLocal.yz * scale + vec2(0.5, 0.5));
     vec4 yaxis = texture2D( map, vLocal.xz * scale + vec2(0.5, 0.5));

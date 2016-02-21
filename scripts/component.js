@@ -126,6 +126,10 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     	map: {
     		type: 't',
     		value: BSWG.render.images['test_nm'].texture
+    	},
+    	extra: {
+    		type: 'v4',
+    		value: new THREE.Vector4(1,0,0,0)
     	}
     });
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
@@ -138,7 +142,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     var self = ret;
 
-	ret.update = function(clr) {
+	ret.update = function(clr, texScale) {
 
 		var matrix = self.mesh.matrix;
 
@@ -160,6 +164,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 		self.mat.uniforms.light.value.x = lp.x;
 		self.mat.uniforms.light.value.y = lp.y;
 		self.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
+
+		self.mat.uniforms.extra.value.x = texScale || 1.0;
 
 		if (clr) {
 			self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
@@ -521,9 +527,9 @@ BSWG.component_CommandCenter = {
 
 		this.meshObj.update([0.85, 0.85, 0.85, 1]);
 		var l = (this.grabT/0.3) * 0.25 + 0.35;
-		this.meshObj3.update([l, l, 0.68, 1]);
+		this.meshObj3.update([l, l, 0.68, 1], 3.0);
 		var l = (this.moveT/0.3) * 0.25 + 0.35;
-		this.meshObj2.update([l, 0.68, l, 1]);
+		this.meshObj2.update([l, 0.68, l, 1], 3.0);
 	},
 
 	update: function(dt) {
@@ -619,7 +625,7 @@ BSWG.component_Blaster = {
 			this.kickBack = 0.0;
 		}
 
-		this.meshObj.update([0.7, 0, 0, 1]);
+		this.meshObj.update([0.7, 0.3, 0.3, 1], 4);
 		
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
 		BSWG.drawBlockPolyOffset = null;
@@ -746,7 +752,7 @@ BSWG.component_Thruster = {
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 		//												   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
 		//				   BSWG.componentHoverFn(this));
-		this.meshObj.update([0.1, 0.8, 0.1, 1]);
+		this.meshObj.update([0.45, 0.8, 0.45, 1], 1/0.75);
 	},
 
 	renderOver: function(ctx, cam, dt) {
@@ -953,8 +959,8 @@ BSWG.component_HingeHalf = {
 			//BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentHoverFn(this));
 		}
 
-		this.meshObj1.update([0.5, 0.6, 0.5, 1]);
-		this.meshObj2.update(this.motor ? [0, 0.7, 0, 1] : [0.9, 0.9, 0.9, 1]);
+		this.meshObj1.update([0.5, 0.6, 0.5, 1], 2);
+		this.meshObj2.update(this.motor ? [0.2, 0.7, 0.2, 1] : [0.3, 0.3, 0.7, 1], 4);
 
 	},
 
