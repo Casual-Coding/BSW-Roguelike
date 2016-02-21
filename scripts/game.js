@@ -1,3 +1,6 @@
+BSWG.grabSlowdownDist = 0.5;
+BSWG.grabSlowdownDistStart = 3.0;
+
 BSWG.game = new function(){
 
     this.test = function ()
@@ -172,6 +175,17 @@ BSWG.game = new function(){
                 } else if (grabbedBlock) {
                     grabbedBlock.obj.body.SetAngularDamping(0.1);
                     grabbedBlock.obj.body.SetLinearDamping(0.1);
+                    
+                    var dist = Math.distVec2(grabbedBlock.getWorldPoint(grabbedLocal), BSWG.physics.mousePosWorld());
+                    if (dist < BSWG.grabSlowdownDistStart) {
+                        var t = Math.pow(1.0 - Math.clamp((dist - BSWG.grabSlowdownDist) / (BSWG.grabSlowdownDistStart - BSWG.grabSlowdownDist), 0, 1), 2.0);
+                        BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75*(1.0+t*0.5));
+                        grabbedBlock.obj.body.SetLinearDamping(0.1 + 2.0*t);
+                        grabbedBlock.obj.body.SetAngularDamping(0.1 + 2.0*t);
+                    }
+                    else {
+                        BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75);
+                    }
                 }
             }
             else if (grabbedBlock) {
@@ -200,11 +214,11 @@ BSWG.game = new function(){
                 self.ccblock.grabT = 0.19;
 
                 var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
-                var gp = self.cam.toScreen(viewport, gpw);
+                var gp = BSWG.render.project3D(gpw);
 
                 var ccl = new b2Vec2(0.0, 0.6);
                 var ccw = self.ccblock.getWorldPoint(ccl);
-                var cc = self.cam.toScreen(viewport, ccw);
+                var cc = BSWG.render.project3D(ccw);
 
                 ctx.lineWidth = 2.0;
                 ctx.strokeStyle = 'rgba(192, 192, 255, ' + (BSWG.input.MOUSE('shift') ? 0.3 : 0.75) + ')';
