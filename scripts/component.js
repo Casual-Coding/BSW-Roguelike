@@ -186,6 +186,129 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
 };
 
+BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
+
+	oscale = 0.1;
+
+	var ret = new Object();
+
+	var body  = obj.body,
+		verts = obj.verts;
+
+	/*if (BSWG.blockPolySmooth) {
+		verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
+	}*/
+
+	var len = verts.length;
+
+	var offset = null;
+
+	if (!zcenter) {
+		zcenter = body.GetLocalCenter();
+	}
+	else {
+		var bc = body.GetLocalCenter();
+		offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
+	}
+
+	var overts = new Array(len*2),
+		cf = 0;
+	for (var i=0; i<len; i++) {
+		var j = (i+1) % len;
+		var edgeLen = Math.distVec2(verts[i], verts[j]);
+		var dx = (verts[j].x - verts[i].x) / edgeLen;
+		var dy = (verts[j].y - verts[i].y) / edgeLen;
+		overts[cf++] = new THREE.Vector3(
+			verts[i].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
+			verts[i].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
+			-0.001
+		);
+		overts[cf++] = new THREE.Vector3(
+			verts[j].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
+			verts[j].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
+			-0.001
+		);
+	}
+	var cvert = new THREE.Vector3(
+		(offset?offset.x:0),
+		(offset?offset.y:0),
+		-0.001
+	);
+	len *= 2;
+
+    var OUTER = function(idx) { return idx+1; };
+
+    ret.geom = new THREE.Geometry();
+
+    var vertices = ret.geom.vertices;
+    vertices.length = len + 1;
+    vertices[0] = cvert;
+    for (var i=0; i<len; i++) {
+    	vertices[OUTER(i)] = overts[i];
+    }
+
+	var faces = ret.geom.faces;
+    faces.length = len;
+    for (var i=0; i<len; i++) {
+    	var j = (i+1) % len;
+    	faces[i] = new THREE.Face3(OUTER(i), OUTER(j), 0);
+    }
+
+    ret.geom.computeFaceNormals();
+    ret.geom.computeBoundingSphere();
+
+    ret.mat = BSWG.render.newMaterial("basicVertex", "selectionFragment", {
+    	clr: {
+    		type: 'v4',
+    		value: new THREE.Vector4(0.5, 1.0, 0.5, 0.0)
+    	},
+    });
+    ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
+
+    ret.geom.needsUpdate = true;
+	ret.mat.needsUpdate = true;
+    ret.mesh.needsUpdate = true;
+
+    BSWG.render.scene.add( ret.mesh );
+
+    var self = ret;
+
+	ret.update = function(clr) {
+
+		var matrix = self.mesh.matrix;
+
+		var center = body.GetWorldCenter(),
+			angle  = body.GetAngle();
+
+		var offset = BSWG.drawBlockPolyOffset || null;
+
+		self.mesh.position.x = center.x + (offset?offset.x:0);
+		self.mesh.position.y = center.y + (offset?offset.y:0);
+		self.mesh.position.z = 0.0;
+
+		self.mesh.rotation.z = angle;
+
+		self.mesh.updateMatrix();
+
+		if (clr) {
+			self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+		}
+
+		self.mat.needsUpdate = true;
+	};
+
+	ret.destroy = function() {
+
+		BSWG.render.scene.remove( self.mesh );
+
+	};
+
+	ret.update();
+
+	return ret;
+
+};
+
 BSWG.drawBlockPolyOffset = null;
 BSWG.drawBlockPoly = function(ctx, obj, iscale, zcenter, outline) {
 
@@ -483,6 +606,7 @@ BSWG.component_CommandCenter = {
 		BSWG.blockPolySmooth = 0.02;
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.8);
+		this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 		BSWG.blockPolySmooth = 0.1;
@@ -530,6 +654,8 @@ BSWG.component_CommandCenter = {
 		this.meshObj3.update([l, l, 0.68, 1], 3.0);
 		var l = (this.moveT/0.3) * 0.25 + 0.35;
 		this.meshObj2.update([l, 0.8, 0.9, 1], 3.0);
+
+		this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 	},
 
 	update: function(dt) {
@@ -609,6 +735,7 @@ BSWG.component_Blaster = {
 		this.kickBack = 0.0;
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.5);
+		this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
 	},
@@ -626,6 +753,7 @@ BSWG.component_Blaster = {
 		}
 
 		this.meshObj.update([0.9, 0.65, 0.2, 1], 4);
+		this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 		
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
 		BSWG.drawBlockPolyOffset = null;
@@ -741,6 +869,7 @@ BSWG.component_Thruster = {
 
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 														   					 (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25));
+		this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
 		BSWG.blockPolySmooth = null;
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
@@ -753,6 +882,7 @@ BSWG.component_Thruster = {
 		//												   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
 		//				   BSWG.componentHoverFn(this));
 		this.meshObj.update([0.1, 0.9, 1.0, 1], 1/0.75);
+		this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 	},
 
 	renderOver: function(ctx, cam, dt) {
@@ -872,6 +1002,7 @@ BSWG.component_Block = {
 
 		BSWG.blockPolySmooth = 0.03;
 		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+		this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
 		BSWG.blockPolySmooth = null;
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
@@ -882,6 +1013,7 @@ BSWG.component_Block = {
 		//ctx.fillStyle = '#444';
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
 		this.meshObj.update([0.6,0.6,0.6,1]);
+		this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 
 	},
 
@@ -942,9 +1074,11 @@ BSWG.component_HingeHalf = {
 		
 		BSWG.blockPolySmooth = 0.05;
 		this.meshObj1 = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+		this.selMeshObj1 = BSWG.genereteBlockPolyOutline(this.obj);
 		BSWG.blockPolySmooth = null;
 		BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
 		this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, !this.motor ? 0.05 : 0.0, 0.05);
+		this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);
 		BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
 
 	},
@@ -958,6 +1092,9 @@ BSWG.component_HingeHalf = {
 			//ctx.fillStyle = this.motor ? '#080' : '#aaa';
 			//BSWG.drawBlockPoly(ctx, { verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, BSWG.componentHoverFn(this));
 		}
+
+		this.selMeshObj1.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+		this.selMeshObj2.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 
 		this.meshObj1.update([0.5, 0.6, 0.5, 1], 2);
 		this.meshObj2.update(this.motor ? [0.1, 0.8, 0.9, 1] : [0.5, 0.5, 0.5, 1], 4);

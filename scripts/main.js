@@ -51,7 +51,8 @@ var BSWG = new function(){
         ],
         'fragment': [
             'basicFragment',
-            'bgFragment'
+            'bgFragment',
+            'selectionFragment'
         ]
     };
 

@@ -107,3 +107,29 @@ Math.distSqVec2 = function(a, b) {
     var x = a.x - b.x, y = a.y - b.y;
     return x*x + y*y;
 };
+
+
+// http://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
+Math.polyCentroid = function(p) {
+
+    var ret = new b2Vec2(0, 0);    
+    var sa = 0.0, x0 = 0.0, y0 = 0.0, x1 = 0.0, y1 = 0.0, a = 0.0;
+    var len = p.length;
+
+    for (var i=0; i<len-1; i++) {
+        x0 = p[i].x;
+        y0 = p[i].y;
+        x1 = p[i+1].x;
+        y1 = p[i+1].y;
+        a = x0*y1 - x1*y0;
+        sa += a;
+        ret.x += (x0 + x1)*a;
+        ret.y += (y0 + y1)*a;
+    }
+
+    sa *= 0.5;
+    ret.x /= (6.0*sa);
+    ret.y /= (6.0*sa);
+
+    return ret;    
+}
