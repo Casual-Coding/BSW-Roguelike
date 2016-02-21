@@ -290,7 +290,7 @@ BSWG.render = new function() {
             img.src = 'images/' + images[key];
             img.onload = function() {
 
-                this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.LinearMipMapNearestFilter);
+                this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
                 this.texture.needsUpdate = true;
 
                 toLoad -= 1;
@@ -350,7 +350,7 @@ BSWG.render = new function() {
 
         cbk(ctx, w, h);
 
-        canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.LinearMipMapNearestFilter);
+        canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
         canvas.texture.needsUpdate = true;
 
         return canvas;
