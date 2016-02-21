@@ -526,10 +526,10 @@ BSWG.component_CommandCenter = {
 		}
 
 		this.meshObj.update([0.85, 0.85, 0.85, 1]);
-		var l = (this.grabT/0.3) * 0.25 + 0.35;
+		var l = (this.grabT/0.3) * 0.25 + 0.5;
 		this.meshObj3.update([l, l, 0.68, 1], 3.0);
 		var l = (this.moveT/0.3) * 0.25 + 0.35;
-		this.meshObj2.update([l, 0.68, l, 1], 3.0);
+		this.meshObj2.update([l, 0.8, 0.9, 1], 3.0);
 	},
 
 	update: function(dt) {
@@ -625,7 +625,7 @@ BSWG.component_Blaster = {
 			this.kickBack = 0.0;
 		}
 
-		this.meshObj.update([0.7, 0.3, 0.3, 1], 4);
+		this.meshObj.update([0.9, 0.65, 0.2, 1], 4);
 		
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
 		BSWG.drawBlockPolyOffset = null;
@@ -752,7 +752,7 @@ BSWG.component_Thruster = {
 		//BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
 		//												   (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
 		//				   BSWG.componentHoverFn(this));
-		this.meshObj.update([0.45, 0.8, 0.45, 1], 1/0.75);
+		this.meshObj.update([0.1, 0.9, 1.0, 1], 1/0.75);
 	},
 
 	renderOver: function(ctx, cam, dt) {
@@ -960,7 +960,7 @@ BSWG.component_HingeHalf = {
 		}
 
 		this.meshObj1.update([0.5, 0.6, 0.5, 1], 2);
-		this.meshObj2.update(this.motor ? [0.2, 0.7, 0.2, 1] : [0.3, 0.3, 0.7, 1], 4);
+		this.meshObj2.update(this.motor ? [0.1, 0.8, 0.9, 1] : [0.5, 0.5, 0.5, 1], 4);
 
 	},
 
