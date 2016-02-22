@@ -49,7 +49,7 @@ vec3 sampleStars1 (vec2 p) {
 vec3 sampleNebulas1 (vec2 p) {
 
     #define NEB_SIZE 300.0
-    #define GRID_SIZE 3
+    #define GRID_SIZE 1
 
     float z = (cam.z*0.5 + 0.5*0.1) / pow(2.0, 5.0);
     vec2 p0 = TO_WORLD(p, z) / NEB_SIZE;
@@ -77,8 +77,8 @@ vec3 sampleNebulas1 (vec2 p) {
 
 vec3 sampleNebulas2 (vec2 p) {
 
-    #define NEB_SIZE2 560.0
-    #define GRID_SIZE2 3
+    #define NEB_SIZE2 800.0
+    #define GRID_SIZE2 1
 
     float z = 0.1 / pow(3.0, 5.0);
     vec2 p0 = TO_WORLD(p, z) / NEB_SIZE2 + vec2(11415, 10521);
@@ -92,7 +92,7 @@ vec3 sampleNebulas2 (vec2 p) {
             float i = floor(k * 15.0);
             k = floor(k * 10000000.0);
 
-            float sz = mod(k/100.0, 1.0) * 3.0 + 0.5;
+            float sz = mod(k/100.0, 1.0) * 2.0 + 0.5;
             float angle = mod((k+371.0)/100.0, 1.0) * 3.141592 * 2.0;
 
             if (abs(mod(floor(k/37.0), 3.0)) < 0.001) {
