@@ -269,10 +269,8 @@ BSWG.game = new function(){
 BSWG.starfield = function(){
 
     var dustCount = 16;
-    var dustImageSize = 1024;
+    var dustImageSize = 512;
     var dustImages = [];
-    var starSizeO = [ 1, 8 ];
-    var layers = 2;
 
     var starImg = [];
     for (var i=0; i<15; i++) {
@@ -293,141 +291,75 @@ BSWG.starfield = function(){
             ctx.globalAlpha = 0.25;
             ctx.fillStyle = '#fff';
 
-            for (var k=0; k<60; k++) {
-                ctx.fillRect(Math.random()*w, Math.random()*h, 4, 4);
+            for (var k=0; k<90; k++) {
+                ctx.fillRect(Math.random()*w, Math.random()*h, 2, 2);
             }
 
         }));
     }
 
-    var bgImg = [],
-        bgImgCount = 0,
-        bgGeom = new THREE.PlaneGeometry(1.0, 1.0, 1, 1);
+    var merge = function(imgList, iw, ih) { return function(ctx, w, h) {
 
-    var addBgImg = function(img, x, y, z, w, h, a, clr, cull) {
+        ctx.clearRect(0, 0, w, h);
+        ctx.globalAlpha = 1.0;
 
-        if (true) {
-            if ((x+w) < 0 || (y+h) < 0 || x >= BSWG.render.viewport.w || y >= BSWG.render.viewport.h) {
-                return;
-            }
+        for (var i=0; i<imgList.length; i++) {
+            var x = i % (w/iw);
+            var y = (i-x) / (w/ih);
+            ctx.drawImage(imgList[i], x*iw, y*ih);
         }
 
-        x += w * 0.5;
-        y += h * 0.5;
+    } };; 
 
-        var x1 = 2 * (x / BSWG.render.viewport.w) - 1;
-        var y1 = 1 - 2 * (y / BSWG.render.viewport.h);
+    var starImgMerge = BSWG.render.proceduralImage(2048, 2048, merge(starImg, 512, 512));
+    var nebulaImgMerge = BSWG.render.proceduralImage(2048, 2048, merge(nebulaImg, 512, 512));
+    var dustImgMerge = BSWG.render.proceduralImage(2048, 2048, merge(dustImages, 512, 512));
 
-        w = Math.abs(w/BSWG.render.viewport.w) * 2.0;
-        h = Math.abs(h/BSWG.render.viewport.h) * 2.0;
+    nebulaImgMerge.texture.wrapS = THREE.ClampToEdgeWrapping;
+    nebulaImgMerge.texture.wrapT = THREE.ClampToEdgeWrapping;
+    nebulaImgMerge.texture.magFilter = THREE.NearestFilter;
+    nebulaImgMerge.texture.minFilter = THREE.LinearFilter;
+    nebulaImgMerge.texture.needsUpdate = true;
 
-        if (bgImgCount < bgImg.length) { // replace
-            var obj = bgImg[bgImgCount];
-            obj.mat.uniforms.pos.value.set(x1, y1, z);
-            obj.mat.uniforms.sza.value.set(w, h, a);
-            obj.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
-            obj.mat.uniforms.img.value = img.texture;
-            obj.mat.needsUpdate = true;
-            bgImgCount ++;
+    var bgGeom = new THREE.PlaneGeometry(2.0, 2.0, 1, 1);
+
+    var bgMat = BSWG.render.newMaterial("bgVertex", "bgFragment", {
+        cam: {
+            type: 'v3',
+            value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
+        },
+        vp: {
+            type: 'v2',
+            value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+        },
+        tStars: {
+            type: 't',
+            value: starImgMerge.texture
+        },
+        tNebula: {
+            type: 't',
+            value: nebulaImgMerge.texture
+        },
+        tDust: {
+            type: 't',
+            value: dustImgMerge.texture
         }
-        else { // add new
-            var obj = new Object();
-            obj.geom = bgGeom;
-            obj.mat = BSWG.render.newMaterial("bgVertex", "bgFragment", {
-                pos: {
-                    type: 'v3',
-                    value: new THREE.Vector3(x1, y1, z)
-                },
-                sza: {
-                    type: 'v3',
-                    value: new THREE.Vector3(w, h, a)
-                },
-                clr: {
-                    type: 'v4',
-                    value: new THREE.Vector4(clr[0], clr[1], clr[2], clr[3])
-                },
-                img: {
-                    type: 't',
-                    value: img.texture
-                }
-            }, THREE.AdditiveBlending);
+    });
 
-            obj.mesh = new THREE.Mesh( obj.geom, obj.mat );
-            obj.mesh.frustumCulled = false;
-
-            obj.mesh.needsUpdate = true;
-            obj.mat.needsUpdate = true;
-            
-            BSWG.render.scene.add( obj.mesh );
-
-            bgImg.push(obj);
-            bgImgCount ++;
-        }
-
-    };
+    var bgMesh = new THREE.Mesh( bgGeom, bgMat );
+    bgMesh.frustumCulled = false;
+    bgMesh.position.set(-1.0, -1.0, -0.5);
+    bgMesh.updateMatrix();
+    
+    bgMesh.needsUpdate = true;
+    bgMat.needsUpdate = true;        
+    
+    BSWG.render.scene.add( bgMesh );
 
     this.render = function(ctx, cam, viewport) {
 
-        //Math.seedrandom();
-
-        var oz = cam.z;
-
-        bgImgCount = 0;
-
-        for (var l=3; l>=1; l--) {
-
-            var t = (l-1)/2;
-            cam.z = (oz*(1.0-t) + t*0.1) / Math.pow(l, 5.0);
-            var alpha = 1.0/Math.pow(Math.max(1, l-1), 2.0);
-
-            var tsize = [25, 150, 225][l-1];
-
-            var p1 = cam.toWorld(viewport, new b2Vec2(0, 0));
-            var p2 = cam.toWorld(viewport, new b2Vec2(viewport.w, viewport.h));
-            p1.x = (Math.floor(p1.x / tsize)-6) * tsize;
-            p1.y = (Math.floor(p1.y / tsize)-6) * tsize;
-            p2.x = (Math.floor(p2.x / tsize)+7) * tsize;
-            p2.y = (Math.floor(p2.y / tsize)+7) * tsize;
-
-            var img = l === 1 ? dustImages : starImg;
-
-            var p = new b2Vec2(p1.x, p1.y);
-            for (p.x = p1.x; p.x <= p2.x; p.x += tsize) {
-                for (p.y = p1.y; p.y <= p2.y; p.y += tsize) {
-                    var x = p.x / tsize, y = p.y / tsize;
-                    var ps = cam.toScreenList(viewport, [p, new b2Vec2(p.x+tsize, p.y+tsize)]);
-                    var w = Math.abs(ps[1].x - ps[0].x),
-                        h = Math.abs(ps[1].y - ps[0].y);
-                    var k = Math.floor(Math.random2d(x*13.5+97*l*l, y*7.431+55*l*l) * 1000000);
-                    if (l>1 && (~~(k/37))%[2,5][l-2] === 0) {
-                        var r1 = (k%100)/100;
-                        var r2 = ((k+371)%1000)/1000;
-                        var nimg = nebulaImg[k % nebulaImg.length];
-                        var sz = (r1*([1.7, 6.0][l-2])+0.5)*Math.min(w,h);
-                        addBgImg(nimg, ps[0].x, ps[0].y, l, sz, sz, Math.PI*2.0*r2, [1,1,1,0.3*alpha]);
-                    }
-                    addBgImg(img[k % img.length], ps[0].x, ps[0].y, l, w, h, 0.0, [1,1,1,[0.4, 0.4, 0.95][l-1] * alpha], true);
-                }
-            }
-
-            ctx.globalAlpha = 1.0;
-        }
-
-        cam.z = oz;
-
-        while (bgImgCount < bgImg.length) {
-            var mesh = bgImg[bgImgCount].mesh;
-            BSWG.render.scene.remove(mesh);
-            mesh.geometry.dispose();
-            mesh.material.dispose();
-            mesh.geometry = null;
-            mesh.material = null;
-            mesh = null;
-            bgImg[bgImgCount].mesh = null;
-            bgImg[bgImgCount].mat = null;
-            bgImg[bgImgCount] = null;
-            bgImg.splice(bgImgCount, 1);
-        }
+        bgMat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+        bgMat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
 
     };
 
