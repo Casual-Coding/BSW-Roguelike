@@ -1512,7 +1512,7 @@ BSWG.component_SawBlade = {
 	init: function(args) {
 
 		this.size      = args.size || 1;
-		this.nteeth    = [8, 12, 14][this.size-1];
+		this.nteeth    = [7, 8, 9][this.size-1];
 		this.toothSize = [0.4, 0.8, 1.4][this.size-1];
 
 		var wheelVerts = new Array(this.nteeth);
@@ -1527,7 +1527,7 @@ BSWG.component_SawBlade = {
 		verts[0] = wheelVerts;
 		for (var i=0; i<this.nteeth; i++) {
 			var tverts = new Array(3);
-			var ac = (i+0.9)/this.nteeth * Math.PI * 2.0;
+			var ac = (i+0.7)/this.nteeth * Math.PI * 2.0;
 			var j = (i+1) % this.nteeth;
 			tverts[0] = new b2Vec2(wheelVerts[i].x, wheelVerts[i].y);
 			tverts[1] = new b2Vec2(Math.cos(ac) * (this.size+this.toothSize) * 0.40, Math.sin(ac) * (this.size+this.toothSize) * 0.40);
