@@ -119,8 +119,8 @@ BSWG.input = new function(){
     var keyMap = {};
     var lkeyMap = {};
     var mouseState = {
-        x: 0,
-        y: 0,
+        x: window.innerWidth/2,
+        y: window.innerHeight/2,
         left: false,
         middle: false,
         right: false,

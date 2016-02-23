@@ -225,6 +225,7 @@ BSWG.physics = new function(){
 			fixtureDef: null,
 			verts:      [],
 			radius:     0,
+			type:       type
 		};
 
 		obj.bodyDef = new b2BodyDef();
@@ -251,10 +252,27 @@ BSWG.physics = new function(){
 			case 'polygon':
 
 				var verts = [];
-				for (var i=0; i<def.verts.length; i++)
+				for (var i=0; i<def.verts.length; i++) {
 					verts.push(Math.rotVec2(def.verts[i], def.offsetAngle));
+				}
 				obj.verts = verts;
 				obj.shape = b2PolygonShape.AsArray(verts, verts.length);
+				break;
+
+			case 'multipoly':
+
+				obj.shape = [];
+				obj.verts = [];
+
+				for (var j=0; j<def.verts.length; j++) {
+					var poly = def.verts[j];
+					var verts = new Array(poly.length);
+					for (var i=0; i<poly.length; i++) {
+						verts[i] = Math.rotVec2(poly[i], def.offsetAngle);
+					}
+					obj.verts.push(verts);
+					obj.shape.push(b2PolygonShape.AsArray(verts, verts.length));
+				}
 				break;
 
 			case 'box':
@@ -279,19 +297,40 @@ BSWG.physics = new function(){
 				break;
 		}
 
-		if (obj.verts) {
+		if (obj.type === 'multipoly') {
 			obj.radius = 0;
 			for (var i=0; i<obj.verts.length; i++) {
-				var v = obj.verts[i];
-				obj.radius = Math.max(obj.radius,
-					v.x*v.x + v.y*v.y
-				);
+				for (var j=0; j<obj.verts[i].length; j++) {
+					var v = obj.verts[i][j];
+					obj.radius = Math.max(obj.radius,
+						v.x*v.x + v.y*v.y
+					);
+				}
 			}
 			obj.radius = Math.sqrt(obj.radius);
+
+			obj.fixture = new Array(obj.shape.length);
+			for (var i=0; i<obj.shape.length; i++) {
+				obj.fixtureDef.shape = obj.shape[i];
+				obj.fixture[i] = obj.body.CreateFixture( obj.fixtureDef );
+			}
+		}
+		else {
+			if (obj.verts) {
+				obj.radius = 0;
+				for (var i=0; i<obj.verts.length; i++) {
+					var v = obj.verts[i];
+					obj.radius = Math.max(obj.radius,
+						v.x*v.x + v.y*v.y
+					);
+				}
+				obj.radius = Math.sqrt(obj.radius);
+			}
+
+			obj.fixtureDef.shape = obj.shape;
+			obj.fixture = obj.body.CreateFixture( obj.fixtureDef );
 		}
 
-		obj.fixtureDef.shape = obj.shape;
-		obj.fixture = obj.body.CreateFixture( obj.fixtureDef );
 		obj.body.ResetMassData();
 
 		return obj;
