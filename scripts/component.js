@@ -15,14 +15,13 @@ BSWG.jpointRenderer = new function() {
 
 	    hasInit = true;
 
-		baseLen = 6;
+		baseLen = 5;
 
 		len = BSWG.maxJPointsRender * baseLen * 3;
 		vertices = new Float32Array(len);
 		var k = 0;
 		for (var i=0; i<BSWG.maxJPointsRender; i++) {
 			vertices[k++] =  0.0; vertices[k++] =  0.0; vertices[k++] =  0.5;
-			vertices[k++] =  0.0; vertices[k++] =  0.0; vertices[k++] = -0.5;
 			vertices[k++] = -1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
 			vertices[k++] =  0.0; vertices[k++] =  1.0; vertices[k++] =  0.0;
 			vertices[k++] =  1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
@@ -37,20 +36,15 @@ BSWG.jpointRenderer = new function() {
 			clrArray[i] = 0.0; // r,g,b,a
 		}
 
-		len = BSWG.maxJPointsRender * 8 * 3;
+		len = BSWG.maxJPointsRender * 4 * 3;
 		faces = new Uint32Array(len);
 		var k = 0;
 		for (var i=0; i<BSWG.maxJPointsRender; i++) {
 			var j = i * baseLen;
+			faces[k++] = j+0; faces[k++] = j+1; faces[k++] = j+2;
 			faces[k++] = j+0; faces[k++] = j+2; faces[k++] = j+3;
 			faces[k++] = j+0; faces[k++] = j+3; faces[k++] = j+4;
-			faces[k++] = j+0; faces[k++] = j+4; faces[k++] = j+5;
-			faces[k++] = j+0; faces[k++] = j+5; faces[k++] = j+2;
-
-			faces[k++] = j+1; faces[k++] = j+2; faces[k++] = j+3;
-			faces[k++] = j+1; faces[k++] = j+3; faces[k++] = j+4;
-			faces[k++] = j+1; faces[k++] = j+4; faces[k++] = j+5;
-			faces[k++] = j+1; faces[k++] = j+5; faces[k++] = j+2;
+			faces[k++] = j+0; faces[k++] = j+4; faces[k++] = j+1;
 		}
 
 		geom = new THREE.BufferGeometry();
@@ -901,13 +895,11 @@ BSWG.component_Blaster = {
 		var offsetAngle = this.offsetAngle = 0.0;
 
 		var verts = [
-			Math.rotVec2(new b2Vec2(-0.3, -0.3), offsetAngle),
-			Math.rotVec2(new b2Vec2( 0.3, -0.3), offsetAngle),
-			Math.rotVec2(new b2Vec2( 0.3,  0.3), offsetAngle),
-			Math.rotVec2(new b2Vec2( 0.05,  1.5), offsetAngle),
-			Math.rotVec2(new b2Vec2(-0.05,  1.5), offsetAngle),
-			Math.rotVec2(new b2Vec2(-0.3,  0.3), offsetAngle)
-		];
+			Math.rotVec2(new b2Vec2(-0.225,  -0.3), offsetAngle),
+			Math.rotVec2(new b2Vec2(-0.05,  1.0), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.05,  1.0), offsetAngle),
+			Math.rotVec2(new b2Vec2( 0.225,  -0.3), offsetAngle)
+		].reverse();
 
 		this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
 			verts: verts
@@ -918,14 +910,12 @@ BSWG.component_Blaster = {
 			'fire': [ '', new b2Vec2(0.0, 0.0) ],
 		};
 
-		this.jpoints = [ new b2Vec2(0.0, -0.3),
-						 new b2Vec2(-0.3, 0.0),
-						 new b2Vec2(0.3, 0.0) ];
+		this.jpoints = [ new b2Vec2(0.0, -0.3) ];
 
 		this.thrustT = 0.0;
 		this.kickBack = 0.0;
 
-		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.5);
+		this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, -0.21));
 		this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
 		BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
