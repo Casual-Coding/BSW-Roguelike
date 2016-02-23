@@ -5,6 +5,191 @@ BSWG.compActiveConfMenu = null;
 BSWG.component_minJMatch = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
+BSWG.maxJPointsRender = 512;
+BSWG.jpointRenderer = new function() {
+
+    var baseLen, geom, len, posArray, clrArray, mat, mesh, vertices, faces;
+    var hasInit = false;
+
+    this.init = function () {
+
+	    hasInit = true;
+
+		baseLen = 6;
+
+		len = BSWG.maxJPointsRender * baseLen * 3;
+		vertices = new Float32Array(len);
+		var k = 0;
+		for (var i=0; i<BSWG.maxJPointsRender; i++) {
+			vertices[k++] =  0.0; vertices[k++] =  0.0; vertices[k++] =  0.5;
+			vertices[k++] =  0.0; vertices[k++] =  0.0; vertices[k++] = -0.5;
+			vertices[k++] = -1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
+			vertices[k++] =  0.0; vertices[k++] =  1.0; vertices[k++] =  0.0;
+			vertices[k++] =  1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
+			vertices[k++] =  0.0; vertices[k++] = -1.0; vertices[k++] =  0.0;
+		}
+
+		len = BSWG.maxJPointsRender * baseLen * 4;
+		posArray = new Float32Array(len);
+		clrArray = new Float32Array(len);
+		for (var i=0; i<len; i++) {
+			posArray[i] = 0.0; // x,y,angle,radius
+			clrArray[i] = 0.0; // r,g,b,a
+		}
+
+		len = BSWG.maxJPointsRender * 8 * 3;
+		faces = new Uint32Array(len);
+		var k = 0;
+		for (var i=0; i<BSWG.maxJPointsRender; i++) {
+			var j = i * baseLen;
+			faces[k++] = j+0; faces[k++] = j+2; faces[k++] = j+3;
+			faces[k++] = j+0; faces[k++] = j+3; faces[k++] = j+4;
+			faces[k++] = j+0; faces[k++] = j+4; faces[k++] = j+5;
+			faces[k++] = j+0; faces[k++] = j+5; faces[k++] = j+2;
+
+			faces[k++] = j+1; faces[k++] = j+2; faces[k++] = j+3;
+			faces[k++] = j+1; faces[k++] = j+3; faces[k++] = j+4;
+			faces[k++] = j+1; faces[k++] = j+4; faces[k++] = j+5;
+			faces[k++] = j+1; faces[k++] = j+5; faces[k++] = j+2;
+		}
+
+		geom = new THREE.BufferGeometry();
+		geom.setIndex( new THREE.BufferAttribute( faces, 1 ) );
+		geom.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+		geom.addAttribute( 'pos',      new THREE.BufferAttribute( posArray, 4 ) );
+		geom.addAttribute( 'clr',      new THREE.BufferAttribute( clrArray, 4 ) );
+
+		mat = BSWG.render.newMaterial("jpointsVertex", "jpointsFragment");
+	    mesh = new THREE.Mesh( geom, mat );
+	    mesh.position.z = 0.05;
+
+	    geom.needsUpdate = true;
+		mat.needsUpdate = true;
+	    mesh.needsUpdate = true;
+
+	    BSWG.render.scene.add( mesh );
+
+    };
+
+	this.render = function () {
+
+		if (!hasInit) {
+			this.init();
+		}
+
+		var pos = new THREE.Vector4(0,0,0,0);
+		var clr = new THREE.Vector4(0,0,0,0);
+
+		var posAttr = geom.getAttribute('pos');
+		var clrAttr = geom.getAttribute('clr');
+
+		posArray = posAttr.array;
+		clrArray = clrAttr.array;
+
+		var compList = new Array();
+		for (var i=0; i<BSWG.componentList.compList.length; i++) {
+			compList.push(BSWG.componentList.compList[i]);
+		}
+		var comp0center = new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y);
+		compList.sort(function(a, b){
+
+			var diff = Math.distSqVec2(comp0center, a.obj.body.GetWorldCenter()) - 
+				       Math.distSqVec2(comp0center, b.obj.body.GetWorldCenter());
+
+			if (diff < 0) {
+				return -1;
+			}
+			else if (diff > 0) {
+				return 1;
+			}
+			return 0;
+
+		});
+
+		mesh.position.x = comp0center.x;
+		mesh.position.y = comp0center.y;
+		mesh.updateMatrix();
+
+		var idx = 0;
+		var idxWidth = baseLen * 4;
+		for (var i=0; i<compList.length && idx<BSWG.maxJPointsRender; i++) {
+			var comp = compList[i];
+			if (comp.jpointsw) {
+				var map = {};
+				for (var j=0; j<comp.jmatch.length; j++) {
+					map[comp.jmatch[j][0]] = comp.jmatch[j][1].jpointsw[comp.jmatch[j][2]];
+				}
+
+				var jp = comp.jpointsw;
+				for (var j=0; j<jp.length; j++) {
+					if (!BSWG.game.editMode && !comp.welds[j]) {
+						continue;
+					}
+
+					var r = map[j]?(comp.jmhover===j?160:110):80;
+					if (comp.welds[j] && comp.jmhover !== j) {
+						r = 110;
+					}
+
+		        	if (comp.welds[j]) {
+		        		if (comp.jmhover === j) {
+		        			clr.set(1.0, 0.1, 0.1, 1.0);
+		        		}
+		        		else {
+		        			clr.set(0.75, 0.75, 1.0, 1.0);
+		        		}
+		        	}
+		        	else {
+		        		if (map[j]) {
+		        			if (comp.jmhover === j) {
+		        				clr.set(0.1, 1.0, 0.1, 1.0);
+		        			}
+		        			else {
+		        				clr.set(0.4, 1.0, 0.4, 1.0);
+		        			}
+		        		}
+		        		else {
+		        			clr.set(0.8, 0.8, 0.8, 1.0);
+		        		}
+		        	}
+
+					pos.set(
+						jp[j].x - comp0center.x,
+						jp[j].y - comp0center.y,
+						comp.obj.body.GetAngle(),
+						r/1250.0
+					);
+
+					for (var k=0; k<baseLen; k++) {
+						var k2 = k*4 + idx*idxWidth;
+						var f = k<2 ? 1.0 : 0.65;
+						clrArray[k2+0] = clr.x * f;
+						clrArray[k2+1] = clr.y * f;
+						clrArray[k2+2] = clr.z * f;
+						clrArray[k2+3] = clr.w;
+						posArray[k2+0] = pos.x;
+						posArray[k2+1] = pos.y;
+						posArray[k2+2] = pos.z;
+						posArray[k2+3] = pos.w;
+					}
+					idx += 1;
+				}
+			}
+		}
+		for (; idx<BSWG.maxJPointsRender; idx++) {
+			var k = idx*idxWidth;
+			for (var i=0; i<idxWidth; i++) {
+				clrArray[k+i] = 0.0;
+				posArray[k+i] = 0.0;
+			}
+		}
+
+		clrAttr.needsUpdate = true;
+		posAttr.needsUpdate = true;
+	};
+
+}();
+
 BSWG.componentHoverFn = function(self) {
 	if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
 		return false;
@@ -1225,7 +1410,7 @@ BSWG.component = function (desc, args) {
 			return;
 		}
 
-		var jp = BSWG.render.project3D(this.jpointsw, 0.0);
+		/*var jp = BSWG.render.project3D(this.jpointsw, 0.0);
 
 		var map = {};
 		for (var i=0; i<this.jmatch.length; i++) {
@@ -1268,7 +1453,7 @@ BSWG.component = function (desc, args) {
             }
 
 	   		ctx.globalAlpha = 1.0;
-	   	}
+	   	}*/
 
 	   	if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
 	   		for (var key in this.dispKeys) {
@@ -1633,6 +1818,8 @@ BSWG.componentList = new function () {
 		for (var i=0; i<len; i++) {
 			this.compList[i].baseRenderOver(ctx, cam, dt);
 		}
+
+		BSWG.jpointRenderer.render();
 	};
 
 	this.atPoint = function (p) {

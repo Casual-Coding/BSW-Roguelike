@@ -47,12 +47,14 @@ var BSWG = new function(){
     var shaders = {
         'vertex': [
             'basicVertex',
-            'bgVertex'
+            'bgVertex',
+            'jpointsVertex'
         ],
         'fragment': [
             'basicFragment',
             'bgFragment',
-            'selectionFragment'
+            'selectionFragment',
+            'jpointsFragment'
         ]
     };
 

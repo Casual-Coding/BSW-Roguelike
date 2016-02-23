@@ -513,13 +513,20 @@ BSWG.render = new function() {
         lastRandomValue = rand;
 
         data = data || {};
+        var attr = {};
         var uniforms = {};
         for (var key in data) {
-            uniforms[key] = data[key];
+            if (key.indexOf('a_') === 0) {
+                attr[key.substring(2)] = data[key];
+            }
+            else {
+                uniforms[key] = data[key];
+            }
         }
 
         var material = new THREE.ShaderMaterial({
             uniforms: uniforms,
+            //attributes: attr,
             vertexShader: this.getShader(vertexID),
             fragmentShader: this.getShader(fragmentID),
             transparent: true
