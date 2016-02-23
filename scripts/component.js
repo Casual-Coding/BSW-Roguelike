@@ -1359,6 +1359,9 @@ BSWG.component_SawMotor = {
 		this.motor  = true;
 		this.rotKey = BSWG.KEY.G;
 
+		this.motorAccel = 0.0;
+		this.motorSpeed = 0.0;
+
 		var verts = [
 			new b2Vec2(this.size *  0.5, this.size * -0.5),
 			new b2Vec2(this.size *  0.65,            -0.2),
@@ -1369,7 +1372,8 @@ BSWG.component_SawMotor = {
 		this.motorC = new b2Vec2(this.size * 1.3, 0.0);
 
 		this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
-			verts: verts
+			verts: verts,
+			density: 3.0
 		});
 
 		this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [0, 1, 2], true);
@@ -1457,6 +1461,21 @@ BSWG.component_SawMotor = {
 
 	update: function(dt) {
 
+		var robj = null;
+		for (var k in this.welds) {
+			if (this.welds[k] && this.welds[k].obj.revolute) {
+				robj = this.welds[k].obj;
+				break;
+			}
+		}
+
+		if (robj) {
+			this.motorSpeed += this.motorAccel * dt;
+			robj.joint.SetMotorSpeed(this.motorSpeed);
+			this.motorSpeed -= (this.motorSpeed * dt);
+			this.motorAccel = 0.0;
+		}
+
 		this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
 		this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
 
@@ -1474,7 +1493,7 @@ BSWG.component_SawMotor = {
 
 		if (robj) {
 			if (keys[this.rotKey]) {
-				robj.joint.SetMotorSpeed(10);
+				this.motorAccel = 10.0;
 			}
 		}
 
@@ -1508,7 +1527,7 @@ BSWG.component_SawBlade = {
 		verts[0] = wheelVerts;
 		for (var i=0; i<this.nteeth; i++) {
 			var tverts = new Array(3);
-			var ac = (i+0.1)/this.nteeth * Math.PI * 2.0;
+			var ac = (i+0.9)/this.nteeth * Math.PI * 2.0;
 			var j = (i+1) % this.nteeth;
 			tverts[0] = new b2Vec2(wheelVerts[i].x, wheelVerts[i].y);
 			tverts[1] = new b2Vec2(Math.cos(ac) * (this.size+this.toothSize) * 0.40, Math.sin(ac) * (this.size+this.toothSize) * 0.40);
@@ -1519,7 +1538,8 @@ BSWG.component_SawBlade = {
 		this.motorC = new b2Vec2(this.size * 1.0, 0.0);
 
 		this.obj = BSWG.physics.createObject('multipoly', args.pos, args.angle || 0, {
-			verts: verts
+			verts: verts,
+			density: 1.0/3.0
 		});
 
 		var cjp = new b2Vec2(0.0, 0.0);
@@ -1550,8 +1570,8 @@ BSWG.component_SawBlade = {
 	render: function(ctx, cam, dt) {
 
 		var selClr = [0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0];
-		var toothClr = [1.0, 0.6, 0.05, 1];
-		var wheelClr = [0.5, 0.6, 0.5, 1];
+		var toothClr = [1.0, 1.0, 1.0, 1];
+		var wheelClr = [1.0, 0.6, 0.05, 1];
 		for (var i=0; i<this.meshObjs.length; i++) {
 			this.selMeshObjs[i].update(selClr);
 			this.meshObjs[i].update(i > 0 ? toothClr : wheelClr, i > 0 ? 6 : 2);
