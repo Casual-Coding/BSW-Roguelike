@@ -5,7 +5,7 @@ BSWG.compActiveConfMenu = null;
 BSWG.component_minJMatch = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
-BSWG.maxJPointsRender = 512;
+BSWG.maxJPointsRender = 384;
 BSWG.jpointRenderer = new function() {
 
     var baseLen, geom, len, posArray, clrArray, mat, mesh, vertices, faces;
@@ -1653,6 +1653,12 @@ BSWG.component_Spikes = {
 				center = new b2Vec2(
 					(tmpObj.verts[0].x + tmpObj.verts[2].x) * 0.5,
 					(tmpObj.verts[0].y + tmpObj.verts[2].y) * 0.5
+				);
+			}
+			else {
+				center = new b2Vec2(
+					Math.cos(Math.PI/2) * this.size * 0.10,
+					Math.sin(Math.PI/2) * this.size * 0.10
 				);
 			}
 			this.meshObjs[i] = BSWG.generateBlockPolyMesh(tmpObj, 0.7, center, null, i === 0 ? 0.075 : 0.025);
