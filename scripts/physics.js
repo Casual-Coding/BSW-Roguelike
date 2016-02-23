@@ -186,6 +186,47 @@ BSWG.physics = new function(){
 
 	this.getNormalAt = function (obj, p) {
 
+		if (obj.type === 'multipoly') {
+			var bestp = null;
+			var best = null;
+			for (var k=0; k<obj.verts.length; k++) {
+				var verts = obj.verts[k];
+				if (verts.length >= 2) {
+					var besti = -1;
+
+					for (var i=0; i<verts.length; i++) {
+						var p1 = verts[i],
+							p2 = verts[(i+1)%verts.length];
+						var dist = Math.pointLineDistance(p1, p2, p);
+						if (best === null || dist < best) {
+							best = dist;
+							besti = i;
+						}
+					}
+
+					if (besti >= 0) {
+
+						var p1 = verts[besti],
+							p2 = verts[(besti+1)%verts.length];
+
+						var dx = p2.x - p1.x,
+							dy = p2.y - p1.y;
+						var len = Math.sqrt(dx*dx + dy*dy);
+						dx /= len;
+						dy /= len;
+
+						bestp = new b2Vec2(dy, -dx);
+					}
+				}
+			}
+			if (bestp) {
+				return bestp;
+			}
+			else {
+				return new b2Vec2(0, 0);
+			}
+		}
+
 		if (obj.verts.length < 2) {
 			return new b2Vec2(0, 0);
 		}
