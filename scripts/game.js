@@ -50,7 +50,7 @@ BSWG.game = new function(){
         Math.seedrandom();
 
         var pastPositions = [ new b2Vec2(0, 0) ];
-        for (var i=0; i<118; i++) {
+        for (var i=0; i<125; i++) {
 
             var p = null;
             for (var k=0; k<500; k++)
@@ -105,6 +105,14 @@ BSWG.game = new function(){
                     pos: p,
                     angle: Math.random()*Math.PI*2.0,
                     size: Math.floor(i%3)+1
+
+                });
+            }
+            else if (i<(8+48)) {
+                new BSWG.component(BSWG.component_ChainLink, {
+
+                    pos: p,
+                    angle: Math.random()*Math.PI*2.0,
 
                 });
             }

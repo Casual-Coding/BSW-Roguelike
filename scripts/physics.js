@@ -52,14 +52,15 @@ BSWG.physics = new function(){
 
 	};
 
-	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB, motorA, motorB) {
+	this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB, motorA, motorB, noMotor) {
 
 		var obj = {
 			jointDef: null,
 			joint:    null,
 			age:      0,
 			other:    null,
-			revolute: motorA ? true : false
+			revolute: motorA ? true : false,
+			noMotor:  !!noMotor
 		};
 
 		if (!motorA) {
@@ -69,9 +70,11 @@ BSWG.physics = new function(){
 		else {
 			obj.jointDef = new b2RevoluteJointDef();
 			obj.jointDef.collideConnected = true;
-			obj.jointDef.enableMotor = true;
-			obj.jointDef.motorSpeed = 0.0;
-			obj.jointDef.maxMotorTorque = bodyA.GetMass() * 30.0;
+			obj.jointDef.enableMotor = !obj.noMotor;
+			if (obj.jointDef.enableMotor) {
+				obj.jointDef.motorSpeed = 0.0;
+				obj.jointDef.maxMotorTorque = bodyA.GetMass() * 30.0;
+			}
 		}
 	
 		obj.jointDef.bodyA = bodyA;
@@ -451,7 +454,7 @@ BSWG.physics = new function(){
 		this.updateMouseDrag();
 
 		for (var i=0; i<this.welds.length; i++) {
-			if (this.welds[i].revolute) {
+			if (this.welds[i].revolute && !this.welds[i].noMotor) {
 				this.welds[i].joint.SetMotorSpeed(0);
 			}
 		}
