@@ -42,7 +42,10 @@ var BSWG = new function(){
         'stars_12': 'stars-512-12.png',
         'stars_13': 'stars-512-13.png',
         'stars_14': 'stars-512-14.png',
-        'test_nm': 'test-normalmap.png'
+        'test_nm': 'test-normalmap.png',
+        'cursor-normal': 'cursor-normal.png',
+        'cursor-pressed': 'cursor-pressed.png',
+        'cursor-pressed-right': 'cursor-pressed-right.png'
     };
     var shaders = {
         'vertex': [

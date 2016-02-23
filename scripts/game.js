@@ -126,6 +126,8 @@ BSWG.game = new function(){
 
         var blackoutT = 1.0;
 
+        BSWG.render.setCustomCursor(true);
+
         BSWG.render.startRenderer(function(dt, time){
 
             var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;

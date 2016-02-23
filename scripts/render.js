@@ -376,6 +376,8 @@ BSWG.render = new function() {
         }
     };
 
+    this.customCursor = true;
+
     this.startRenderer = function (cbk) {
         
         if (this.animFrameID !== null) {
@@ -403,6 +405,24 @@ BSWG.render = new function() {
             }
 
             self.renderer.render( self.scene, self.cam3D );
+
+            if (self.customCursor) {
+                document.body.style.cursor = 'none';
+                self.ctx.drawImage(
+                    self.images[
+                        BSWG.input.MOUSE('left') ? 'cursor-pressed' :
+                        (BSWG.input.MOUSE('right') ? 'cursor-pressed-right' : 'cursor-normal')
+                    ],
+                    0,   0,
+                    128, 128,
+                    BSWG.input.MOUSE('x')-32,
+                    BSWG.input.MOUSE('y')-32,
+                    64,  64
+                );
+            }
+            else {
+                document.body.style.cursor = null;
+            }
 
             BSWG.input.newFrame();
 
@@ -496,6 +516,7 @@ BSWG.render = new function() {
             window.cancelAnimationFrame(this.animFrameID);
             this.animFrameID = null;
         }
+        document.body.style.cursor = null;
         this.renderCbk = null;
     };
 
@@ -540,6 +561,10 @@ BSWG.render = new function() {
         material.needsUpdate = true;
 
         return material;
+    };
+
+    this.setCustomCursor = function(flag) {
+        this.customCursor = !!flag;
     };
 
     this.test = function () {
