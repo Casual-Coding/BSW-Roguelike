@@ -50,7 +50,7 @@ BSWG.game = new function(){
         Math.seedrandom();
 
         var pastPositions = [ new b2Vec2(0, 0) ];
-        for (var i=0; i<100; i++) {
+        for (var i=0; i<112; i++) {
 
             var p = null;
             for (var k=0; k<500; k++)
@@ -88,7 +88,16 @@ BSWG.game = new function(){
                     angle: Math.random()*Math.PI*2.0,
                     size: Math.floor(i%3)+1
 
-                });                
+                });
+            }
+            else if (i<(8+24)) {
+                new BSWG.component(BSWG.component_SawMotor, {
+
+                    pos: p,
+                    angle: Math.random()*Math.PI*2.0,
+                    size: Math.floor(i%3)+1
+
+                });
             }
             else if (Math.random() < 1/5)
                 new BSWG.component(BSWG.component_Thruster, {
