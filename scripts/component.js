@@ -2,7 +2,7 @@
 
 BSWG.compActiveConfMenu = null;
 
-BSWG.component_minJMatch = Math.pow(0.15, 2.0);
+BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.maxJPointsRender = 384;
@@ -188,14 +188,14 @@ BSWG.componentHoverFn = function(self) {
     if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
         return false;
     }
-    if (self.onCC && !self.hasConfig) {
+    if (self.onCC && !self.hasConfig && !self.canMoveAttached) {
         return false;
     }
     return true;
 };
 
 BSWG.polyMesh_baseHeight = 0.5;
-BSWG.blockPolySmooth = null;
+BSWG.blockPolySmooth     = null;
 
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
@@ -463,7 +463,7 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
 
         self.mesh.position.x = center.x + (offset?offset.x:0);
         self.mesh.position.y = center.y + (offset?offset.y:0);
-        self.mesh.position.z = 0.0;
+        self.mesh.position.z = -0.05;
 
         self.mesh.rotation.z = angle;
 
@@ -1471,7 +1471,7 @@ BSWG.component_SawMotor = {
 
         if (robj) {
             this.motorSpeed += this.motorAccel * dt;
-            robj.joint.SetMotorSpeed(this.motorSpeed);
+            robj.vMotorSpeed = this.motorSpeed;
             this.motorSpeed -= (this.motorSpeed * dt);
             this.motorAccel = 0.0;
         }
@@ -1493,7 +1493,7 @@ BSWG.component_SawMotor = {
 
         if (robj) {
             if (keys[this.rotKey]) {
-                this.motorAccel = 10.0;
+                this.motorAccel = 33.0;
             }
         }
 
@@ -1505,9 +1505,9 @@ BSWG.component_SawBlade = {
 
     type: 'sawblade',
 
-    sortOrder: 1,
-
-    hasConfig: false,
+    sortOrder:       1,
+    hasConfig:       false,
+    canMoveAttached: true,
 
     init: function(args) {
 
@@ -1591,11 +1591,25 @@ BSWG.component_SawBlade = {
 
     update: function(dt) {
 
-    },
+        var robj = null;
+        for (var k in this.welds) {
+            if (this.welds[k] && this.welds[k].obj.revolute) {
+                robj = this.welds[k].obj;
+                break;
+            }
+        }
 
-    handleInput: function(keys) {
+        if (robj) {
+            this.obj.body.SetAngularDamping(5.0);
+            if (robj.vMotorSpeed) {
+                this.obj.body.ApplyTorque(robj.vMotorSpeed * Math.pow(this.obj.body.GetMass(), 2.0));
+            }
+        }
+        else {
+            this.obj.body.SetAngularDamping(0.1);
+        }
 
-    },
+    }
 
 };
 
@@ -1604,7 +1618,6 @@ BSWG.component_Spikes = {
     type: 'spikes',
 
     sortOrder: 1,
-
     hasConfig: false,
 
     init: function(args) {
@@ -1693,11 +1706,7 @@ BSWG.component_Spikes = {
 
     update: function(dt) {
 
-    },
-
-    handleInput: function(keys) {
-
-    },
+    }
 
 };
 
@@ -1705,9 +1714,9 @@ BSWG.component_ChainLink = {
 
     type: 'chainlink',
 
-    sortOrder: 1,
-
-    hasConfig: false,
+    sortOrder:       1,
+    hasConfig:       false,
+    canMoveAttached: true,
 
     init: function(args) {
 
@@ -1779,11 +1788,7 @@ BSWG.component_ChainLink = {
 
     update: function(dt) {
 
-    },
-
-    handleInput: function(keys) {
-
-    },
+    }
 
 };
 
@@ -1980,7 +1985,7 @@ BSWG.component = function (desc, args) {
                                                           this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
                                                           this.jmatch[i][3],
                                                           this.jmatch[i][4],
-                                                          this.jmatch[i][3] === 61
+                                                          [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
                                                           );
 
                         if (this.onCC && !this.jmatch[i][1].onCC) {
@@ -2089,6 +2094,10 @@ BSWG.component = function (desc, args) {
         else
             this.obj.body.ApplyForce(f, p);
 
+    };
+
+    this.distanceTo = function (comp2) {
+        return Math.distVec2(this.obj.body.GetWorldCenter(), comp2.obj.body.GetWorldCenter());
     };
 
     BSWG.componentList.add(this);

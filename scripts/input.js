@@ -223,7 +223,8 @@ BSWG.input = new function(){
 
     this.init = function () {
 
-        var div = window;
+        var div  = window;
+        var self = this;
 
         if (!BSWG.render.canvas)
         {
@@ -233,6 +234,30 @@ BSWG.input = new function(){
 
         jQuery(div).keydown(function(e){
             keyMap[e.which] = true;
+            if (self.mouseWheelKeys) {
+                var dir = 0;
+                for (i=0; i<self.mouseWheelKeys.plus.length; i++) {
+                    if (e.which == self.mouseWheelKeys.minus[i]) {
+                        dir = -self.mouseWheelKeys.speed;
+                        break;
+                    }
+                }
+                for (i=0; i<self.mouseWheelKeys.plus.length; i++) {
+                    if (e.which == self.mouseWheelKeys.plus[i]) {
+                        dir += self.mouseWheelKeys.speed;
+                        break;
+                    }
+                }
+                if (dir) {
+                    mouseState.wheel += dir;
+                    if ((minWheel || minWheel === 0) && mouseState.wheel < minWheel) {
+                        mouseState.wheel = minWheel;
+                    }
+                    if ((maxWheel || maxWheel === 0) && mouseState.wheel > maxWheel) {
+                        mouseState.wheel = maxWheel;
+                    }
+                }
+            }
         });
 
         jQuery(div).keyup(function(e){
@@ -290,6 +315,15 @@ BSWG.input = new function(){
             mouseState.shift = !!e.shiftKey;
         });
 
+    };
+
+    this.mouseWheelKeys = null;
+    this.emulateMouseWheel = function(minusKeys, plusKeys, speed) {
+        this.mouseWheelKeys = {
+            minus: minusKeys,
+            plus:  plusKeys,
+            speed: speed || 1
+        }
     };
 
     this.newFrame = function () {

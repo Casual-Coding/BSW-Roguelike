@@ -1,5 +1,7 @@
-BSWG.grabSlowdownDist = 0.5;
+BSWG.grabSlowdownDist      = 0.5;
 BSWG.grabSlowdownDistStart = 3.0;
+BSWG.maxGrabDistance       = 45.0;
+BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 
 BSWG.game = new function(){
 
@@ -162,13 +164,19 @@ BSWG.game = new function(){
         var blackoutT = 1.0;
 
         BSWG.render.setCustomCursor(true);
+        BSWG.input.emulateMouseWheel([BSWG.KEY['-'], BSWG.KEY['NUMPAD -']], [BSWG.KEY['='], BSWG.KEY['NUMPAD +']], 2);
 
         BSWG.render.startRenderer(function(dt, time){
+
+            var mx = BSWG.input.MOUSE('x');
+            var my = BSWG.input.MOUSE('y');
+            var mps = new b2Vec2(mx, my);
+            var mp = BSWG.render.unproject3D(mps, 0.0);
 
             var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
             var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / (1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1);
             self.cam.zoomTo(dt*2.5, toZ);
-            self.cam.panTo(dt*2.0, self.ccblock.obj.body.GetWorldCenter());
+            self.cam.panTo(dt*2.0, Math.interpolate(mp, self.ccblock.obj.body.GetWorldCenter(), 1.0-BSWG.mouseLookFactor));
             BSWG.render.updateCam3D(self.cam);
 
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
@@ -177,17 +185,12 @@ BSWG.game = new function(){
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
 
-            var mx = BSWG.input.MOUSE('x');
-            var my = BSWG.input.MOUSE('y');
-            var mps = new b2Vec2(mx, my);
-            var mp = BSWG.render.unproject3D(mps, 0.0);
-
             if (self.editMode) {
 
                 if (BSWG.input.MOUSE_PRESSED('left')) {
                     if (BSWG.componentList.mouseOver) {
                         grabbedBlock = BSWG.componentList.mouseOver;
-                        if (grabbedBlock.type === 'cc' || grabbedBlock.onCC) {
+                        if (grabbedBlock.type === 'cc' || (grabbedBlock.onCC && (!grabbedBlock.canMoveAttached || grabbedBlock.onCC !== self.ccblock)) || grabbedBlock.distanceTo(self.ccblock) > BSWG.maxGrabDistance) {
                             grabbedBlock = null;
                         }
                         else {
@@ -198,7 +201,7 @@ BSWG.game = new function(){
                         }
                     }
                 }
-                if (BSWG.input.MOUSE_RELEASED('left') && grabbedBlock) {
+                if (grabbedBlock && (BSWG.input.MOUSE_RELEASED('left') || grabbedBlock.distanceTo(self.ccblock) > BSWG.maxGrabDistance)) {
                     grabbedBlock.obj.body.SetLinearDamping(0.1);
                     grabbedBlock.obj.body.SetAngularDamping(0.1);
                     grabbedBlock = null;
