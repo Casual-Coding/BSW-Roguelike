@@ -56,6 +56,8 @@ var BSWG = new function(){
         'fragment': [
             'basicFragment',
             'bgFragment',
+            'basicFragmentOptimized',
+            'bgFragmentOptimized',
             'selectionFragment',
             'jpointsFragment'
         ]

@@ -293,7 +293,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     //ret.geom.computeVertexNormals();
     ret.geom.computeBoundingSphere();
 
-    ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragment", {
+    ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragmentOptimized", {
         clr: {
             type: 'v4',
             value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
@@ -1843,71 +1843,12 @@ BSWG.component = function (desc, args) {
             return;
         }
 
-        /*var jp = BSWG.render.project3D(this.jpointsw, 0.0);
-
-        var map = {};
-        for (var i=0; i<this.jmatch.length; i++) {
-            map[this.jmatch[i][0]] = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
-        }
-
-        for (var i=0; i<jp.length; i++) {
-
-            if (!BSWG.game.editMode && !this.welds[i])
-                continue;
-
-            ctx.beginPath();
-            var r = map[i]?(this.jmhover===i?160:110):80;
-            if (this.welds[i] && this.jmhover !== i) {
-                r = 110;
-            }
-            ctx.arc(jp[i].x, jp[i].y, r * cam.z, 0, 2*Math.PI);
-            ctx.fillStyle = map[i]?(this.jmhover===i?'#2f2':'#8f8'):'#aaa';
-            ctx.globalAlpha = 0.7;
-            if (this.welds[i])
-            {
-                ctx.fillStyle = '#ccf';
-                ctx.globalAlpha = 0.4;
-                if (this.jmhover === i) {
-                    ctx.fillStyle = '#f22';
-                }
-            }
-            ctx.fill();
-            if (map[i]) {
-                ctx.strokeStyle = ctx.fillStyle;
-                ctx.lineWidth = 2.0;
-                ctx.globalAlpha = 0.25;
-                var p2s = cam.toScreen(BSWG.render.viewport, map[i]);
-                ctx.beginPath();
-                ctx.moveTo(jp[i].x, jp[i].y);
-                ctx.lineTo(p2s.x, p2s.y);
-                ctx.closePath();
-                ctx.stroke();
-                ctx.lineWidth = 1.0;
-            }
-
-            ctx.globalAlpha = 1.0;
-        }*/
-
         if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
             for (var key in this.dispKeys) {
                 var info = this.dispKeys[key];
                 if (info) {
                     var text = info[0];
                     var rot = 0.0;
-                    /*if (text === 'Left') {
-                        text = '<-';
-                    }
-                    else if (text === 'Right') {
-                        text = '->';
-                    }
-                    else if (text === 'Up') {
-                        text = '<-';
-                        rot = Math.PI/2.0;
-                    }
-                    else if (text === 'Down') {
-                        text = '->';
-                        rot = Math.PI/2.0;
-                    }*/
 
                     var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
                     var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);

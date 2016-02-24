@@ -360,7 +360,7 @@ BSWG.starfield = function(){
 
     var bgGeom = new THREE.PlaneGeometry(2.0, 2.0, 1, 1);
 
-    var bgMat = BSWG.render.newMaterial("bgVertex", "bgFragment", {
+    var bgMat = BSWG.render.newMaterial("bgVertex", "bgFragmentOptimized", {
         cam: {
             type: 'v3',
             value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
