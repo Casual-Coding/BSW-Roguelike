@@ -23,8 +23,8 @@ NavierStokes.prototype = {
 
           this._mergeRecursive(this.settings, settings);
 
-          this.rows                 =    this.settings.resolution      + 2;
-          this.arraySize            =   (this.settings.resolution+2)*(this.settings.resolution+2);
+          this.rows       =    this.settings.resolution      + 2;
+          this.arraySize  =   (this.settings.resolution+2)*(this.settings.resolution+2);
 
 
           this.U          = new Float32Array(this.arraySize);
@@ -236,7 +236,7 @@ NavierStokes.prototype = {
                 case 1 :
                     for (i = 1; i <= this.settings.resolution; i++) {
                         x[i] =  x[i + this.rows];
-                        x[this.IX[i][(this.settings.resolution+1)]] = x[this.IX[i][(this.settings.resolution)]];
+                        x[this.IX[i][(this.settings.resolution+1)]] =  x[this.IX[i][(this.settings.resolution)]];
                         x[this.IX[0][i]] = -x[this.IX[1][i]];
                         x[this.IX[(this.settings.resolution+1)][i]] = -x[this.IX[(this.settings.resolution)][i]];
                     }
@@ -252,15 +252,15 @@ NavierStokes.prototype = {
                 default :
                     for ( i = 1; i <= this.settings.resolution; i++) {
                         x[i] =  x[i + this.rows];
-                        x[this.IX[i][(this.settings.resolution+1)]]       =   x[this.IX[i][(this.settings.resolution)]];
+                        x[this.IX[i][(this.settings.resolution+1)]]  = x[this.IX[i][(this.settings.resolution)]];
                         x[this.IX[0][i]]                                                        =   x[this.IX[1][i]];
-                        x[this.IX[(this.settings.resolution+1)][i]]       =   x[this.IX[(this.settings.resolution)][i]];
+                        x[this.IX[(this.settings.resolution+1)][i]]  = x[this.IX[(this.settings.resolution)][i]];
                     }
             }
                         // Boundes of the Canvas
-            var topPos                                    = this.IX[0][this.settings.resolution+1];
-            x[0]                                            = (x[1] + x[this.rows]) / 2;
-            x[topPos]                                       = (x[1 + topPos] + x[this.IX[this.settings.resolution][0]]) / 2;
+            var topPos                                = this.IX[0][this.settings.resolution+1];
+            x[0]                                      = (x[1] + x[this.rows]) / 2;
+            x[topPos]                                 = (x[1 + topPos] + x[this.IX[this.settings.resolution][0]]) / 2;
             x[(this.settings.resolution+1)]           = (x[this.settings.resolution] + x[(this.settings.resolution + 1) + this.rows]) / 2;
             x[(this.settings.resolution+1)+topPos]    = (x[this.settings.resolution + topPos] + x[this.IX[this.settings.resolution+1][this.settings.resolution]]);
 

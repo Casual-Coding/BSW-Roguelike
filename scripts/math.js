@@ -78,16 +78,16 @@ Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPreci
 
 Math.rotVec2 = function(vec, angle)
 {
-	var x = vec.x,
-		y = vec.y;
-	if (!angle)
-		return new b2Vec2(x, y);
-	var ca = Math.cos(angle),
-		sa = Math.sin(angle);
-	return new b2Vec2(
-		x * ca - y * sa,
-		y * ca + x * sa
-	);
+    var x = vec.x,
+        y = vec.y;
+    if (!angle)
+        return new b2Vec2(x, y);
+    var ca = Math.cos(angle),
+        sa = Math.sin(angle);
+    return new b2Vec2(
+        x * ca - y * sa,
+        y * ca + x * sa
+    );
 };
 
 Math.lenVec2 = function(vec) {
