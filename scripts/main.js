@@ -10,6 +10,18 @@ var BSWG = new function(){
         'component.js',
         'ui.js',
         'blaster.js',
+        'background.js',
+        'components/blaster.js',
+        'components/block.js',
+        'components/chain-link.js',
+        'components/command-center.js',
+        'components/hinge-half.js',
+        'components/saw-blade.js',
+        'components/saw-motor.js',
+        'components/spikes.js',
+        'components/thruster.js',
+        'components/util-jpoints.js',
+        'components/util-render.js'
     ];
     var images = {
         'nebula_0': 'nebula-512-0.png',

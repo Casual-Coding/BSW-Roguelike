@@ -133,7 +133,3 @@ Math.polyCentroid = function(p) {
 
     return ret;    
 };
-
-Math.addVec2 = function(a, b) {
-    return new b2Vec2(a.x+b.x, a.y+b.y);
-};
