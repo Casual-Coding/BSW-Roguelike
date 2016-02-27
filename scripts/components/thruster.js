@@ -113,6 +113,27 @@ BSWG.component_Thruster = {
         var accel = 0;
 
         if (keys[this.thrustKey]) accel += 1;
+
+        if (accel && this.thrustT < 0.025) { // add shockwave
+            for (var i=-10; i<=10; i++) {
+                var p = Math.rotVec2(new b2Vec2(0.0, -0.55));
+                var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
+                var a = this.obj.body.GetAngle() + Math.PI/2.0 + (i/10) * Math.PI/2.7;
+                v.x -= Math.cos(a) * 4;
+                v.y -= Math.sin(a) * 4;
+                p = BSWG.physics.localToWorld(p, this.obj.body);
+
+                BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                BSWG.render.boom.add(
+                    p.particleWrap(0.025),
+                    1.35*0.3*5.0,
+                    32,
+                    0.3*0.3*5.0,
+                    4.0,
+                    v.THREE(Math.random()*2.0)
+                );           
+            }
+        }
         
         if (accel)
         {
