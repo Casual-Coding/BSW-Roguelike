@@ -44,8 +44,8 @@ BSWG.component_Blaster = {
         ctx.fillStyle = '#600';
 
         if (this.kickBack > 0.0) {
-            BSWG.drawBlockPolyOffset = Math.rotVec2(new b2Vec2(0.0, -this.kickBack*0.1), this.obj.body.GetAngle());
-            this.kickBack *= 0.65;
+            BSWG.drawBlockPolyOffset = Math.rotVec2(new b2Vec2(0.0, -this.kickBack*0.2), this.obj.body.GetAngle());
+            this.kickBack *= 0.9;
         }
         else {
             this.kickBack = 0.0;

@@ -5,14 +5,15 @@ uniform vec4 pal1;
 uniform vec4 pal2;
 uniform vec4 pal3;
 uniform vec4 pal4;
-uniform vec2 frame;
+uniform vec3 frame;
 
 void main() {
 
     float amp = texture2D(
         img,
-        vUv/8.0 + frame
-    ).r;
+        vUv/8.0 + frame.xy
+    ).r * frame.z;
+    amp = pow(amp, 1.0-amp*0.9);
     vec3 clr = vec3(0., 0., 0.);
 
     if (amp < pal1.a) {

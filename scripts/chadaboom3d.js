@@ -94,7 +94,7 @@ chadaboom3D.prototype.render = function(dt) {
         B.mesh.rotation.set(0.0, 0.0, B.rot, 'ZXY');
         B.mesh.scale.set(sz, sz, 1.0);
         B.mesh.updateMatrix();
-        B.material.uniforms.frame.value.set((frame%8)/8.0, 1.0 - ~~(frame/8)/8.0);
+        B.material.uniforms.frame.value.set((frame%8)/8.0, 1.0 - ~~(frame/8)/8.0, 1.0-Math.pow(t, 3.0));
         B.material.needsUpdate = true;
 
         p = B.p(B.vel.x*dt, B.vel.y*dt, B.vel.z*dt);
@@ -196,8 +196,8 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
             value: bb.img[Math.floor(Math.random()*1000000) % bb.count].texture
         },
         frame: {
-            type: 'v2',
-            value: new THREE.Vector2(0, 0)
+            type: 'v3',
+            value: new THREE.Vector3(0, 0, 0)
         }
     }, THREE.AdditiveBlending);
 

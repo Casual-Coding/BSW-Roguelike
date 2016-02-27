@@ -56,7 +56,24 @@ BSWG.component_Thruster = {
 
         if (this.thrustT > 0) {
 
-            var tpl = [
+            var p = Math.rotVec2(new b2Vec2(0.0, -0.55));
+            var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
+            var a = this.obj.body.GetAngle() + Math.PI/2.0 + Math.random()*Math.PI/8.0 - Math.PI/16.0;
+            v.x -= Math.cos(a) * 6;
+            v.y -= Math.sin(a) * 6;
+            p = BSWG.physics.localToWorld(p, this.obj.body);
+
+            BSWG.render.boom.palette = chadaboom3D.fire;
+            BSWG.render.boom.add(
+                p.particleWrap(0.2),
+                1.0*this.thrustT*5.0,
+                32,
+                0.3*this.thrustT*5.0,
+                4.0,
+                v.THREE(Math.random()*0.25-0.125)
+            );
+
+            /*var tpl = [
                 Math.rotVec2(new b2Vec2(-0.15, -0.4), this.offsetAngle),
                 Math.rotVec2(new b2Vec2( 0.0, -0.5 - this.thrustT * (2.0 + Math.random())), this.offsetAngle),
                 Math.rotVec2(new b2Vec2( 0.15, -0.4), this.offsetAngle)
@@ -80,7 +97,7 @@ BSWG.component_Thruster = {
                 (tpl[0].y + tpl[2].y) * 0.5
             ));
 
-            ctx.globalAlpha = 1.0;
+            ctx.globalAlpha = 1.0;*/
 
             this.thrustT -= dt;
 
