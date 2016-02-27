@@ -534,17 +534,17 @@ BSWG.physics = new function(){
             var wm = new b2WorldManifold();
             contact.GetWorldManifold(wm);
             var p = wm.m_points[0];
-            BSWG.render.boom.palette = chadaboom3D.blue;
+            BSWG.render.boom.palette = chadaboom3D.fire_bright;
             for (var i=0; i<2; i++) {
                 var a = Math.random() * Math.PI * 2.0;
                 var v = [ba, bb][i].GetLinearVelocityFromWorldPoint(p);
                 BSWG.render.boom.add(
-                    p.particleWrap(0.2),
+                    p.particleWrap(0.0),
                     0.2*Math.pow(tforce, 0.125),
                     32,
                     0.3*Math.pow(tforce, 0.33),
                     4.0,
-                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*0.5-0.25)
+                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*3.0)
                 );
             }
         }
