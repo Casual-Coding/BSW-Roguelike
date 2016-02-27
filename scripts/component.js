@@ -162,6 +162,8 @@ BSWG.component = function (desc, args) {
             }
         }
 
+        ctx.globalAlpha = 1.0;
+
     };
 
     this.cacheJPW = function() {
