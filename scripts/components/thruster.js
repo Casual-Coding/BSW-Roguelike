@@ -44,15 +44,17 @@ BSWG.component_Thruster = {
 
     render: function(ctx, cam, dt) {
 
-        //ctx.fillStyle = '#282';
-        //BSWG.drawBlockPoly(ctx, this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
-        //                                                 (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25),
-        //                 BSWG.componentHoverFn(this));
         this.meshObj.update([0.1, 0.75, 0.8, 1], 1/0.75);
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+
     },
 
-    renderOver: function(ctx, cam, dt) {
+    update: function(dt) {
+
+        if (this.dispKeys) {
+            this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase();
+            this.dispKeys['thrust'][2] = BSWG.input.KEY_DOWN(this.thrustKey);
+        }
 
         if (this.thrustT > 0) {
 
@@ -65,54 +67,19 @@ BSWG.component_Thruster = {
 
             BSWG.render.boom.palette = chadaboom3D.fire;
             BSWG.render.boom.add(
-                p.particleWrap(0.2),
+                p.particleWrap(0.025),
                 1.0*this.thrustT*5.0,
                 32,
                 0.3*this.thrustT*5.0,
                 4.0,
-                v.THREE(Math.random()*0.25-0.125)
+                v.THREE(Math.random()*2.0)
             );
-
-            /*var tpl = [
-                Math.rotVec2(new b2Vec2(-0.15, -0.4), this.offsetAngle),
-                Math.rotVec2(new b2Vec2( 0.0, -0.5 - this.thrustT * (2.0 + Math.random())), this.offsetAngle),
-                Math.rotVec2(new b2Vec2( 0.15, -0.4), this.offsetAngle)
-            ];
-
-            ctx.globalAlpha = Math.min(this.thrustT / 0.3, 1.0);
-
-            var r = Math.random();
-            if (r<0.5)
-                ctx.fillStyle = '#f40';
-            else if (r<0.75)
-                ctx.fillStyle = '#ff0';
-            else
-                ctx.fillStyle = '#fff';
-
-            BSWG.drawBlockPoly(ctx, {
-                body: this.obj.body,
-                verts: tpl
-            }, 0.5, new b2Vec2(
-                (tpl[0].x + tpl[2].x) * 0.5,
-                (tpl[0].y + tpl[2].y) * 0.5
-            ));
-
-            ctx.globalAlpha = 1.0;*/
 
             this.thrustT -= dt;
 
         }
         else
             this.thrustT = 0.0;
-
-    },
-
-    update: function(dt) {
-
-        if (this.dispKeys) {
-            this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase();
-            this.dispKeys['thrust'][2] = BSWG.input.KEY_DOWN(this.thrustKey);
-        }
 
     },
 
