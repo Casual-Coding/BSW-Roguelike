@@ -13,6 +13,7 @@ BSWG.component_Spikes = {
         this.nteeth    = [6, 6, 8][this.size-1];
         this.toothSize = [0.8, 1.6, 2.8][this.size-1];
 
+        var friction = [ 0.25 ];
         var wheelVerts = new Array(this.nteeth);
         for (var i=0; i<this.nteeth; i++) {
             var a = i/this.nteeth * Math.PI;
@@ -31,11 +32,13 @@ BSWG.component_Spikes = {
             tverts[1] = new b2Vec2(Math.cos(ac) * (this.size+this.toothSize) * 0.40, Math.sin(ac) * (this.size+this.toothSize) * 0.40);
             tverts[2] = new b2Vec2(wheelVerts[j].x, wheelVerts[j].y);
             verts[i] = tverts;
+            friction.push(0.75);
         }
 
         this.obj = BSWG.physics.createObject('multipoly', args.pos, args.angle || 0, {
             verts: verts,
-            density: 1.0/3.0
+            density: 1.0/3.0,
+            frictionList: friction
         });
 
         this.jpoints = BSWG.createPolyJPoints([wheelVerts[wheelVerts.length-1], wheelVerts[0]], [1], false);

@@ -306,7 +306,7 @@ BSWG.physics = new function(){
 
         obj.fixtureDef = new b2FixtureDef();
         obj.fixtureDef.density = def.density || 1.0;
-        obj.fixtureDef.friction = (def.friction || def.friction === 0) ? def.friction : 0.5;
+        obj.fixtureDef.friction = (def.friction || def.friction === 0) ? def.friction : 0.25;
         
         switch (type)
         {
@@ -380,6 +380,9 @@ BSWG.physics = new function(){
             obj.fixture = new Array(obj.shape.length);
             for (var i=0; i<obj.shape.length; i++) {
                 obj.fixtureDef.shape = obj.shape[i];
+                if (def.frictionList) {
+                    obj.fixtureDef.friction = def.frictionList[i];
+                }
                 obj.fixture[i] = obj.body.CreateFixture( obj.fixtureDef );
             }
         }
@@ -540,7 +543,7 @@ BSWG.physics = new function(){
                 var v = [ba, bb][i].GetLinearVelocityFromWorldPoint(p);
                 BSWG.render.boom.add(
                     p.particleWrap(0.0),
-                    0.25*Math.pow(tforce, 0.125),
+                    0.2*Math.pow(tforce, 0.125),
                     32,
                     0.3*Math.pow(tforce, 0.33),
                     4.0,
