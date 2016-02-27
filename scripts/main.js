@@ -63,7 +63,8 @@ var BSWG = new function(){
         'vertex': [
             'basicVertex',
             'bgVertex',
-            'jpointsVertex'
+            'jpointsVertex',
+            'expVertex'
         ],
         'fragment': [
             'basicFragment',
@@ -71,7 +72,8 @@ var BSWG = new function(){
             'basicFragmentOptimized',
             'bgFragmentOptimized',
             'selectionFragment',
-            'jpointsFragment'
+            'jpointsFragment',
+            'expFragment'
         ]
     };
 

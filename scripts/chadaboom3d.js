@@ -1,6 +1,7 @@
 window.chadaboom3D = function(batches, onLoad) {
 
-    this.bwidth = 9;
+    var self = this;
+    this.bwidth  = 9;
     this.bheight = 5;
     this.nframes = this.bwidth * this.bheight;
 
@@ -24,23 +25,30 @@ window.chadaboom3D = function(batches, onLoad) {
                     for (var k=0; k<batches.length; k++) {
                         var bk = batches[k];
                         for (var k2=0; k2<bk.img.length; k2++) {
+                            // Prepare animation sheet as texture for use in shader
                             var timg = bk.img[k2];
-                            var canvas = document.createElement('canvas');
-                            var width = parseInt(timg.width),
-                                height = parseInt(timg.height);
-                            canvas.width = width;
-                            canvas.height = height;
-                            var ctx = canvas.getContext("2d");
-                            ctx.drawImage(timg, 0, 0);
-                            var pdata = ctx.getImageData(0, 0, width, height);
-                            for (var l=0; l<pdata.data.length; l+=4) {
-                                var index = pdata.data[l+3];
-                                pdata.data[l+0] = pal[index][0];
-                                pdata.data[l+1] = pal[index][1];
-                                pdata.data[l+2] = pal[index][2];
-                            }
-                            ctx.putImageData(pdata, 0, 0);
-                            bk.img[k2] = canvas;
+                            var isz = bk.size;
+                            var osz = Math.min(isz, 256); // currently downscales if frames are larger than 256x256
+                            var width = osz * 8,
+                                height = osz * 8;
+
+                            bk.img[k2] = BSWG.render.proceduralImage(width, height, function(ctx, w, h){
+
+                                ctx.fillStyle = '#000';
+                                ctx.fillRect(0, 0, w, h);
+
+                                for (var k3=0; k3<self.nframes; k3++) {
+                                    ctx.drawImage(
+                                        timg,
+                                        (k3%self.bwidth) * isz, Math.floor(k3/self.bwidth) * isz,
+                                        isz, isz,
+                                        (k3%8) * osz, Math.floor(k3/8) * osz,
+                                        osz, osz
+                                    );
+                                }
+
+                            });
+
                         }
                     }
 
@@ -56,53 +64,64 @@ window.chadaboom3D = function(batches, onLoad) {
 
     this.batches = batches;
     this.list = [];
+    this.geom = new THREE.PlaneGeometry(1.0, 1.0, 1, 1);
 
 };
 
 chadaboom3D.prototype.render = function(dt) {
 
-    var oAlpha = parseFloat(ctx.globalAlpha);
-
     for (var i=0; i<this.list.length; i++) {
         var B = this.list[i];
         B.t -= dt;
         if (B.t <= 0.0) {
+            B.eraseMesh();
             this.list.splice(i, 1);
             i --;
             continue;
         }
 
-        var p = B.p(B.vel.x*dt, B.vel.y*dt, B.vel.z*dt);
+        var p = B.p(B.vel.x*0, B.vel.y*0, B.vel.z*0);
         B.vel.x *= 0.995;
         B.vel.y *= 0.995;
         B.vel.z *= 0.995;
         var sz = B.sz(B.res);
-        var bb = this.batches[B.bbi];
 
         var t = Math.pow(1.0-(B.t / B.maxt), 1.0/B.attack);
         sz *= Math.pow(t, 0.25);
-        var frame = t * this.nframes;
-        if (frame < 0) {
-            frame = 0;
-        }
-        if (frame > this.nframes-2) {
-            frame = this.nframes-2;
-        }
+        var frame = Math.floor(t * this.nframes);
 
-        var f1 = Math.floor(frame);
-        var f2 = f1 + 1;
-        var ft = frame - f1;
+        B.mesh.position.set(p.x, p.y, p.z);
+        B.mesh.rotation.set(0.0, 0.0, B.rot, 'ZXY');
+        B.mesh.scale.set(sz, sz, 1.0);
+        B.mesh.updateMatrix();
+        B.material.uniforms.frame.value.set((frame%8)/8.0, 1.0 - ~~(frame/8)/8.0);
+        B.material.needsUpdate = true;
 
-        /*ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(B.rot);
-        ctx.translate(-sz*0.5, -sz*0.5);
-        ctx.drawImage(bb.img[B.img], (f1%this.bwidth)*bb.size, Math.floor(f1/this.bwidth)*bb.size, bb.size, bb.size, 0, 0, sz, sz);
-
-        ctx.restore();*/
+        p = B.p(B.vel.x*dt, B.vel.y*dt, B.vel.z*dt);
     }
 
 };
+
+chadaboom3D.fire = [
+    [ 0.25, 0.25, 0.25, 0.25 ],
+    [ 1.0,   0.0,  0.0, 0.50 ],
+    [ 1.0,   1.0,  0.0, 0.75 ],
+    [ 1.0,   1.0,  1.0,  1.0 ]
+];
+
+chadaboom3D.blue = [
+    [ 0.25, 0.25, 0.25, 1/3 ],
+    [ 0.0,   0.0,  1.0, 2/3 ],
+    [ 1.0,   1.0,  1.0,  1.0 ],
+    [ 1.0,   1.0,  1.0,  1.0 ]
+];
+
+chadaboom3D.green = [
+    [ 0.25, 0.25, 0.25, 1/3 ],
+    [ 0.0,   1.0,  0.0, 2/3 ],
+    [ 1.0,   1.0,  1.0,  1.0 ],
+    [ 1.0,   1.0,  1.0,  1.0 ]
+];
 
 chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
 
@@ -117,7 +136,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
     }
 
     if (!vel) {
-        vel = { x:0, y:0, z: 0 };
+        vel = { x:0, y:0, z:0 };
     }
 
     var bb = null;
@@ -153,6 +172,40 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
         };
     }
 
+    var palette = this.palette || chadaboom3D.fire;
+
+    var mat = BSWG.render.newMaterial("expVertex", "expFragment", {
+        pal1: {
+            type: 'v4',
+            value: new THREE.Vector4(palette[0][0], palette[0][1], palette[0][2], palette[0][3])
+        },
+        pal2: {
+            type: 'v4',
+            value: new THREE.Vector4(palette[1][0], palette[1][1], palette[1][2], palette[1][3])
+        },
+        pal3: {
+            type: 'v4',
+            value: new THREE.Vector4(palette[2][0], palette[2][1], palette[2][2], palette[2][3])
+        },
+        pal4: {
+            type: 'v4',
+            value: new THREE.Vector4(palette[3][0], palette[3][1], palette[3][2], palette[3][3])
+        },
+        img: {
+            type: 't',
+            value: bb.img[Math.floor(Math.random()*1000000) % bb.count].texture
+        },
+        frame: {
+            type: 'v2',
+            value: new THREE.Vector2(0, 0)
+        }
+    }, THREE.AdditiveBlending);
+
+    var mesh = new THREE.Mesh( this.geom, mat );
+    mesh.needsUpdate = true;
+    mat.needsUpdate = true;
+    BSWG.render.scene.add( mesh );
+
     this.list.push({
 
         p: posFn,
@@ -160,11 +213,22 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
         vel: vel,
         res: res,
         bbi: bb.i,
-        img: Math.floor(Math.random()*1000000) % bb.count,
         t: life,
         maxt: life,
         rot: Math.random() * Math.PI * 2.0,
-        attack: attack
+        attack: attack,
+        mesh: mesh,
+        material: mat,
+        eraseMesh: function () {
+            if (!mesh) {
+                return;
+            }
+            BSWG.render.scene.remove(mesh);
+            mesh.material.dispose();
+            mesh.geometry = null;
+            mesh.material = null;
+            mesh = null;
+        }
 
     });
 
@@ -174,6 +238,9 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
 
 chadaboom3D.prototype.clear = function() {
 
+    for (var i=0; i<this.list.length; i++) {
+        this.list[i].eraseMesh();
+    }
     this.list.length = 0;
 
 };

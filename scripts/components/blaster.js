@@ -105,13 +105,12 @@ BSWG.component_Blaster = {
 
         if (keys[this.fireKey] && !this.fireT) {
 
+            var pl = new b2Vec2(0.0,  1.05);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
-            var v = this.obj.body.GetLinearVelocity();
-
-            var pl = new b2Vec2(0.0,  1.5);
+            var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
             var p = BSWG.physics.localToWorld([pl], this.obj.body);
 
-            BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0 + v.x, -Math.sin(a)*15.0 + v.y));
+            BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0 + v.x, -Math.sin(a)*15.0 + v.y), v);
             accel = 1;
 
             this.fireT = 0.5;

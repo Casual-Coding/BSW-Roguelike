@@ -240,7 +240,7 @@ BSWG.render = new function() {
         var ocomplete = complete;
         var self = this;
         complete = function() {
-            self.boom = new chadaboom([
+            self.boom = new chadaboom3D([
                 {
                     'name': 'images/explosion',
                     'size': 64,
@@ -262,19 +262,8 @@ BSWG.render = new function() {
                     'count': 1
                 }
             ],
-            chadaboom.fire,
             function(){            
-                self.blueBoom = new chadaboom([
-                    {
-                        'name': 'images/explosion',
-                        'size': 64,
-                        'count': 4
-                    }
-                ],
-                chadaboom.blue_flame,
-                function(){
-                    self.loadShaders(shaders, ocomplete);
-                });
+                self.loadShaders(shaders, ocomplete);
             });
         };
 

@@ -30,6 +30,26 @@ BSWG.physics = new function(){
             this.ApplyForce(v, this.GetWorldCenter());
         };
 
+        b2Vec2.prototype.THREE = function(z) {
+            return new THREE.Vector3(this.x, this.y, z);
+        };
+
+        b2Vec2.prototype.particleWrap = function(z) {
+            var pos = new THREE.Vector3(this.x, this.y, z);
+            return function(vx, vy, vz) {
+                pos.x += vx;
+                pos.y += vy;
+                pos.z += vz;
+                return pos;
+            };
+        };
+
+        if (!b2Vec2.prototype.clone) {
+            b2Vec2.prototype.clone = function() {
+                return new b2Vec2(this.x, this.y);
+            };
+        }
+
         this.world = new b2World( new b2Vec2(0.0, 0.0) );
         this.ground = this.world.CreateBody(new b2BodyDef());
 

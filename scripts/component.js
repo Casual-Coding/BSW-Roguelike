@@ -286,9 +286,10 @@ BSWG.component = function (desc, args) {
                         var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
                         var p1 = this.jpointsw[this.jmatch[i][0]];
 
-                        BSWG.render.blueBoom.add(
-                            BSWG.game.cam.wrapToScreen(BSWG.render.viewport, {x: (p1.x+p2.x)*0.5, y: (p1.y+p2.y)*0.5}),
-                            BSWG.game.cam.wrapToScreenSize(BSWG.render.viewport, 0.75),
+                        BSWG.render.boom.palette = chadaboom3D.blue;
+                        BSWG.render.boom.add(
+                            new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2),
+                            0.75,
                             32,
                             0.4,
                             1.0
@@ -305,9 +306,10 @@ BSWG.component = function (desc, args) {
 
                         BSWG.updateOnCC(this, this.jmatch[i][1]);
 
+                        BSWG.render.boom.palette = chadaboom3D.fire;
                         BSWG.render.boom.add(
-                            BSWG.game.cam.wrapToScreen(BSWG.render.viewport, this.jpointsw[this.jmatch[i][0]]),
-                            BSWG.game.cam.wrapToScreenSize(BSWG.render.viewport, 1.25),
+                            this.jpointsw[this.jmatch[i][0]].particleWrap(0.2),
+                            1.25,
                             32,
                             0.4,
                             1.0
