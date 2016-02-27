@@ -52,6 +52,10 @@ BSWG.physics = new function(){
 
         this.world = new b2World( new b2Vec2(0.0, 0.0) );
         this.ground = this.world.CreateBody(new b2BodyDef());
+        this.chandler = new b2ContactListener();
+        this.chandler.PreSolve = this.collisionCallbackPre;
+        this.chandler.PostSolve = this.collisionCallback;
+        this.world.SetContactListener(this.chandler);
 
     };
 
@@ -448,7 +452,11 @@ BSWG.physics = new function(){
 
     };
 
+    this.lastDT = 1.0/60.0;
+
     this.update = function (dt){
+
+        this.lastDT = dt;
 
         for (var i=0; i<this.welds.length; i++) {
             var t = this.welds[i].joint.GetReactionTorque(1.0/dt);
@@ -476,6 +484,68 @@ BSWG.physics = new function(){
         for (var i=0; i<this.welds.length; i++) {
             if (this.welds[i].revolute && !this.welds[i].noMotor) {
                 this.welds[i].joint.SetMotorSpeed(0);
+            }
+        }
+
+    };
+
+    this.collisionCallbackPre = function(contact) {
+        if (contact.IsTouching()) {
+            var ba = contact.GetFixtureA().GetBody();
+            var bb = contact.GetFixtureB().GetBody();
+            var ta = ba.GetLinearVelocity();
+            var tb = bb.GetLinearVelocity();
+            if (!ba.__lastVel) {
+                ba.__lastVel = ta.clone();
+            }
+            else {
+                ba.__lastVel.x = ta.x;
+                ba.__lastVel.y = ta.y;
+            }
+            if (!bb.__lastVel) {
+                bb.__lastVel = tb.clone();
+            }
+            else {
+                bb.__lastVel.x = tb.x;
+                bb.__lastVel.y = tb.y;
+            }
+        }
+    }
+
+    var self = this;
+
+    this.collisionCallback = function(contact, impulse) {
+
+        var ba = contact.GetFixtureA().GetBody();
+        var bb = contact.GetFixtureB().GetBody();
+        var ta = ba.GetLinearVelocity().clone();
+        var tb = bb.GetLinearVelocity().clone();
+
+        ta.x -= ba.__lastVel.x;
+        ta.y -= ba.__lastVel.y;
+        tb.x -= bb.__lastVel.x;
+        tb.y -= bb.__lastVel.y;
+
+        var forceA = (Math.lenVec2(ta) * ba.GetMass()) / self.lastDT;
+        var forceB = (Math.lenVec2(tb) * bb.GetMass()) / self.lastDT;
+        var tforce = forceA + forceB;
+
+        if (tforce > 0.75) {
+            var wm = new b2WorldManifold();
+            contact.GetWorldManifold(wm);
+            var p = wm.m_points[0];
+            BSWG.render.boom.palette = chadaboom3D.blue;
+            for (var i=0; i<2; i++) {
+                var a = Math.random() * Math.PI * 2.0;
+                var v = [ba, bb][i].GetLinearVelocityFromWorldPoint(p);
+                BSWG.render.boom.add(
+                    p.particleWrap(0.2),
+                    0.2*Math.pow(tforce, 0.125),
+                    32,
+                    0.3*Math.pow(tforce, 0.33),
+                    4.0,
+                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*0.5-0.25)
+                );
             }
         }
 
