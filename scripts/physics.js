@@ -530,7 +530,7 @@ BSWG.physics = new function(){
         var forceB = (Math.lenVec2(tb) * bb.GetMass()) / self.lastDT;
         var tforce = forceA + forceB;
 
-        if (tforce > 0.75) {
+        if (tforce > 0.375) {
             var wm = new b2WorldManifold();
             contact.GetWorldManifold(wm);
             var p = wm.m_points[0];
@@ -540,7 +540,7 @@ BSWG.physics = new function(){
                 var v = [ba, bb][i].GetLinearVelocityFromWorldPoint(p);
                 BSWG.render.boom.add(
                     p.particleWrap(0.0),
-                    0.2*Math.pow(tforce, 0.125),
+                    0.25*Math.pow(tforce, 0.125),
                     32,
                     0.3*Math.pow(tforce, 0.33),
                     4.0,
