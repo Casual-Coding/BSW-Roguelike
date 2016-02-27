@@ -37,7 +37,8 @@ BSWG.component_SawBlade = {
         this.obj = BSWG.physics.createObject('multipoly', args.pos, args.angle || 0, {
             verts: verts,
             density: 1.0/3.0,
-            friction: 0.05
+            friction: 0.05,
+            restitution: 0.0
         });
 
         var cjp = new b2Vec2(0.0, 0.0);
