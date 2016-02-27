@@ -18,10 +18,10 @@ BSWG.blasterList = new function () {
             var comp = null;
             if (B.t <= 0.0 || (comp=BSWG.componentList.atPoint(B.p))) {
                 if (B.t > 0.0) {
-                    BSWG.render.boom.palette = chadaboom3D.blue;
+                    BSWG.render.boom.palette = chadaboom3D.blue_bright;
                     BSWG.render.boom.add(
                         new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
-                        1.75,
+                        2.2,
                         32,
                         1.0,
                         1.5,
@@ -37,10 +37,10 @@ BSWG.blasterList = new function () {
 
             var p = cam.toScreen(BSWG.render.viewport, B.p);
 
-            BSWG.render.boom.palette = chadaboom3D.blue;
+            BSWG.render.boom.palette = chadaboom3D.blue_bright;
             BSWG.render.boom.add(
                 new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
-                0.4,
+                0.65,
                 16,
                 0.1,
                 1.5,
