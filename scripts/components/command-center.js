@@ -17,7 +17,8 @@ BSWG.component_CommandCenter = {
 
         this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
             width:  this.width,
-            height: this.height
+            height: this.height,
+            smooth: 0.02
         });
 
         this.dispKeys = {
@@ -29,7 +30,7 @@ BSWG.component_CommandCenter = {
 
         this.jpoints = BSWG.createBoxJPoints(this.width, this.height);
 
-        BSWG.blockPolySmooth = 0.02;
+        //BSWG.blockPolySmooth = 0.02;
 
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.8);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);

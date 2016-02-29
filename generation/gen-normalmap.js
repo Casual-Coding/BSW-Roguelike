@@ -80,20 +80,20 @@ Math.random2d = function(x,y) {
 var genPerlin = function(sz, min, max, k) {
     var ret = newArr(sz, 0.0);
     var h = max - min;
-    var sz2 = sz / 128;
+    var sz2 = sz / 32;
     for (var x=-sz/2; x<sz*1.5; x++) {
         for (var y=-sz/2; y<sz*1.5; y++) {
             var xx = x/sz2;
             var yy = y/sz2;
             var v =
                 Math.random2d(Math.floor(xx), Math.floor(yy)) * Math.pow(2.0, -1) +
-                Math.random2d(Math.floor(xx*(2)), Math.floor(yy*(2))) * Math.pow(2.0, -1.5) +
-                Math.random2d(Math.floor(xx*(4)), Math.floor(yy*(4))) * Math.pow(2.0, -2) +
-                Math.random2d(Math.floor(xx*(8)), Math.floor(yy*(8))) * Math.pow(2.0, -2.5) +
-                Math.random2d(Math.floor(xx*(16)), Math.floor(yy*(16))) * Math.pow(2.0, -3) +
-                Math.random2d(Math.floor(xx*(32)), Math.floor(yy*(32))) * Math.pow(2.0, -3.5) +
-                Math.random2d(Math.floor(xx*(64)), Math.floor(yy*(64))) * Math.pow(2.0, -4) +
-                Math.random2d(Math.floor(xx*(128)), Math.floor(yy*(128))) * Math.pow(2.0, -4.5);
+                Math.random2d(Math.floor(xx*(1.5)), Math.floor(yy*(1.5))) * Math.pow(2.0, -2) +
+                Math.random2d(Math.floor(xx*(2)), Math.floor(yy*(2))) * Math.pow(2.0, -3) +
+                Math.random2d(Math.floor(xx*(2.5)), Math.floor(yy*(2.5))) * Math.pow(2.0, -4) +
+                Math.random2d(Math.floor(xx*(3)), Math.floor(yy*(3))) * Math.pow(2.0, -5) +
+                Math.random2d(Math.floor(xx*(3.5)), Math.floor(yy*(3.5))) * Math.pow(2.0, -6);
+                //Math.random2d(Math.floor(xx*(64)), Math.floor(yy*(64))) * Math.pow(2.0, -7) +
+                //Math.random2d(Math.floor(xx*(128)), Math.floor(yy*(128))) * Math.pow(2.0, -8);
             ret.setRot(x, y, Math.max(ret.getRot(x, y), v*h+min));
         }
     }
@@ -115,7 +115,7 @@ var genPerlin = function(sz, min, max, k) {
 
 switch (type) {
     case 'grass':
-        var p = genPerlin(sz, 0.2, 0.9, 2);
+        var p = genPerlin(sz, 0.2, 0.9, 5);
         for (var x=0; x<sz; x++) {
             for (var y=0; y<sz; y++) {
                 var v = p.get(x, y);

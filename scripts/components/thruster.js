@@ -20,7 +20,8 @@ BSWG.component_Thruster = {
         ];
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
-            verts: verts
+            verts:  verts,
+            smooth: 0.1
         });
 
         this.dispKeys = {
@@ -32,12 +33,12 @@ BSWG.component_Thruster = {
         this.thrustKey = args.thrustKey || BSWG.KEY.UP;
         this.thrustT = 0.0;
 
-        BSWG.blockPolySmooth = 0.1;
+        //BSWG.blockPolySmooth = 0.1;
 
-        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((this.obj.verts[2].x + this.obj.verts[3].x) * 0.5,
-                                                                             (this.obj.verts[2].y + this.obj.verts[3].y) * 0.5 - 0.25));
+        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((verts[2].x + verts[3].x) * 0.5,
+                                                                             (verts[2].y + verts[3].y) * 0.5 - 0.25));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
-        BSWG.blockPolySmooth = null;
+        //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
     },

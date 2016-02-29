@@ -18,15 +18,16 @@ BSWG.component_Block = {
         this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
             width:    this.width,
             height:   this.height,
-            triangle: this.triangle
+            triangle: this.triangle,
+            smooth:   0.03
         });
 
         this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
-        BSWG.blockPolySmooth = 0.03;
+        //BSWG.blockPolySmooth = 0.03;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
-        BSWG.blockPolySmooth = null;
+        //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
     },

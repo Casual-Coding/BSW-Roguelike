@@ -27,11 +27,12 @@ BSWG.component_SawMotor = {
         this.motorC = new b2Vec2(this.size * 1.3, 0.0);
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
-            verts: verts,
-            density: 3.0
+            verts:   verts,
+            density: 3.0,
+            smooth:  0.05
         });
 
-        this.jpoints = BSWG.createPolyJPoints(this.obj.verts, [0, 1, 2], true);
+        this.jpoints = BSWG.createPolyJPoints(verts, [0, 1, 2], true);
 
         this.dispKeys = {
             'rotate': [ '', new b2Vec2(this.motorC.x, this.motorC.y) ],
@@ -59,10 +60,10 @@ BSWG.component_SawMotor = {
             new b2Vec2(this.size *  0.5, this.size *  0.2)
         ];
         
-        BSWG.blockPolySmooth = 0.05;
+        //BSWG.blockPolySmooth = 0.05;
         this.meshObj1 = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         this.selMeshObj1 = BSWG.genereteBlockPolyOutline(this.obj);
-        BSWG.blockPolySmooth = null;
+        //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
         this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, -0.1, 0.225);
         this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);

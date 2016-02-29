@@ -324,6 +324,10 @@ BSWG.physics = new function(){
                 for (var i=0; i<def.verts.length; i++) {
                     verts.push(Math.rotVec2(def.verts[i], def.offsetAngle));
                 }
+                if (def.smooth) {
+                    verts = Math.smoothPoly(verts, def.smooth);
+                }
+
                 obj.verts = verts;
                 obj.shape = b2PolygonShape.AsArray(verts, verts.length);
                 break;
@@ -338,6 +342,9 @@ BSWG.physics = new function(){
                     var verts = new Array(poly.length);
                     for (var i=0; i<poly.length; i++) {
                         verts[i] = Math.rotVec2(poly[i], def.offsetAngle);
+                    }
+                    if (def.smooth) {
+                        verts = Math.smoothPoly(verts, def.smooth);
                     }
                     obj.verts.push(verts);
                     obj.shape.push(b2PolygonShape.AsArray(verts, verts.length));
@@ -357,6 +364,10 @@ BSWG.physics = new function(){
                     verts.splice(0, 1);
                 else if (def.triangle === 1)
                     verts.splice(1, 1);
+
+                if (def.smooth) {
+                    verts = Math.smoothPoly(verts, def.smooth);
+                }
 
                 obj.verts = verts;
                 obj.shape = b2PolygonShape.AsArray(verts, verts.length);

@@ -56,13 +56,13 @@ BSWG.game = new function(){
         BSWG.planets.add({});
 
         var pastPositions = [ new b2Vec2(0, 0) ];
-        for (var i=0; i<35; i++) {
+        for (var i=0; i<48; i++) {
 
             var p = null;
             for (var k=0; k<500; k++)
             {
                 var a = Math.random() * Math.PI * 2.0;
-                var r = Math.random() * 8 + 8;
+                var r = Math.random() * 10 + 12;
                 p = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
                 for (var j=0; j<pastPositions.length && p; j++) {
                     var jp = pastPositions[j];
@@ -113,7 +113,7 @@ BSWG.game = new function(){
                 });
             }
             else {
-                var k = i - (8+4+6+3);
+                var k = (i - (8+4+6+3)) % 14;
                 switch (k) {
                     case 0:
                     case 1:
