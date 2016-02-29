@@ -2,6 +2,8 @@ BSWG.planet_SurfaceDetail = 5;
 BSWG.planet_CloudDetail = 3;
 
 BSWG.planet_TERRAN = 0;
+BSWG.planet_HELL   = 1;
+BSWG.planet_MARS   = 2;
 
 BSWG.planets = new function(surfaceRes, cloudRes){
 
@@ -34,7 +36,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             rotD:   0.0,
             rotVec: new THREE.Vector3(Math.random(), Math.random(), Math.random()),
             radius: 35,
-            type:   BSWG.planet_TERRAN,
+            type:   BSWG.planet_MARS,
             seed:   Date.timeStamp()
         };
 
@@ -46,6 +48,42 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         }
 
         obj.pos.z -= obj.radius * 0.75;
+
+        var crators = false;
+
+        var colors;
+        switch (obj.type) {
+            case BSWG.planet_TERRAN:
+                colors = [
+                    new THREE.Vector4(0.04, 0.04, 0.67, 1.0),
+                    new THREE.Vector4(0.03, 0.3, 0.045, 1.0),
+                    new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
+                    new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
+                ];
+                break;
+
+            case BSWG.planet_HELL:
+                colors = [
+                    new THREE.Vector4(0.67, 0.04, 0.04, 1.0),
+                    new THREE.Vector4(0.45, 0.03, 0.03, 1.0),
+                    new THREE.Vector4(0.5, 0.3, 0.3, 1.0),
+                    new THREE.Vector4(0.8, 0.5, 0.5, 1.0)
+                ];
+                break;
+
+            case BSWG.planet_MARS:
+                crators = true;
+                colors = [
+                    new THREE.Vector4(0.25, 0.06, 0.03, 1.0),
+                    new THREE.Vector4(0.35, 0.06, 0.03, 1.0),
+                    new THREE.Vector4(0.35, 0.2, 0.15, 1.0),
+                    new THREE.Vector4(0.4, 0.3, 0.25, 1.0)
+                ];
+                break;
+
+            default:
+                break;
+        }
 
         obj.mat = BSWG.render.newMaterial("planetVertex", "planetFragment", {
             light: {
@@ -63,6 +101,26 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             map: {
                 type: 't',
                 value: BSWG.render.images['grass_nm'].texture
+            },
+            extra: {
+                type: 'v4',
+                value: new THREE.Vector4(crators?1:0, 0, 0, 0)
+            },
+            clr1: {
+                type: 'v4',
+                value: colors[0]
+            },
+            clr2: {
+                type: 'v4',
+                value: colors[1]
+            },
+            clr3: {
+                type: 'v4',
+                value: colors[2]
+            },
+            clr4: {
+                type: 'v4',
+                value: colors[3]
             }
         });
 
@@ -81,9 +139,14 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 rand.get(Math.floor(x*3), Math.floor(y*3), Math.floor(z*3)) * Math.pow(2, -1.5) +
                 rand.get(Math.floor(x*9), Math.floor(y*9), Math.floor(z*9)) * Math.pow(2, -2) +
                 rand.get(Math.floor(x*27), Math.floor(y*27), Math.floor(y*27)) * Math.pow(2, -2.5);
-            if (pval < 0.75) pval = 0.5;
-            else if (pval < 1.1) pval = 0.7;
-            pval = Math.pow(pval-0.5, 1.5)*2.0 + 0.5;
+            if (pval < 0.75 && (!crators || pval > 0.15)) pval = 0.5;
+            else if (pval < 1.1 && (!crators || pval > 0.9)) pval = 0.7;
+            if (!crators) {
+                pval = Math.pow(pval-0.5, 1.5)*2.0 + 0.5;
+            }
+            else {
+                pval = Math.pow(pval, 1.5);
+            }
             var h = 0.9 + pval * 0.2;
             n.x *= h;
             n.y *= h;

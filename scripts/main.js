@@ -72,6 +72,7 @@ var BSWG = new function(){
         'fragment': [
             'basicFragment',
             'bgFragment',
+            'bgFragment2',
             'basicFragmentOptimized',
             'bgFragmentOptimized',
             'selectionFragment',

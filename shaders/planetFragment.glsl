@@ -8,10 +8,17 @@ varying mat3 vNormalMatrix;
 uniform sampler2D map;
 uniform vec4 light;
 
-#define WATER vec4(0.04, 0.04, 0.67, 1.0)
-#define GRASS vec4(0.03, 0.3, 0.045, 1.0)
-#define ROCK1 vec4(0.3, 0.3, 0.3, 1.0)
-#define ROCK2 vec4(0.5, 0.5, 0.5, 1.0)
+uniform vec4 clr1;
+uniform vec4 clr2;
+uniform vec4 clr3;
+uniform vec4 clr4;
+
+uniform vec4 extra;
+
+#define WATER clr1
+#define GRASS clr2
+#define ROCK1 clr3
+#define ROCK2 clr4
 
 void main() {
 
@@ -36,6 +43,10 @@ void main() {
         clr = mix(ROCK1, ROCK2, (len-0.950) / 0.005);
     else
         clr = ROCK2;
+
+    if (extra.x > 0.5) {
+        waterAmt *= 0.0;
+    }
 
     float scale = 0.5 * 6.0;
     

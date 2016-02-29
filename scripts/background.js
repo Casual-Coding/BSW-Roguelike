@@ -77,6 +77,10 @@ BSWG.starfield = function(){
         tDust: {
             type: 't',
             value: dustImgMerge.texture
+        },
+        zpos: {
+            type: 'f',
+            value: 0.999
         }
     });
 
@@ -90,10 +94,49 @@ BSWG.starfield = function(){
     
     BSWG.render.scene.add( bgMesh );
 
+    var bgMat2 = BSWG.render.newMaterial("bgVertex", "bgFragment2", {
+        cam: {
+            type: 'v3',
+            value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
+        },
+        vp: {
+            type: 'v2',
+            value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+        },
+        tStars: {
+            type: 't',
+            value: starImgMerge.texture
+        },
+        tNebula: {
+            type: 't',
+            value: nebulaImgMerge.texture
+        },
+        tDust: {
+            type: 't',
+            value: dustImgMerge.texture
+        },
+        zpos: {
+            type: 'f',
+            value: 0.99
+        }
+    });
+
+    var bgMesh2 = new THREE.Mesh( bgGeom, bgMat2 );
+    bgMesh2.frustumCulled = false;
+    bgMesh2.position.set(-1.0, -1.0, 0.0);
+    bgMesh2.updateMatrix();
+    
+    bgMesh2.needsUpdate = true;
+    bgMat2.needsUpdate = true;        
+    
+    BSWG.render.scene.add( bgMesh2 );
+
     this.render = function(ctx, cam, viewport) {
 
         bgMat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
         bgMat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+        bgMat2.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+        bgMat2.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
 
     };
 

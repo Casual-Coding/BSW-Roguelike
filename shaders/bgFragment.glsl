@@ -4,7 +4,6 @@ uniform vec3 cam;
 uniform vec2 vp; 
 uniform sampler2D tStars;
 uniform sampler2D tNebula;
-uniform sampler2D tDust;
 
 #define SAMPLE_POS(I, SUB) (mod(SUB, 1.0)*0.25 + vec2(floor(mod(I, 4.0)) * 0.25, floor((I) / 4.0) * 0.25))
 #define SAMPLE_POS2(I, SUB) (clamp(SUB, 0.0, 1.0)*0.25 + vec2(floor(mod(I, 4.0)) * 0.25, floor((I) / 4.0) * 0.25))
@@ -21,17 +20,6 @@ vec2 rotVec (vec2 p, vec2 c, float a) {
         p.x * ca - p.y * sa + c.x,
         p.y * ca + p.x * sa + c.y
     );
-}
-
-vec3 sampleDust (vec2 p) {
-
-    #define DUST_SIZE 32.0
-
-    vec2 p2 = TO_WORLD(p, cam.z) / DUST_SIZE;
-    float i = floor(rand(floor(p2)) * 15.0);
-
-    vec4 clr = texture2D(tDust, SAMPLE_POS(i, p2));
-    return clr.rgb*clr.a;
 }
 
 vec3 sampleStars1 (vec2 p) {
