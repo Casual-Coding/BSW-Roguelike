@@ -1,3 +1,59 @@
+// http://www.geeks3d.com/20100831/shader-library-noise-and-pseudo-random-number-generator-in-glsl/
+Math.random3d = function(x,y,z) {
+
+    var LFSR_Rand_Gen = function(n) {
+        n = (n << 13) ^ n; 
+        return (n * (n*n*15731+789221) + 1376312589) & 0x7fffffff;
+    };
+    var LFSR_Rand_Gen_f = LFSR_Rand_Gen;
+ 
+    var ip = [ Math.floor(x), Math.floor(y), Math.floor(z) ];
+    var u = [ x - ip[0], y - ip[1], z - ip[2] ];
+    u[0] *= u[0] * (3.0-2.0*u[0]);
+    u[1] *= u[1] * (3.0-2.0*u[1]);
+    u[2] *= u[2] * (3.0-2.0*u[2]);
+
+    var _n = ip[0] + ip[1]*57 + ip[2]*113;
+
+    var mix = function (a,b,t) {
+        return a*(1.-t) + b*t;
+    };
+
+    var res = mix(mix(mix(LFSR_Rand_Gen_f(_n+(0+57*0+113*0)),
+                          LFSR_Rand_Gen_f(_n+(1+57*0+113*0)),u[0]),
+                      mix(LFSR_Rand_Gen_f(_n+(0+57*1+113*0)),
+                          LFSR_Rand_Gen_f(_n+(1+57*1+113*0)),u[0]),u[1]),
+                 mix(mix(LFSR_Rand_Gen_f(_n+(0+57*0+113*1)),
+                          LFSR_Rand_Gen_f(_n+(1+57*0+113*1)),u[0]),
+                      mix(LFSR_Rand_Gen_f(_n+(0+57*1+113*1)),
+                          LFSR_Rand_Gen_f(_n+(1+57*1+113*1)),u[0]),u[1]),u[2]);
+
+    res = 1.0 - res*(1.0/1073741824.0);
+    return res;
+};
+
+Math.random3dSlow = function() {
+    this.map = {};
+    this.get = function(x,y,z) {
+        x += 333.0;
+        y += 333.0;
+        z += 333.0;
+        x = x/1000.0 - Math.floor(x/1000.0);
+        y = y/1000.0 - Math.floor(y/1000.0);
+        z = z/1000.0 - Math.floor(z/1000.0);
+        var k = x+','+y+','+z;
+        if (this.map[k] || this.map[k] === 0.0) {
+            return this.map[k];
+        }
+        else {
+            return this.map[k] = Math.random();
+        }
+    };
+    this.dispose = function() {
+        this.map = null;
+    }
+}
+
 Math.random2d = function(x,y) {
     var x2 = 12.9898, y2 = 78.233;
     if (x === 0)

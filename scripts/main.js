@@ -11,6 +11,7 @@ var BSWG = new function(){
         'ui.js',
         'blaster.js',
         'background.js',
+        'planets.js',
         'components/blaster.js',
         'components/block.js',
         'components/chain-link.js',
@@ -55,6 +56,7 @@ var BSWG = new function(){
         'stars_13': 'stars-512-13.png',
         'stars_14': 'stars-512-14.png',
         'test_nm': 'test-normalmap.png',
+        'grass_nm': 'grass-nm.png',
         'cursor-normal': 'cursor-normal.png',
         'cursor-pressed': 'cursor-pressed.png',
         'cursor-pressed-right': 'cursor-pressed-right.png'
@@ -64,7 +66,8 @@ var BSWG = new function(){
             'basicVertex',
             'bgVertex',
             'jpointsVertex',
-            'expVertex'
+            'expVertex',
+            'planetVertex'
         ],
         'fragment': [
             'basicFragment',
@@ -73,7 +76,8 @@ var BSWG = new function(){
             'bgFragmentOptimized',
             'selectionFragment',
             'jpointsFragment',
-            'expFragment'
+            'expFragment',
+            'planetFragment'
         ]
     };
 

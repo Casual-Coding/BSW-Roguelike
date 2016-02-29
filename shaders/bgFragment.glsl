@@ -122,7 +122,7 @@ void main() {
     vec2 p = vUv - vec2(0.5, 0.5);
 
     gl_FragColor = vec4(
-        sampleDust(p)     * 0.65 +
+        //sampleDust(p)     * 0.65 +
         sampleStars1(p)   * 0.75 +
         sampleNebulas1(p) * 0.20 +
         sampleStars2(p)   * 0.75 +

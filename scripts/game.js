@@ -17,6 +17,8 @@ BSWG.game = new function(){
         BSWG.physics.reset();
         BSWG.componentList.clear();
         BSWG.blasterList.clear();
+        BSWG.planets.init();
+
         this.cam = new BSWG.camera();
         this.editMode = false;
         this.showControls = false;
@@ -50,6 +52,8 @@ BSWG.game = new function(){
         var self = this;
 
         Math.seedrandom();
+
+        BSWG.planets.add({});
 
         var pastPositions = [ new b2Vec2(0, 0) ];
         for (var i=0; i<125; i++) {
@@ -184,6 +188,7 @@ BSWG.game = new function(){
             BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
+            BSWG.planets.render(dt);
 
             if (self.editMode) {
 

@@ -36,6 +36,27 @@ var newArr = function(size, val) {
         }
         this[Math.floor(x)+Math.floor(y)*size] += val;
     };
+    var rot = function(v) {
+        while (v<0) {
+            v += size;
+        }
+        while (v>=size) {
+            v -= size;
+        }
+        return v;
+    };
+    ret.getRot = function(x, y) {
+        x = rot(x); y = rot(y);
+        return ret.get(x,y);
+    };
+    ret.setRot = function(x, y, val) {
+        x = rot(x); y = rot(y);
+        return ret.set(x,y,val);
+    };
+    ret.incRot = function(x, y, val) {
+        x = rot(x); y = rot(y);
+        return ret.inc(x,y,val);
+    };
     return ret;
 };
 
@@ -56,7 +77,54 @@ Math.random2d = function(x,y) {
     return whole - Math.floor(whole);
 };
 
+var genPerlin = function(sz, min, max, k) {
+    var ret = newArr(sz, 0.0);
+    var h = max - min;
+    var sz2 = sz / 128;
+    for (var x=-sz/2; x<sz*1.5; x++) {
+        for (var y=-sz/2; y<sz*1.5; y++) {
+            var xx = x/sz2;
+            var yy = y/sz2;
+            var v =
+                Math.random2d(Math.floor(xx), Math.floor(yy)) * Math.pow(2.0, -1) +
+                Math.random2d(Math.floor(xx*(2)), Math.floor(yy*(2))) * Math.pow(2.0, -1.5) +
+                Math.random2d(Math.floor(xx*(4)), Math.floor(yy*(4))) * Math.pow(2.0, -2) +
+                Math.random2d(Math.floor(xx*(8)), Math.floor(yy*(8))) * Math.pow(2.0, -2.5) +
+                Math.random2d(Math.floor(xx*(16)), Math.floor(yy*(16))) * Math.pow(2.0, -3) +
+                Math.random2d(Math.floor(xx*(32)), Math.floor(yy*(32))) * Math.pow(2.0, -3.5) +
+                Math.random2d(Math.floor(xx*(64)), Math.floor(yy*(64))) * Math.pow(2.0, -4) +
+                Math.random2d(Math.floor(xx*(128)), Math.floor(yy*(128))) * Math.pow(2.0, -4.5);
+            ret.setRot(x, y, Math.max(ret.getRot(x, y), v*h+min));
+        }
+    }
+    while (k--) {
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                ret.setRot(x, y,
+                    (ret.getRot(x, y) + 
+                    ret.getRot(x-1, y) + 
+                    ret.getRot(x, y-1) + 
+                    ret.getRot(x+1, y) + 
+                    ret.getRot(x, y+1)) / 5.0
+                );
+            }
+        }
+    }
+    return ret;
+};
+
 switch (type) {
+    case 'grass':
+        var p = genPerlin(sz, 0.2, 0.9, 2);
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var v = p.get(x, y);
+                hmap.set(x, y, v);
+                bmap.set(x, y, v);
+            }
+        }
+        break;
+
     case 'death-metal':
 
         for (var x=0; x<sz; x++) {
@@ -132,8 +200,8 @@ for (var i=0; i<dat.length; i+=4) {
 
     var x = (i/4) % sz, y = ((i/4)-(i/4)%sz)/sz;
 
-    var sx = hmap.get(x+1, y) - hmap.get(x-1, y);
-    var sy = hmap.get(x, y+1) - hmap.get(x, y-1);
+    var sx = hmap.getRot(x+1, y) - hmap.getRot(x-1, y);
+    var sy = hmap.getRot(x, y+1) - hmap.getRot(x, y-1);
 
     var dx = -sx*64, dy = 2; dz = sy*64;
     var len = Math.sqrt(dx*dx+dy*dy+dz*dz);
@@ -147,7 +215,7 @@ for (var i=0; i<dat.length; i+=4) {
     dat[i]   = prepComp((dx + 1.0) * 0.5);
     dat[i+2] = prepComp((dy + 1.0) * 0.5);
     dat[i+1] = prepComp((dz + 1.0) * 0.5);
-    dat[i+3] = prepComp(bmap.get(x, y));
+    dat[i+3] = prepComp(bmap.getRot(x, y));
 }
 
 png.pack().pipe(outfile).on('close', function(){

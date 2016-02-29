@@ -307,10 +307,8 @@ BSWG.physics = new function(){
         obj.fixtureDef = new b2FixtureDef();
         obj.fixtureDef.density = def.density || 1.0;
         obj.fixtureDef.friction = (def.friction || def.friction === 0) ? def.friction : 0.25;
-        obj.fixtureDef.restitution = def.restitution || 0.05;
-
-        console.log(obj.fixtureDef.restitution);
-        
+        obj.fixtureDef.restitution = def.restitution || 0.0;
+       
         switch (type)
         {
             case 'circle':
