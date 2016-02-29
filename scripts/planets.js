@@ -1,4 +1,4 @@
-BSWG.planet_SurfaceDetail = 5;
+BSWG.planet_SurfaceDetail = 4;
 BSWG.planet_CloudDetail = 3;
 
 BSWG.planet_TERRAN = 0;
@@ -35,8 +35,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             rot:    Math.random() * Math.PI/60,
             rotD:   0.0,
             rotVec: new THREE.Vector3(Math.random(), Math.random(), Math.random()),
-            radius: 35,
-            type:   BSWG.planet_MARS,
+            radius: 25,
+            type:   BSWG.planet_TERRAN,
             seed:   Date.timeStamp()
         };
 
@@ -50,6 +50,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         obj.pos.z -= obj.radius * 0.75;
 
         var crators = false;
+        var smooth = 1;
 
         var colors;
         switch (obj.type) {
@@ -152,20 +153,21 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             n.y *= h;
             n.z *= h;
         }
-        for (var k=0; k<1; k++) {
+        for (var k=0; k<smooth; k++) {
             for (var i=0; i<obj.geom.faces.length; i++) {
                 var f = obj.geom.faces[i];
                 var v = obj.geom.vertices;
                 v[f.a].set(
-                    (v[f.a].x*0.5 + v[f.b].x*0.25 + v[f.c].x*0.25),
-                    (v[f.a].y*0.5 + v[f.b].y*0.25 + v[f.c].y*0.25),
-                    (v[f.a].z*0.5 + v[f.b].z*0.25 + v[f.c].z*0.25)
+                    (v[f.a].x*7/8 + v[f.b].x/16 + v[f.c].x/16),
+                    (v[f.a].y*7/8 + v[f.b].y/16 + v[f.c].y/16),
+                    (v[f.a].z*7/8 + v[f.b].z/16 + v[f.c].z/16)
                 );
             }
         }
         rand.dispose();
         obj.geom.computeFaceNormals();
         obj.geom.computeVertexNormals();
+        obj.geom.computeBoundingSphere();
         //for (var i=0; i<obj.geom.faces.length; i++) {
         //    obj.geom.faces[i].vertexNormals.length = 0;
         //}

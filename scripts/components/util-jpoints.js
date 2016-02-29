@@ -1,6 +1,6 @@
 // BlockShip Wars Rougelike - Helper functions for jpoints (weld points)
 
-BSWG.maxJPointsRender = 384;
+BSWG.maxJPointsRender = 192;
 BSWG.jpointRenderer = new function() {
 
     var baseLen, geom, len, posArray, clrArray, mat, mesh, vertices, faces;
@@ -16,11 +16,11 @@ BSWG.jpointRenderer = new function() {
         vertices = new Float32Array(len);
         var k = 0;
         for (var i=0; i<BSWG.maxJPointsRender; i++) {
-            vertices[k++] =  0.0; vertices[k++] =  0.0; vertices[k++] =  0.5;
-            vertices[k++] = -1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
-            vertices[k++] =  0.0; vertices[k++] =  1.0; vertices[k++] =  0.0;
-            vertices[k++] =  1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
             vertices[k++] =  0.0; vertices[k++] = -1.0; vertices[k++] =  0.0;
+            vertices[k++] =  1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
+            vertices[k++] =  0.0; vertices[k++] =  1.0; vertices[k++] =  0.0;
+            vertices[k++] = -1.0; vertices[k++] =  0.0; vertices[k++] =  0.0;
+            vertices[k++] =  0.0; vertices[k++] =  0.0; vertices[k++] =  0.5;
         }
 
         len = BSWG.maxJPointsRender * baseLen * 4;
