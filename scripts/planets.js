@@ -6,8 +6,9 @@ BSWG.planet_HELL   = 1;
 BSWG.planet_MARS   = 2;
 BSWG.planet_MOON   = 3;
 BSWG.planet_DESERT = 4;
+BSWG.planet_ICE    = 5;
 
-BSWG.planet_COUNT  = 5;
+BSWG.planet_COUNT  = 6;
 
 BSWG.planets = new function(surfaceRes, cloudRes){
 
@@ -141,6 +142,20 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     obj.radius = 25 + 5 * Math.random();
                 }
                 waterScale = 0.35;
+                break;
+
+            case BSWG.planet_ICE:
+                colors = [
+                    new THREE.Vector4(0.8, 0.8, 1.0, 1.0),
+                    new THREE.Vector4(0.6, 0.8, 1.0, 1.0),
+                    new THREE.Vector4(0.4, 0.6, 1.0, 1.0),
+                    new THREE.Vector4(0.2, 0.4, 1.0, 1.0),
+                ];
+                waterAnim = false;
+                if (obj.radius === -1) {
+                    obj.radius = 25 + 5 * Math.random();
+                }
+                waterScale = 0.25;
                 break;
 
             default:
