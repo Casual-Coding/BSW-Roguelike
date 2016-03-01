@@ -40,6 +40,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             radius: -1,
             type:   -1,
             seed:   Date.timeStamp(),
+            ringScale: -1
         };
 
         var obj = new Object();
@@ -156,6 +157,10 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     colors[i].w * t + colors2[i].w * (1-t)
                 );
             }
+        }
+
+        if (obj.ringScale === -1) {
+            obj.ringScale = 0.8 + Math.random() * 0.55;
         }
 
         var ringcolors = new Array(4);
@@ -348,7 +353,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             obj.geomr.computeBoundingSphere();
 
             obj.meshr = new THREE.Mesh( obj.geomr, obj.matr );
-            obj.meshr.scale.set(obj.radius*2.5, obj.radius*2.5, obj.radius*2.5);
+            obj.meshr.scale.set(obj.radius*2.5*obj.ringScale, obj.radius*2.5*obj.ringScale, obj.radius*2.5*obj.ringScale);
             obj.meshr.updateMatrix();
 
             obj.matr.needsUpdate = true;
