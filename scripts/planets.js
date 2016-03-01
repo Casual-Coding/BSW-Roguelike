@@ -230,11 +230,36 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         obj.mesh.needsUpdate = true;
 
         if (hasRing) {
+            obj.ringtex = BSWG.render.proceduralImage(128, 128, function(ctx, w, h){
+
+                var comp = function(v) {
+                    return Math.floor(v*255);
+                };
+
+                ctx.clearRect(0, 0, w, h);
+                for (var i=0; i<h; i++) {
+                    var j = Math.floor(Math.random() * (ringcolors.length+2));
+                    if (j<ringcolors.length) {
+                        ctx.strokeStyle = 'rgba(' + comp(ringcolors[j].x) + ',' + comp(ringcolors[j].y) + ',' + comp(ringcolors[j].z) + ', 1.0)';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(0, i);
+                        ctx.lineTo(w-1, i);
+                        ctx.stroke();
+                    }
+                }
+
+            })
+
             Math.seedrandom();
             obj.matr = BSWG.render.newMaterial("planetVertex", "planetRingFragment", {
                 light: {
                     type: 'v4',
                     value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
+                },
+                tex: {
+                    type: 't',
+                    value: obj.ringtex.texture
                 },
                 planet: {
                     type: 'v4',
@@ -247,26 +272,10 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 vp: {
                     type: 'v2',
                     value: new THREE.Vector2(0, 0)
-                },
-                clr1: {
-                    type: 'v4',
-                    value: ringcolors[0]
-                },
-                clr2: {
-                    type: 'v4',
-                    value: ringcolors[1]
-                },
-                clr3: {
-                    type: 'v4',
-                    value: ringcolors[2]
-                },
-                clr4: {
-                    type: 'v4',
-                    value: ringcolors[3]
                 }
             }, THREE.NormalBlending, THREE.DoubleSide);
 
-            var count = Math.floor(obj.radius*4);
+            var count = 4;
             obj.geomr = new THREE.Geometry();
             obj.geomr.vertices.length = count + 1;
             obj.geomr.vertices[0] = new THREE.Vector3(0, 0, 0);
@@ -280,11 +289,11 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             }
 
             obj.geomr.computeFaceNormals();
-            obj.geomr.computeVertexNormals();
+            //obj.geomr.computeVertexNormals();
             obj.geomr.computeBoundingSphere();
 
             obj.meshr = new THREE.Mesh( obj.geomr, obj.matr );
-            obj.meshr.scale.set(obj.radius*1.5, obj.radius*1.5, obj.radius*1.5);
+            obj.meshr.scale.set(obj.radius*2.5, obj.radius*2.5, obj.radius*2.5);
             obj.meshr.updateMatrix();
 
             obj.matr.needsUpdate = true;
