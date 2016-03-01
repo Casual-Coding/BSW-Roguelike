@@ -397,17 +397,19 @@ BSWG.render = new function() {
 
             if (self.customCursor) {
                 document.body.style.cursor = 'none';
-                self.ctx.drawImage(
-                    self.images[
-                        BSWG.input.MOUSE('left') ? 'cursor-pressed' :
-                        (BSWG.input.MOUSE('right') ? 'cursor-pressed-right' : 'cursor-normal')
-                    ],
-                    0,   0,
-                    128, 128,
-                    BSWG.input.MOUSE('x')-32,
-                    BSWG.input.MOUSE('y')-32,
-                    64,  64
-                );
+                if (BSWG.input.MOUSE('mousein')) {
+                    self.ctx.drawImage(
+                        self.images[
+                            BSWG.input.MOUSE('left') ? 'cursor-pressed' :
+                            (BSWG.input.MOUSE('right') ? 'cursor-pressed-right' : 'cursor-normal')
+                        ],
+                        0,   0,
+                        128, 128,
+                        BSWG.input.MOUSE('x')-32,
+                        BSWG.input.MOUSE('y')-32,
+                        64,  64
+                    );
+                }
             }
             else {
                 document.body.style.cursor = null;

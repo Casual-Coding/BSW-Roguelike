@@ -125,7 +125,8 @@ BSWG.input = new function(){
         middle: false,
         right: false,
         wheel: 0,
-        shift: false
+        shift: false,
+        mousein: true
     };
     var minWheel = null,
         maxWheel = null;
@@ -268,6 +269,14 @@ BSWG.input = new function(){
             mouseState.x = e.pageX;
             mouseState.y = e.pageY;
             mouseState.shift = !!e.shiftKey;
+        });
+
+        jQuery(div).mouseenter(function(e){
+            mouseState.mousein = true;
+        });
+
+        jQuery(div).mouseleave(function(e){
+            mouseState.mousein = false;
         });
 
         jQuery(div).mousedown(function(e){
