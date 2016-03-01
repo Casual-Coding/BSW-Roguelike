@@ -41,7 +41,7 @@ void main() {
 
     vec3 lightDir = light.xyz - vPosition.xyz;
 
-    float l = 1.0 / (0.85 + abs(dot(lightDir/4.5, lightDir/4.5))/1500.0);
+    float l = 0.5 / (0.85 + abs(dot(lightDir/4.5, lightDir/4.5))/1500.0) + 0.5;
     l *= abs(dot(normalize(lightDir), normalize(vNormal))) * 0.5 + 0.5;
     if (rayIntersectsSphere(vPosition.xyz, normalize(lightDir), planet.xyz, planet.w) > -0.5) {
         l *= 0.25;
