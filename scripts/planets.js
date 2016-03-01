@@ -147,7 +147,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 break;
         }
 
-        obj.pos.z -= obj.radius * 0.75;
+        obj.pos.z -= obj.radius * 1.5;
 
         if (colors2) {
             Math.seedrandom(obj.seed+1);
@@ -386,7 +386,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             self.mat.uniforms.light.value.y = self.pos.y - self.radius*1.5;
             self.mat.uniforms.light.value.z = self.pos.z + self.radius*4.0;
 
-            self.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+            self.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z/1.02);
             self.mat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
 
             if (waterAnim) {
@@ -404,7 +404,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 self.matr.uniforms.light.value.y = self.pos.y - self.radius*1.5;
                 self.matr.uniforms.light.value.z = self.pos.z + self.radius*4.0;
 
-                self.matr.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+                self.matr.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z/1.02);
                 self.matr.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
                 self.matr.uniforms.planet.value.set(self.pos.x, self.pos.y, self.pos.z, self.radius * 0.8);
 
