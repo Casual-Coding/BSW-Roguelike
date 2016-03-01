@@ -25,7 +25,7 @@ BSWG.starfield = function(){
             ctx.globalAlpha = 0.25;
             ctx.fillStyle = '#fff';
 
-            for (var k=0; k<90; k++) {
+            for (var k=0; k<30; k++) {
                 ctx.fillRect(Math.random()*w, Math.random()*h, 2, 2);
             }
 

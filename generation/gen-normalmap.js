@@ -80,34 +80,45 @@ Math.random2d = function(x,y) {
 var genPerlin = function(sz, min, max, k) {
     var ret = newArr(sz, 0.0);
     var h = max - min;
-    var sz2 = sz / 32;
-    for (var x=-sz/2; x<sz*1.5; x++) {
-        for (var y=-sz/2; y<sz*1.5; y++) {
-            var xx = x/sz2;
-            var yy = y/sz2;
-            var v =
-                Math.random2d(Math.floor(xx), Math.floor(yy)) * Math.pow(2.0, -1) +
-                Math.random2d(Math.floor(xx*(1.5)), Math.floor(yy*(1.5))) * Math.pow(2.0, -2) +
-                Math.random2d(Math.floor(xx*(2)), Math.floor(yy*(2))) * Math.pow(2.0, -3) +
-                Math.random2d(Math.floor(xx*(2.5)), Math.floor(yy*(2.5))) * Math.pow(2.0, -4) +
-                Math.random2d(Math.floor(xx*(3)), Math.floor(yy*(3))) * Math.pow(2.0, -5) +
-                Math.random2d(Math.floor(xx*(3.5)), Math.floor(yy*(3.5))) * Math.pow(2.0, -6);
-                //Math.random2d(Math.floor(xx*(64)), Math.floor(yy*(64))) * Math.pow(2.0, -7) +
-                //Math.random2d(Math.floor(xx*(128)), Math.floor(yy*(128))) * Math.pow(2.0, -8);
-            ret.setRot(x, y, Math.max(ret.getRot(x, y), v*h+min));
-        }
-    }
+    var sz2 = sz / 4;
+    var l = 0.5;
     while (k--) {
         for (var x=0; x<sz; x++) {
             for (var y=0; y<sz; y++) {
-                ret.setRot(x, y,
-                    (ret.getRot(x, y) + 
-                    ret.getRot(x-1, y) + 
-                    ret.getRot(x, y-1) + 
-                    ret.getRot(x+1, y) + 
-                    ret.getRot(x, y+1)) / 5.0
-                );
+                var xx = x/sz2;
+                var yy = y/sz2;
+                var xxi = Math.floor(xx);
+                var yyi = Math.floor(yy);
+                var d = Math.pow((xx-xxi)*2-1, 2.0) + Math.pow((yy-yyi)*2-1, 2.0);
+                if (d>1) {
+                    if ((xx-xxi) > 0.75) { xxi += 1 }
+                    else if ((xx-xxi) < 0.25) { xxi -= 1 }
+                    if ((yy-yyi) > 0.75) { yyi += 1 }
+                    else if ((yy-yyi) < 0.25) { yyi -= 1 }
+                }
+                var v = Math.random2d(xxi, yyi) * l;
+                ret.inc(x, y, v);
             }
+        }
+        for (var j=0; j<((k/2)*(k/2)); j++) {
+            for (var x=0; x<sz; x++) {
+                for (var y=0; y<sz; y++) {
+                    ret.setRot(x, y,
+                        (ret.getRot(x, y) + 
+                        ret.getRot(x-1, y) + 
+                        ret.getRot(x, y-1) + 
+                        ret.getRot(x+1, y) + 
+                        ret.getRot(x, y+1)) / 5.0
+                    );
+                }
+            }
+        }
+        l *= 0.75;
+        sz2 *= 0.5;
+    }
+    for (var x=0; x<sz; x++) {
+        for (var y=0; y<sz; y++) {
+            ret.set(x, y, ret.get(x, y) * (max-min) + min);
         }
     }
     return ret;
@@ -115,12 +126,37 @@ var genPerlin = function(sz, min, max, k) {
 
 switch (type) {
     case 'grass':
-        var p = genPerlin(sz, 0.2, 0.9, 5);
+        var p = genPerlin(sz, 0.0, 1.0, 12);
         for (var x=0; x<sz; x++) {
             for (var y=0; y<sz; y++) {
                 var v = p.get(x, y);
                 hmap.set(x, y, v);
                 bmap.set(x, y, v);
+            }
+        }
+        break;
+
+    case 'water':
+        var lst = new Array(32);
+        for (var i=0; i<lst.length; i++) {
+            lst[i] = {
+                str: Math.pow(Math.random(), 0.3),
+                x: Math.random()*sz,
+                y: Math.random()*sz
+            };
+        }
+        for (var x=-sz/2; x<sz*1.5; x++) {
+            for (var y=-sz/2; y<sz*1.5; y++) {
+                var xx = (x + sz) % sz,
+                    yy = (y + sz) % sz;
+                var v = 0;
+                for (var i=0; i<lst.length; i++) {
+                    var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                    var d = Math.sqrt(dx*dx+dy*dy);
+                    v += (Math.sin((d/lst[i].str)/12) * 0.5 + 0.5) * lst[i].str * 0.2;
+                }
+                hmap.setRot(x, y, v);
+                bmap.setRot(x, y, v);
             }
         }
         break;

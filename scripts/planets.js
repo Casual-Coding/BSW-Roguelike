@@ -32,9 +32,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         var defaults = {
             pos:    new THREE.Vector3(0., 0., 0.),
-            rot:    Math.random() * Math.PI/60,
+            rot:    Math.random() * Math.PI/120 + Math.PI/120,
             rotD:   0.0,
-            rotVec: new THREE.Vector3(Math.random(), Math.random(), Math.random()),
+            rotVec: new THREE.Vector3(Math.random()+.5, Math.random()+.5, Math.random()),
             radius: 25,
             type:   BSWG.planet_TERRAN,
             seed:   Date.timeStamp()
@@ -50,11 +50,13 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         obj.pos.z -= obj.radius * 0.75;
 
         var crators = false;
+        var water = false;
         var smooth = 1;
 
         var colors;
         switch (obj.type) {
             case BSWG.planet_TERRAN:
+                water = true;
                 colors = [
                     new THREE.Vector4(0.04, 0.04, 0.67, 1.0),
                     new THREE.Vector4(0.03, 0.3, 0.045, 1.0),
@@ -66,7 +68,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             case BSWG.planet_HELL:
                 colors = [
                     new THREE.Vector4(0.67, 0.04, 0.04, 1.0),
-                    new THREE.Vector4(0.45, 0.03, 0.03, 1.0),
+                    new THREE.Vector4(0.55, 0.03, 0.03, 1.0),
                     new THREE.Vector4(0.5, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.8, 0.5, 0.5, 1.0)
                 ];
@@ -75,10 +77,10 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             case BSWG.planet_MARS:
                 crators = true;
                 colors = [
-                    new THREE.Vector4(0.25, 0.06, 0.03, 1.0),
-                    new THREE.Vector4(0.35, 0.06, 0.03, 1.0),
-                    new THREE.Vector4(0.35, 0.2, 0.15, 1.0),
-                    new THREE.Vector4(0.4, 0.3, 0.25, 1.0)
+                    new THREE.Vector4(0.15*2.25, 0.06*2.25, 0.03*2.25, 1.0),
+                    new THREE.Vector4(0.15*2.25, 0.1*2.25, 0.06*2.25, 1.0),
+                    new THREE.Vector4(0.17*2.25, 0.15*2.25, 0.15*2.25, 1.0),
+                    new THREE.Vector4(0.15*2.25, 0.125*2.25, 0.125*2.25, 1.0)
                 ];
                 break;
 
@@ -103,9 +105,13 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 type: 't',
                 value: BSWG.render.images['grass_nm'].texture
             },
+            mapW: {
+                type: 't',
+                value: BSWG.render.images['water_nm'].texture
+            },
             extra: {
                 type: 'v4',
-                value: new THREE.Vector4(crators?1:0, 0, 0, 0)
+                value: new THREE.Vector4(crators?1:0, water?1:0, 0, 0.0)
             },
             clr1: {
                 type: 'v4',
@@ -135,18 +141,39 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             var x = n.x*2;
             var y = n.y*2;
             var z = n.z*2;
-            var pval = 
-                rand.get(Math.floor(x*1.5), Math.floor(y*1.5), Math.floor(z*1.5)) * Math.pow(2, -1) +
-                rand.get(Math.floor(x*3), Math.floor(y*3), Math.floor(z*3)) * Math.pow(2, -1.5) +
-                rand.get(Math.floor(x*9), Math.floor(y*9), Math.floor(z*9)) * Math.pow(2, -2) +
-                rand.get(Math.floor(x*27), Math.floor(y*27), Math.floor(y*27)) * Math.pow(2, -2.5);
+            var pval = 0;
+            var pv = -1;
+            var sz = 1.0;
+            for (var k=0; k<10; k++) {
+                var fx = x*sz, fy = y*sz, fz = z*sz;
+                var ix = Math.floor(fx), iy = Math.floor(fy), iz = Math.floor(fz);
+                var dx = (fx-ix)*2-1, dy = (fy-iy)*2-1, dz = (fz-iz)*2-1;
+                var d = dx*dx+dy*dy+dz*dz;
+                if (d>1) {
+                    if (dx > 0.5) { ix ++; }
+                    else if (dx < -0.5) { ix--; }
+                    if (dy > 0.5) { iy ++; }
+                    else if (dy < -0.5) { iy--; }
+                    if (dz > 0.5) { iz ++; }
+                    else if (dz < -0.5) { iz--; }
+                }
+                pval += rand.get(ix, iy, iz) * Math.pow(2, pv);
+                sz *= 1.25
+                pv -= 0.5;
+            }
+
+            pval -= 0.25;
+            if (pval < 0.1) {
+                pval = 0.1;
+            }
+
             if (pval < 0.75 && (!crators || pval > 0.15)) pval = 0.5;
             else if (pval < 1.1 && (!crators || pval > 0.9)) pval = 0.7;
             if (!crators) {
-                pval = Math.pow(pval-0.5, 1.5)*2.0 + 0.5;
+                pval = Math.pow(pval-0.5, 1.25)*2.0 + 0.5;
             }
             else {
-                pval = Math.pow(pval, 1.5);
+                pval = Math.pow(pval, 1.25);
             }
             var h = 0.9 + pval * 0.2;
             n.x *= h;
@@ -168,9 +195,6 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         obj.geom.computeFaceNormals();
         obj.geom.computeVertexNormals();
         obj.geom.computeBoundingSphere();
-        //for (var i=0; i<obj.geom.faces.length; i++) {
-        //    obj.geom.faces[i].vertexNormals.length = 0;
-        //}
 
         obj.mesh = new THREE.Mesh( obj.geom, obj.mat );
         obj.mesh.scale.set(obj.radius, obj.radius, obj.radius);
@@ -181,7 +205,11 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         var self = obj;
 
+        var time = 0.0;
+
         obj.update = function(dt) {
+
+            time += dt;
 
             var matrix = self.mesh.matrix;
 
@@ -200,6 +228,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
             self.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
             self.mat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+
+            self.mat.uniforms.extra.value.w = time;
 
             self.mat.needsUpdate = true;
         };

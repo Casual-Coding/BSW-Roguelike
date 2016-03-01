@@ -23,7 +23,7 @@ vec2 rotVec (vec2 p, vec2 c, float a) {
 
 vec4 sampleDust (vec2 p) {
 
-    #define DUST_SIZE 32.0
+    #define DUST_SIZE 64.0
 
     vec2 p2 = TO_WORLD(p, cam.z) / DUST_SIZE;
     float i = floor(rand(floor(p2)) * 15.0);
