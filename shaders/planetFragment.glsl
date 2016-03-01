@@ -53,7 +53,7 @@ void main() {
     }
 
     float scale = 0.5 * 3.0;
-    float scaleW = 0.5 * 7.0;
+    float scaleW = 0.5 * 7.0 / extra.z;
     
     vec3 blending = abs( vNormal );
     float topFactor = blending.z / (blending.x + blending.y + blending.z);

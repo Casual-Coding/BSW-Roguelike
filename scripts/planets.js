@@ -66,6 +66,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         var hasRing = Math.random() < 0.5 ? true : false;
         var smooth = 1;
         var waterAnim = true;
+        var waterScale = 1.0;
 
         var colors, colors2;
         switch (obj.type) {
@@ -98,6 +99,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 if (obj.radius === -1) {
                     obj.radius = 35 + 10 * Math.random();
                 }
+                waterScale = 0.75;
                 break;
 
             case BSWG.planet_MARS:
@@ -138,6 +140,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 if (obj.radius === -1) {
                     obj.radius = 25 + 5 * Math.random();
                 }
+                waterScale = 0.35;
                 break;
 
             default:
@@ -194,7 +197,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             },
             extra: {
                 type: 'v4',
-                value: new THREE.Vector4(crators?1:0, water?1:0, 0, 0.0)
+                value: new THREE.Vector4(crators?1:0, water?1:0, waterScale, 0.0)
             },
             clr1: {
                 type: 'v4',
