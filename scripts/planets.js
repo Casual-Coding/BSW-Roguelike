@@ -4,6 +4,10 @@ BSWG.planet_CloudDetail = 3;
 BSWG.planet_TERRAN = 0;
 BSWG.planet_HELL   = 1;
 BSWG.planet_MARS   = 2;
+BSWG.planet_MOON   = 3;
+BSWG.planet_DESERT = 4;
+
+BSWG.planet_COUNT  = 5;
 
 BSWG.planets = new function(surfaceRes, cloudRes){
 
@@ -33,9 +37,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             rot:    Math.random() * Math.PI/120 + Math.PI/120,
             rotD:   Math.random()*Math.PI,
             rotVec: new THREE.Vector3(Math.random()+.5, Math.random()+.5, Math.random()),
-            radius: 25,
-            type:   BSWG.planet_TERRAN,
-            seed:   Date.timeStamp()
+            radius: -1,
+            type:   -1,
+            seed:   Date.timeStamp(),
         };
 
         var obj = new Object();
@@ -45,12 +49,22 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             obj[key] = def[key] || defaults[key];
         }
 
-        obj.pos.z -= obj.radius * 0.75;
+        Math.seedrandom(obj.seed+2);
+
+        if (obj.type === -1) {
+            if (Math.random() < 0.25) {
+                obj.type = BSWG.planet_TERRAN;
+            }
+            else {
+                obj.type = Math.floor(Math.random() * BSWG.planet_COUNT);
+            }
+        }
 
         var crators = false;
         var water = false;
         var hasRing = Math.random() < 0.5 ? true : false;
         var smooth = 1;
+        var waterAnim = true;
 
         var colors, colors2;
         switch (obj.type) {
@@ -68,6 +82,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
                 ];
+                if (obj.radius === -1) {
+                    obj.radius = 25 + 5 * Math.random();
+                }
                 break;
 
             case BSWG.planet_HELL:
@@ -77,6 +94,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     new THREE.Vector4(0.5, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.8, 0.5, 0.5, 1.0)
                 ];
+                if (obj.radius === -1) {
+                    obj.radius = 35 + 10 * Math.random();
+                }
                 break;
 
             case BSWG.planet_MARS:
@@ -87,13 +107,46 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     new THREE.Vector4(0.17*2.25, 0.15*2.25, 0.15*2.25, 1.0),
                     new THREE.Vector4(0.15*2.25, 0.125*2.25, 0.125*2.25, 1.0)
                 ];
+                if (obj.radius === -1) {
+                    obj.radius = 17.5 + 5 * Math.random();
+                }
+                break;
+
+            case BSWG.planet_MOON:
+                crators = true;
+                colors = [
+                    new THREE.Vector4(0.11*2.25, 0.11*2.25, 0.11*2.25, 1.0),
+                    new THREE.Vector4(0.15*2.25, 0.15*2.25, 0.15*2.25, 1.0),
+                    new THREE.Vector4(0.17*2.25, 0.17*2.25, 0.17*2.25, 1.0),
+                    new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.20*2.25, 1.0)
+                ];
+                hasRing = false;
+                if (obj.radius === -1) {
+                    obj.radius = 10 + 5 * Math.random();
+                }
+                break;
+
+            case BSWG.planet_DESERT:
+                colors = [
+                    new THREE.Vector4(0.25*2.25, 0.25*2.25, 0.15*2.25, 1.0),
+                    new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.17*2.25, 1.0),
+                    new THREE.Vector4(0.17*2.25, 0.17*2.25, 0.17*2.25, 1.0),
+                    new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.20*2.25, 1.0)
+                ];
+                waterAnim = false;
+                if (obj.radius === -1) {
+                    obj.radius = 25 + 5 * Math.random();
+                }
                 break;
 
             default:
                 break;
         }
 
+        obj.pos.z -= obj.radius * 0.75;
+
         if (colors2) {
+            Math.seedrandom(obj.seed+1);
             for (var i=0; i<4; i++) {
                 var t = Math.random();
                 colors[i].set(
@@ -218,6 +271,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         }
         rand.dispose();
         Math.seedrandom();
+        obj.geom.mergeVertices();
         obj.geom.computeFaceNormals();
         obj.geom.computeVertexNormals();
         obj.geom.computeBoundingSphere();
@@ -230,6 +284,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         obj.mesh.needsUpdate = true;
 
         if (hasRing) {
+            Math.seedrandom(obj.seed);
             obj.ringtex = BSWG.render.proceduralImage(128, 128, function(ctx, w, h){
 
                 var comp = function(v) {
@@ -326,7 +381,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             self.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
             self.mat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
 
-            self.mat.uniforms.extra.value.w = time;
+            if (waterAnim) {
+                self.mat.uniforms.extra.value.w = time;
+            }
 
             self.mat.needsUpdate = true;
 
