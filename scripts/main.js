@@ -79,7 +79,8 @@ var BSWG = new function(){
             'selectionFragment',
             'jpointsFragment',
             'expFragment',
-            'planetFragment'
+            'planetFragment',
+            'planetRingFragment'
         ]
     };
 

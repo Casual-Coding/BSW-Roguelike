@@ -12,16 +12,15 @@ varying vec4 vSPosition;
 
 void main() {
 
-    vec3 pos = vec3(position.x, position.y, position.z);
+    vec3 pos = position.xyz;
     vUv = uv;
     vNormal = normalMatrix * normal;
     vPosition = modelMatrix * vec4( pos, 1.0 );
     vLocal = position;
     vNormalMatrix = normalMatrix;
     vec4 tmp = modelViewMatrix * vec4( pos, 1.0 );
-    //gl_Position = projectionMatrix * tmp;
     gl_Position.xy = TO_SCREEN(tmp.xy, 1.65*cam.z);
-    gl_Position.z = 0.995-tmp.z/100000.0;
+    gl_Position.z = 0.97-tmp.z/100000.0;
     gl_Position.w = 1.0;
     vSPosition = gl_Position;
 }

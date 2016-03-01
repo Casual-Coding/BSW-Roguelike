@@ -20,8 +20,6 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         this.hasInit = true;
 
-        this.cloudGeom = new THREE.IcosahedronGeometry(1.0, surfaceRes);
-
     };
 
     this.clear = function() {
@@ -33,7 +31,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         var defaults = {
             pos:    new THREE.Vector3(0., 0., 0.),
             rot:    Math.random() * Math.PI/120 + Math.PI/120,
-            rotD:   0.0,
+            rotD:   Math.random()*Math.PI,
             rotVec: new THREE.Vector3(Math.random()+.5, Math.random()+.5, Math.random()),
             radius: 25,
             type:   BSWG.planet_TERRAN,
@@ -51,15 +49,22 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         var crators = false;
         var water = false;
+        var hasRing = Math.random() < 0.5 ? true : false;
         var smooth = 1;
 
-        var colors;
+        var colors, colors2;
         switch (obj.type) {
             case BSWG.planet_TERRAN:
                 water = true;
                 colors = [
-                    new THREE.Vector4(0.04, 0.04, 0.67, 1.0),
+                    new THREE.Vector4(0.06, 0.22, 0.67, 1.0),
                     new THREE.Vector4(0.03, 0.3, 0.045, 1.0),
+                    new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
+                    new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
+                ];
+                colors2 = [
+                    new THREE.Vector4(0.06, 0.52, 0.67, 1.0),
+                    new THREE.Vector4(0.5, 0.25, 0.045, 1.0),
                     new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
                 ];
@@ -87,6 +92,26 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             default:
                 break;
         }
+
+        if (colors2) {
+            for (var i=0; i<4; i++) {
+                var t = Math.random();
+                colors[i].set(
+                    colors[i].x * t + colors2[i].x * (1-t),
+                    colors[i].y * t + colors2[i].y * (1-t),
+                    colors[i].z * t + colors2[i].z * (1-t),
+                    colors[i].w * t + colors2[i].w * (1-t)
+                );
+            }
+        }
+
+        var ringcolors = new Array(4);
+        for (var i=0; i<4; i++) {
+            var C = colors[i];
+            var l = Math.sqrt(C.x*C.x+C.y*C.y+C.z*C.z);
+            ringcolors[i] = new THREE.Vector4((C.x/l)*0.4+0.6, (C.y/l)*0.4+0.6, (C.z/l)*0.4+0.6, 1.0);
+        }
+        ringcolors[3].set(1,1,1,1);
 
         obj.mat = BSWG.render.newMaterial("planetVertex", "planetFragment", {
             light: {
@@ -192,6 +217,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             }
         }
         rand.dispose();
+        Math.seedrandom();
         obj.geom.computeFaceNormals();
         obj.geom.computeVertexNormals();
         obj.geom.computeBoundingSphere();
@@ -202,6 +228,68 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         obj.mat.needsUpdate = true;
         obj.mesh.needsUpdate = true;
+
+        if (hasRing) {
+            Math.seedrandom();
+            obj.matr = BSWG.render.newMaterial("planetVertex", "planetRingFragment", {
+                light: {
+                    type: 'v4',
+                    value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
+                },
+                planet: {
+                    type: 'v4',
+                    value: new THREE.Vector4(0, 0, 0, 0)
+                },
+                cam: {
+                    type: 'v3',
+                    value: new THREE.Vector3(0, 0, 0)
+                },
+                vp: {
+                    type: 'v2',
+                    value: new THREE.Vector2(0, 0)
+                },
+                clr1: {
+                    type: 'v4',
+                    value: ringcolors[0]
+                },
+                clr2: {
+                    type: 'v4',
+                    value: ringcolors[1]
+                },
+                clr3: {
+                    type: 'v4',
+                    value: ringcolors[2]
+                },
+                clr4: {
+                    type: 'v4',
+                    value: ringcolors[3]
+                }
+            }, THREE.NormalBlending, THREE.DoubleSide);
+
+            var count = Math.floor(obj.radius*4);
+            obj.geomr = new THREE.Geometry();
+            obj.geomr.vertices.length = count + 1;
+            obj.geomr.vertices[0] = new THREE.Vector3(0, 0, 0);
+            for (var i=0; i<count; i++) {
+                var a = (i/count) * Math.PI * 2.0;
+                obj.geomr.vertices[i+1] = new THREE.Vector3(Math.cos(a), Math.sin(a), 0.0);
+            }
+            obj.geomr.faces.length = count;
+            for (var i=0; i<count; i++) {
+                obj.geomr.faces[i] = new THREE.Face3(1+i, 1+((i+1)%count), 0);
+            }
+
+            obj.geomr.computeFaceNormals();
+            obj.geomr.computeVertexNormals();
+            obj.geomr.computeBoundingSphere();
+
+            obj.meshr = new THREE.Mesh( obj.geomr, obj.matr );
+            obj.meshr.scale.set(obj.radius*1.5, obj.radius*1.5, obj.radius*1.5);
+            obj.meshr.updateMatrix();
+
+            obj.matr.needsUpdate = true;
+            obj.meshr.needsUpdate = true;
+        }
 
         var self = obj;
 
@@ -232,17 +320,39 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             self.mat.uniforms.extra.value.w = time;
 
             self.mat.needsUpdate = true;
+
+            if (self.meshr) {
+                self.meshr.position.set(self.pos.x, self.pos.y, self.pos.z);
+                self.meshr.rotation.setFromQuaternion(q);
+                self.meshr.updateMatrix();
+
+                self.matr.uniforms.light.value.x = self.pos.x + self.radius*8.0;
+                self.matr.uniforms.light.value.y = self.pos.y - self.radius*1.5;
+                self.matr.uniforms.light.value.z = self.pos.z + self.radius*4.0;
+
+                self.matr.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+                self.matr.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+                self.matr.uniforms.planet.value.set(self.pos.x, self.pos.y, self.pos.z, self.radius * 0.8);
+
+                self.matr.needsUpdate = true;
+            }
         };
 
         obj.destroy = function() {
 
             BSWG.render.scene.remove( self.mesh );
+            if (self.meshr) {
+                BSWG.render.scene.remove( self.meshr );
+            }
 
         };
 
         obj.update(1.0/60.0);
 
         BSWG.render.scene.add( obj.mesh );
+        if (obj.meshr) {
+            BSWG.render.scene.add( obj.meshr );
+        }
 
         this.planets.push(obj);
 

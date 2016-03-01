@@ -80,7 +80,7 @@ BSWG.starfield = function(){
         },
         zpos: {
             type: 'f',
-            value: 0.999
+            value: 0.98
         }
     });
 
@@ -117,7 +117,7 @@ BSWG.starfield = function(){
         },
         zpos: {
             type: 'f',
-            value: 0.99
+            value: 0.96
         }
     });
 

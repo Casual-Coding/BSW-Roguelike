@@ -515,7 +515,7 @@ BSWG.render = new function() {
     };
 
     var lastRandomValue = null;
-    this.newMaterial = function (vertexID, fragmentID, data, blendMode) {
+    this.newMaterial = function (vertexID, fragmentID, data, blendMode, side) {
         var rand = Math.random();
         if (lastRandomValue === rand) { // using seed random other places can lead to materials with duplicate UUIDs
             Math.seedrandom();
@@ -541,7 +541,9 @@ BSWG.render = new function() {
             fragmentShader: this.getShader(fragmentID),
             transparent: true
         });
-        //material.side = THREE.DoubleSide;
+        if (side) {
+            material.side = side;
+        }
 
         if (blendMode || blendMode === 0) {
             material.blending = blendMode;

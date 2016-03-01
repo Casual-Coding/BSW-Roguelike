@@ -4,6 +4,7 @@ uniform float zpos;
 void main() {
 
     vUv = uv;
-    gl_Position = vec4(position.xy, zpos, 1.0);
+    vec3 pos = vec3(position.xy, zpos);
+    gl_Position = vec4(pos, 1.0);
 
 }
