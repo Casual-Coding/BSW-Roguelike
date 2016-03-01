@@ -366,6 +366,8 @@ BSWG.render = new function() {
     };
 
     this.customCursor = true;
+    this.cursorNo = 0;
+    this.cursorScale = 1.0;
 
     this.startRenderer = function (cbk) {
         
@@ -400,14 +402,15 @@ BSWG.render = new function() {
                 if (BSWG.input.MOUSE('mousein')) {
                     self.ctx.drawImage(
                         self.images[
-                            BSWG.input.MOUSE('left') ? 'cursor-pressed' :
-                            (BSWG.input.MOUSE('right') ? 'cursor-pressed-right' : 'cursor-normal')
+                            self.cursorNo ? 'cursor-custom-' + self.cursorNo :
+                            (BSWG.input.MOUSE('left') ? 'cursor-pressed' :
+                            (BSWG.input.MOUSE('right') ? 'cursor-pressed-right' : 'cursor-normal'))
                         ],
                         0,   0,
                         128, 128,
-                        BSWG.input.MOUSE('x')-32,
-                        BSWG.input.MOUSE('y')-32,
-                        64,  64
+                        BSWG.input.MOUSE('x')-32*self.cursorScale,
+                        BSWG.input.MOUSE('y')-32*self.cursorScale,
+                        64*self.cursorScale,  64*self.cursorScale
                     );
                 }
             }
@@ -556,7 +559,9 @@ BSWG.render = new function() {
         return material;
     };
 
-    this.setCustomCursor = function(flag) {
+    this.setCustomCursor = function(flag, number, scale) {
+        this.cursorScale = scale || 1;
+        this.cursorNo = number || 0;
         this.customCursor = !!flag;
     };
 

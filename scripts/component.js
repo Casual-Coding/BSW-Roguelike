@@ -494,6 +494,17 @@ BSWG.componentList = new function () {
         if (!this.mouseOver) {
             this.mouseOver = this.atPoint(pw);
         }
+        if (this.mouseOver && BSWG.componentHoverFn(this.mouseOver)) {
+            if (this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.game.editMode) {
+                BSWG.render.setCustomCursor(true, 3);
+            }
+            else {
+                BSWG.render.setCustomCursor(true, 2);
+            }
+        }
+        else {
+            BSWG.render.setCustomCursor(true);
+        }
 
         for (var i=0; i<len; i++) {
             this.compList[i].render(ctx, cam, dt);

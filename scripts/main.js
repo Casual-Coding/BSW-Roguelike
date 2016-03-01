@@ -60,7 +60,10 @@ var BSWG = new function(){
         'water_nm': 'water-nm.png',
         'cursor-normal': 'cursor-normal.png',
         'cursor-pressed': 'cursor-pressed.png',
-        'cursor-pressed-right': 'cursor-pressed-right.png'
+        'cursor-pressed-right': 'cursor-pressed-right.png',
+        'cursor-custom-1': 'cursor-welder.png',
+        'cursor-custom-2': 'cursor-mover.png',
+        'cursor-custom-3': 'cursor-settings.png'
     };
     var shaders = {
         'vertex': [
