@@ -26,7 +26,7 @@ vec4 sampleStars1 (vec2 p) {
 
     #define STAR_SIZE 140.0
 
-    float z = (cam.z*0.5 + 0.5*0.1) / pow(2.0, 5.0);
+    float z = (cam.z*0.2 + 0.8*0.1) / pow(2.0, 5.0);
     vec2 p2 = TO_WORLD(p, z) / STAR_SIZE;
     float i = floor(rand(floor(p2)) * 15.0);
 
@@ -39,7 +39,7 @@ vec4 sampleNebulas1 (vec2 p) {
     #define NEB_SIZE 300.0
     #define GRID_SIZE 1.0
 
-    float z = (cam.z*0.5 + 0.5*0.1) / pow(2.0, 5.0);
+    float z = (cam.z*0.2+ 0.8*0.1) / pow(2.0, 5.0);
     vec2 p0 = TO_WORLD(p, z) / NEB_SIZE;
 
     vec4 ret = vec4(0.0, 0.0, 0.0, 0.0);

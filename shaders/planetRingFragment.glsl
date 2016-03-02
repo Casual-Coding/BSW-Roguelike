@@ -33,8 +33,14 @@ void main() {
     vec4 clr = texture2D(tex, vec2(0., t));
     alpha = clr.a;
 
-    if (dist > 0.95) {
+    if (dist > 0.97) {
+        alpha = 0.0;
+    }
+    else if (dist > 0.95) {
         alpha *= 1.0 - (min(dist, 0.97) - 0.95) / 0.02;
+    }
+    else if (dist < 0.73) {
+        alpha = 0.0;
     }
     else if (dist < 0.75) {
         alpha *= 1.0 - (0.75 - max(dist, 0.73)) / 0.02;
