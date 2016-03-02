@@ -31,6 +31,7 @@ void main() {
 
     float t = (dist - 0.75) / (0.95 - 0.75);
     vec4 clr = texture2D(tex, vec2(0., t));
+    alpha = clr.a;
 
     if (dist > 0.95) {
         alpha *= 1.0 - (min(dist, 0.97) - 0.95) / 0.02;
@@ -46,9 +47,9 @@ void main() {
     if (rayIntersectsSphere(vPosition.xyz, normalize(lightDir), planet.xyz, planet.w) > -0.5) {
         l *= 0.25;
     }
-    gl_FragColor = vec4(clr.rgb*l, alpha*0.85);
+    gl_FragColor = vec4(clr.rgb*l, alpha);
 
-    if (alpha < 0.5) {
+    if (alpha < 0.1) {
         discard;
     }
 }

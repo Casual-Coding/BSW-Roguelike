@@ -82,7 +82,7 @@ BSWG.starfield = function(){
             type: 'f',
             value: 0.98
         }
-    });
+    }, THREE.AdditiveBlending);
 
     var bgMesh = new THREE.Mesh( bgGeom, bgMat );
     bgMesh.frustumCulled = false;
@@ -119,7 +119,7 @@ BSWG.starfield = function(){
             type: 'f',
             value: 0.96
         }
-    });
+    }, THREE.AdditiveBlending);
 
     var bgMesh2 = new THREE.Mesh( bgGeom, bgMat2 );
     bgMesh2.frustumCulled = false;

@@ -22,7 +22,7 @@ vec2 rotVec (vec2 p, vec2 c, float a) {
     );
 }
 
-vec3 sampleStars1 (vec2 p) {
+vec4 sampleStars1 (vec2 p) {
 
     #define STAR_SIZE 140.0
 
@@ -31,10 +31,10 @@ vec3 sampleStars1 (vec2 p) {
     float i = floor(rand(floor(p2)) * 15.0);
 
     vec4 clr = texture2D(tStars, SAMPLE_POS(i, p2));
-    return clr.rgb*clr.a;
+    return vec4(clr.rgb*clr.a, clr.a);
 }
 
-vec3 sampleNebulas1 (vec2 p) {
+vec4 sampleNebulas1 (vec2 p) {
 
     #define NEB_SIZE 300.0
     #define GRID_SIZE 1.0
@@ -42,7 +42,7 @@ vec3 sampleNebulas1 (vec2 p) {
     float z = (cam.z*0.5 + 0.5*0.1) / pow(2.0, 5.0);
     vec2 p0 = TO_WORLD(p, z) / NEB_SIZE;
 
-    vec3 ret = vec3(0.0, 0.0, 0.0);
+    vec4 ret = vec4(0.0, 0.0, 0.0, 0.0);
     for (float xo = -GRID_SIZE; xo<=GRID_SIZE+0.0001; xo += 1.0) {
         for (float yo = -GRID_SIZE; yo<=GRID_SIZE+0.0001; yo += 1.0) {
             vec2 p2 = floor(p0 + vec2(xo, yo));
@@ -55,7 +55,7 @@ vec3 sampleNebulas1 (vec2 p) {
 
             if (abs(mod(floor(k/37.0), 2.0)) < 0.001) {
                 vec4 clr = texture2D(tNebula, SAMPLE_POS2(i, rotVec((mod(p0, 1.0) - vec2(xo, yo)) / sz, vec2(0.5, 0.5), angle)));
-                ret += clr.rgb * clr.a;
+                ret += vec4(clr.rgb * clr.a, clr.a);
             }
         }
     }
@@ -63,7 +63,7 @@ vec3 sampleNebulas1 (vec2 p) {
     return ret;
 }
 
-vec3 sampleNebulas2 (vec2 p) {
+vec4 sampleNebulas2 (vec2 p) {
 
     #define NEB_SIZE2 800.0
     #define GRID_SIZE2 1.0
@@ -71,7 +71,7 @@ vec3 sampleNebulas2 (vec2 p) {
     float z = 0.1 / pow(3.0, 5.0);
     vec2 p0 = TO_WORLD(p, z) / NEB_SIZE2 + vec2(11415, 10521);
 
-    vec3 ret = vec3(0.0, 0.0, 0.0);
+    vec4 ret = vec4(0.0, 0.0, 0.0, 0.0);
     for (float xo = -GRID_SIZE2; xo<=GRID_SIZE2+0.0001; xo += 1.0) {
         for (float yo = -GRID_SIZE2; yo<=GRID_SIZE2+0.0001; yo += 1.0) {
             vec2 p2 = floor(p0 + vec2(xo, yo));
@@ -85,7 +85,7 @@ vec3 sampleNebulas2 (vec2 p) {
 
             if (abs(mod(floor(k/37.0), 3.0)) < 0.001) {
                 vec4 clr = texture2D(tNebula, SAMPLE_POS2(i, rotVec((mod(p0, 1.0) - vec2(xo, yo)) / sz, vec2(0.5, 0.5), angle)));
-                ret += clr.rgb * clr.a;
+                ret += vec4(clr.rgb*clr.a, clr.a);
             }
         }
     }
@@ -93,7 +93,7 @@ vec3 sampleNebulas2 (vec2 p) {
     return ret;
 }
 
-vec3 sampleStars2 (vec2 p) {
+vec4 sampleStars2 (vec2 p) {
 
     #define STAR_SIZE2 300.0
 
@@ -102,19 +102,22 @@ vec3 sampleStars2 (vec2 p) {
     float i = floor(rand(floor(p2)) * 15.0);
 
     vec4 clr = texture2D(tStars, SAMPLE_POS(i, p2));
-    return clr.rgb*clr.a;
+    return vec4(clr.rgb*clr.a, clr.a);
 }
 
 void main() {
 
     vec2 p = vUv - vec2(0.5, 0.5);
 
-    gl_FragColor = vec4(
-        //sampleDust(p)     * 0.65 +
+    vec4 clr =
         sampleStars1(p)   * 0.75 +
         sampleNebulas1(p) * 0.20 +
         sampleStars2(p)   * 0.75 +
-        sampleNebulas2(p) * 0.095,
-    1.0);
+        sampleNebulas2(p) * 0.095;
+
+    gl_FragColor = vec4(
+        clamp(clr.rgb, 0.0, 1.0),
+        1.0
+    );
 
 }

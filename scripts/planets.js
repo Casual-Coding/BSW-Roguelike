@@ -308,7 +308,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         if (hasRing) {
             Math.seedrandom(obj.seed);
-            obj.ringtex = BSWG.render.proceduralImage(128, 128, function(ctx, w, h){
+            var ringThickness = Math.random();
+            obj.ringtex = BSWG.render.proceduralImage(64, 64, function(ctx, w, h){
 
                 var comp = function(v) {
                     return Math.floor(v*255);
@@ -316,7 +317,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
                 ctx.clearRect(0, 0, w, h);
                 for (var i=0; i<h; i++) {
-                    var j = Math.floor(Math.random() * (ringcolors.length+2));
+                    var j = Math.floor(Math.random() * (ringcolors.length+10*(1.0-ringThickness)));
                     if (j<ringcolors.length) {
                         ctx.strokeStyle = 'rgba(' + comp(ringcolors[j].x) + ',' + comp(ringcolors[j].y) + ',' + comp(ringcolors[j].z) + ', 1.0)';
                         ctx.lineWidth = 1.5;
