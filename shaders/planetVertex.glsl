@@ -19,8 +19,9 @@ void main() {
     vLocal = position;
     vNormalMatrix = normalMatrix;
     vec4 tmp = modelViewMatrix * vec4( pos, 1.0 );
-    gl_Position.xy = TO_SCREEN(tmp.xy, 1.65*cam.z);
-    gl_Position.z = 0.97-tmp.z/100000.0;
-    gl_Position.w = 1.0;
+    //gl_Position.xy = TO_SCREEN(tmp.xy, 1.45*cam.z);
+    float zf = cam.z * 70.0;
+    gl_Position = projectionMatrix * ((modelViewMatrix * vec4( position, 1.0 )) * vec4(1.0*zf, 1.0*zf, 0.2*zf, 1.0) + vec4(0.0, 0.0, -45.0, 0.0));
+    //gl_Position.z = gl_Position.z/100000.0;
     vSPosition = gl_Position;
 }

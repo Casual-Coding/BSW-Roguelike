@@ -54,7 +54,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         Math.seedrandom(obj.seed+2);
 
         if (obj.type === -1) {
-            if (Math.random() < 0.25) {
+            if (Math.random() < 0.125) {
                 obj.type = BSWG.planet_TERRAN;
             }
             else {
@@ -162,7 +162,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 break;
         }
 
-        obj.pos.z -= obj.radius * 1.5;
+        obj.pos.z -= 45 * 2.5;
 
         if (colors2) {
             Math.seedrandom(obj.seed+1);
