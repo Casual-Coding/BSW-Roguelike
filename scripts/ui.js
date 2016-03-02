@@ -180,7 +180,7 @@ BSWG.control_KeyConfig = {
     update: function () {
 
         var keys = BSWG.input.getKeyMap();
-        if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left')) {
+        if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left') || !BSWG.game.editMode) {
             BSWG.input.EAT_KEY(BSWG.KEY.ESC);
             BSWG.input.EAT_MOUSE('left');
             this.close(null);
