@@ -80,13 +80,13 @@ BSWG.starfield = function(){
         },
         zpos: {
             type: 'f',
-            value: 0.98
+            value: 0.999
         }
     }, THREE.AdditiveBlending);
 
     var bgMesh = new THREE.Mesh( bgGeom, bgMat );
     bgMesh.frustumCulled = false;
-    bgMesh.position.set(-1.0, -1.0, -0.5);
+    bgMesh.position.set(-1.0, -1.0, -1000.0);
     bgMesh.updateMatrix();
     
     bgMesh.needsUpdate = true;
@@ -132,6 +132,11 @@ BSWG.starfield = function(){
     BSWG.render.scene.add( bgMesh2 );
 
     this.render = function(ctx, cam, viewport) {
+
+        bgMesh.position.set(BSWG.game.cam.x, BSWG.game.cam.y, bgMesh.position.z);
+        bgMesh2.position.set(BSWG.game.cam.x, BSWG.game.cam.y, bgMesh2.position.z);
+        bgMesh.updateMatrix();
+        bgMesh2.updateMatrix();
 
         bgMat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
         bgMat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);

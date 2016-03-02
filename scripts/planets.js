@@ -317,7 +317,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
                 ctx.clearRect(0, 0, w, h);
                 for (var i=0; i<h; i++) {
-                    var j = Math.floor(Math.random() * (ringcolors.length+10*(1.0-ringThickness)));
+                    var j = Math.floor(Math.random() * (ringcolors.length+6*(1.0-ringThickness)));
                     if (j<ringcolors.length) {
                         ctx.strokeStyle = 'rgba(' + comp(ringcolors[j].x) + ',' + comp(ringcolors[j].y) + ',' + comp(ringcolors[j].z) + ', 1.0)';
                         ctx.lineWidth = 1.5;

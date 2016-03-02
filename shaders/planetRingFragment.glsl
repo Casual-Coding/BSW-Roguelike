@@ -47,9 +47,9 @@ void main() {
     if (rayIntersectsSphere(vPosition.xyz, normalize(lightDir), planet.xyz, planet.w) > -0.5) {
         l *= 0.25;
     }
-    gl_FragColor = vec4(clr.rgb*l, alpha);
+    gl_FragColor = vec4(clr.rgb*l, pow(alpha, 0.3));
 
-    if (alpha < 0.1) {
-        discard;
-    }
+    //if (alpha < 0.1) {
+    //    discard;
+    //}
 }

@@ -194,9 +194,12 @@ BSWG.game = new function(){
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
             var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
-            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / (1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1);
+            var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
             self.cam.zoomTo(dt*2.5, toZ);
-            self.cam.panTo(dt*2.0, Math.interpolate(mp, self.ccblock.obj.body.GetWorldCenter(), 1.0-BSWG.mouseLookFactor));
+            var p = self.ccblock.obj.body.GetWorldCenter().clone();
+            p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
+            p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
+            self.cam.panTo(dt*8.0, Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
             BSWG.render.updateCam3D(self.cam);
 
             document.title = "BSWR - " + Math.floor(1/dt) + " fps";
