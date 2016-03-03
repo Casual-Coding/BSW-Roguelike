@@ -45,10 +45,14 @@ BSWG.game = new function(){
                 self.showControls = me.selected;
             }
         });
+
     };
 
     this.start = function ()
     {
+        var self = this;
+
+        this.titlePolys = null;
         var self = this;
 
         Math.seedrandom();
@@ -310,6 +314,22 @@ BSWG.game = new function(){
 
             self.editBtn.x = 10;
             self.editBtn.y = 10;
+
+            if (self.titlePolys) {
+                for (var i=0; i<self.titlePolys.length; i++) {
+                    var poly = self.titlePolys[i];
+                    for (var j=1; j<(poly.length+1); j++) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(poly[j-1].x*3.5+100, poly[j-1].y*3.5+100);
+                        ctx.lineTo(poly[j%poly.length].x*3.5+100, poly[j%poly.length].y*3.5+100);
+                        ctx.strokeStyle = '#fff';
+                        ctx.globalAlpha = j/poly.length;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
 
             BSWG.ui.render(ctx, viewport);
 

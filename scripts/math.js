@@ -120,6 +120,48 @@ Math.smoothPoly = function (poly, f) {
 
 };
 
+Math.simplifyPoly = function (poly, threshold) {
+
+    while (true) {
+        var out = new Array(poly.length);
+        for (var i=0; i<poly.length; i++) {
+            out[i] = poly[i];
+        }
+        var change = false;
+        var minDot = 1.0;
+        var best = -1;
+        for (var i=1; i<poly.length; i++) {
+            var j = i-1;
+            var k = (i+1) % poly.length;
+            var x1 = poly[j].x - poly[k].x;
+            var y1 = poly[j].y - poly[k].y;
+            var x2 = poly[i].x - poly[k].x;
+            var y2 = poly[i].y - poly[k].y;
+            var len1 = Math.sqrt(x1*x1+y1*y1);
+            var len2 = Math.sqrt(x2*x2+y2*y2);
+            x1 /= len1; y1 /= len1;
+            x2 /= len2; y2 /= len2;
+            var dot = 1 - Math.abs(x1*x2+y1*y2);
+            if (dot < threshold) {
+                if (best === -1 || dot < minDot) {
+                    minDot = dot;
+                    best = i;
+                }
+                change = true;
+            }
+        }
+        if (!change) {
+            return out;
+        }
+        else {
+            out.splice(best, 1);
+            poly = out;
+        }
+    }
+    return out;
+
+};
+
 Math.pointDistance = function (p1, p2) {
 
     var dx = p2.x - p1.x;
@@ -188,4 +230,22 @@ Math.polyCentroid = function(p) {
     ret.y /= (6.0*sa);
 
     return ret;    
+};
+
+// http://alienryderflex.com/polygon/
+Math.pointInPoly = function(p, poly) {
+
+    var i, j = poly.length-1;
+    var oddNodes = false;
+
+    for (i=0; i<poly.length; i++) {
+        if (poly[i].y<p.y && poly[j].y>=p.y || poly[j].y<p.y && poly[i].y>=p.y) {
+            if (poly[i].x+(p.y-poly[i].y)/(poly[j].y-poly[i].y)*(poly[j].x-poly[i].x)<p.x) {
+                oddNodes = !oddNodes;
+            }
+        }
+        j = i;
+    }
+
+    return oddNodes;
 };

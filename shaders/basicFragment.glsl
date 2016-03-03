@@ -18,6 +18,9 @@ void main() {
     float topFactor = blending.z / (blending.x + blending.y + blending.z);
 
     vec4 clrn = texture2D(map, vLocal.xy * scale + vec2(0.5, 0.5));
+    if (blending.z < 0.01) {
+        clrn = texture2D(map, vLocal.yz * scale + vec2(0.5, 0.5));
+    }
     vec3 tNormal = vNormalMatrix * (clrn.xyz * 2.0 - vec3(1.0, 1.0, 1.0));
     vec3 lightDir = normalize(light.xyz - vPosition.xyz);
 

@@ -262,8 +262,12 @@ BSWG.render = new function() {
                     'count': 1
                 }
             ],
-            function(){            
-                self.loadShaders(shaders, ocomplete);
+            function(){
+                var loader = new THREE.FontLoader();
+                loader.load('fonts/orbitron-400.js', function (response) {
+                    self.font3D = response;
+                    self.loadShaders(shaders, ocomplete);
+                });
             });
         };
 
@@ -396,6 +400,12 @@ BSWG.render = new function() {
             }
 
             self.renderer.render( self.scene, self.cam3D );
+
+            if (self.textObjs) {
+                for (var i=0; i<self.textObjs.length; i++) {
+                    self.textObjs[i].update();
+                }
+            }
 
             if (self.customCursor) {
                 document.body.style.cursor = 'none';
@@ -558,6 +568,97 @@ BSWG.render = new function() {
 
         return material;
     };
+
+    this.textObjs = [];
+
+    this.make3DText = function(text, size, depth, clr, pos) {
+
+        var geom = new THREE.TextGeometry(
+            text,
+            {
+                font:           this.font3D,
+                size:           4,
+                height:         (depth/size)*4,
+                bevelEnabled:   true,
+                bevelThickness: 4 * 0.05,
+                bevelSize:      4 * 0.05
+            }
+        );
+
+        geom.computeBoundingBox();
+        geom.computeFaceNormals();
+
+        var xOffset = -(geom.boundingBox.max.x - geom.boundingBox.min.x) / 2.0;
+
+        material = BSWG.render.newMaterial("basicVertex", "basicFragment", {
+            clr: {
+                type: 'v4',
+                value: clr || new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
+            },
+            light: {
+                type: 'v4',
+                value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
+            },
+            map: {
+                type: 't',
+                value: BSWG.render.images['test_nm'].texture
+            },
+            extra: {
+                type: 'v4',
+                value: new THREE.Vector4(1,0,0,0)
+            }
+        });
+
+        mesh = new THREE.Mesh( geom, material );
+
+        pos = pos || new THREE.Vector3(0, 0, 0);
+
+        mesh.position.x = pos.x + xOffset*size/4;
+        mesh.position.y = pos.y;
+        mesh.position.z = pos.z;
+
+        mesh.scale.set(size/4, size/4, size/4);
+
+        mesh.rotation.x = 0;
+        mesh.rotation.y = Math.PI * 2;
+
+        this.scene.add(mesh);
+
+        var obj = {
+            mesh: mesh,
+            mat: material,
+            geom: geom,
+            clr: null,
+            pos: pos,
+            destroy: function() {
+                BSWG.render.scene.remove(this.mesh);
+            },
+            update: function() {
+
+                var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
+
+                if (this.pos) {
+                    this.mesh.position.set(this.pos.x + xOffset*size/4, this.pos.y, this.pos.z);
+                    this.mesh.updateMatrix();
+                }
+
+                this.mat.uniforms.light.value.x = lp.x;
+                this.mat.uniforms.light.value.y = lp.y;
+                this.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
+
+                this.mat.uniforms.extra.value.x = 1.0 * this.mesh.scale.z;
+
+                if (this.clr) {
+                    this.mat.uniforms.clr.value.set(this.clr[0], this.clr[1], this.clr[2], this.clr[3]);
+                }
+
+                this.mat.needsUpdate = true;
+            }
+        };
+
+        this.textObjs.push(obj);
+        return obj;
+    }
 
     this.setCustomCursor = function(flag, number, scale) {
         this.cursorScale = scale || 1;
