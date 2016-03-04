@@ -54,6 +54,7 @@ BSWG.game = new function(){
         BSWG.ui.clear();
 
         this.cam = new BSWG.camera();
+        BSWG.render.updateCam3D(this.cam);
         this.editMode = false;
         this.showControls = false;
 
@@ -66,6 +67,79 @@ BSWG.game = new function(){
 
         switch (scene) {
             case BSWG.SCENE_TITLE:
+
+                this.cam.z *= 1.5;
+
+                this.title1 = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                    x: BSWG.render.viewport.w*0.5, y: 80,
+                    w: 800, h: 100,
+                    vpXCenter: true,
+                    text: "BlockShip Wars",
+                    color: [0.75, 0.75, 0.75, 1],
+                    hoverColor: [0.75, 0.75, 0.75, 1],
+                    click: function (me) {
+                    }
+                });
+                this.title2 = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                    x: BSWG.render.viewport.w*0.5, y: 145,
+                    w: 800, h: 100,
+                    vpXCenter: true,
+                    text: "r o u g e l i k e",
+                    color: [0.7, 0.2, 0.2, 1.0],
+                    hoverColor: [0.7, 0.2, 0.2, 1.0],
+                    click: function (me) {
+                    }
+                });
+
+                this.newGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                    x: BSWG.render.viewport.w*0.5, y: 350,
+                    w: 800, h: 70,
+                    vpXCenter: true,
+                    text: "New Game",
+                    color: [0.35, 0.75, 0.75, 1.0],
+                    hoverColor: [0.95, 0.95, 0.95, 1.0],
+                    click: function (me) {
+                        self.changeScene(BSWG.SCENE_GAME1, {}, '#000', 0.75);
+                    }
+                });
+                this.sandBoxBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                    x: BSWG.render.viewport.w*0.5, y: 350+70,
+                    w: 800, h: 70,
+                    vpXCenter: true,
+                    text: "Sandbox",
+                    color: [0.35, 0.75, 0.75, 1.0],
+                    hoverColor: [0.3, 0.3, 0.3, 1.0],
+                    click: function (me) {
+                        //self.changeScene(BSWG.SCENE_GAME1, {}, '#fff');
+                    }
+                });
+                this.optionsBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                    x: BSWG.render.viewport.w*0.5, y: 350+140,
+                    w: 800, h: 70,
+                    vpXCenter: true,
+                    text: "Options",
+                    color: [0.35, 0.75, 0.75, 1.0],
+                    hoverColor: [0.3, 0.3, 0.3, 1.0],
+                    click: function (me) {
+                        //self.changeScene(BSWG.SCENE_GAME1, {}, '#fff');
+                    }
+                });
+
+                var r = 5000;
+                var n = 5;
+                this.panPositions = [];
+                for (var i=0; i<n; i++) {
+                    var a = i/n*Math.PI*2.0;
+                    var t = i;
+                    if (t >= BSWG.planet_MOON) {
+                        t += 1;
+                    }
+                    var pos = new THREE.Vector3(Math.cos(a)*r, Math.sin(a)*r, 0.0);
+                    this.panPositions.push(pos);
+                    BSWG.planets.add({pos: pos, type: t});
+                }
+                this.curPanPos = 0;
+                this.panPosTime = this.panPosStartTime = 20.0;
                 break;
 
             case BSWG.SCENE_GAME1:
@@ -242,6 +316,12 @@ BSWG.game = new function(){
 
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
+                    self.panPosTime -= dt;
+                    if (self.panPosTime < 0.0) {
+                        self.curPanPos = (self.curPanPos + 1) % self.panPositions.length;
+                        self.panPosTime = self.panPosStartTime;
+                    }
+                    self.cam.panTo(dt*0.5, self.panPositions[self.curPanPos]);
                     break;
 
                 case BSWG.SCENE_GAME1:
@@ -399,7 +479,7 @@ BSWG.game = new function(){
                     }
                     t = 1.0 - (ss.timeOut / ss.fadeTime);
                 }
-                else if (ss.newScene) {
+                else if (ss.newScene !== null) {
                     self.initScene(ss.newScene, ss.newArgs);
                     ss.newScene = null
                     t = 1.0;

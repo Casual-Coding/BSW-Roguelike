@@ -53,6 +53,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         def = def || {};
         for (var key in defaults) {
             obj[key] = def[key] || defaults[key];
+            if (def[key] === 0) {
+                obj[key] = def[key];
+            }
         }
 
         Math.seedrandom(obj.seed+2);
@@ -182,7 +185,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         }
 
         if (obj.ringScale === -1) {
-            obj.ringScale = 0.8 + Math.random() * 0.55;
+            obj.ringScale = 0.9 + Math.random() * 0.55;
         }
 
         var ringcolors = new Array(4);

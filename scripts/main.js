@@ -101,7 +101,7 @@ var BSWG = new function(){
             BSWG.render.init(function(){
                 BSWG.physics.init();
                 BSWG.input.init();
-                BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 3.0);
+                BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
                 BSWG.game.start();
             }, images, shaders);
         };

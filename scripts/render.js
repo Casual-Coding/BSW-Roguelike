@@ -399,13 +399,13 @@ BSWG.render = new function() {
                 self.renderCbk(self.dt, self.time, self.ctx);
             }
 
-            self.renderer.render( self.scene, self.cam3D );
-
             if (self.textObjs) {
                 for (var i=0; i<self.textObjs.length; i++) {
                     self.textObjs[i].update();
                 }
             }
+
+            self.renderer.render( self.scene, self.cam3D );
 
             if (self.customCursor) {
                 document.body.style.cursor = 'none';
@@ -571,6 +571,24 @@ BSWG.render = new function() {
 
     this.textObjs = [];
 
+    this.geomBBScreen = function(geom, z) {
+
+        if (!geom.boundingBox) {
+            geom.computeBoundingBox();
+        }
+
+        var min = this.project3D(geom.boundingBox.min, z||0.0);
+        var max = this.project3D(geom.boundingBox.max, z||0.0);
+
+        return {
+            x: Math.min(min.x, max.x),
+            y: Math.min(min.y, max.y),
+            w: Math.abs(max.x - min.x),
+            h: Math.abs(max.y - min.y)
+        };
+
+    };
+
     this.make3DText = function(text, size, depth, clr, pos) {
 
         var geom = new THREE.TextGeometry(
@@ -634,6 +652,7 @@ BSWG.render = new function() {
             geom: geom,
             clr: clr,
             pos: pos,
+            size: size,
             destroy: function() {
                 BSWG.render.scene.remove(this.mesh);
 
@@ -657,7 +676,8 @@ BSWG.render = new function() {
                 var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
 
                 if (this.pos) {
-                    this.mesh.position.set(this.pos.x + xOffset*size/4, this.pos.y, this.pos.z);
+                    this.mesh.scale.set(this.size/4, this.size/4, this.size/4);
+                    this.mesh.position.set(this.pos.x + xOffset*this.size/4, this.pos.y, this.pos.z);
                     this.mesh.updateMatrix();
                 }
 

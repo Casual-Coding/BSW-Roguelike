@@ -139,6 +139,67 @@ BSWG.control_Button = {
 
 };
 
+BSWG.ui_3dScreen = function(p, z) {
+    return BSWG.render.unproject3D(p, z || 0.0).THREE(z || 0.0);
+};
+
+BSWG.ui_3dSizeW = function(sz, p, z) {
+    return Math.abs(
+        BSWG.render.unproject3D(new b2Vec2(p.x + sz, p.y), z || 0.0).x -
+        BSWG.render.unproject3D(new b2Vec2(p.x, p.y), z || 0.0).x
+    );
+};
+
+BSWG.ui_3dSizeH = function(sz, p, z) {
+    return Math.abs(
+        BSWG.render.unproject3D(new b2Vec2(p.x, p.y-sz*0.5), z || 0.0).y -
+        BSWG.render.unproject3D(new b2Vec2(p.x, p.y+sz*0.5), z || 0.0).y
+    );
+};
+
+BSWG.control_3DTextButton = {
+
+    init: function (args) {
+
+        this.textColor = args.color || [0.5, 0.5, 0.5, 1.0];
+        this.hoverColor = args.hoverColor || [0.7, 0.7, 0.7, 1.0];
+        this.xCentered = true;
+
+        var H = BSWG.ui_3dSizeH(this.h, this.p);
+        if (!this.textObj) {
+            this.textObj = BSWG.render.make3DText(
+                this.text,
+                H,
+                H * 0.5,
+                this.textColor,
+                BSWG.ui_3dScreen(this.p)
+            );
+        }
+
+    },
+
+    render: function (ctx, viewport) {
+
+        var H = BSWG.ui_3dSizeH(this.h, this.p);
+        this.textObj.size = H*0.5;
+        this.textObj.pos = BSWG.ui_3dScreen(this.p);
+        this.textObj.pos.y -= H*0.75;
+        this.textObj.clr = this.mouseIn ? this.hoverColor : this.textColor;
+    },
+
+    update: function () {
+
+    },
+
+    destroy: function () {
+        if (this.textObj) {
+            this.textObj.destroy();
+            this.textObj = null;
+        }
+    }
+
+};
+
 BSWG.control_KeyConfig = {
 
     init: function (args) {
@@ -239,6 +300,7 @@ BSWG.uiControl = function (desc, args) {
     this.click = args.click || null;
     this.text = args.text || "";
     this.selected = args.selected || null;
+    this.vpXCenter = args.vpXCenter || false;
 
     this.init(args);
 
@@ -254,6 +316,14 @@ BSWG.uiControl = function (desc, args) {
 
         var mx = BSWG.input.MOUSE('x');
         var my = BSWG.input.MOUSE('y');
+
+        if (this.vpXCenter) {
+            this.p.x = BSWG.render.viewport.w * 0.5;
+        }
+
+        if (this.xCentered) {
+            mx += this.w * 0.5;
+        }
 
         if (mx >= this.p.x && my >= this.p.y && mx < (this.p.x + this.w) && my < (this.p.y + this.h))
             this.mouseIn = true;
@@ -283,6 +353,7 @@ BSWG.ui = new function () {
 
     this.clear = function ( ) {
         while (this.list.length) {
+            this.list[0].destroy();
             this.remove(this.list[0]);
         }
     };
@@ -300,7 +371,7 @@ BSWG.ui = new function () {
     };
 
     this.remove = function(el) {
-        el.destroy();
+        
         if (el === BSWG.compActiveConfMenu) {
             BSWG.compActiveConfMenu = null;
             el.confm = null;
