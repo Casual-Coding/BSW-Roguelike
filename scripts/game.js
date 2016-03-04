@@ -129,7 +129,7 @@ BSWG.game = new function(){
                     }
                 });
 
-                var r = 5000;
+                var r = 500;
                 var n = 5;
                 this.panPositions = [];
                 for (var i=0; i<n; i++) {
