@@ -8,6 +8,7 @@ BSWG.physics = new function(){
     this.world              = null;
     this.maxWeldForce       = 5000.0;
     this.welds              = [];
+    this.objects            = [];
 
     this.init = function (){
 
@@ -84,8 +85,19 @@ BSWG.physics = new function(){
             age:      0,
             other:    null,
             revolute: motorA ? true : false,
-            noMotor:  !!noMotor
+            noMotor:  !!noMotor,
+            objA:     null,
+            objB:     null
         };
+
+        for (var i=0; i<this.objects.length; i++) {
+            if (this.objects[i].body === bodyA) {
+                obj.objA = this.objects[i];
+            }
+            if (this.objects[i].body === bodyB) {
+                obj.objB = this.objects[i];
+            }
+        }
 
         if (!motorA) {
             obj.jointDef = new b2WeldJointDef();
@@ -141,6 +153,8 @@ BSWG.physics = new function(){
         }
 
         obj.joint = this.world.CreateJoint( obj.jointDef );
+        obj.objA.welds.push(obj);
+        obj.objB.welds.push(obj);
 
         this.welds.push(obj);
 
@@ -152,14 +166,35 @@ BSWG.physics = new function(){
 
         for (var i=0; i<this.welds.length; i++) {
             if (this.welds[i] === obj) {
+                this.welds[i] = null;
                 this.welds.splice(i, 1);
                 break;
+            }
+        }
+
+        var remWeld = function(obj, search) {
+            for (var j=0; j<obj.welds.length; j++) {
+                if (obj.welds[j] === search) {
+                    obj.welds.splice(j, 1);
+                    j --;
+                }
+            }
+        };
+
+        for (var i=0; i<this.objects.length; i++) {
+            if (this.objects[i] === obj.objA) {
+                remWeld(this.objects[i], obj);
+            }
+            if (this.objects[i] === obj.objB) {
+                remWeld(this.objects[i], obj);
             }
         }
 
         this.world.DestroyJoint( obj.joint );
         obj.joint = null;
         obj.jointDef = null;
+        obj.objA = null;
+        obj.objB = null;
 
     };
 
@@ -293,7 +328,8 @@ BSWG.physics = new function(){
             fixtureDef: null,
             verts:      [],
             radius:     0,
-            type:       type
+            type:       type,
+            welds:      []
         };
 
         obj.bodyDef = new b2BodyDef();
@@ -416,7 +452,33 @@ BSWG.physics = new function(){
 
         obj.body.ResetMassData();
 
+        this.objects.push(obj);
+
         return obj;
+
+    };
+
+    this.removeObject = function(obj) {
+
+        for (var i=0; i<this.objects.length; i++) {
+            if (this.objects[i] === obj) {
+                this.objects[i] = null;
+                this.objects.splice(i, 1);
+                break;
+            }
+        }
+
+        while (obj.welds.length > 0) {
+            this.removeWeld(obj.welds[0]);
+        }
+        obj.welds = null;
+
+        this.world.DestroyBody(obj.body);
+        obj.body = null;
+        obj.fixture = null;
+        obj.fixtureDef = null;
+        obj.shape = null;
+        obj.verts = null;
 
     };
 
@@ -464,6 +526,21 @@ BSWG.physics = new function(){
     };
 
     this.reset = function (){
+
+        while (this.welds.length) {
+            this.removeWeld(this.welds[0]);
+        }
+
+        while (this.objects.length) {
+            this.removeObject(this.objects[0]);
+        }
+
+        if (this.mouseJoint) {
+            this.world.DestroyJoint(this.mouseJoint);
+            this.mouseJoint = null;
+        }
+
+        this.lastDT = 1.0/60.0;
 
     };
 
