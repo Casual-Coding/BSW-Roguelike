@@ -158,8 +158,21 @@ BSWG.game = new function(){
                         self.editMode = me.selected;
                     }
                 });
-                this.showControlsBtn = new BSWG.uiControl(BSWG.control_Button, {
+                this.anchorBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10 + 150 + 10, y: 10,
+                    w: 150, h: 50,
+                    text: "Anchor",
+                    selected: false,
+                    click: function (me) {
+                        if (self.ccblock)
+                        {
+                            self.ccblock.anchored = !self.ccblock.anchored;
+                            me.selected = self.ccblock.anchored;
+                        }
+                    }
+                });
+                this.showControlsBtn = new BSWG.uiControl(BSWG.control_Button, {
+                    x: 10 + 150 + 10 + 150 + 10, y: 10,
                     w: 200, h: 50,
                     text: "Show Controls",
                     selected: this.showControls,

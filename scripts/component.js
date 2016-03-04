@@ -15,6 +15,10 @@ BSWG.componentHoverFn = function(self) {
     return true;
 };
 
+BSWG.compAnchored = function(self) {
+    return ((self.onCC && self.onCC.anchored) || self.anchored) ? true : false;
+};
+
 BSWG.updateOnCC = function (a, b) {
 
     var cc = a.onCC || b.onCC;
@@ -249,6 +253,19 @@ BSWG.component = function (desc, args) {
     }   
 
     this.baseUpdate = function(dt) {
+
+        if (BSWG.compAnchored(this)) {
+            if (this.obj && this.obj.body) {
+                this.obj.body.SetAngularDamping(20.0);
+                this.obj.body.SetLinearDamping(20.0);
+            }
+        }
+        else {
+            if (this.obj && this.obj.body) {
+                this.obj.body.SetAngularDamping(0.1);
+                this.obj.body.SetLinearDamping(0.1);
+            }
+        }
 
         if (!BSWG.game.editMode) {
             return;

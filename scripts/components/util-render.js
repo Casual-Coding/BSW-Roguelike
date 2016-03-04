@@ -97,7 +97,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     //ret.geom.computeVertexNormals();
     ret.geom.computeBoundingSphere();
 
-    ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragmentOptimized", {
+    ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragment", {
         clr: {
             type: 'v4',
             value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
@@ -125,7 +125,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     var self = ret;
 
-    ret.update = function(clr, texScale) {
+    ret.update = function(clr, texScale, anchor) {
 
         var matrix = self.mesh.matrix;
 
@@ -149,6 +149,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         self.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
 
         self.mat.uniforms.extra.value.x = texScale || 1.0;
+        self.mat.uniforms.extra.value.y = anchor ? 1.0 : 0.0;
+        self.mat.uniforms.extra.value.z = BSWG.render.time;
 
         if (clr) {
             self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);

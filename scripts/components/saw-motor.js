@@ -91,9 +91,9 @@ BSWG.component_SawMotor = {
         this.selMeshObj2.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
         this.selMeshObj3.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 
-        this.meshObj1.update([0.5, 0.6, 0.5, 1], 2);
-        this.meshObj2.update([0.1, 0.7, 0.8, 1], 4);
-        this.meshObj3.update([0.4, 0.4, 0.4, 1], 3);
+        this.meshObj1.update([0.5, 0.6, 0.5, 1], 2, BSWG.compAnchored(this));
+        this.meshObj2.update([0.1, 0.7, 0.8, 1], 4, BSWG.compAnchored(this));
+        this.meshObj3.update([0.4, 0.4, 0.4, 1], 3, BSWG.compAnchored(this));
 
     },
 

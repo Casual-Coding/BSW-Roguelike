@@ -86,7 +86,7 @@ BSWG.component_Spikes = {
         var wheelClr = [1.0, 0.6, 0.05, 1];
         for (var i=0; i<this.meshObjs.length; i++) {
             this.selMeshObjs[i].update(selClr);
-            this.meshObjs[i].update(i > 0 ? toothClr : wheelClr, i > 0 ? 10.0 : 1.25);
+            this.meshObjs[i].update(i > 0 ? toothClr : wheelClr, i > 0 ? 10.0 : 1.25, BSWG.compAnchored(this));
         }
 
     },

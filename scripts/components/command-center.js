@@ -15,6 +15,8 @@ BSWG.component_CommandCenter = {
 
         this.moveT = 0.0;
 
+        this.anchored = false;
+
         this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
             width:  this.width,
             height: this.height,
@@ -85,11 +87,11 @@ BSWG.component_CommandCenter = {
             this.grabT = 0.0;
         }
 
-        this.meshObj.update([0.85, 0.85, 0.85, 1]);
+        this.meshObj.update([0.85, 0.85, 0.85, 1], null, BSWG.compAnchored(this));
         var l = (this.grabT/0.3) * 0.25 + 0.5;
-        this.meshObj3.update([l, l, 0.68, 1], 3.0);
+        this.meshObj3.update([l, l, 0.68, 1], 3.0, BSWG.compAnchored(this));
         var l = (this.moveT/0.3) * 0.25 + 0.35;
-        this.meshObj2.update([l, 0.8, 0.9, 1], 3.0);
+        this.meshObj2.update([l, 0.8, 0.9, 1], 3.0, BSWG.compAnchored(this));
 
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
     },

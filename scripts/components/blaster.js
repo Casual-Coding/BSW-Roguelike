@@ -58,7 +58,7 @@ BSWG.component_Blaster = {
             this.kickBack = 0.0;
         }
 
-        this.meshObj.update([1.0, 0.6, 0.05, 1], 4);
+        this.meshObj.update([1.0, 0.6, 0.05, 1], 4, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
         
         //BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));

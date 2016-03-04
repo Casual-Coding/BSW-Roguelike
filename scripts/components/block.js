@@ -43,7 +43,7 @@ BSWG.component_Block = {
 
         //ctx.fillStyle = '#444';
         //BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
-        this.meshObj.update([0.6,0.6,0.6,1]);
+        this.meshObj.update([0.6,0.6,0.6,1], null, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
 
     },
