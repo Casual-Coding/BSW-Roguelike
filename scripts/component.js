@@ -256,8 +256,8 @@ BSWG.component = function (desc, args) {
 
         if (BSWG.compAnchored(this)) {
             if (this.obj && this.obj.body) {
-                this.obj.body.SetAngularDamping(20.0);
-                this.obj.body.SetLinearDamping(20.0);
+                this.obj.body.SetAngularDamping(5.0);
+                this.obj.body.SetLinearDamping(5.0);
             }
         }
         else {

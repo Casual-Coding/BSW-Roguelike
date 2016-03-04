@@ -48,9 +48,9 @@ BSWG.jpointRenderer = new function() {
         geom.addAttribute( 'pos',      new THREE.BufferAttribute( posArray, 4 ) );
         geom.addAttribute( 'clr',      new THREE.BufferAttribute( clrArray, 4 ) );
 
-        mat = BSWG.render.newMaterial("jpointsVertex", "jpointsFragment");
+        mat = BSWG.render.newMaterial("jpointsVertex", "jpointsFragment", null, null, THREE.DoubleSide);
         mesh = new THREE.Mesh( geom, mat );
-        mesh.position.z = 0.05;
+        mesh.position.z = 0.065;
 
         geom.needsUpdate = true;
         mat.needsUpdate = true;
