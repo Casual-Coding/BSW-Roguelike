@@ -74,6 +74,17 @@ BSWG.component_SawMotor = {
 
     },
 
+    destroy: function() {
+
+        this.meshObj1.destroy();
+        this.selMeshObj1.destroy();
+        this.meshObj2.destroy();
+        this.selMeshObj2.destroy();
+        this.meshObj3.destroy();
+        this.selMeshObj3.destroy();
+
+    },
+
     render: function(ctx, cam, dt) {
 
         this.selMeshObj1.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);

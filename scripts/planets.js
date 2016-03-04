@@ -29,6 +29,10 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
     this.clear = function() {
 
+        while (this.planets.length) {
+            this.planets[0].destroy();
+        }
+
     };
 
     this.add = function(def) {
@@ -433,6 +437,32 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             BSWG.render.scene.remove( self.mesh );
             if (self.meshr) {
                 BSWG.render.scene.remove( self.meshr );
+            }
+
+            self.mesh.geometry.dispose();
+            self.mesh.material.dispose();
+            self.mesh.geometry = null;
+            self.mesh.material = null;
+            self.mesh = null;
+            self.mat = null;
+            self.geom = null;
+
+            if (self.meshr) {
+                self.meshr.geometry.dispose();
+                self.meshr.material.dispose();
+                self.meshr.geometry = null;
+                self.meshr.material = null;
+                self.meshr = null;
+                self.matr = null;
+                self.geomr = null;
+            }
+
+            var pl = BSWG.planets.planets;
+            for (var i=0; i<pl.length; i++) {
+                if (pl[i] === self) {
+                    pl.splice(i, 1);
+                    break;
+                }
             }
 
         };

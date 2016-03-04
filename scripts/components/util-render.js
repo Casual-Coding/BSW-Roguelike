@@ -161,6 +161,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         BSWG.render.scene.remove( self.mesh );
 
+        self.mesh.geometry.dispose();
+        self.mesh.material.dispose();
+        self.mesh.geometry = null;
+        self.mesh.material = null;
+        self.mesh = null;
+        self.mat = null;
+        self.geom = null;
+
     };
 
     ret.update();
@@ -289,6 +297,14 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
     ret.destroy = function() {
 
         BSWG.render.scene.remove( self.mesh );
+
+        self.mesh.geometry.dispose();
+        self.mesh.material.dispose();
+        self.mesh.geometry = null;
+        self.mesh.material = null;
+        self.mesh = null;
+        self.mat = null;
+        self.geom = null;
 
     };
 

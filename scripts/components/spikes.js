@@ -70,6 +70,15 @@ BSWG.component_Spikes = {
         }
     },
 
+    destroy: function() {
+
+        for (var i=0; i<this.meshObjs.length; i++) {
+            this.meshObjs[i].destroy();
+            this.selMeshObjs[i].destroy();
+        }
+
+    },
+
     render: function(ctx, cam, dt) {
 
         var selClr = [0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0];

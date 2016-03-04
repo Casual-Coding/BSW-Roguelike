@@ -140,8 +140,8 @@ BSWG.component = function (desc, args) {
 
                     var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
                     var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
-                    ctx.globalAlpha = 0.25;
-                    ctx.fillStyle = '#444';
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = '#fff';
                     BSWG.draw3DRect(ctx, p.x - w * 0.5, p.y - 10, w, 20, 3, info[2] || false);
 
                     ctx.save();
@@ -419,6 +419,8 @@ BSWG.componentList = new function () {
     };
 
     this.remove = function (comp) {
+
+        comp.destroy();
 
         for (var i=0; i<this.compList.length; i++)
             if (this.compList[i] === comp) {

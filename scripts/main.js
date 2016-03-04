@@ -83,7 +83,8 @@ var BSWG = new function(){
             'jpointsFragment',
             'expFragment',
             'planetFragment',
-            'planetRingFragment'
+            'planetRingFragment',
+            'textFragment'
         ]
     };
 
@@ -100,7 +101,7 @@ var BSWG = new function(){
             BSWG.render.init(function(){
                 BSWG.physics.init();
                 BSWG.input.init();
-                BSWG.game.createNew();
+                BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 3.0);
                 BSWG.game.start();
             }, images, shaders);
         };

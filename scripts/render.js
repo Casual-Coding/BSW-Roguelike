@@ -590,10 +590,12 @@ BSWG.render = new function() {
 
         var xOffset = -(geom.boundingBox.max.x - geom.boundingBox.min.x) / 2.0;
 
-        material = BSWG.render.newMaterial("basicVertex", "basicFragment", {
+        clr = clr || [0.5,0.5,0.5,1.0];
+
+        material = BSWG.render.newMaterial("basicVertex", "textFragment", {
             clr: {
                 type: 'v4',
-                value: clr || new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
+                value: new THREE.Vector4(clr[0], clr[1], clr[2], clr[3])
             },
             light: {
                 type: 'v4',
@@ -624,14 +626,31 @@ BSWG.render = new function() {
 
         this.scene.add(mesh);
 
+        var self = this;
+
         var obj = {
             mesh: mesh,
             mat: material,
             geom: geom,
-            clr: null,
+            clr: clr,
             pos: pos,
             destroy: function() {
                 BSWG.render.scene.remove(this.mesh);
+
+                this.mesh.geometry.dispose();
+                this.mesh.material.dispose();
+                this.mesh.geometry = null;
+                this.mesh.material = null;
+                this.mesh = null;
+                this.mat = null;
+                this.geom = null;
+
+                for (var i=0; i<self.textObjs.length; i++) {
+                    if (self.textObjs[i] === this) {
+                        self.textObjs.splice(i, 1);
+                        break;
+                    }
+                }
             },
             update: function() {
 

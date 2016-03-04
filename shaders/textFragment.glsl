@@ -18,6 +18,9 @@ void main() {
     float topFactor = blending.z / (blending.x + blending.y + blending.z);
 
     vec4 clrn = texture2D(map, vLocal.xy * scale + vec2(0.5, 0.5));
+    if (blending.z < 0.01) {
+        clrn = texture2D(map, vLocal.yz * scale + vec2(0.5, 0.5));
+    }
     vec3 tNormal = vNormalMatrix * (clrn.xyz * 2.0 - vec3(1.0, 1.0, 1.0));
     vec3 lightDir = normalize(light.xyz - vPosition.xyz);
 
@@ -25,6 +28,6 @@ void main() {
     float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 0.7);
     float l2 = (pow(max(dot(normalize(vNormal), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.8+0.6) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.05 + 0.2, 0.75);
-    gl_FragColor = vec4(clr.rgb*l, 1.0);
+    gl_FragColor = vec4(clr.rgb*l, clr.a);
 
 }

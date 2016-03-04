@@ -35,7 +35,7 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
     if (outline) {
         ctx.strokeStyle = outline;
-        ctx.lineWidth = 3.0;
+        ctx.lineWidth = 2.0;
         ctx.stroke();
         ctx.lineWidth = 1.0;
     }
@@ -53,6 +53,12 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
         var alpha = Math.sin(angle + Math.PI/4.0) * 0.5 + 0.5;
         ctx.globalAlpha = oAlpha * alpha * 0.6;
 
+        var grad = ctx.createLinearGradient(a.x,a.y, c.x,c.y);
+        grad.addColorStop(0,"#fff");
+        grad.addColorStop(1,"#888");
+
+        ctx.fillStyle = grad;
+
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
@@ -62,7 +68,17 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
         ctx.fill();
     }
 
-    if (pressedIn) ctx.fillStyle = '#000';
+    var grad = ctx.createLinearGradient(iverts[0].x,iverts[0].y, iverts[2].x, iverts[2].y);
+    if (pressedIn) {
+        grad.addColorStop(0,"#000");
+        grad.addColorStop(1,"#222");
+    }
+    else
+    {
+        grad.addColorStop(0,"#fff");
+        grad.addColorStop(1,"#999");        
+    }
+    ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.globalAlpha = 0.65 * (pressedIn ? 0.4 : 1.0);
     ctx.moveTo(iverts[0].x, iverts[0].y);
@@ -98,7 +114,7 @@ BSWG.control_Button = {
             
         ctx.lineWidth = 2.0;
 
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected, this.mouseIn ? 'rgba(155,255,155,0.65)' : null);
+        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
 
         ctx.lineWidth = 1.0;
 
@@ -150,7 +166,7 @@ BSWG.control_KeyConfig = {
         ctx.lineWidth = 2.0;
 
         ctx.globalAlpha = 0.75;
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, true ? 'rgba(155,255,155,0.65)' : null);
+        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, true ? 'rgba(255,255,255,0.45)' : null);
         ctx.globalAlpha = 1.0;
 
         ctx.lineWidth = 1.0;
@@ -211,6 +227,7 @@ BSWG.uiControl = function (desc, args) {
     this.render = function (ctx, viewport) { };
     this.update = function ( ) { };
     this.init = function (args) { };
+    this.destroy = function ( ) { };
 
     for (var k in desc) {
         this[k] = desc[k];
@@ -265,30 +282,36 @@ BSWG.ui = new function () {
     this.list = [];
 
     this.clear = function ( ) {
-        this.list.length = 0;
+        while (this.list.length) {
+            this.remove(this.list[0]);
+        }
     };
 
     this.render = function (ctx, viewport) {
-        for (var i=0; i<this.list.length; i++)
+        for (var i=0; i<this.list.length; i++) {
             this.list[i].render(ctx, viewport);
+        }
     };
 
     this.update = function () {
-        for (var i=0; i<this.list.length; i++)
+        for (var i=0; i<this.list.length; i++) {
             this.list[i]._update();
+        }
     };
 
     this.remove = function(el) {
+        el.destroy();
         if (el === BSWG.compActiveConfMenu) {
             BSWG.compActiveConfMenu = null;
             el.confm = null;
         }
-        for (var i=0; i<this.list.length; i++)
+        for (var i=0; i<this.list.length; i++) {
             if (this.list[i] === el)
             {
                 this.list.splice(i, 1);
                 return true;
             }
+        }
         return false;
     };
 

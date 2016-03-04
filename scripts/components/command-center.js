@@ -60,6 +60,15 @@ BSWG.component_CommandCenter = {
         BSWG.blockPolySmooth = null;
     },
 
+    destroy: function() {
+
+        this.meshObj.destroy();
+        this.selMeshObj.destroy();
+        this.meshObj2.destroy();
+        this.meshObj3.destroy();
+
+    },
+
     render: function(ctx, cam, dt) {
 
         if (this.moveT >= 0) {

@@ -32,6 +32,13 @@ BSWG.component_Block = {
 
     },
 
+    destroy: function() {
+
+        this.meshObj.destroy();
+        this.selMeshObj.destroy();
+
+    },
+
     render: function(ctx, cam, dt) {
 
         //ctx.fillStyle = '#444';

@@ -61,6 +61,15 @@ BSWG.component_HingeHalf = {
 
     },
 
+    destroy: function() {
+
+        this.meshObj1.destroy();
+        this.selMeshObj1.destroy();
+        this.meshObj2.destroy();
+        this.selMeshObj2.destroy();
+
+    },
+
     render: function(ctx, cam, dt) {
 
         //ctx.fillStyle = '#353';

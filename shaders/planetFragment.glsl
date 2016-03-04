@@ -28,9 +28,13 @@ void main() {
         clr = WATER;
         waterAmt = 1.0;
     }
-    else if (len < 0.9001) {
+    else if (len < 0.9001 && extra.y > 0.5) {
         waterAmt = 1.0 - (len-0.900) / 0.0001;
         clr = mix(WATER, GRASS, (len-0.900) / 0.0001);
+    }
+    else if (len < 0.905 && extra.y < 0.5) {
+        waterAmt = 1.0 - (len-0.900) / 0.005;
+        clr = mix(WATER, GRASS, (len-0.900) / 0.005);   
     }
     else if (len < 0.925) {
         clr = GRASS;
