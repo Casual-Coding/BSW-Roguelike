@@ -26,12 +26,12 @@ void main() {
     float l2 = (pow(max(dot(normalize(vNormal), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.8+0.6) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.05 + 0.2, 0.75);
 
-    if (extra.y < 0.5) {
+    if (extra.y <= 0.0) {
         gl_FragColor = vec4(clr.rgb*l, 1.0);
     }
     else {
-        float al = sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5;
-        gl_FragColor = vec4(clr.rgb*vec3(al*0.75+(1.0-al), 0.5*al+(1.0-al), al+(1.0-al))*l, 1.0);
+        float al = (sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5) * extra.y;
+        gl_FragColor = vec4(clr.rgb*vec3(al*1.0+(1.0-al), 0.5*al+(1.0-al), 0.75*al+(1.0-al))*l, 1.0);
     }
 
 }

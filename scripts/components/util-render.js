@@ -125,6 +125,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     var self = ret;
 
+    self.anchorT = 0.0;
+
     ret.update = function(clr, texScale, anchor) {
 
         var matrix = self.mesh.matrix;
@@ -149,7 +151,15 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         self.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
 
         self.mat.uniforms.extra.value.x = texScale || 1.0;
-        self.mat.uniforms.extra.value.y = anchor ? 1.0 : 0.0;
+
+        if (anchor) {
+            self.anchorT += (1.0 - self.anchorT) * 0.25;
+        }
+        else {
+            self.anchorT += (0.0 - self.anchorT) * 0.25;   
+        }
+
+        self.mat.uniforms.extra.value.y = Math.clamp(self.anchorT, 0, 1);
         self.mat.uniforms.extra.value.z = BSWG.render.time;
 
         if (clr) {
