@@ -448,7 +448,7 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
             
-            document.title = "BSWR - " + Math.floor(1/dt) + " fps";
+            document.title = "BSWR - " + Math.floor(1/BSWG.render.actualDt) + " fps";
 
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');

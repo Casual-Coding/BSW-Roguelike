@@ -386,14 +386,13 @@ BSWG.render = new function() {
         var renderFrame = function () {
 
             var frameTime = Date.timeStamp();
-            self.dt = frameTime - self.lastFrameTime;
+            self.actualDt = frameTime - self.lastFrameTime;
             self.lastFrameTime = frameTime;
-            self.dt = self.dt * 0.5 + Math.clamp(self.dt, 1.0/60.0, 1.0/10.0) * 0.5;
+            self.dt = 1.0/60.0;
             self.time += self.dt;
 
             self.sizeViewport();
             self.ctx.clearRect(0, 0, self.viewport.w, self.viewport.h);
-            self.renderer.clear();
 
             if (self.renderCbk) {
                 self.renderCbk(self.dt, self.time, self.ctx);
@@ -405,6 +404,7 @@ BSWG.render = new function() {
                 }
             }
 
+            self.renderer.clear();
             self.renderer.render( self.scene, self.cam3D );
 
             if (self.customCursor) {

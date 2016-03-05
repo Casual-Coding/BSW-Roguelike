@@ -180,6 +180,7 @@ BSWG.control_3DTextButton = {
                 0.35
             );
         }
+        this.added = true;
 
     },
 
@@ -190,6 +191,18 @@ BSWG.control_3DTextButton = {
         this.textObj.pos = BSWG.ui_3dScreen(this.p);
         this.textObj.pos.y -= H*0.75;
         this.textObj.clr = this.mouseIn ? this.hoverColor : this.textColor;
+        if (this.textObj.clr[3] <= 0.001) {
+            if (this.added) {
+                BSWG.render.scene.remove(this.textObj.mesh);
+                this.added = false;
+            }
+        }
+        else {
+            if (!this.added) {
+                BSWG.render.scene.add(this.textObj.mesh);
+                this.added = true;
+            }
+        }
     },
 
     update: function () {
