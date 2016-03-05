@@ -1,0 +1,1 @@
+window.BSWG = window.BSWG || {};

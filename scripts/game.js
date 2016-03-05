@@ -38,7 +38,7 @@ BSWG.game = new function(){
 
         if (this.scene === null) {
             this.switchScene.timeOut = 0.0;
-            this.newScene = null;
+            this.switchScene.newScene = null;
             this.initScene(scene, args);
         }
 

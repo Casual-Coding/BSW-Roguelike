@@ -53,6 +53,7 @@ BSWG.component_DetacherLauncher = {
     destroy: function() {
 
         this.meshObj.destroy();
+        this.meshObj2.destroy();
         this.selMeshObj.destroy();
 
     },

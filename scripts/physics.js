@@ -365,7 +365,7 @@ BSWG.physics = new function(){
                 }
 
                 obj.verts = verts;
-                obj.shape = b2PolygonShape.AsArray(verts, verts.length);
+                obj.shape = b2PolygonShape.AsArray(Math.scalePoly(verts, 0.99), verts.length);
                 break;
 
             case 'multipoly':
@@ -383,7 +383,7 @@ BSWG.physics = new function(){
                         verts = Math.smoothPoly(verts, def.smooth);
                     }
                     obj.verts.push(verts);
-                    obj.shape.push(b2PolygonShape.AsArray(verts, verts.length));
+                    obj.shape.push(b2PolygonShape.AsArray(Math.scalePoly(verts, 0.99), verts.length));
                 }
                 break;
 
@@ -406,7 +406,7 @@ BSWG.physics = new function(){
                 }
 
                 obj.verts = verts;
-                obj.shape = b2PolygonShape.AsArray(verts, verts.length);
+                obj.shape = b2PolygonShape.AsArray(Math.scalePoly(verts, 0.99), verts.length);
                 break;
 
             default:

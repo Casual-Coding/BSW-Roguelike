@@ -232,6 +232,21 @@ Math.polyCentroid = function(p) {
     return ret;    
 };
 
+Math.scalePoly = function(poly, s) {
+
+    var c = Math.polyCentroid(poly);
+    var len = poly.length;
+    var ret = new Array(len);
+    for (var i=0; i<len; i++) {
+        ret[i] = new b2Vec2(
+            (poly[i].x - c.x) * s + c.x,
+            (poly[i].y - c.y) * s + c.y
+        );
+    }
+    return ret;
+
+};
+
 // http://alienryderflex.com/polygon/
 Math.pointInPoly = function(p, poly) {
 
