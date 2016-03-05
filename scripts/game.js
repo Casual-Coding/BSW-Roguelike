@@ -74,6 +74,8 @@ BSWG.game = new function(){
         var self = this;
         Math.seedrandom();
 
+        var startPos = new b2Vec2(0, 0);
+
         switch (scene) {
             case BSWG.SCENE_TITLE:
 
@@ -154,6 +156,10 @@ BSWG.game = new function(){
             case BSWG.SCENE_GAME1:
 
                 this.map = BSWG.genMap(128, 30, 8);
+                for (var i=0; i<this.map.planets.length; i++) {
+                    BSWG.planets.add({pos: this.map.planets[i].worldP.THREE()});   
+                }
+                startPos = this.map.planets[0].worldP.clone();
                 this.mapImage = BSWG.render.proceduralImage(this.map.size, this.map.size, function(ctx, w, h){
                 });
                 this.nebulas = new BSWG.nebulas(this.map);
@@ -222,7 +228,7 @@ BSWG.game = new function(){
                         else {
                             r = Math.random() * 26 + 12;
                         }
-                        p = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+                        p = new b2Vec2(Math.cos(a)*r+startPos.x, Math.sin(a)*r+startPos.y);
                         for (var j=0; j<pastPositions.length && p; j++) {
                             var jp = pastPositions[j];
                             if (Math.pow(jp.x - p.x, 2.0) + Math.pow(jp.y - p.y, 2.0) < 4*4)
@@ -410,10 +416,13 @@ BSWG.game = new function(){
 
                 this.ccblock = new BSWG.component(BSWG.component_CommandCenter, {
 
-                    pos: new b2Vec2(0, 0),
+                    pos: startPos.clone(),
                     angle: -Math.PI/3.5
 
                 });
+
+                self.cam.x = startPos.x;
+                self.cam.y = startPos.y;
 
                 break;
 
@@ -639,6 +648,14 @@ BSWG.game = new function(){
                     self.map.renderZoneMap(ctx2, '#002', true, null, true);
                     self.map.renderEdgeMap(ctx2, '#00f', true, null, true);
 
+                    for (var i=0; i<self.map.planets.length; i++) {
+                        if (self.map.planets[i].zone.discovered) {
+                            var p = self.map.worldToMap(self.map.planets[i].worldP);
+                            ctx2.fillStyle = '#0f0';
+                            ctx2.fillRect(p.x/self.map.size * 128-1, p.y/self.map.size * 128-1, 3, 3);
+                        }
+                    }
+
                 }
                 else {
                     self.inZone.zoneTitle.hoverColor[3] = Math.min(self.zoneChangeT, 1.0);
@@ -677,12 +694,20 @@ BSWG.game = new function(){
                 var t = 0.0;
                 if (ss.timeOut > 0) {
                     ss.timeOut -= dt;
+                    t = 1.0 - (ss.timeOut / ss.fadeTime);
                     if (ss.timeOut < 0) {
                         ss.timeOut = 0;
+                        ctx.fillStyle = ss.color;
+                        ctx.fillRect(0, 0, viewport.w, viewport.h);
+                        ctx.font = '48px Orbitron';
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = '#7d7';
+                        ctx.fillTextB('Loading ...', 48, viewport.h - 48, true);
+                        t = 0.0;
                     }
-                    t = 1.0 - (ss.timeOut / ss.fadeTime);
                 }
                 else if (ss.newScene !== null) {
+
                     self.initScene(ss.newScene, ss.newArgs);
                     ss.newScene = null
                     t = 1.0;

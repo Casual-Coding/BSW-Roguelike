@@ -1,6 +1,8 @@
 BSWG.map_minZoneDist     = 10; // Minimum distance allowed between two zones
 BSWG.map_minZoneEdgeDist = 10; // Minimum distance allowed from a zone center to edge of map
 BSWG.map_gridSize        = 50.0;
+BSWG.map_flPlanetDist    = 0.9; // * size
+BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
 
 BSWG.genMap = function(size, numZones, numPlanets) {
 
@@ -15,6 +17,7 @@ BSWG.genMap = function(size, numZones, numPlanets) {
     ret.gridSize = BSWG.map_gridSize;
     ret.zoneMap  = new Array(size);
     ret.edgeMap  = new Array(size);
+    ret.planets  = new Array(numPlanets);
 
     for (var i=0; i<size; i++) {
         ret.zoneMap[i] = new Array(size);
@@ -54,7 +57,50 @@ BSWG.genMap = function(size, numZones, numPlanets) {
             if (i === 0) {
                 console.log('Map generation error: Number of zones forced to 0');
             }
+            if (i < numPlanets) {
+                console.log('Map generator error: Number of zones forced to less than number of planets')
+            }
             break;
+        }
+    }
+
+    for (var i=0; i<numZones; i++) {
+        for (var j=i+1; j<numZones; j++) {
+            if (Math.distVec2(ret.zones[i].p, ret.zones[j].p) > size*BSWG.map_flPlanetDist) {
+                ret.planets[0] = new Object();
+                ret.planets[1] = new Object();
+                ret.planets[0].zone = ret.zones[i];
+                ret.planets[1].zone = ret.zones[j];
+                ret.planets[0].p = ret.zones[i].p;
+                ret.planets[1].p = ret.zones[j].p;
+                ret.planets[0].worldP = new b2Vec2(ret.planets[0].p.x * ret.gridSize, ret.planets[0].p.y * ret.gridSize);
+                ret.planets[1].worldP = new b2Vec2(ret.planets[1].p.x * ret.gridSize, ret.planets[1].p.y * ret.gridSize);
+                break;
+            }
+        }
+    }
+
+    for (var i=2; i<numPlanets; i++) {
+        var k;
+        for (k=0; k<1000; k++) {
+            var z = ret.zones[~~(Math.random()*ret.zones.length)];
+            var valid = true;
+            for (var j=0; j<i && valid; j++) {
+                if (Math.distVec2(z.p, ret.planets[j].p) < BSWG.map_minPlanetDist) {
+                    valid = false;
+                }
+            }
+            if (valid) {
+                ret.planets[i] = new Object();
+                ret.planets[i].zone = z;
+                ret.planets[i].p = z.p;
+                ret.planets[i].worldP = new b2Vec2(ret.planets[i].p.x * ret.gridSize, ret.planets[i].p.y * ret.gridSize);
+                break;
+            }
+        }
+        if (k >= 1000) {
+            numPlanets = i;
+            ret.planets.length = numPlanets;
         }
     }
 
