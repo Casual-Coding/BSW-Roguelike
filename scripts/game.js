@@ -95,7 +95,7 @@ BSWG.game = new function(){
                     x: BSWG.render.viewport.w*0.5, y: 145,
                     w: 800, h: 100,
                     vpXCenter: true,
-                    text: "r o u g e l i k e",
+                    text: "r o g u e l i k e",
                     color: [0.7, 0.2, 0.2, 1.0],
                     hoverColor: [0.7, 0.2, 0.2, 1.0],
                     click: function (me) {
