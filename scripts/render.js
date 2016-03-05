@@ -589,7 +589,7 @@ BSWG.render = new function() {
 
     };
 
-    this.make3DText = function(text, size, depth, clr, pos) {
+    this.make3DText = function(text, size, depth, clr, pos, lowDetial, fixedTScale) {
 
         var geom = new THREE.TextGeometry(
             text,
@@ -597,6 +597,7 @@ BSWG.render = new function() {
                 font:           this.font3D,
                 size:           4,
                 height:         (depth/size)*4,
+                curveSegments:  lowDetial ? 2 : 12,
                 bevelEnabled:   true,
                 bevelThickness: 4 * 0.05,
                 bevelSize:      4 * 0.05
@@ -685,7 +686,12 @@ BSWG.render = new function() {
                 this.mat.uniforms.light.value.y = lp.y;
                 this.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
 
-                this.mat.uniforms.extra.value.x = 1.0 * this.mesh.scale.z;
+                if (fixedTScale) {
+                    this.mat.uniforms.extra.value.x = fixedTScale;
+                }
+                else {
+                    this.mat.uniforms.extra.value.x = 1.0 * this.mesh.scale.z;
+                }
 
                 if (this.clr) {
                     this.mat.uniforms.clr.value.set(this.clr[0], this.clr[1], this.clr[2], this.clr[3]);

@@ -66,6 +66,11 @@ BSWG.game = new function(){
             this.stars = new BSWG.starfield();
         }
 
+        if (this.nebulas) {
+            this.nebulas.destroy();
+            this.nebulas = null;
+        }
+
         var self = this;
         Math.seedrandom();
 
@@ -147,6 +152,12 @@ BSWG.game = new function(){
                 break;
 
             case BSWG.SCENE_GAME1:
+
+                this.map = BSWG.genMap(128, 30, 8);
+                this.mapImage = BSWG.render.proceduralImage(this.map.size, this.map.size, function(ctx, w, h){
+                });
+                this.nebulas = new BSWG.nebulas(this.map);
+
             case BSWG.SCENE_GAME2:
                 this.editBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
@@ -191,7 +202,9 @@ BSWG.game = new function(){
                     }
                 });
 
-                BSWG.planets.add({});
+                if (scene === BSWG.SCENE_GAME2) {
+                    BSWG.planets.add({});
+                }
 
                 var count = scene === BSWG.SCENE_GAME1 ? 48 : 125+3;
 
@@ -535,6 +548,9 @@ BSWG.game = new function(){
             var viewport = BSWG.render.viewport;
 
             self.stars.render(ctx, self.cam, viewport);
+            if (self.nebulas) {
+                self.nebulas.render(ctx, self.cam, viewport);
+            }
             BSWG.componentList.render(ctx, self.cam, dt);
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
@@ -588,7 +604,72 @@ BSWG.game = new function(){
                     break;
             }
 
+            if (self.map) {
+                var zones = self.map.zones;
+                for (var i=0; i<zones.length; i++) {
+                    if (!zones[i].zoneTitle) {
+                        zones[i].zoneTitle = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                            x: viewport.w*0.5, y: 160,
+                            w: 800, h: 100,
+                            vpXCenter: true,
+                            text: zones[i].name,
+                            color: [1, 1, 1.5, 0],
+                            hoverColor: [1, 1, 1.5, 0],
+                            lowDetail: true,
+                            click: function (me) {}
+                        });
+                        zones[i].zoneTitle.remove();
+                    }
+                }
+                self.inZone = self.map.getZone(self.ccblock.obj.body.GetWorldCenter());
+                if (self.lastZone !== self.inZone) {
+                    if (self.lastZone) {
+                        self.lastZone.zoneTitle.remove();
+                        self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
+                    }
+                    self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
+                    self.inZone.zoneTitle.add();
+                    self.lastZone = self.inZone;
+                    self.zoneChangeT = 6.0;
+
+                    self.inZone.discovered = true;
+                    var ctx2 = self.mapImage.getContext('2d');
+
+                    ctx2.globalAlpha = 1.0;
+                    self.map.renderZoneMap(ctx2, '#002', true, null, true);
+                    self.map.renderEdgeMap(ctx2, '#00f', true, null, true);
+
+                }
+                else {
+                    self.inZone.zoneTitle.hoverColor[3] = Math.min(self.zoneChangeT, 1.0);
+                    self.inZone.zoneTitle.textColor[3] = Math.min(self.zoneChangeT, 1.0);
+                    self.zoneChangeT -= dt;
+                    if (self.zoneChangeT < 0.0) {
+                        self.zoneChangeT = 0.0;
+                    }
+                }
+            }
+
             BSWG.ui.render(ctx, viewport);
+
+            if (self.mapImage) {
+                ctx.fillStyle = '#000';
+                ctx.strokeStyle = '#88f';
+                ctx.fillRect(9, viewport.h - 11 - 128, 128+2, 128+2);
+                ctx.strokeRect(9, viewport.h - 11 - 128, 128+2, 128+2);
+                ctx.drawImage(self.mapImage, 0, 0, self.map.size, self.map.size, 10, viewport.h - 10 - 128, 128, 128);
+                var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(10 + p.x/self.map.size * 128-1, viewport.h - 10 - 128 + p.y/self.map.size * 128-1, 3, 3);
+
+                if (self.inZone) {
+                    ctx.fillStyle = '#88f';
+                    ctx.strokeStyle = '#226';
+                    ctx.font = '24px Orbitron';
+                    ctx.textAlign = 'left';
+                    ctx.fillTextB(self.inZone.name, 10 + 128 + 10, viewport.h - 10);
+                }
+            }
 
             if (self.switchScene) {
 

@@ -1,5 +1,7 @@
 // BSWR - Command Center component
 
+BSWG.uberFastCC = true;
+
 BSWG.component_CommandCenter = {
 
     type: 'cc',
@@ -115,6 +117,11 @@ BSWG.component_CommandCenter = {
 
         if (keys[BSWG.KEY.UP]) accel -= 1;
         if (keys[BSWG.KEY.DOWN]) accel += 1;
+
+        if (BSWG.uberFastCC) {
+            rot *= 2.0;
+            accel *= 10.0;
+        }
 
         if (rot) {
             this.obj.body.SetAwake(true);

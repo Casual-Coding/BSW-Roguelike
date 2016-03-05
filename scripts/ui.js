@@ -159,10 +159,13 @@ BSWG.ui_3dSizeH = function(sz, p, z) {
 
 BSWG.control_3DTextButton = {
 
+    noEat: true,
+
     init: function (args) {
 
         this.textColor = args.color || [0.5, 0.5, 0.5, 1.0];
         this.hoverColor = args.hoverColor || [0.7, 0.7, 0.7, 1.0];
+        this.lowDetail = args.lowDetail || false;
         this.xCentered = true;
 
         var H = BSWG.ui_3dSizeH(this.h, this.p);
@@ -172,7 +175,9 @@ BSWG.control_3DTextButton = {
                 H,
                 H * 0.5,
                 this.textColor,
-                BSWG.ui_3dScreen(this.p)
+                BSWG.ui_3dScreen(this.p),
+                this.lowDetail,
+                0.35
             );
         }
 
@@ -310,7 +315,13 @@ BSWG.uiControl = function (desc, args) {
 
     };
 
-    BSWG.ui.add(this);
+    this.add = function () {
+
+        BSWG.ui.add(this);
+
+    };
+
+    this.add();
 
     this._update = function () {
 
@@ -337,7 +348,7 @@ BSWG.uiControl = function (desc, args) {
 
         this.update();
 
-        if (this.mouseIn) {
+        if (this.mouseIn && !this.noEat) {
             BSWG.input.EAT_MOUSE('left');
             BSWG.input.EAT_MOUSE('right');
             BSWG.input.EAT_MOUSE('middle');
