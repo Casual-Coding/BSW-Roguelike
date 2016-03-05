@@ -441,7 +441,7 @@ BSWG.game = new function(){
                     var p = self.ccblock.obj.body.GetWorldCenter().clone();
                     p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
                     p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
-                    self.cam.panTo(dt*8.0, Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
+                    self.cam.panTo(dt*8.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
                     break;
 
                 default:
