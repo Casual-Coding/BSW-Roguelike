@@ -80,6 +80,10 @@ BSWG.genMap = function(size, numZones, numPlanets) {
         }
     }
 
+    if (!ret.planets[0] && !ret.planets[1]) {
+        return BSWG.mapGen(size, numZones, numPlanets);
+    }
+
     for (var i=2; i<numPlanets; i++) {
         var k;
         for (k=0; k<1000; k++) {
