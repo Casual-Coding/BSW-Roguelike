@@ -53,7 +53,11 @@ BSWG.randomName = new function() {
         '',
         'ia',
         'inus',
-        'us'
+        'us',
+        'ix',
+        'ek',
+        'ok',
+        'uk'
     ];
 
     var end2 = [

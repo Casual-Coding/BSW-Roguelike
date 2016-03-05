@@ -1,6 +1,6 @@
 // BSWR - Command Center component
 
-BSWG.uberFastCC = true;
+BSWG.uberFastCC = false;
 
 BSWG.component_CommandCenter = {
 
@@ -121,6 +121,9 @@ BSWG.component_CommandCenter = {
         if (BSWG.uberFastCC) {
             rot *= 2.0;
             accel *= 10.0;
+        }
+        else {
+            accel *= 2.5;
         }
 
         if (rot) {

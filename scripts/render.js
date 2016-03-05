@@ -388,7 +388,7 @@ BSWG.render = new function() {
             var frameTime = Date.timeStamp();
             self.dt = frameTime - self.lastFrameTime;
             self.lastFrameTime = frameTime;
-            self.dt = Math.clamp(self.dt, 1.0/60.0, 1.0/10.0);
+            self.dt = self.dt * 0.5 + Math.clamp(self.dt, 1.0/60.0, 1.0/10.0) * 0.5;
             self.time += self.dt;
 
             self.sizeViewport();
