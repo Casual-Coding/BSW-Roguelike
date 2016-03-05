@@ -514,7 +514,7 @@ BSWG.componentList = new function () {
             this.mouseOver = this.atPoint(pw);
         }
         if (this.mouseOver && BSWG.componentHoverFn(this.mouseOver)) {
-            if (this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.game.editMode) {
+            if (this.mouseOver.hasConfig && this.mouseOver.onCC && BSWG.game.editMode) {
                 BSWG.render.setCustomCursor(true, 3);
             }
             else {

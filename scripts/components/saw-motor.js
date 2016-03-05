@@ -4,7 +4,7 @@ BSWG.component_SawMotor = {
 
     type: 'sawmotor',
 
-    sortOrder: 1,
+    sortOrder: 2,
 
     hasConfig: true,
 
