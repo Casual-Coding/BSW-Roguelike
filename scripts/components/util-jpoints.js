@@ -114,6 +114,7 @@ BSWG.jpointRenderer = new function() {
                     if (!BSWG.game.editMode && !comp.welds[j]) {
                         continue;
                     }
+                    var detacher = comp.jpoints[j].detacher || false;
 
                     var r = map[j]?(comp.jmhover===j?160:110):80;
                     if (comp.welds[j] && comp.jmhover !== j) {
@@ -128,7 +129,12 @@ BSWG.jpointRenderer = new function() {
                             clr.set(1.0, 0.1, 0.1, 1.0);
                         }
                         else {
-                            clr.set(0.75, 0.75, 1.0, 1.0);
+                            if (detacher) {
+                                clr.set(0.5, 0.5, 1.0, 1.0);
+                            }
+                            else {
+                                clr.set(0.75, 0.75, 1.0, 1.0);
+                            }
                         }
                     }
                     else {
@@ -144,7 +150,12 @@ BSWG.jpointRenderer = new function() {
                             }
                         }
                         else {
-                            clr.set(0.8, 0.8, 0.8, 1.0);
+                            if (detacher) {
+                                clr.set(0.2, 0.2, 1.0, 1.0);
+                            }
+                            else {
+                                clr.set(0.8, 0.8, 0.8, 1.0);
+                            }
                         }
                     }
 

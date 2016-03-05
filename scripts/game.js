@@ -193,7 +193,7 @@ BSWG.game = new function(){
 
                 BSWG.planets.add({});
 
-                var count = scene === BSWG.SCENE_GAME1 ? 48 : 125;
+                var count = scene === BSWG.SCENE_GAME1 ? 48 : 125+3;
 
                 var pastPositions = [ new b2Vec2(0, 0) ];
                 for (var i=0; i<count; i++) {
@@ -313,7 +313,16 @@ BSWG.game = new function(){
                         }
                     }
                     else {
-                        if (i<8)
+                        if (i<(6)) {
+                            new BSWG.component(BSWG.component_DetacherLauncher, {
+
+                                pos: p,
+                                angle: Math.random()*Math.PI*2.0,
+                                size: (i%3) + 1,
+                                
+                            });   
+                        }
+                        else if (i<(8+6)) {
                             new BSWG.component(BSWG.component_HingeHalf, {
 
                                 pos: p,
@@ -322,7 +331,8 @@ BSWG.game = new function(){
                                 motor: Math.floor(i%2) === 0,
 
                             });
-                        else if (i<(8+12)) {
+                        }
+                        else if (i<(8+6+12)) {
                             new BSWG.component(BSWG.component_SawBlade, {
 
                                 pos: p,
@@ -331,7 +341,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+24)) {
+                        else if (i<(8+6+24)) {
                             new BSWG.component(BSWG.component_SawMotor, {
 
                                 pos: p,
@@ -340,7 +350,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+36)) {
+                        else if (i<(8+6+36)) {
                             new BSWG.component(BSWG.component_Spikes, {
 
                                 pos: p,
@@ -349,7 +359,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+48)) {
+                        else if (i<(8+6+48)) {
                             new BSWG.component(BSWG.component_ChainLink, {
 
                                 pos: p,

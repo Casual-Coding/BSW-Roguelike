@@ -30,8 +30,8 @@ void main() {
         gl_FragColor = vec4(clr.rgb*l, 1.0);
     }
     else {
-        float al = (sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5) * extra.y;
-        gl_FragColor = vec4(clr.rgb*vec3(al*1.0+(1.0-al), 0.25*al+(1.0-al), 0.25*al+(1.0-al))*l, 1.0);
+        float al = (sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5) * extra.y * 0.5;
+        gl_FragColor = vec4(clr.rgb*vec3(al*1.0+(1.0-al), al*0.5+(1.0-al), 0.25*al+(1.0-al))*l, 1.0);
     }
 
 }

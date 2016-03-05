@@ -21,6 +21,7 @@ var BSWG = new function(){
         'components/saw-motor.js',
         'components/spikes.js',
         'components/thruster.js',
+        'components/detacher-launcher.js',
         'components/util-jpoints.js',
         'components/util-render.js'
     ];
