@@ -22,12 +22,12 @@ BSWG.randomName = new function() {
     ];
 
     var prefix = [
-        '*v*',
-        '*k*',
-        '*r*',
-        '_r*',
-        '_*',
-        '_*',
+        '*v*_',
+        '*k*_',
+        '*r*_',
+        '_r*_',
+        '_*_',
+        '_*_',
         '_r*t',
         '_*t',
         '_*te',
@@ -37,7 +37,9 @@ BSWG.randomName = new function() {
         '_*nus',
         '_*nis',
         '_r*vok',
-        '_l*vol'
+        '_l*vol',
+        'di_',
+        'tri_'
     ];
 
     var middle = [

@@ -130,12 +130,12 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 colors = [
                     new THREE.Vector4(0.11*2.25, 0.11*2.25, 0.11*2.25, 1.0),
                     new THREE.Vector4(0.15*2.25, 0.15*2.25, 0.15*2.25, 1.0),
-                    new THREE.Vector4(0.17*2.25, 0.17*2.25, 0.17*2.25, 1.0),
-                    new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.20*2.25, 1.0)
+                    new THREE.Vector4(0.31*2.25, 0.31*2.25, 0.31*2.25, 1.0),
+                    new THREE.Vector4(0.35*2.25, 0.35*2.25, 0.35*2.25, 1.0)
                 ];
                 hasRing = false;
                 if (obj.radius === -1) {
-                    obj.radius = 10 + 5 * Math.random();
+                    obj.radius = 15 + 5 * Math.random();
                 }
                 break;
 
@@ -171,6 +171,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 break;
         }
 
+        obj.radius *= 1.35;
         obj.pos.z -= 45 * 2.5;
 
         if (colors2) {

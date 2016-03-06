@@ -160,6 +160,7 @@ BSWG.game = new function(){
             case BSWG.SCENE_GAME1:
 
                 this.map = BSWG.genMap(128, 30, 8);
+                Math.seedrandom();
                 for (var i=0; i<this.map.planets.length; i++) {
                     var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE()});
                     this.map.planets[i].pobj = planet;
