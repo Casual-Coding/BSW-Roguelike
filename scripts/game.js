@@ -2,6 +2,7 @@ BSWG.grabSlowdownDist      = 0.5;
 BSWG.grabSlowdownDistStart = 3.0;
 BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
+BSWG.camVelLookBfr         = 0.1; // * viewport.w
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -423,7 +424,7 @@ BSWG.game = new function(){
 
                 self.cam.x = startPos.x;
                 self.cam.y = startPos.y;
-
+                BSWG.render.updateCam3D(self.cam);
                 break;
 
             default:
@@ -447,6 +448,9 @@ BSWG.game = new function(){
         BSWG.input.emulateMouseWheel([BSWG.KEY['-'], BSWG.KEY['NUMPAD -']], [BSWG.KEY['='], BSWG.KEY['NUMPAD +']], 2);
 
         BSWG.render.startRenderer(function(dt, time){
+
+            var ctx = BSWG.render.ctx;
+            var viewport = BSWG.render.viewport;
             
             document.title = "BSWR - " + Math.floor(1/BSWG.render.actualDt) + " fps";
 
@@ -470,9 +474,21 @@ BSWG.game = new function(){
                     var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                     var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
                     self.cam.zoomTo(dt*2.5, toZ);
+                    var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
                     var p = self.ccblock.obj.body.GetWorldCenter().clone();
                     p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
                     p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
+
+                    var bfr = BSWG.camVelLookBfr * viewport.w;
+                    var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
+                    var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
+                    var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
+                    var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
+                    var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
+
+                    p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
+                    p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
+
                     self.cam.panTo(dt*8.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
                     break;
 
@@ -552,9 +568,6 @@ BSWG.game = new function(){
                 default:
                     break;
             }
-
-            var ctx = BSWG.render.ctx;
-            var viewport = BSWG.render.viewport;
 
             self.stars.render(ctx, self.cam, viewport);
             if (self.nebulas) {

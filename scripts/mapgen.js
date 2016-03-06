@@ -3,7 +3,7 @@ BSWG.map_minZoneEdgeDist = 10; // Minimum distance allowed from a zone center to
 BSWG.map_gridSize        = 50.0;
 BSWG.map_flPlanetDist    = 0.9; // * size
 BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
-BSWG.map_planetSafeDist  = 5.0; // Size of zone surrounding planet
+BSWG.map_planetSafeDist  = 6.5; // Size of zone surrounding planet
 
 BSWG.genMap = function(size, numZones, numPlanets) {
 

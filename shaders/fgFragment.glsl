@@ -42,4 +42,8 @@ void main() {
     vec4 clr = sampleNebulas(p);
     gl_FragColor = clamp(vec4(pow(clr.r, 3.0), pow(clr.r, 3.0), clr.r, clr.a), 0.0, 1.0);
 
+    if (gl_FragColor.a < 0.001) {
+        discard;
+    }
+
 }
