@@ -121,7 +121,7 @@ BSWG.randomName = new function() {
         return false;
     };
 
-    this.get = function(minLen, maxLen) {
+    var generate = function(minLen, maxLen) {
 
         minLen = minLen || 9;
         maxLen = maxLen || 13;
@@ -147,7 +147,7 @@ BSWG.randomName = new function() {
 
         for (var i=0; i<dictionary.length; i++) {
             if (dictionary[i].length > 2 && ret.indexOf(dictionary[i]) === 0) {
-                return this.get();
+                return generate();
             }
         }
 
@@ -159,9 +159,28 @@ BSWG.randomName = new function() {
         }
 
         if (ret.length > maxLen || ret.length < minLen) {
-            return this.get();
+            return generate();
         }
 
+        return ret;
+    };
+
+    this.list = [];
+    var map = {};
+
+    for (var i=0; i<512; i++) {
+        var name = generate();
+        if (map[name]) {
+            continue;
+        }
+        map[name] = true;
+        this.list.push(name);
+    }
+
+    this.idx = 0;
+    this.get = function() {
+        var ret = this.list[this.idx % this.list.length];
+        this.idx += 1;
         return ret;
     };
 
