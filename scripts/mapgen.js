@@ -85,7 +85,7 @@ BSWG.genMap = function(size, numZones, numPlanets) {
     }
 
     if (!found) {
-        return BSWG.mapGen(size, numZones, numPlanets);
+        return BSWG.genMap(size, numZones, numPlanets);
     }
 
     for (var i=2; i<numPlanets; i++) {

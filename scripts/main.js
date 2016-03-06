@@ -75,7 +75,8 @@ var BSWG = new function(){
             'bgVertex',
             'jpointsVertex',
             'expVertex',
-            'planetVertex'
+            'planetVertex',
+            'pRangeVertex'
         ],
         'fragment': [
             'basicFragment',
@@ -89,6 +90,7 @@ var BSWG = new function(){
             'expFragment',
             'planetFragment',
             'planetRingFragment',
+            'pRangeFragment',
             'textFragment'
         ]
     };

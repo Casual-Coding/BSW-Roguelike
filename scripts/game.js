@@ -161,9 +161,11 @@ BSWG.game = new function(){
 
                 this.map = BSWG.genMap(128, 30, 8);
                 for (var i=0; i<this.map.planets.length; i++) {
-                    BSWG.planets.add({pos: this.map.planets[i].worldP.THREE()});   
+                    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE()});
+                    this.map.planets[i].pobj = planet;
                 }
                 startPos = this.map.planets[0].worldP.clone();
+                this.map.planets[0].pobj.capture();
                 this.mapImage = BSWG.render.proceduralImage(this.map.size, this.map.size, function(ctx, w, h){
                 });
                 this.nebulas = new BSWG.nebulas(this.map);
@@ -211,6 +213,27 @@ BSWG.game = new function(){
                         self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
                     }
                 });
+
+                this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
+                    x: 10 + 150 + 10 + 150 + 10, y: 10,
+                    w: 110, h: 50,
+                    text: "Save",
+                    selected: false,
+                    click: function (me) {
+                    }
+                });
+                this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
+                    x: 10, y: 10,
+                    w: 110, h: 50,
+                    text: "Repair",
+                    selected: false,
+                    click: function (me) {
+                    }
+                });
+
+                this.saveBtn.remove();
+                this.healBtn.remove();
+                this.saveHealAdded = false;
 
                 if (scene === BSWG.SCENE_GAME2) {
                     BSWG.planets.add({});
@@ -629,6 +652,23 @@ BSWG.game = new function(){
                     break;
             }
 
+            if (self.ccblock && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter())) {
+                if (!self.saveHealAdded) {
+                    self.saveBtn.add();
+                    self.healBtn.add();
+                    self.saveHealAdded = true;
+                }
+                self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
+                self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
+            }
+            else {
+                if (self.saveHealAdded) {
+                    self.saveBtn.remove();
+                    self.healBtn.remove();
+                    self.saveHealAdded = false;
+                }
+            }
+
             if (self.map) {
                 var zones = self.map.zones;
                 for (var i=0; i<zones.length; i++) {
@@ -643,17 +683,17 @@ BSWG.game = new function(){
                             lowDetail: true,
                             click: function (me) {}
                         });
-                        zones[i].zoneTitle.remove();
+                        //zones[i].zoneTitle.remove();
                     }
                 }
                 self.inZone = self.map.getZone(self.ccblock.obj.body.GetWorldCenter());
                 if (self.lastZone !== self.inZone) {
                     if (self.lastZone) {
-                        self.lastZone.zoneTitle.remove();
+                        //self.lastZone.zoneTitle.remove();
                         self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
                     }
                     self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
-                    self.inZone.zoneTitle.add();
+                    //self.inZone.zoneTitle.add();
                     self.lastZone = self.inZone;
                     self.zoneChangeT = 6.0;
 
@@ -679,6 +719,7 @@ BSWG.game = new function(){
                     self.zoneChangeT -= dt;
                     if (self.zoneChangeT < 0.0) {
                         self.zoneChangeT = 0.0;
+                        //self.inZone.zoneTitle.remove();
                     }
                 }
             }

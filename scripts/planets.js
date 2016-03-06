@@ -1,3 +1,5 @@
+BSWG.planet_OwnRange = 30.0;
+
 BSWG.planet_SurfaceDetail = 4;
 BSWG.planet_CloudDetail = 3;
 
@@ -38,13 +40,13 @@ BSWG.planets = new function(surfaceRes, cloudRes){
     this.add = function(def) {
 
         var defaults = {
-            pos:    new THREE.Vector3(0., 0., 0.),
-            rot:    Math.random() * Math.PI/120 + Math.PI/120,
-            rotD:   Math.random()*Math.PI,
-            rotVec: new THREE.Vector3(Math.random()+.5, Math.random()+.5, Math.random()),
-            radius: -1,
-            type:   -1,
-            seed:   Date.timeStamp(),
+            pos:       new THREE.Vector3(0., 0., 0.),
+            rot:       Math.random() * Math.PI/120 + Math.PI/120,
+            rotD:      Math.random()*Math.PI,
+            rotVec:    new THREE.Vector3(Math.random()+.5, Math.random()+.5, Math.random()),
+            radius:    -1,
+            type:      -1,
+            seed:      Date.timeStamp(),
             ringScale: -1
         };
 
@@ -433,7 +435,56 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
                 self.matr.needsUpdate = true;
             }
+
+            if (self.meshc) {
+                self.matc.uniforms.clr.value.w += (0.3 - self.matc.uniforms.clr.value.w) * (dt/4.0);
+                self.matc.needsUpdate = true;
+                self.meshc.position.set(self.pos.x, self.pos.y, 0.0);
+                self.meshc.updateMatrix();
+            }
         };
+
+        obj.capture = function(instant) {
+
+            if (this.meshc) {
+                return;
+            }
+
+            this.captured = true;
+
+            this.matc = BSWG.render.newMaterial("pRangeVertex", "pRangeFragment", {
+                clr: {
+                    type: 'v4',
+                    value: new THREE.Vector4(0.3, 1.0, 0.3, instant ? 0.3 : 0.0)
+                }
+            }, THREE.NormalBlending, THREE.DoubleSide);
+
+            var count = 64;
+            this.geomc = new THREE.Geometry();
+            this.geomc.vertices.length = count + 1;
+            this.geomc.vertices[0] = new THREE.Vector3(0, 0, -200);
+            for (var i=0; i<count; i++) {
+                var a = (i/count) * Math.PI * 2.0;
+                obj.geomc.vertices[i+1] = new THREE.Vector3(Math.cos(a), Math.sin(a), 0.0);
+            }
+            this.geomc.faces.length = count;
+            for (var i=0; i<count; i++) {
+                this.geomc.faces[i] = new THREE.Face3(1+i, 1+((i+1)%count), 0);
+            }
+
+            this.geomc.computeFaceNormals();
+            //obj.geomc.computeVertexNormals();
+            this.geomc.computeBoundingBox();
+
+            this.meshc = new THREE.Mesh( this.geomc, this.matc );
+            this.meshc.scale.set(BSWG.planet_OwnRange, BSWG.planet_OwnRange, 1.0);
+            this.meshc.updateMatrix();
+
+            this.matc.needsUpdate = true;
+            this.meshc.needsUpdate = true;
+
+            BSWG.render.scene.add( obj.meshc );
+        }
 
         obj.destroy = function() {
 
@@ -460,6 +511,16 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 self.geomr = null;
             }
 
+            if (self.meshc) {
+                self.meshc.geometry.dispose();
+                self.meshc.material.dispose();
+                self.meshc.geometry = null;
+                self.meshc.material = null;
+                self.meshc = null;
+                self.matc = null;
+                self.geomc = null;
+            }
+
             var pl = BSWG.planets.planets;
             for (var i=0; i<pl.length; i++) {
                 if (pl[i] === self) {
@@ -479,6 +540,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         this.planets.push(obj);
 
+        return obj;
+
     };
 
     this.render = function(dt) {
@@ -487,6 +550,20 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             var PL = this.planets[i];
             PL.update(dt);
         }
+
+    };
+
+    this.inzone = function(p) {
+
+        for (var i=0; i<this.planets.length; i++) {
+            var PL = this.planets[i];
+            if (PL.captured) {
+                if (Math.distVec2(new b2Vec2(PL.pos.x, PL.pos.y), p) < BSWG.planet_OwnRange) {
+                    return true;
+                }
+            }
+        }
+        return false;
 
     };
 
