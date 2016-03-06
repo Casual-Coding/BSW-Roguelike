@@ -492,6 +492,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             if (self.meshr) {
                 BSWG.render.scene.remove( self.meshr );
             }
+            if (self.meshc) {
+                BSWG.render.scene.remove( self.meshc );
+            }
 
             self.mesh.geometry.dispose();
             self.mesh.material.dispose();

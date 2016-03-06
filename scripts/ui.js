@@ -211,6 +211,10 @@ BSWG.control_3DTextButton = {
 
     destroy: function () {
         if (this.textObj) {
+            if (this.added) {
+                BSWG.render.scene.remove(this.textObj.mesh);
+                this.added = false;
+            }
             this.textObj.destroy();
             this.textObj = null;
         }
