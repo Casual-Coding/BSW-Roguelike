@@ -45,6 +45,8 @@ BSWG.game = new function(){
 
     };
 
+    var wheelStart = 0;
+
     this.initScene = function (scene, args)
     {
         // Init game state
@@ -79,6 +81,9 @@ BSWG.game = new function(){
         Math.seedrandom();
 
         var startPos = new b2Vec2(0, 0);
+
+        wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
+        BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
 
         switch (scene) {
             case BSWG.SCENE_TITLE:
@@ -465,9 +470,6 @@ BSWG.game = new function(){
     this.start = function ()
     {
         var self = this;
-
-        var wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
-        BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
 
         var grabbedBlock = null;
         var grabbedLocal = null;

@@ -45,7 +45,7 @@ BSWG.component_DetacherLauncher = {
         ];
         
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
-        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: arrowVerts}, 0.7, null, 0.3);
+        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: arrowVerts}, 0.7, Math.polyCentroid(arrowVerts), 0.3);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
     },
@@ -109,7 +109,7 @@ BSWG.component_DetacherLauncher = {
             v.y -= Math.sin(a) * 6;
             p = BSWG.physics.localToWorld(p, this.obj.body);
 
-            var T = Math.min(this.fireT, 0.3);
+            var T = Math.clamp(this.fireT - 6, 0.0, 0.3);
 
             BSWG.render.boom.palette = chadaboom3D.blue_bright;
             BSWG.render.boom.add(
@@ -121,11 +121,13 @@ BSWG.component_DetacherLauncher = {
                 v.THREE(Math.random()*2.0)
             );
 
-            var a = this.obj.body.GetAngle() + Math.PI;
-            var accel = 20.0 * this.size;
-            this.obj.body.SetAwake(true);
-            var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
-            this.obj.body.ApplyForceToCenter(force);
+            if (T > 0.01) {
+                var a = this.obj.body.GetAngle() + Math.PI;
+                var accel = 20.0 * [1,3,7][this.size-1];
+                this.obj.body.SetAwake(true);
+                var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
+                this.obj.body.ApplyForceToCenter(force);
+            }
 
             this.fireT -= dt;
 
@@ -144,7 +146,7 @@ BSWG.component_DetacherLauncher = {
                 }
             }
 
-            this.fireT = 2.0;
+            this.fireT = 8.0;
             for (var i=-10; i<=10; i++) {
                 var p = Math.rotVec2(new b2Vec2(0.4*this.size, 0.0));
                 var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
