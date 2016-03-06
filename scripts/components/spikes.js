@@ -12,6 +12,11 @@ BSWG.component_Spikes = {
         this.size      = args.size || 1;
         this.nteeth    = [6, 6, 8][this.size-1];
         this.toothSize = [0.8, 1.6, 2.8][this.size-1];
+        this.pike      = args.pike || false;
+
+        if (this.pike) {
+            this.toothSize *= 2.0;
+        }
 
         var friction = [ 0.25 ];
         var wheelVerts = new Array(this.nteeth);
@@ -22,17 +27,32 @@ BSWG.component_Spikes = {
             );
         }
 
-        var verts = new Array(this.nteeth-2);
+        var verts = new Array(this.pike ? 2 : this.nteeth-2);
         verts[0] = wheelVerts;
-        for (var i=1; i<(this.nteeth-2); i++) {
+        if (this.pike) {
             var tverts = new Array(3);
-            var ac = (i+0.5)/this.nteeth * Math.PI;
-            var j = (i+1) % this.nteeth;
-            tverts[0] = new b2Vec2(wheelVerts[i].x, wheelVerts[i].y);
+            var p1 = wheelVerts[wheelVerts.length-1], p2 = wheelVerts[0];
+            var dx = p2.x - p1.x, dy = p2.y - p1.y;
+            var ac = Math.atan2(dx, -dy);
+            var a1 = ac - Math.PI*0.2;
+            var a2 = ac + Math.PI*0.2;
+            tverts[0] = new b2Vec2(Math.cos(a1) * this.size * 0.20, Math.sin(a1) * this.size * 0.20);
             tverts[1] = new b2Vec2(Math.cos(ac) * (this.size+this.toothSize) * 0.40, Math.sin(ac) * (this.size+this.toothSize) * 0.40);
-            tverts[2] = new b2Vec2(wheelVerts[j].x, wheelVerts[j].y);
-            verts[i] = tverts;
+            tverts[2] = new b2Vec2(Math.cos(a2) * this.size * 0.20, Math.sin(a2) * this.size * 0.20);
+            verts[1] = tverts;
             friction.push(0.75);
+        }
+        else {
+            for (var i=1; i<(this.nteeth-2); i++) {
+                var tverts = new Array(3);
+                var ac = (i+0.5)/this.nteeth * Math.PI;
+                var j = (i+1) % this.nteeth;
+                tverts[0] = new b2Vec2(wheelVerts[i].x, wheelVerts[i].y);
+                tverts[1] = new b2Vec2(Math.cos(ac) * (this.size+this.toothSize) * 0.40, Math.sin(ac) * (this.size+this.toothSize) * 0.40);
+                tverts[2] = new b2Vec2(wheelVerts[j].x, wheelVerts[j].y);
+                verts[i] = tverts;
+                friction.push(0.75);
+            }
         }
 
         this.obj = BSWG.physics.createObject('multipoly', args.pos, args.angle || 0, {
@@ -43,8 +63,8 @@ BSWG.component_Spikes = {
 
         this.jpoints = BSWG.createPolyJPoints([wheelVerts[wheelVerts.length-1], wheelVerts[0]], [1], false);
 
-        this.meshObjs = new Array(this.nteeth-2);
-        this.selMeshObjs = new Array(this.nteeth-2);
+        this.meshObjs = new Array(verts.length);
+        this.selMeshObjs = new Array(verts.length);
 
         for (var i=0; i<this.obj.verts.length; i++) {
             var tmpObj = {

@@ -240,7 +240,7 @@ BSWG.game = new function(){
                     BSWG.planets.add({});
                 }
 
-                var count = scene === BSWG.SCENE_GAME1 ? 48 : 125+3;
+                var count = scene === BSWG.SCENE_GAME1 ? 44 : 125+3;
 
                 var pastPositions = [ new b2Vec2(0, 0) ];
                 for (var i=0; i<count; i++) {
@@ -282,16 +282,17 @@ BSWG.game = new function(){
                                 motor: Math.floor(i%2) === 0,
 
                             });
-                        else if (i<(8+4)) {
+                        else if (i<(4+4)) {
                             new BSWG.component(BSWG.component_Spikes, {
 
                                 pos: p,
                                 angle: Math.random()*Math.PI*2.0,
-                                size: Math.floor(i%2)+1
+                                size: Math.floor(i%2)+1,
+                                pike: true
 
                             });
                         }
-                        else if (i<(8+4+6)) {
+                        else if (i<(4+4+6)) {
                             new BSWG.component(BSWG.component_Thruster, {
 
                                 pos: p,
@@ -299,7 +300,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+4+6+3)) {
+                        else if (i<(4+4+6+3)) {
                             new BSWG.component(BSWG.component_Blaster, {
 
                                 pos: p,
@@ -308,7 +309,7 @@ BSWG.game = new function(){
                             });
                         }
                         else {
-                            var k = (i - (8+4+6+3)) % 14;
+                            var k = (i - (4+4+6+3)) % 14;
                             switch (k) {
                                 case 0:
                                 case 1:
@@ -402,7 +403,8 @@ BSWG.game = new function(){
 
                                 pos: p,
                                 angle: Math.random()*Math.PI*2.0,
-                                size: Math.floor(i%3)+1
+                                size: Math.floor(i%3)+1,
+                                pike: (i%2) ? true : false
 
                             });
                         }
