@@ -58,6 +58,9 @@ BSWG.game = new function(){
         BSWG.planets.init();
         BSWG.ui.clear();
 
+        this.map = null;
+        this.mapImage = null;
+        this.ccblock = null;
         this.cam = new BSWG.camera();
         BSWG.render.updateCam3D(this.cam);
         this.editMode = false;
@@ -716,12 +719,14 @@ BSWG.game = new function(){
                         ctx.textAlign = 'left';
                         ctx.fillStyle = '#77d';
                         ctx.fillTextB('Loading ...', 48, viewport.h - 48, true);
+                        BSWG.render.setCustomCursor(false);
                         t = 0.0;
                     }
                 }
                 else if (ss.newScene !== null) {
 
                     self.initScene(ss.newScene, ss.newArgs);
+                    BSWG.render.setCustomCursor(true);
                     ss.newScene = null
                     t = 1.0;
                 }
