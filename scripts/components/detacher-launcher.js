@@ -111,17 +111,16 @@ BSWG.component_DetacherLauncher = {
 
             var T = Math.clamp(this.fireT - 6, 0.0, 0.3);
 
-            BSWG.render.boom.palette = chadaboom3D.blue_bright;
-            BSWG.render.boom.add(
-                p.particleWrap(0.025),
-                1.0*T*5.0*this.size,
-                32,
-                0.3*T*5.0,
-                4.0,
-                v.THREE(Math.random()*2.0)
-            );
-
             if (T > 0.01) {
+                BSWG.render.boom.palette = chadaboom3D.blue_bright;
+                BSWG.render.boom.add(
+                    p.particleWrap(0.025),
+                    1.0*T*5.0*this.size,
+                    32,
+                    0.3*T*5.0,
+                    4.0,
+                    v.THREE(Math.random()*2.0)
+                );
                 var a = this.obj.body.GetAngle() + Math.PI;
                 var accel = 20.0 * [1,3,7][this.size-1];
                 this.obj.body.SetAwake(true);
