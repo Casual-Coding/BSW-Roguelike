@@ -86,8 +86,8 @@ BSWG.game = new function(){
                     w: 800, h: 100,
                     vpXCenter: true,
                     text: "BlockShip Wars",
-                    color: [0.75, 0.75, 0.75, 1],
-                    hoverColor: [0.75, 0.75, 0.75, 1],
+                    color: [0.85, 0.85, 0.85, 1],
+                    hoverColor: [0.85, 0.85, 0.85, 1],
                     click: function (me) {
                     }
                 });
@@ -96,8 +96,8 @@ BSWG.game = new function(){
                     w: 800, h: 100,
                     vpXCenter: true,
                     text: "r o g u e l i k e",
-                    color: [0.7, 0.2, 0.2, 1.0],
-                    hoverColor: [0.7, 0.2, 0.2, 1.0],
+                    color: [0.4, 0.4, 0.85, 1.0],
+                    hoverColor: [0.4, 0.4, 0.85, 1.0],
                     click: function (me) {
                     }
                 });
@@ -107,7 +107,7 @@ BSWG.game = new function(){
                     w: 400, h: 70,
                     vpXCenter: true,
                     text: "New Game",
-                    color: [0.35, 0.75, 0.75, 1.0],
+                    color: [0.35, 0.6, 1., 1.0],
                     hoverColor: [0.95, 0.95, 0.95, 1.0],
                     click: function (me) {
                         self.changeScene(BSWG.SCENE_GAME1, {}, '#000', 0.75);
@@ -118,7 +118,7 @@ BSWG.game = new function(){
                     w: 400, h: 70,
                     vpXCenter: true,
                     text: "Sandbox",
-                    color: [0.35, 0.75, 0.75, 1.0],
+                    color: [0.35, 0.6, 1., 1.0],
                     hoverColor: [0.95, 0.95, 0.95, 1.0],
                     click: function (me) {
                         self.changeScene(BSWG.SCENE_GAME2, {}, '#000', 0.75);
@@ -129,7 +129,7 @@ BSWG.game = new function(){
                     w: 400, h: 70,
                     vpXCenter: true,
                     text: "Options",
-                    color: [0.35, 0.75, 0.75, 1.0],
+                    color: [0.35*0.75, 0.6*0.75, 1.*0.75, 1.0],
                     hoverColor: [0.3, 0.3, 0.3, 1.0],
                     click: function (me) {
                         //self.changeScene(BSWG.SCENE_GAME1, {}, '#fff');
@@ -701,7 +701,7 @@ BSWG.game = new function(){
                         ctx.fillRect(0, 0, viewport.w, viewport.h);
                         ctx.font = '48px Orbitron';
                         ctx.textAlign = 'left';
-                        ctx.fillStyle = '#7d7';
+                        ctx.fillStyle = '#77d';
                         ctx.fillTextB('Loading ...', 48, viewport.h - 48, true);
                         t = 0.0;
                     }

@@ -41,7 +41,7 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
     }
 
     var oAlpha = parseFloat(ctx.globalAlpha);
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#aaf';
 
     for (var i=0; i<len; i++) {
         var j = (i+1) % len;
@@ -54,8 +54,8 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
         ctx.globalAlpha = oAlpha * alpha * 0.6;
 
         var grad = ctx.createLinearGradient(a.x,a.y, c.x,c.y);
-        grad.addColorStop(0,"#fff");
-        grad.addColorStop(1,"#888");
+        grad.addColorStop(0,"#aaf");
+        grad.addColorStop(1,"#668");
 
         ctx.fillStyle = grad;
 
@@ -71,12 +71,12 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
     var grad = ctx.createLinearGradient(iverts[0].x,iverts[0].y, iverts[2].x, iverts[2].y);
     if (pressedIn) {
         grad.addColorStop(0,"#000");
-        grad.addColorStop(1,"#222");
+        grad.addColorStop(1,"#223");
     }
     else
     {
-        grad.addColorStop(0,"#fff");
-        grad.addColorStop(1,"#999");        
+        grad.addColorStop(0,"#aaf");
+        grad.addColorStop(1,"#779");        
     }
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -106,10 +106,10 @@ BSWG.control_Button = {
         }
 
         if (this.selected) {
-            ctx.fillStyle = 'rgba(70,70,70,1)';
+            ctx.fillStyle = 'rgba(60,60,100,1)';
         }
         else {
-            ctx.fillStyle = 'rgba(40,40,40,1)';
+            ctx.fillStyle = 'rgba(35,35,50,1)';
         }
             
         ctx.lineWidth = 2.0;
@@ -120,7 +120,7 @@ BSWG.control_Button = {
 
         ctx.textAlign = 'center';
         if (this.selected) {
-            ctx.fillStyle = '#aea';
+            ctx.fillStyle = '#ddf';
         }
         else {
             ctx.fillStyle = '#fff';

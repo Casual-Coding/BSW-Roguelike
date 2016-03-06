@@ -229,7 +229,7 @@ BSWG.render = new function() {
         this.ctx.clearRect(0, 0, this.viewport.w, this.viewport.h);
         this.ctx.font = '48px Orbitron';
         this.ctx.textAlign = 'left';
-        this.ctx.fillStyle = '#7d7';
+        this.ctx.fillStyle = '#77d';
         this.ctx.fillTextB('Loading ...', 48, this.viewport.h - 48, true);
 
         document.body.appendChild(this.canvas);
