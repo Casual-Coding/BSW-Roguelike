@@ -25,6 +25,8 @@ var BSWG = new function(){
         'components/spikes.js',
         'components/thruster.js',
         'components/detacher-launcher.js',
+        'components/missile-launcher.js',
+        'components/missile.js',
         'components/util-jpoints.js',
         'components/util-render.js'
     ];

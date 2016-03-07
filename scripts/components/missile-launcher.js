@@ -1,8 +1,8 @@
 // BSWR - Blaster component
 
-BSWG.component_Blaster = {
+BSWG.component_MissileLauncher = {
 
-    type: 'blaster',
+    type: 'missile-launcher',
 
     sortOrder: 2,
 
@@ -13,10 +13,10 @@ BSWG.component_Blaster = {
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = [
-            Math.rotVec2(new b2Vec2(-0.225,  -0.3), offsetAngle),
-            Math.rotVec2(new b2Vec2(-0.1,  1.0), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.1,  1.0), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.225,  -0.3), offsetAngle)
+            Math.rotVec2(new b2Vec2(-0.5,  -0.3), offsetAngle),
+            Math.rotVec2(new b2Vec2(-0.4,  0.85), offsetAngle),
+            Math.rotVec2(new b2Vec2( 0.4,  0.85), offsetAngle),
+            Math.rotVec2(new b2Vec2( 0.5,  -0.3), offsetAngle)
         ].reverse();
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
@@ -33,7 +33,7 @@ BSWG.component_Blaster = {
         this.thrustT = 0.0;
         this.kickBack = 0.0;
 
-        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, -0.25));
+        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, 0.6));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
@@ -52,13 +52,13 @@ BSWG.component_Blaster = {
 
         if (this.kickBack > 0.0) {
             BSWG.drawBlockPolyOffset = Math.rotVec2(new b2Vec2(0.0, -this.kickBack*0.2), this.obj.body.GetAngle());
-            this.kickBack *= 0.9;
+            this.kickBack *= 0.95;
         }
         else {
             this.kickBack = 0.0;
         }
 
-        this.meshObj.update([1.0, 0.6, 0.05, 1], 4, BSWG.compAnchored(this));
+        this.meshObj.update([1.0, 0.9, 0.6, 1], 4, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
         
         //BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
@@ -93,7 +93,7 @@ BSWG.component_Blaster = {
             x: p.x-150, y: p.y-25,
             w: 350, h: 50+32,
             key: this.fireKey,
-            title: 'Blaster fire',
+            title: 'Missile fire',
             close: function (key) {
                 if (key)
                     self.fireKey = key;
@@ -112,24 +112,29 @@ BSWG.component_Blaster = {
 
         if (keys[this.fireKey] && !this.fireT) {
 
-            var pl = new b2Vec2(0.0,  1.05);
+            var pl = new b2Vec2(0.0,  1.5);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
             var p = BSWG.physics.localToWorld([pl], this.obj.body);
-            p[0].x -= v.x*0.01;
-            p[0].y -= v.y*0.01;
 
-            BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0 + v.x, -Math.sin(a)*15.0 + v.y), v, this);
+            new BSWG.component(BSWG.component_Missile, {
+
+                pos: p[0],
+                angle: a,
+                vel: new b2Vec2(-Math.cos(a)*1.0 + v.x, -Math.sin(a)*1.0 + v.y)
+
+            });
+
             accel = 1;
 
-            this.fireT = 0.5;
-            this.kickBack = 1.0;
+            this.fireT = 1.5;
+            this.kickBack = 1.5;
         }
         
         if (accel)
         {
             var a = this.obj.body.GetAngle() + Math.PI/2.0;
-            accel *= -8.0;
+            accel *= -38.0;
             this.obj.body.SetAwake(true);
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);    

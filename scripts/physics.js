@@ -601,6 +601,8 @@ BSWG.physics = new function(){
                 bb.__lastVel.x = tb.x;
                 bb.__lastVel.y = tb.y;
             }
+            ba.__lastForce = 0;
+            bb.__lastForce = 0;
         }
     }
 
@@ -621,6 +623,11 @@ BSWG.physics = new function(){
         var forceA = (Math.lenVec2(ta) * ba.GetMass()) / self.lastDT;
         var forceB = (Math.lenVec2(tb) * bb.GetMass()) / self.lastDT;
         var tforce = forceA + forceB;
+
+        ba.__lastForce += forceA;
+        bb.__lastForce += forceB;
+        ba.__lastHit = bb;
+        bb.__lastHit = ba;
 
         if (tforce > 1.0) {
             var wm = new b2WorldManifold();

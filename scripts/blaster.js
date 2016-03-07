@@ -17,20 +17,23 @@ BSWG.blasterList = new function () {
 
             var comp = null;
             if (B.t <= 0.0 || (comp=BSWG.componentList.atPoint(B.p))) {
-                if (B.t > 0.0) {
-                    BSWG.render.boom.palette = chadaboom3D.blue_bright;
-                    BSWG.render.boom.add(
-                        new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
-                        2.2,
-                        32,
-                        1.0,
-                        1.5,
-                        comp.obj.body.GetLinearVelocity().clone().THREE(0.0)
-                    );
+                if (B.t <= 0.0 || comp !== B.source) {
+                    if (B.t > 0.0) {
+                        BSWG.render.boom.palette = chadaboom3D.blue_bright;
+                        BSWG.render.boom.add(
+                            new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
+                            2.2,
+                            32,
+                            1.0,
+                            1.5,
+                            comp.obj.body.GetLinearVelocity().clone().THREE(0.0)
+                        );
+                    }
+                    B.source = null;
+                    this.list.splice(i, 1);
+                    i -= 1;
+                    continue;
                 }
-                this.list.splice(i, 1);
-                i -= 1;
-                continue;
             }
 
             var t = Math.min(B.t * 4.0, 1.0);
@@ -60,7 +63,7 @@ BSWG.blasterList = new function () {
 
     };
 
-    this.add = function (p, v, baseV) {
+    this.add = function (p, v, baseV, source) {
 
         BSWG.render.boom.palette = chadaboom3D.fire;
         BSWG.render.boom.add(
@@ -76,7 +79,8 @@ BSWG.blasterList = new function () {
 
             p: p,
             v: v,
-            t: 2.0
+            t: 2.0,
+            source: source
 
         });
 

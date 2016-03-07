@@ -99,6 +99,10 @@ BSWG.component = function (desc, args) {
 
     this.init(args);
 
+    if (this.obj.body && args.vel) {
+        this.obj.body.SetLinearVelocity(args.vel.clone());
+    }
+
     if (this.jpoints && this.jpoints.length && this.obj) {
 
         for (var i=0; i<this.jpoints.length; i++) {

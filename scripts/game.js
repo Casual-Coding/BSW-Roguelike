@@ -245,7 +245,7 @@ BSWG.game = new function(){
                     BSWG.planets.add({});
                 }
 
-                var count = scene === BSWG.SCENE_GAME1 ? 44 : 125+3;
+                var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 125+3;
 
                 var pastPositions = [ new b2Vec2(0, 0) ];
                 for (var i=0; i<count; i++) {
@@ -314,7 +314,7 @@ BSWG.game = new function(){
                             });
                         }
                         else {
-                            var k = (i - (4+4+6+3)) % 14;
+                            var k = (i - (4+6+3+4)) % 14;
                             switch (k) {
                                 case 0:
                                 case 1:
@@ -428,13 +428,20 @@ BSWG.game = new function(){
                                 angle: Math.random()*Math.PI*2.0,
 
                             });
-                        else if (Math.random() < 1/6)
+                        else if (Math.random() < 1/7)
                             new BSWG.component(BSWG.component_Blaster, {
 
                                 pos: p,
                                 angle: Math.random()*Math.PI*2.0,
 
                             });
+                        else if (Math.random() < 1/8)
+                            new BSWG.component(BSWG.component_MissileLauncher, {
+
+                                pos: p,
+                                angle: Math.random()*Math.PI*2.0,
+
+                            });   
                         else
                             new BSWG.component(BSWG.component_Block, {
 
