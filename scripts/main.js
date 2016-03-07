@@ -10,6 +10,7 @@ var BSWG = new function(){
         'component.js',
         'ui.js',
         'blaster.js',
+        'laser.js',
         'background.js',
         'planets.js',
         'mapgen.js',
@@ -27,6 +28,7 @@ var BSWG = new function(){
         'components/detacher-launcher.js',
         'components/missile-launcher.js',
         'components/missile.js',
+        'components/laser.js',
         'components/util-jpoints.js',
         'components/util-render.js'
     ];
@@ -93,7 +95,8 @@ var BSWG = new function(){
             'planetFragment',
             'planetRingFragment',
             'pRangeFragment',
-            'textFragment'
+            'textFragment',
+            'laserFragment'
         ]
     };
 

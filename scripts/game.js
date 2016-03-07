@@ -57,6 +57,7 @@ BSWG.game = new function(){
         BSWG.physics.reset();
         BSWG.componentList.clear();
         BSWG.blasterList.clear();
+        BSWG.laserList.clear();
         BSWG.planets.init();
         BSWG.ui.clear();
 
@@ -138,7 +139,7 @@ BSWG.game = new function(){
                     w: 400, h: 70,
                     vpXCenter: true,
                     text: "Options",
-                    color: [0.35*0.75, 0.6*0.75, 1.*0.75, 1.0],
+                    color: [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0],
                     hoverColor: [0.3, 0.3, 0.3, 1.0],
                     click: function (me) {
                         //self.changeScene(BSWG.SCENE_GAME1, {}, '#fff');
@@ -313,6 +314,14 @@ BSWG.game = new function(){
 
                             });
                         }
+                        /*else if (i<(4+4+6+3+4)) {
+                            new BSWG.component(i%2 ? BSWG.component_Laser : BSWG.component_MissileLauncher, {
+
+                                pos: p,
+                                angle: Math.random()*Math.PI*2.0,
+
+                            });
+                        }*/
                         else {
                             var k = (i - (4+6+3+4)) % 14;
                             switch (k) {
@@ -385,7 +394,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+6+12)) {
+                        else if (i<(8+6+6)) {
                             new BSWG.component(BSWG.component_SawBlade, {
 
                                 pos: p,
@@ -394,7 +403,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+6+24)) {
+                        else if (i<(8+6+12)) {
                             new BSWG.component(BSWG.component_SawMotor, {
 
                                 pos: p,
@@ -403,7 +412,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+6+36)) {
+                        else if (i<(8+6+36-12)) {
                             new BSWG.component(BSWG.component_Spikes, {
 
                                 pos: p,
@@ -413,7 +422,7 @@ BSWG.game = new function(){
 
                             });
                         }
-                        else if (i<(8+6+48)) {
+                        else if (i<(8+6+48-12)) {
                             new BSWG.component(BSWG.component_ChainLink, {
 
                                 pos: p,
@@ -437,6 +446,13 @@ BSWG.game = new function(){
                             });
                         else if (Math.random() < 1/8)
                             new BSWG.component(BSWG.component_MissileLauncher, {
+
+                                pos: p,
+                                angle: Math.random()*Math.PI*2.0,
+
+                            });   
+                        else if (Math.random() < 1/8)
+                            new BSWG.component(BSWG.component_Laser, {
 
                                 pos: p,
                                 angle: Math.random()*Math.PI*2.0,
@@ -613,6 +629,7 @@ BSWG.game = new function(){
             }
             BSWG.componentList.render(ctx, self.cam, dt);
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
+            BSWG.laserList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
 
             switch (self.scene) {

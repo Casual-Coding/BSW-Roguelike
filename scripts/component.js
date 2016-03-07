@@ -556,6 +556,41 @@ BSWG.componentList = new function () {
 
     };
 
+    this.withRay = function (p, p2) {
+
+        var raycaster = BSWG.render.raycaster;
+
+        var dx = p2.x - p.x, dy = p2.y - p.y, dz = p2.z - p.z;
+        var vlen = Math.sqrt(dx*dx+dy*dy+dz*dz);
+
+        raycaster.set(p, new THREE.Vector3(dx/vlen, dy/vlen, dz/vlen));
+
+        var len = this.compList.length;
+        var dist = vlen+0.001;
+        var best = null, bestP = null;
+        for (var i=0; i<len; i++) {
+            var inter = raycaster.intersectObjects(this.compList[i].queryMeshes);
+            for (var j=0; j<inter.length; j++)
+            {
+                if (inter[j].distance < dist) {
+                    dist = inter[j].distance;
+                    best = this.compList[i];
+                    bestP = inter[j].point;
+                }
+            }
+        }
+
+        if (best) {
+            return {
+                comp: best,
+                p: bestP,
+                d: dist
+            };
+        }
+        return null;
+
+    };
+
     this.makeQueryable = function (comp, mesh) {
 
         mesh.__compid = comp.id;
