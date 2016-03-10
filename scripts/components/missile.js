@@ -1,4 +1,4 @@
-// BSWR - Chain Link component
+// BSWR - Missile object
 
 BSWG.component_Missile = {
 

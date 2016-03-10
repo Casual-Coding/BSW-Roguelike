@@ -1,3 +1,5 @@
+// BSWR - Laser beam objects
+
 BSWG.laserRange = 25.0;
 BSWG.laserWidth = 0.35;
 

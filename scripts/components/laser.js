@@ -1,4 +1,4 @@
-// BSWR - Blaster component
+// BSWR - Laser component
 
 BSWG.component_Laser = {
 

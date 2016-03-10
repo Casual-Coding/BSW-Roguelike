@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <script src="scripts/music.js"></script>
+        <script src="scripts/lib/seedrandom.js"></script>
+        <style>
+            a {
+                text-decoration: none;
+                font-weight: bold;
+                color: white;
+                font-size: 30px;
+            }
+            span.left {
+                display: inline-block;
+                width: 300px;
+                font-size: 20px;
+            }
+        </style>
+    </head>
+    <body style='background-color: black; color: white;'>
+        <noscript>JavaScript is required.</noscript>
+
+        <div id='#info'>
+        </div>
+
+        <script>
+
+            var bpm = 40.0 + ~~(Math.random() * 80);
+
+            var settings = {
+                happy: Math.random(),
+                smooth: Math.random(),
+                rise: Math.random(), drop: Math.random(),
+                crazy: Math.pow(Math.random(), 2.0),
+                harmonize: Math.random()
+            };
+
+            var song = new BSWG.song(
+                3,
+                bpm,
+                null,
+                settings
+            );
+
+            settings['bpm'] = bpm;
+
+            var div = document.getElementById('#info');
+
+            for (var k in settings) {
+                var v = settings[k];
+                if (k !== 'bpm' && typeof v === 'number') {
+                    v = Math.floor(v*100) + '%';
+                }
+                div.innerHTML += '<span class="left">' + k + '</span>' + ': ' + v + '<br>';
+            }
+
+        </script>
+
+        <br>
+
+        <a href="#" onclick="window.location.reload();">NEW MUSIC</a>
+    </body>
+</html>

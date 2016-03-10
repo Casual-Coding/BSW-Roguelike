@@ -1,4 +1,4 @@
-// BSWR - Blaster component
+// BSWR - Missile Launcher component
 
 BSWG.component_MissileLauncher = {
 

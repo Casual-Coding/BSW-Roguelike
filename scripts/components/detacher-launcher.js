@@ -1,4 +1,4 @@
-// BSWR - Chain Link component
+// BSWR - Detaching Thruster component
 
 BSWG.component_DetacherLauncher = {
 

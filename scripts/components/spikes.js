@@ -1,4 +1,4 @@
-// BSWR - Spikes component
+// BSWR - Spikes/Pikes component
 
 BSWG.component_Spikes = {
 
