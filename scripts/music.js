@@ -263,8 +263,11 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     if (mood.happy < 0.25) {
         major = minor = BSWG.music_harmonicMinor;
     }
-    else if (mood.happy > 0.75) {
+    else if (mood.happy > 0.5) {
         minor = major;
+    }
+    else if (mood.happy <= 0.5) {
+        major = minor;
     }
 
     var cProg = [ 0, 0, 0, 0 ];
