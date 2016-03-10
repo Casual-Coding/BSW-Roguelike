@@ -230,18 +230,31 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         spats[j] = pat;
     }
 
+    var beat = new Array(32);
+    for (var i=0; i<beat.length; i++) {
+        var pat = new Array(16);
+        for (var j=0; j<pat.length; j++) {
+            pat[j] = Math.random() > mood.intense ? 7.0 : 0.0;
+        }
+        beat[i] = pat;
+    }
+
     var intOffset = 0;
 
-    var putPat = function(pat, minW, maxW, totalW, nPer, oct, volPat1, volPat2) {
+    var putPat = function(pat, minW, maxW, totalW, nPer, oct, volPat1, volPat2, beat) {
         oct = oct || 0;
         var tw = totalW;
         var _i = 0;
         while (tw > 0 && _i<1000) {
             var w = Math.min(16 * Math.pow(2, -Math.floor(Math.random() * (maxW - minW) + minW)), tw);
             tw -= w;
-            if (Math.random() > nPer) {
+            if (Math.random() > nPer || (beat && volPat1[_i%volPat1.length])) {
                 var v1 = volPat1[~~(Math.random() * volPat1.length)] / 8 * 0.5;
                 var v2 = volPat2[~~(Math.random() * volPat2.length)] / 8 * 0.5;
+                if (beat) {
+                    v1 = volPat1[_i%volPat1.length] / 8 * 0.5;
+                    v2 = volPat2[_i%volPat2.length] / 8 * 0.5;
+                }
                 v1 = Math.min(Math.max(0.0, v1), 1.0);
                 v1 = (v1 + 1.0) * 0.5;
                 v1 = (v1 * 0.75) + (v2 * 0.25);
@@ -328,7 +341,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             var tmp = NEW_PAT(w * 16);
             USE_PAT(tmp);
             if (i===0) {
-                putPat([0], 1, 2, tmp.length, baseRestPer, 0, spats[(k)%spats.length], spats[(k+2)%spats.length]);
+                putPat([0], 1, 2, tmp.length, baseRestPer, 0, beat[(k)%beat.length], beat[(k+2)%beat.length], true);
             }
             else if (i === 1) {
                 putPat(spats[(k+1)%spats.length], 2, 2, tmp.length, baseRestPer*0.1, 1, spats[(k+2)%spats.length], spats[(k+3)%spats.length]);
