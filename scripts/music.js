@@ -45,14 +45,20 @@ BSWG.music = new function() {
 
 }();
 
+BSWG.music_pentMinor = function(ind, rootNote) {
+    rootNote = rootNote || 0;
+    ind += 5 * 10;
+    var pos = ind % 5;
+    var oct = ((ind - pos) / 5) - 10;
+    return rootNote + [ 0, 3, 5, 7, 10 ][pos] + (oct - 4) * 12;
+};
+
+
 BSWG.music_harmonicMinor = function(ind, rootNote) {
     rootNote = rootNote || 0;
     ind += 7 * 10;
     var pos = ind % 7;
     var oct = ((ind - pos) / 7) - 10;
-    if (isNaN(pos) || isNaN(oct)) {
-        console.log(ind, rootNote);
-    }
     return rootNote + [ 0, 2, 3, 5, 7, 8, 11 ][pos] + (oct - 4) * 12;
 };
 
@@ -314,13 +320,17 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         major = minor = BSWG.music_harmonicMinor;
         cPu[2] = true;
     }
-    else if (mood.happy > 0.5) {
-        minor = major;
-    }
-    else if (mood.happy <= 0.5) {
+    else if (mood.happy < 0.5) {
         major = minor;
         cPu[2] = true;
     }
+    else if (mood.happy < 0.75) {
+        major = minor = BSWG.music_pentMinor;
+    }
+    else {
+        minor = major;
+    }
+
 
     for (var i=1; i<cProg.length; i++) {
         var lScale = cMag[i-1] ? major : minor;
