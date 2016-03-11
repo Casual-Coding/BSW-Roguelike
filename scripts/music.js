@@ -234,7 +234,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     for (var i=0; i<beat.length; i++) {
         var pat = new Array(16);
         for (var j=0; j<pat.length; j++) {
-            pat[j] = Math.random() > mood.intense ? 7.0 : 0.0;
+            pat[j] = Math.random() > Math.pow(1-mood.intense, 4.0) ? 7.0 : 0.0;
         }
         beat[i] = pat;
     }
@@ -273,20 +273,23 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     var major = BSWG.music_Major;
     var minor = BSWG.music_naturalMinor;
 
+    var cProg = [ 0, 0, 0, 0 ];
+    var h = mood.happy > 0.5 ? Math.pow(mood.happy, 0.5) : Math.pow(mood.happy, 2.0);
+    var cMag = [ Math.random() < h, Math.random() < h, Math.random() < h, Math.random() < h ];
+    var cPu = { 0: true };
+
     if (mood.happy < 0.25) {
         major = minor = BSWG.music_harmonicMinor;
+        cPu[2] = false;
     }
     else if (mood.happy > 0.5) {
         minor = major;
     }
     else if (mood.happy <= 0.5) {
         major = minor;
+        cPu[2] = false;
     }
 
-    var cProg = [ 0, 0, 0, 0 ];
-    var h = mood.happy > 0.5 ? Math.pow(mood.happy, 0.5) : Math.pow(mood.happy, 2.0);
-    var cMag = [ Math.random() < h, Math.random() < h, Math.random() < h, Math.random() < h ];
-    var cPu = { 0: true };
     for (var i=1; i<cProg.length; i++) {
         var lScale = cMag[i-1] ? major : minor;
         var cScale = cMag[i] ? major : minor;
