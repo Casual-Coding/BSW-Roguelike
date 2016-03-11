@@ -423,7 +423,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                             C.bfr.connect(C.gain);
                         } catch (err) {
                         }
-                        C.bfr.playbackRate.value = (N[0] / C.inst.baseFreq) + (Math.random()*0.001-0.0005);
+                        C.bfr.playbackRate.value = (N[0] / C.inst.baseFreq) * (1 + Math.random()*0.001-0.0005);
                         C.bfr.start();
                     }
                     /*if (C.osc.frequency.value !== N[0]) {
