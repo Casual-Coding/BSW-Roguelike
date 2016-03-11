@@ -47,33 +47,36 @@ BSWG.music = new function() {
 
 BSWG.music_harmonicMinor = function(ind, rootNote) {
     rootNote = rootNote || 0;
-    ind += 8 * 10;
-    var pos = ind % 8;
-    var oct = ((ind - pos) / 8) - 10;
+    ind += 7 * 10;
+    var pos = ind % 7;
+    var oct = ((ind - pos) / 7) - 10;
+    if (isNaN(pos) || isNaN(oct)) {
+        console.log(ind, rootNote);
+    }
     return rootNote + [ 0, 2, 3, 5, 7, 8, 11 ][pos] + (oct - 4) * 12;
 };
 
 BSWG.music_harmonicMajor = function(ind, rootNote) {
     rootNote = rootNote || 0;
-    ind += 8 * 10;
-    var pos = ind % 8;
-    var oct = ((ind - pos) / 8) - 10;
+    ind += 7 * 10;
+    var pos = ind % 7;
+    var oct = ((ind - pos) / 7) - 10;
     return rootNote + [ 0, 2, 4, 5, 7, 8, 11 ][pos] + (oct - 4) * 12;
 };
 
 BSWG.music_naturalMinor = function(ind, rootNote) {
     rootNote = rootNote || 0;
-    ind += 8 * 10;
-    var pos = ind % 8;
-    var oct = ((ind - pos) / 8) - 10;
+    ind += 7 * 10;
+    var pos = ind % 7;
+    var oct = ((ind - pos) / 7) - 10;
     return rootNote + [ 0, 2, 3, 5, 7, 8, 10 ][pos] + (oct - 4) * 12;
 };
 
 BSWG.music_Major = function(ind, rootNote) {
     rootNote = rootNote || 0;
-    ind += 8 * 10;
-    var pos = ind % 8;
-    var oct = ((ind - pos) / 8) - 10;
+    ind += 7 * 10;
+    var pos = ind % 7;
+    var oct = ((ind - pos) / 7) - 10;
     return rootNote + [ 0, 2, 4, 5, 7, 9, 11 ][pos] + (oct - 4) * 12;
 };
 
@@ -221,7 +224,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     var spats = new Array(32);
     for (var j=0; j<spats.length; j++) {
-        var pat = new Array(16);
+        var pat = new Array(BSWG.song_subBeat);
         if (Math.random() < mood.harmonize && j > 0) {
             for (var i=0; i<pat.length; i++) {
                 pat[i] = spats[j-1][i] + (Math.random() < 0.5 ? 1 : -1) * (Math.random() < 0.5 ? 3 : 5);
@@ -266,9 +269,9 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     var beat = new Array(32);
     for (var i=0; i<beat.length; i++) {
-        var pat = new Array(16);
+        var pat = new Array(BSWG.song_subBeat);
         for (var j=0; j<pat.length; j++) {
-            pat[j] = Math.random() > Math.pow(1-mood.intense, 4.0) ? 7.0 : 0.0;
+            pat[j] = Math.random() > Math.pow(mood.intense, 2.0) ? 7.0 : 0.0;
         }
         beat[i] = pat;
     }
@@ -358,7 +361,8 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         var _tw = patternLength / 16;
         var k = 0;
         var k2 = 0;
-        var nextDouble = i === 0 && mood.intense > 0.75;
+        var nextDouble = i === 0 && mood.intense > 0.5;
+        var alwaysDouble = nextDouble;
         while (_tw > 0) {
 
             Math.random(~~(k2/2));
@@ -375,10 +379,10 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             if (_tw < 0) {
                 w += 4;
             }
-            var tmp = NEW_PAT(w * 16);
+            var tmp = NEW_PAT(w * BSWG.song_subBeat);
             USE_PAT(tmp);
             if (i===0) {
-                putPat([0], 1, 2, tmp.length, baseRestPer, -1, beat[(k)%beat.length], beat[(k+2)%beat.length], true);
+                putPat([0], 2, 1, tmp.length, baseRestPer, -1, beat[(k)%beat.length], beat[(k+2)%beat.length], true);
             }
             else if (i === 1) {
                 putPat(spats[(k+1)%spats.length], 2, 0, tmp.length, baseRestPer*0.1, 2, spats[(k+2)%spats.length], spats[(k+3)%spats.length]);
@@ -396,7 +400,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             }
             if (!(k2 % 4)) {
                 k += 1;
-                if (Math.random() < 0.25) {
+                if (Math.random() < 0.25 || alwaysDouble) {
                     nextDouble = true;
                     k --;
                 }
@@ -463,6 +467,8 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         patIndex += 1;
 
     };
+
+    console.log(this.channels[0]);
 
     var msInterval = 60000/(bpm*BSWG.song_subBeat);
     var interval = window.setInterval(update, msInterval);
