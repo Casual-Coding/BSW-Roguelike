@@ -423,7 +423,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                     C.bfr.stop();
                 }
                 else {
-                    toGain = (self.volume * N[1] * [2.0,2.0,2.0][i]) || 0.0;
+                    toGain = (self.volume * N[1] * [4.0,4.0,4.0][i]) || 0.0;
                     if (N[2]) {
                         C.gain.gain.value = toGain;
                         try {
