@@ -161,41 +161,6 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         return impulse;
     }
 
-    var inst = [1,1,0];
-    if (mood.happy >= 0.5) {
-        inst = [0,0,0];
-    }
-
-    for (var i=0; i<this.channels.length; i++) {
-        var chan = new Object();
-        //chan.osc = audioCtx.createOscillator();
-        //chan.osc.type = 'square';
-        //chan.osc.detune.value = 0;
-        //chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
-        chan.inst = BSWG.music.instruments[ inst[i] ];
-        chan.bfr = audioCtx.createBufferSource();
-        chan.bfr.loop = true;
-        chan.bfr.buffer = chan.inst.buffer;
-        chan.gain = audioCtx.createGain();
-        chan.gain.gain.value = 0.0 * initVolume;
-        chan.conv = audioCtx.createConvolver();//(bpm/60.0);
-        chan.pan = audioCtx.createStereoPanner();
-        chan.pan.value = [0,-0.75,0.75][i%3];
-
-        chan.bfr.connect(chan.gain);
-        //chan.osc.connect(chan.gain);
-
-        chan.gain.connect(chan.pan);
-        //chan.gain.connect(chan.conv);
-        //chan.conv.connect(chan.pan);
-        chan.pan.connect(audioCtx.destination);
-        //chan.osc.start();
-
-        chan.pattern = NEW_PAT(patternLength);
-
-        this.channels[i] = chan;
-    }
-
     if (!mood) {
         mood = {};
     }
@@ -216,8 +181,43 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         }
     }
 
+    var inst = [1,1,0];
+    if (mood.happy >= 0.5) {
+        inst = [0,0,0];
+    }
+
+    for (var i=0; i<this.channels.length; i++) {
+        var chan = new Object();
+        //chan.osc = audioCtx.createOscillator();
+        //chan.osc.type = 'square';
+        //chan.osc.detune.value = 0;
+        //chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
+        chan.inst = BSWG.music.instruments[ inst[i] ];
+        chan.bfr = audioCtx.createBufferSource();
+        chan.bfr.loop = false;
+        chan.bfr.buffer = chan.inst.buffer;
+        chan.gain = audioCtx.createGain();
+        chan.gain.gain.value = 0.0 * initVolume;
+        chan.conv = audioCtx.createConvolver();//(bpm/60.0);
+        chan.pan = audioCtx.createStereoPanner();
+        chan.pan.value = [0,-0.75,0.75][i%3];
+
+        chan.bfr.connect(chan.gain);
+        //chan.osc.connect(chan.gain);
+
+        //chan.gain.connect(chan.pan);
+        chan.gain.connect(chan.conv);
+        chan.conv.connect(chan.pan);
+        chan.pan.connect(audioCtx.destination);
+        //chan.osc.start();
+
+        chan.pattern = NEW_PAT(patternLength);
+
+        this.channels[i] = chan;
+    }
+
     var scale = null;
-    var rootNote = ~~(Math.random()*12) + 12*2.5 - 12;
+    var rootNote = ~~(Math.random()*12) + 12*2.5;
 
     var spats = new Array(32);
     for (var j=0; j<spats.length; j++) {
@@ -381,7 +381,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                 putPat([0], 1, 2, tmp.length, baseRestPer, 0, beat[(k)%beat.length], beat[(k+2)%beat.length], true);
             }
             else if (i === 1) {
-                putPat(spats[(k+1)%spats.length], 2, 2, tmp.length, baseRestPer*0.1, 1, spats[(k+2)%spats.length], spats[(k+3)%spats.length]);
+                putPat(spats[(k+1)%spats.length], 2, 2, tmp.length, baseRestPer*0.1, 2, spats[(k+2)%spats.length], spats[(k+3)%spats.length]);
             }
             else if (i === 2) {
                 putPat(spats[(k+2)%spats.length], 2, 3, tmp.length, 0.0, 1, spats[(k+3)%spats.length], spats[(k+4)%spats.length]);
@@ -417,16 +417,19 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             var P = C.pattern;
             var N = P[patIndex];
             if (N) {
+                var toGain = 0.0;
                 if (!N[0]) {
-                    C.gain.gain.value = 0.0;
+                    //C.gain.gain.value = 0.0;
+                    C.bfr.stop();
                 }
                 else {
-                    C.gain.gain.value = (self.volume * N[1] * [1.0,1.0,1.25][i]) || 0.0;
+                    toGain = (self.volume * N[1] * [2.0,2.0,2.0][i]) || 0.0;
                     if (N[2]) {
+                        C.gain.gain.value = toGain;
                         try {
                             C.bfr.stop();
                             C.bfr = audioCtx.createBufferSource();
-                            C.bfr.loop = true;
+                            C.bfr.loop = false;
                             C.bfr.buffer = C.inst.buffer;
                             C.bfr.connect(C.gain);
                         } catch (err) {
@@ -442,13 +445,15 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                         }
                     }*/
                 }
+                C.gain.gain.value += (toGain - C.gain.gain.value) * (0.9-mood.smooth*0.8);
             }
             else {
                 C.gain.gain.value = 0.0;
+                C.bfr.stop();
             }
 
             if (!C.conv.buffer) {
-                C.conv.buffer = impulseResponse(1.0);
+                C.conv.buffer = impulseResponse(0.05);
             }
         }
 
