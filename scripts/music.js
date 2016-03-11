@@ -19,6 +19,29 @@ BSWG.music = new function() {
 
     this.audioCtx = new acClass();
 
+    this.instruments = [
+        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-electric-guitar.wav' }
+    ];
+
+    this.init = function(onload) {
+        var urls = [];
+        for (var i=0; i<this.instruments.length; i++) {
+            urls.push(this.instruments[i].url);
+        }
+
+        var self = this;
+        this.loader = new WABufferLoader(this.audioCtx, urls, function(buffers){
+            for (var i=0; i<buffers.length; i++) {
+                self.instruments[i].buffer = buffers[i];
+            }
+            if (onload) {
+                onload();
+            }
+        });
+
+        this.loader.load();
+    };
+
 }();
 
 BSWG.music_harmonicMinor = function(ind, rootNote) {
@@ -97,7 +120,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         for (var __i=PAT._currentIndex, j=0; j<len && __i<PAT.length; __i++, j++) {
             var t = Math.pow(j / (len-1), 0.5);
             var v = (v2 - v1) * t + v1;
-            PAT[__i] = [ f, v ];
+            PAT[__i] = [ f, v, j===0 ];
         }
         PAT._currentIndex += len;
     };
@@ -105,7 +128,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     var REST = function(len) {
         PAT._currentIndex = PAT._currentIndex || 0;
         for (var __i=PAT._currentIndex, j=0; j<len && __i<PAT.length; __i++, j++) {
-            PAT[__i] = [ null, 0.0 ];
+            PAT[__i] = [ null, 0.0, false ];
         }
         PAT._currentIndex += len;
     };
@@ -139,23 +162,27 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     for (var i=0; i<this.channels.length; i++) {
         var chan = new Object();
-        chan.osc = audioCtx.createOscillator();
-        chan.osc.type = 'square';
-        chan.osc.detune.value = 0;
-        chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
+        //chan.osc = audioCtx.createOscillator();
+        //chan.osc.type = 'square';
+        //chan.osc.detune.value = 0;
+        //chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
+        chan.inst = BSWG.music.instruments[0];
+        chan.bfr = audioCtx.createBufferSource();
+        chan.bfr.buffer = chan.inst.buffer;
         chan.gain = audioCtx.createGain();
         chan.gain.gain.value = 0.0 * initVolume;
         chan.conv = audioCtx.createConvolver();//(bpm/60.0);
-        chan.conv.buffer = impulseResponse(0.1, 0.1, 0.1);
+        chan.conv.buffer = impulseResponse(1.0);
         chan.pan = audioCtx.createStereoPanner();
         chan.pan.value = [0,-0.75,0.75][i%3];
 
-        chan.osc.connect(chan.gain);
-        chan.gain.connect(chan.pan);
-        //chan.gain.connect(chan.conv);
-        //chan.conv.connect(audioCtx.destination);
+        chan.bfr.connect(chan.gain);
+        //chan.osc.connect(chan.gain);
+        //chan.gain.connect(chan.pan);
+        chan.gain.connect(chan.conv);
+        chan.conv.connect(chan.pan);
         chan.pan.connect(audioCtx.destination);
-        chan.osc.start();
+        //chan.osc.start();
 
         chan.pattern = NEW_PAT(patternLength);
 
@@ -388,13 +415,24 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                 }
                 else {
                     C.gain.gain.value = (self.volume * N[1]) || 0.0;
-                    if (C.osc.frequency.value !== N[0]) {
+                    if (N[2]) {
+                        try {
+                            C.bfr.stop();
+                            C.bfr = audioCtx.createBufferSource();
+                            C.bfr.buffer = C.inst.buffer;
+                            C.bfr.connect(C.gain);
+                        } catch (err) {
+                        }
+                        C.bfr.playbackRate.value = (N[0] / C.inst.baseFreq) + (Math.random()*0.001-0.0005);
+                        C.bfr.start();
+                    }
+                    /*if (C.osc.frequency.value !== N[0]) {
                         if (mood.slidey) {
                             C.osc.frequency.value = N[0];
                         } else {
                             C.osc.frequency.setValueAtTime(N[0], Math.max(0, audioCtx.currentTime));
                         }
-                    }
+                    }*/
                 }
             }
             else {
@@ -412,4 +450,3 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     console.log(patternLength, msInterval);
 
 };
-
