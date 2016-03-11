@@ -161,13 +161,18 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         return impulse;
     }
 
+    var inst = [1,1,0];
+    if (mood.happy >= 0.5) {
+        inst = [0,0,0];
+    }
+
     for (var i=0; i<this.channels.length; i++) {
         var chan = new Object();
         //chan.osc = audioCtx.createOscillator();
         //chan.osc.type = 'square';
         //chan.osc.detune.value = 0;
         //chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
-        chan.inst = BSWG.music.instruments[ [1,1,0][i] ];
+        chan.inst = BSWG.music.instruments[ inst[i] ];
         chan.bfr = audioCtx.createBufferSource();
         chan.bfr.loop = true;
         chan.bfr.buffer = chan.inst.buffer;
@@ -416,7 +421,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                     C.gain.gain.value = 0.0;
                 }
                 else {
-                    C.gain.gain.value = (self.volume * N[1] * [2.0,2.0,2.5][i]) || 0.0;
+                    C.gain.gain.value = (self.volume * N[1] * [1.0,1.0,1.25][i]) || 0.0;
                     if (N[2]) {
                         try {
                             C.bfr.stop();
