@@ -20,7 +20,8 @@ BSWG.music = new function() {
     this.audioCtx = new acClass();
 
     this.instruments = [
-        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-electric-guitar.wav' }
+        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-electric-guitar.wav' },
+        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-distorted-guitar.wav' }
     ];
 
     this.init = function(onload) {
@@ -166,21 +167,21 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         //chan.osc.type = 'square';
         //chan.osc.detune.value = 0;
         //chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
-        chan.inst = BSWG.music.instruments[0];
+        chan.inst = BSWG.music.instruments[ [0,1,0][i] ];
         chan.bfr = audioCtx.createBufferSource();
         chan.bfr.buffer = chan.inst.buffer;
         chan.gain = audioCtx.createGain();
         chan.gain.gain.value = 0.0 * initVolume;
         chan.conv = audioCtx.createConvolver();//(bpm/60.0);
-        chan.conv.buffer = impulseResponse(1.0);
         chan.pan = audioCtx.createStereoPanner();
         chan.pan.value = [0,-0.75,0.75][i%3];
 
         chan.bfr.connect(chan.gain);
         //chan.osc.connect(chan.gain);
-        //chan.gain.connect(chan.pan);
-        chan.gain.connect(chan.conv);
-        chan.conv.connect(chan.pan);
+
+        chan.gain.connect(chan.pan);
+        //chan.gain.connect(chan.conv);
+        //chan.conv.connect(chan.pan);
         chan.pan.connect(audioCtx.destination);
         //chan.osc.start();
 
@@ -210,7 +211,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     }
 
     var scale = null;
-    var rootNote = ~~(Math.random()*12) + 12*2.5;
+    var rootNote = ~~(Math.random()*12) + 12*2.5 - 12;
 
     var spats = new Array(32);
     for (var j=0; j<spats.length; j++) {
@@ -414,7 +415,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                     C.gain.gain.value = 0.0;
                 }
                 else {
-                    C.gain.gain.value = (self.volume * N[1]) || 0.0;
+                    C.gain.gain.value = (self.volume * N[1] * [1.0,3.0,2.5][i]) || 0.0;
                     if (N[2]) {
                         try {
                             C.bfr.stop();
@@ -437,6 +438,10 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             }
             else {
                 C.gain.gain.value = 0.0;
+            }
+
+            if (!C.conv.buffer) {
+                C.conv.buffer = impulseResponse(1.0);
             }
         }
 
