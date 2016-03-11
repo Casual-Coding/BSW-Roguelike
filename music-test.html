@@ -24,6 +24,11 @@
 
         <script>
 
+            var seed = parseInt(window.location.href.split('#')[1] || (~~(Math.random()*10000000) + ''));
+            window.location.href = '#' + seed;
+
+            Math.seedrandom(seed);
+
             var bpm = 40.0 + ~~(Math.random() * 80);
 
             var settings = {
