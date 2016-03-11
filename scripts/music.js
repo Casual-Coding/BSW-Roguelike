@@ -105,12 +105,12 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         return ret;
     };
 
-    var DOUBLE = function () {
+    var DOUBLE = function (pat) {
         var tmp = [];
-        for (var i=0; i<PAT.length; i+=2) {
-            tmp.push(PAT[i]);
+        for (var i=0; i<pat.length; i+=2) {
+            tmp.push(pat[i]);
         }
-        PAT = tmp;
+        return tmp;
     };
 
     var NOTE = function(note, len, v1, v2) {
@@ -181,7 +181,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         }
     }
 
-    var inst = [1,1,0];
+    var inst = [1,0,0];
     if (mood.happy >= 0.5) {
         inst = [0,0,0];
     }
@@ -314,14 +314,14 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     if (mood.happy < 0.25) {
         major = minor = BSWG.music_harmonicMinor;
-        cPu[2] = false;
+        cPu[2] = true;
     }
     else if (mood.happy > 0.5) {
         minor = major;
     }
     else if (mood.happy <= 0.5) {
         major = minor;
-        cPu[2] = false;
+        cPu[2] = true;
     }
 
     for (var i=1; i<cProg.length; i++) {
@@ -358,7 +358,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         var _tw = patternLength / 16;
         var k = 0;
         var k2 = 0;
-        var nextDouble = false;
+        var nextDouble = i === 0 && mood.intense > 0.75;
         while (_tw > 0) {
 
             Math.random(~~(k2/2));
@@ -378,17 +378,17 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             var tmp = NEW_PAT(w * 16);
             USE_PAT(tmp);
             if (i===0) {
-                putPat([0], 1, 2, tmp.length, baseRestPer, 0, beat[(k)%beat.length], beat[(k+2)%beat.length], true);
+                putPat([0], 1, 2, tmp.length, baseRestPer, -1, beat[(k)%beat.length], beat[(k+2)%beat.length], true);
             }
             else if (i === 1) {
-                putPat(spats[(k+1)%spats.length], 2, 2, tmp.length, baseRestPer*0.1, 2, spats[(k+2)%spats.length], spats[(k+3)%spats.length]);
+                putPat(spats[(k+1)%spats.length], 2, 0, tmp.length, baseRestPer*0.1, 2, spats[(k+2)%spats.length], spats[(k+3)%spats.length]);
             }
             else if (i === 2) {
-                putPat(spats[(k+2)%spats.length], 2, 3, tmp.length, 0.0, 1, spats[(k+3)%spats.length], spats[(k+4)%spats.length]);
+                putPat(spats[(k+2)%spats.length], 2, 1, tmp.length, 0.0, 1, spats[(k+3)%spats.length], spats[(k+4)%spats.length]);
             }
             USE_PAT(this.channels[i].pattern);
             if (nextDouble) {
-                DOUBLE();
+                tmp = DOUBLE(tmp);
                 REPEAT(tmp, 2);
             }
             else {
@@ -420,10 +420,12 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                 var toGain = 0.0;
                 if (!N[0]) {
                     //C.gain.gain.value = 0.0;
-                    C.bfr.stop();
+                    try {
+                        C.bfr.stop();
+                    } catch (err) {}
                 }
                 else {
-                    toGain = (self.volume * N[1] * [4.0,4.0,4.0][i]) || 0.0;
+                    toGain = (self.volume * N[1] * [4.0,5.0,6.0][i]) || 0.0;
                     if (N[2]) {
                         C.gain.gain.value = toGain;
                         try {
@@ -432,10 +434,9 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                             C.bfr.loop = false;
                             C.bfr.buffer = C.inst.buffer;
                             C.bfr.connect(C.gain);
-                        } catch (err) {
-                        }
+                        } catch (err) {}
                         C.bfr.playbackRate.value = (N[0] / C.inst.baseFreq) * (1 + Math.random()*0.001-0.0005);
-                        C.bfr.start();
+                        C.bfr.start(null, 1);
                     }
                     /*if (C.osc.frequency.value !== N[0]) {
                         if (mood.slidey) {
@@ -449,7 +450,9 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             }
             else {
                 C.gain.gain.value = 0.0;
-                C.bfr.stop();
+                try {
+                    C.bfr.stop();
+                } catch (err) {}
             }
 
             if (!C.conv.buffer) {
