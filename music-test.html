@@ -43,10 +43,10 @@
                     intense: Math.random()
                 };
 
-                var song = new BSWG.song(
+                window.song = new BSWG.song(
                     3,
                     bpm,
-                    1.0,
+                    0.0,
                     settings
                 );
 
@@ -61,6 +61,8 @@
                     }
                     div.innerHTML += '<span class="left">' + k + '</span>' + ': ' + v + '<br>';
                 }
+
+                song.setVolume(1.0, 3.0);
 
             });
 

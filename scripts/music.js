@@ -191,28 +191,23 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     for (var i=0; i<this.channels.length; i++) {
         var chan = new Object();
-        //chan.osc = audioCtx.createOscillator();
-        //chan.osc.type = 'square';
-        //chan.osc.detune.value = 0;
-        //chan.osc.frequency.value = BSWG.music_NoteFreq(3, 0);
         chan.inst = BSWG.music.instruments[ inst[i] ];
         chan.bfr = audioCtx.createBufferSource();
         chan.bfr.loop = false;
         chan.bfr.buffer = chan.inst.buffer;
         chan.gain = audioCtx.createGain();
         chan.gain.gain.value = 0.0 * initVolume;
-        chan.conv = audioCtx.createConvolver();//(bpm/60.0);
+        chan.conv = audioCtx.createConvolver();
         chan.pan = audioCtx.createStereoPanner();
         chan.pan.value = [0,-0.75,0.75][i%3];
+        chan.mGain = audioCtx.createGain();
+        chan.mGain.gain.value = initVolume;
 
-        chan.bfr.connect(chan.gain);
-        //chan.osc.connect(chan.gain);
-
-        //chan.gain.connect(chan.pan);
+        chan.bfr.connect(chan.mGain);
+        chan.mGain.connect(chan.gain);
         chan.gain.connect(chan.conv);
         chan.conv.connect(chan.pan);
         chan.pan.connect(audioCtx.destination);
-        //chan.osc.start();
 
         chan.pattern = NEW_PAT(patternLength);
 
@@ -411,68 +406,109 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         }
     }
 
-    var patIndex = 0;
+    var allBfrs = [];
 
     var self = this;
-    var update = function() {
+    var queue = function() {
+
+        var patIndex = 0;
+        var ctime = audioCtx.currentTime;
+
+        while (patIndex < patternLength) {
+
+            for (var i=0; i<self.channels.length; i++) {
+                var C = self.channels[i];
+
+                if (!C.conv.buffer) {
+                    C.conv.buffer = impulseResponse(0.05);
+                }
+
+                var P = C.pattern;
+                var N = P[patIndex];
+                if (N) {
+                    if (!N[0]) {
+                        try {
+                            C.bfr.stop(ctime);
+                        } catch (err) {}
+                    }
+                    else {
+                        if (N[2]) {
+                            try {
+                                C.bfr.stop(ctime);
+                                C.bfr = audioCtx.createBufferSource();
+                                C.bfr.loop = false;
+                                C.bfr.buffer = C.inst.buffer;
+                                C.bfr.connect(C.mGain);
+                            } catch (err) {}
+                            C.bfr.playbackRate.setValueAtTime((N[0] / C.inst.baseFreq) * (1 + Math.random()*0.001-0.0005), ctime);
+                            C.bfr.start(ctime, 1);
+                            allBfrs.push(C.bfr);
+                        }
+                    }
+                    C.gain.gain.setValueAtTime((N[1] * [4.0,5.0,6.0][i]) || 0.0, ctime);
+                }
+                else {
+                    C.gain.gain.setValueAtTime(0.0, ctime);
+                    try {
+                        C.bfr.stop(ctime);
+                    } catch (err) {}
+                }
+            }
+
+            patIndex += 1;
+
+            ctime += 60.0/(bpm*BSWG.song_subBeat);
+        }
 
         for (var i=0; i<self.channels.length; i++) {
             var C = self.channels[i];
-            var P = C.pattern;
-            var N = P[patIndex];
-            if (N) {
-                var toGain = 0.0;
-                if (!N[0]) {
-                    //C.gain.gain.value = 0.0;
-                    try {
-                        C.bfr.stop();
-                    } catch (err) {}
-                }
-                else {
-                    toGain = (self.volume * N[1] * [4.0,5.0,6.0][i]) || 0.0;
-                    if (N[2]) {
-                        C.gain.gain.value = toGain;
-                        try {
-                            C.bfr.stop();
-                            C.bfr = audioCtx.createBufferSource();
-                            C.bfr.loop = false;
-                            C.bfr.buffer = C.inst.buffer;
-                            C.bfr.connect(C.gain);
-                        } catch (err) {}
-                        C.bfr.playbackRate.value = (N[0] / C.inst.baseFreq) * (1 + Math.random()*0.001-0.0005);
-                        C.bfr.start(null, 1);
-                    }
-                    /*if (C.osc.frequency.value !== N[0]) {
-                        if (mood.slidey) {
-                            C.osc.frequency.value = N[0];
-                        } else {
-                            C.osc.frequency.setValueAtTime(N[0], Math.max(0, audioCtx.currentTime));
-                        }
-                    }*/
-                }
-                C.gain.gain.value += (toGain - C.gain.gain.value) * (0.9-mood.smooth*0.8);
-            }
-            else {
-                C.gain.gain.value = 0.0;
-                try {
-                    C.bfr.stop();
-                } catch (err) {}
-            }
-
-            if (!C.conv.buffer) {
-                C.conv.buffer = impulseResponse(0.05);
-            }
+            C.gain.gain.setValueAtTime(0.0, ctime);
+            try {
+                C.bfr.stop(ctime);
+            } catch (err) {}
         }
-
-        patIndex += 1;
 
     };
 
-    console.log(this.channels[0]);
+    queue();
 
-    var msInterval = 60000/(bpm*BSWG.song_subBeat);
-    var interval = window.setInterval(update, msInterval);
+    this.setVolume = function (newVolume, time) {
 
-    console.log(patternLength, msInterval);
+        this.volume = newVolume;
+
+        for (var i=0; i<this.channels.length; i++) {
+            var C = this.channels[i];
+            if (C.mGain.gain.linearRampToValueAtTime) {
+                C.mGain.gain.linearRampToValueAtTime(this.volume, audioCtx.currentTime + (time||0.0));
+            }
+            else {
+                C.mGain.gain.value = this.volume;
+            }
+        }
+
+    };
+
+    this.setVolume(this.volume);
+
+    this.stop = function () {
+
+        for (var i=0; i<allBfrs.length; i++) {
+            try {
+                allBfrs[i].stop();
+                allBfrs[i] = null;
+            } catch (err) { }
+        }
+        allBfrs = null;
+        this.channels = null;
+
+    };
+
+    this.fadeOutStop = function(time) {
+        this.setVolume(0.0, time);
+        var self = this;
+        window.setTimeout(function(){
+            self.stop();
+        }, ~~(time*1000+100))
+    }
 
 };
