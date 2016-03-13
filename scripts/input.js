@@ -222,6 +222,85 @@ BSWG.input = new function(){
         return keyMap;
     };
 
+    this.gfID = 1;
+    this.gfiles = new Array();
+
+    // onclick = function(data, mousex, mousey), data will be null if click-range test
+    this.GET_FILE = function (onclick, type) {
+
+        if (!type) {
+            type = "text";
+        }
+
+        var ret = new Object();
+        ret.id = this.gfID++;
+
+        var input = document.createElement("INPUT");
+        input.id = "get_file_" + ret.id;
+        input.type = "file";
+        input.style.visibility = "hidden";
+        input.style.position = "fixed";
+        input.style.left = "120%";
+        input.addEventListener('change', function(evt){
+            var files = evt.target.files;
+            for (var i=0; i<files.length && i<1; i++) {
+                if (files[i]) {
+                    var reader = new FileReader();
+                    var file = files[i];
+                    reader.onload = function(e) {
+                        if (onclick) {
+                            onclick({
+                                filename: file.name,
+                                data: e.target.result
+                            });
+                        }
+                    };
+                    if (type === "text") {
+                        reader.readAsText(file);
+                    }
+                    //reader.readAsDataURL(f);
+                    break;
+                }
+            }
+            input.value = "";
+        }, false);
+        document.body.appendChild(input);
+
+        ret.input = input;
+        ret.onclick = onclick;
+
+        this.gfiles.push(ret);
+
+        return ret;
+
+    };
+
+    this.REMOVE_GFILE = function(obj) {
+
+        if (!obj) {
+            return false;
+        }
+
+        document.body.removeChild(obj.input);
+
+        for (var i=0; i<this.gfiles.length; i++) {
+            if (this.gfiles[i].id === obj.id) {
+                this.gfiles.splice(i, 1);
+                i --;
+                continue;
+            }
+        }
+
+        return true;
+
+    };
+
+    this.CLEAR_GFILE = function() {
+        while (this.gfiles.length > 0) {
+            this.REMOVE_GFILE(this.gfiles[0]);
+        }
+    };
+
     this.init = function () {
 
         var div  = window;
@@ -265,7 +344,11 @@ BSWG.input = new function(){
             keyMap[e.which] = false;
         });
 
+        self.dgOpenTime = 0;
         jQuery(div).mousemove(function(e){
+            if ((Date.timeStamp() - self.dgOpenTime) > 1.0) {
+                //BSWG.render.dlgOpen = false;
+            }
             mouseState.x = e.pageX;
             mouseState.y = e.pageY;
             mouseState.shift = !!e.shiftKey;
@@ -273,6 +356,11 @@ BSWG.input = new function(){
 
         jQuery(div).mouseenter(function(e){
             mouseState.mousein = true;
+            //BSWG.render.dlgOpen = false;
+        });
+
+        jQuery(div).focus(function(e){
+            BSWG.render.dlgOpen = false; 
         });
 
         jQuery(div).mouseleave(function(e){
@@ -295,6 +383,7 @@ BSWG.input = new function(){
                     break;
             }
             mouseState.shift = !!e.shiftKey;
+            //BSWG.render.dlgOpen = false;
         });
 
         jQuery(div).mouseup(function(e){
@@ -313,6 +402,20 @@ BSWG.input = new function(){
                     break;
             }
             mouseState.shift = !!e.shiftKey;
+        });
+
+        jQuery(div).click(function(e){
+
+            var x = mouseState.x, y = mouseState.y;
+
+            for (var i=0; i<self.gfiles.length; i++) {
+                if (self.gfiles[i].onclick && self.gfiles[i].onclick(null, x, y)) {
+                    self.gfiles[i].input.click();
+                    BSWG.render.dlgOpen = true;
+                    self.dgOpenTime = Date.timeStamp();
+                }
+            }
+
         });
 
         jQuery(div).mousewheel(function(e){

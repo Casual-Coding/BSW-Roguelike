@@ -191,6 +191,7 @@ BSWG.render = new function() {
     this.time = 0.0;
     this.images = {};
     this.cam3D = null;
+    this.dlgOpen = false;
 
     var maxRes = { w: 1920, h: 1080 };
 
@@ -407,7 +408,7 @@ BSWG.render = new function() {
             self.renderer.clear();
             self.renderer.render( self.scene, self.cam3D );
 
-            if (self.customCursor) {
+            if (self.customCursor && !self.dlgOpen) {
                 document.body.style.cursor = 'none';
                 if (BSWG.input.MOUSE('mousein')) {
                     self.ctx.drawImage(
@@ -426,6 +427,11 @@ BSWG.render = new function() {
             }
             else {
                 document.body.style.cursor = null;
+            }
+
+            if (self.dlgOpen) {
+                self.ctx.fillStyle = 'rgba(0,0,0,.5)';
+                self.ctx.fillRect(0, 0, self.viewport.w, self.viewport.h);
             }
 
             BSWG.input.newFrame();

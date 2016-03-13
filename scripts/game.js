@@ -69,6 +69,8 @@ BSWG.game = new function(){
         this.editMode = false;
         this.showControls = false;
 
+        this.exportFN = "untitled.json";
+
         if (!this.stars) {
             this.stars = new BSWG.starfield();
         }
@@ -85,6 +87,7 @@ BSWG.game = new function(){
 
         wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
         BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
+        BSWG.input.CLEAR_GFILE();
 
         switch (scene) {
             case BSWG.SCENE_TITLE:
@@ -227,6 +230,12 @@ BSWG.game = new function(){
                     text: scene === BSWG.SCENE_GAME2 ? "Export" : "Save",
                     selected: false,
                     click: function (me) {
+                        if (self.scene === BSWG.SCENE_GAME2) {
+                            JSON.saveAs(
+                                BSWG.componentList.serialize(null, true),
+                                self.exportFN
+                            );
+                        }
                     }
                 });
                 this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -237,6 +246,39 @@ BSWG.game = new function(){
                     click: function (me) {
                     }
                 });
+                if (scene === BSWG.SCENE_GAME2) {
+                    this.loadBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10 + 150 + 10 + 150 + 10, y: 10,
+                        w: 110, h: 50,
+                        text: "Import",
+                        selected: false,
+                        click: function (me) {
+                        }
+                    });
+                    BSWG.input.GET_FILE(function(data, x, y){
+                        if (!data) {
+                            return x >= self.loadBtn.p.x && y >= self.loadBtn.p.y &&
+                                   x <= (self.loadBtn.p.x + self.loadBtn.w) && y <= (self.loadBtn.p.y + self.loadBtn.h);
+                        }
+
+                        var backup = BSWG.componentList.serialize(null, true);
+
+                        try {
+                            self.ccblock = null;
+                            self.exportFN = data.filename;
+                            var obj = JSON.parse(data.data);
+                            BSWG.componentList.clear();
+                            self.ccblock = BSWG.componentList.load(obj);
+                            if (!self.ccblock) {
+                                throw "no cc";
+                            }
+                        } catch (err) {
+                            BSWG.componentList.clear();
+                            self.ccblock = BSWG.componentList.load(backup);
+                        }
+                        
+                    }, "text");
+                }
 
                 if (scene === BSWG.SCENE_GAME1) {
                     this.saveBtn.remove();
@@ -703,6 +745,7 @@ BSWG.game = new function(){
             if (self.scene === BSWG.SCENE_GAME2) {
                 self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
                 self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
+                self.loadBtn.p.x = self.saveBtn.p.x + 10 + self.saveBtn.w;
             }
 
             if (self.map) {
