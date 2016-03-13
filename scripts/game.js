@@ -69,7 +69,33 @@ BSWG.game = new function(){
         this.editMode = false;
         this.showControls = false;
 
-        this.exportFN = "untitled.json";
+        this.exportFN = "";
+        var setExportFN = function () {
+            var date = new Date();
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            var hour = date.getHours();
+            var minutes = date.getMinutes();
+            var seconds = date.getSeconds();
+            var ampm = "am"
+            if (seconds < 10) {
+                seconds = '0' + seconds;
+            }
+            if (minutes < 10) {
+                minutes = '0' + minutes;
+            }
+            if (hour >= 12) {
+                ampm = "pm";
+                if (hour > 12) {
+                    hour -= 12;
+                }
+            }
+            if (hour < 10) {
+                hour = '0' + hour;
+            }
+            self.exportFN = 'bswr-sandbox-'+month+'-'+day+'-'+year+'-'+hour+'-'+minutes+'-'+seconds+'-'+ampm+'.json';
+        }
 
         if (!this.stars) {
             this.stars = new BSWG.starfield();
@@ -231,6 +257,7 @@ BSWG.game = new function(){
                     selected: false,
                     click: function (me) {
                         if (self.scene === BSWG.SCENE_GAME2) {
+                            setExportFN();
                             JSON.saveAs(
                                 BSWG.componentList.serialize(null, true),
                                 self.exportFN
@@ -804,6 +831,15 @@ BSWG.game = new function(){
             }
 
             BSWG.ui.render(ctx, viewport);
+
+            if (self.scene === BSWG.SCENE_GAME2) {
+                var x = self.loadBtn.p.x + 10 + self.loadBtn.w;
+                ctx.fillStyle = '#aaa';
+                ctx.strokeStyle = '#00f';
+                ctx.font = '18px Orbitron';
+                ctx.textAlign = 'left';
+                ctx.fillTextB(self.exportFN, x, self.loadBtn.p.y + self.loadBtn.h * 0.5 + 18/2, true);
+            }
 
             if (self.mapImage) {
                 ctx.fillStyle = '#000';
