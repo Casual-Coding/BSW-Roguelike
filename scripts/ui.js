@@ -114,7 +114,7 @@ BSWG.control_Button = {
             
         ctx.lineWidth = 2.0;
 
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
+        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
 
         ctx.lineWidth = 1.0;
 
@@ -353,22 +353,28 @@ BSWG.uiControl = function (desc, args) {
             mx += this.w * 0.5;
         }
 
-        if (mx >= this.p.x && my >= this.p.y && mx < (this.p.x + this.w) && my < (this.p.y + this.h))
+        if (mx >= this.p.x && my >= this.p.y && mx < (this.p.x + this.w) && my < (this.p.y + this.h) && !BSWG.game.grabbedBlock)
             this.mouseIn = true;
         else
             this.mouseIn = false;
 
-        if (this.mouseIn && this.click && BSWG.input.MOUSE_PRESSED('left'))
+        if (this.mouseIn && this.click && BSWG.input.MOUSE_RELEASED('left'))
         {
             this.click(this);
         }
 
+        this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left');
+
         this.update();
 
-        if (this.mouseIn && !this.noEat) {
+        /*if (this.mouseIn && !this.noEat) {
             BSWG.input.EAT_MOUSE('left');
             BSWG.input.EAT_MOUSE('right');
             BSWG.input.EAT_MOUSE('middle');
+        }*/
+
+        if (this.mouseIn && !this.noEat) {
+            BSWG.ui.mouseBlock = true;
         }
 
     };
@@ -376,6 +382,8 @@ BSWG.uiControl = function (desc, args) {
 };
 
 BSWG.ui = new function () {
+
+    this.mouseBlock = false;
 
     this.list = [];
 
@@ -393,6 +401,7 @@ BSWG.ui = new function () {
     };
 
     this.update = function () {
+        this.mouseBlock = false;
         for (var i=0; i<this.list.length; i++) {
             this.list[i]._update();
         }

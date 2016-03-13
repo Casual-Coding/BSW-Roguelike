@@ -224,7 +224,7 @@ BSWG.game = new function(){
                 this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10 + 150 + 10 + 150 + 10, y: 10,
                     w: 110, h: 50,
-                    text: "Save",
+                    text: scene === BSWG.SCENE_GAME2 ? "Export" : "Save",
                     selected: false,
                     click: function (me) {
                     }
@@ -238,8 +238,10 @@ BSWG.game = new function(){
                     }
                 });
 
-                this.saveBtn.remove();
-                this.healBtn.remove();
+                if (scene === BSWG.SCENE_GAME1) {
+                    this.saveBtn.remove();
+                    this.healBtn.remove();
+                }
                 this.saveHealAdded = false;
 
                 if (scene === BSWG.SCENE_GAME2) {
@@ -565,7 +567,7 @@ BSWG.game = new function(){
 
                     if (self.editMode) {
 
-                        if (BSWG.input.MOUSE_PRESSED('left')) {
+                        if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.ui.mouseBlock) {
                             if (BSWG.componentList.mouseOver) {
                                 grabbedBlock = BSWG.componentList.mouseOver;
                                 if (grabbedBlock.type === 'cc' || (grabbedBlock.onCC && (!grabbedBlock.canMoveAttached || grabbedBlock.onCC !== self.ccblock)) || grabbedBlock.distanceTo(self.ccblock) > BSWG.maxGrabDistance) {
@@ -696,6 +698,11 @@ BSWG.game = new function(){
                     self.healBtn.remove();
                     self.saveHealAdded = false;
                 }
+            }
+
+            if (self.scene === BSWG.SCENE_GAME2) {
+                self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
+                self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
             }
 
             if (self.map) {

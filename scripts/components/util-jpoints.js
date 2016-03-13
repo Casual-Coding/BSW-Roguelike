@@ -123,7 +123,7 @@ BSWG.jpointRenderer = new function() {
 
                     if (comp.welds[j]) {
                         if (comp.jmhover === j) {
-                            if (!BSWG.input.MOUSE('left')) {
+                            if (!BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
                                 BSWG.render.setCustomCursor(true, 1, 2.0);
                             }
                             clr.set(1.0, 0.1, 0.1, 1.0);
@@ -140,7 +140,7 @@ BSWG.jpointRenderer = new function() {
                     else {
                         if (map[j]) {
                             if (comp.jmhover === j) {
-                                if (!BSWG.input.MOUSE('left')) {
+                                if (!BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
                                     BSWG.render.setCustomCursor(true, 1, 2.0);
                                 }
                                 clr.set(0.1, 1.0, 0.1, 1.0);
