@@ -8,6 +8,10 @@ BSWG.component_SawBlade = {
     hasConfig:       false,
     canMoveAttached: true,
 
+    serialize: [
+        'size'
+    ],
+
     init: function(args) {
 
         this.size      = args.size || 1;

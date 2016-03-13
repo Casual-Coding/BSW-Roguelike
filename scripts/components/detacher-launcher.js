@@ -8,6 +8,11 @@ BSWG.component_DetacherLauncher = {
     hasConfig:       true,
     canMoveAttached: false,
 
+    serialize: [
+        'size',
+        'launchKey'
+    ],
+
     init: function(args) {
 
         this.size      = args.size || 2;

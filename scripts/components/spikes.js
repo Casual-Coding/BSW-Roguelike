@@ -7,6 +7,11 @@ BSWG.component_Spikes = {
     sortOrder: 1,
     hasConfig: false,
 
+    serialize: [
+        'size',
+        'pike'
+    ],
+
     init: function(args) {
 
         this.size      = args.size || 1;

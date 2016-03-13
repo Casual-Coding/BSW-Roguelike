@@ -8,6 +8,9 @@ BSWG.component_ChainLink = {
     hasConfig:       false,
     canMoveAttached: true,
 
+    serialize: [
+    ],
+
     init: function(args) {
 
         this.size   = 1;

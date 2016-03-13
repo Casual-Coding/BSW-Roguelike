@@ -8,6 +8,10 @@ BSWG.component_Thruster = {
 
     hasConfig: true,
 
+    serialize: [
+        'thrustKey'
+    ],
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

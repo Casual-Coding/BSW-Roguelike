@@ -8,6 +8,8 @@ BSWG.component_Missile = {
     hasConfig:       false,
     canMoveAttached: false,
 
+    serialize: false,
+
     init: function(args) {
 
         this.size      = args.size || 1;

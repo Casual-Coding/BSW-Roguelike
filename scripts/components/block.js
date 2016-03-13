@@ -8,6 +8,13 @@ BSWG.component_Block = {
 
     hasConfig: false,
 
+    serialize: [
+        'width',
+        'height',
+        'armour',
+        'triangle'
+    ],
+
     init: function(args) {
 
         this.width    = args.width || 1;

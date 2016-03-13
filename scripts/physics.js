@@ -77,6 +77,7 @@ BSWG.physics = new function(){
 
     };
 
+    this.weldID = 1;
     this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB, motorA, motorB, noMotor) {
 
         var obj = {
@@ -87,7 +88,8 @@ BSWG.physics = new function(){
             revolute: motorA ? true : false,
             noMotor:  !!noMotor,
             objA:     null,
-            objB:     null
+            objB:     null,
+            id:       this.weldID++
         };
 
         for (var i=0; i<this.objects.length; i++) {
@@ -164,17 +166,28 @@ BSWG.physics = new function(){
 
     this.removeWeld = function ( obj ) {
 
+        if (!obj) {
+            return;
+        }
+
+        var found = false;
+
         for (var i=0; i<this.welds.length; i++) {
-            if (this.welds[i] === obj) {
+            if (this.welds[i].id === obj.id) {
                 this.welds[i] = null;
                 this.welds.splice(i, 1);
+                found = true;
                 break;
             }
         }
 
+        if (!found) {
+            return;
+        }
+
         var remWeld = function(obj, search) {
             for (var j=0; j<obj.welds.length; j++) {
-                if (obj.welds[j] === search) {
+                if (obj.welds[j].id === search.id) {
                     obj.welds.splice(j, 1);
                     j --;
                 }
@@ -182,10 +195,10 @@ BSWG.physics = new function(){
         };
 
         for (var i=0; i<this.objects.length; i++) {
-            if (this.objects[i] === obj.objA) {
+            if (this.objects[i].id === obj.objA.id) {
                 remWeld(this.objects[i], obj);
             }
-            if (this.objects[i] === obj.objB) {
+            if (this.objects[i].id === obj.objB.id) {
                 remWeld(this.objects[i], obj);
             }
         }
@@ -319,6 +332,8 @@ BSWG.physics = new function(){
 
     };
 
+    this.objID = 1;
+
     this.createObject = function (type, pos, angle, def) {
 
         var obj = {
@@ -329,7 +344,8 @@ BSWG.physics = new function(){
             verts:      [],
             radius:     0,
             type:       type,
-            welds:      []
+            welds:      [],
+            id:         this.objID ++
         };
 
         obj.bodyDef = new b2BodyDef();
@@ -460,18 +476,29 @@ BSWG.physics = new function(){
 
     this.removeObject = function(obj) {
 
+        if (!obj) {
+            return;
+        }
+
+        while (obj.welds && obj.welds.length > 0) {
+            this.removeWeld(obj.welds[0]);
+        }
+        obj.welds = null;
+
+        var found = false;
+
         for (var i=0; i<this.objects.length; i++) {
-            if (this.objects[i] === obj) {
+            if (this.objects[i].id === obj.id) {
+                found = true;
                 this.objects[i] = null;
                 this.objects.splice(i, 1);
                 break;
             }
         }
 
-        while (obj.welds.length > 0) {
-            this.removeWeld(obj.welds[0]);
+        if (!found) {
+            return;
         }
-        obj.welds = null;
 
         this.world.DestroyBody(obj.body);
         obj.body = null;

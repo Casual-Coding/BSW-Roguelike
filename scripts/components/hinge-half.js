@@ -8,6 +8,12 @@ BSWG.component_HingeHalf = {
 
     hasConfig: true,
 
+    serialize: [
+        'rotKey',
+        'size',
+        'motor'
+    ],
+
     init: function(args) {
 
         this.size   = args.size || 1;

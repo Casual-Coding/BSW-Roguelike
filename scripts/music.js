@@ -331,7 +331,6 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         minor = major;
     }
 
-
     for (var i=1; i<cProg.length; i++) {
         var lScale = cMag[i-1] ? major : minor;
         var cScale = cMag[i] ? major : minor;

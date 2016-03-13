@@ -8,6 +8,10 @@ BSWG.component_MissileLauncher = {
 
     hasConfig: true,
 
+    serialize: [
+        'fireKey'
+    ],
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;
@@ -115,12 +119,14 @@ BSWG.component_MissileLauncher = {
             var pl = new b2Vec2(0.0,  1.5);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
+            var av = this.obj.body.GetAngularVelocity();
             var p = BSWG.physics.localToWorld([pl], this.obj.body);
 
             new BSWG.component(BSWG.component_Missile, {
 
                 pos: p[0],
                 angle: a,
+                angVel: av * 0.5,
                 vel: new b2Vec2(-Math.cos(a)*1.0 + v.x, -Math.sin(a)*1.0 + v.y)
 
             });
@@ -134,7 +140,7 @@ BSWG.component_MissileLauncher = {
         if (accel)
         {
             var a = this.obj.body.GetAngle() + Math.PI/2.0;
-            accel *= -38.0;
+            accel *= -38.0 * 3;
             this.obj.body.SetAwake(true);
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);    

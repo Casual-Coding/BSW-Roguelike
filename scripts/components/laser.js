@@ -2,11 +2,15 @@
 
 BSWG.component_Laser = {
 
-    type: 'missile-launcher',
+    type: 'laser',
 
     sortOrder: 2,
 
     hasConfig: true,
+
+    serialize: [
+        'fireKey'
+    ],
 
     init: function(args) {
 

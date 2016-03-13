@@ -103,6 +103,10 @@ BSWG.component = function (desc, args) {
         this.obj.body.SetLinearVelocity(args.vel.clone());
     }
 
+    if (this.obj.body && args.angVel) {
+        this.obj.body.SetAngularVelocity(args.angVel);
+    }
+
     if (this.jpoints && this.jpoints.length && this.obj) {
 
         for (var i=0; i<this.jpoints.length; i++) {
@@ -187,8 +191,13 @@ BSWG.component = function (desc, args) {
 
     this.updateJCache = function() {
 
-        if (!BSWG.game.editMode) {
+        if (!BSWG.game.editMode && !BSWG.componentList.autoWelds) {
             return;
+        }
+
+        var autos = null;
+        if (BSWG.componentList.autoWelds) {
+            autos = BSWG.componentList.autoWelds;
         }
 
         if (!this.jpointsw) {
@@ -240,14 +249,28 @@ BSWG.component = function (desc, args) {
                             continue;
                         }
                         if (d2 < BSWG.component_minJMatch) {
+                            var auto = false;
+                            if (autos) {
+                                var _c = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5);
+                                for (var f=0; f<autos.length; f++) {
+                                    if (Math.distSqVec2(_c, autos[f]) < BSWG.component_minJMatch) {
+                                        auto = true;
+                                        break;
+                                    }
+                                }
+                            }
                             this.jmatch.push([
-                                k1, cl[i], k2, p1.motorType || 0, p2.motorType || 0
+                                k1, cl[i], k2, p1.motorType || 0, p2.motorType || 0, auto
                             ]);
                             if (cl[i].jmhover === k2) {
-                                this.jmhover = k1;
+                                if (BSWG.game.editMode) {
+                                    this.jmhover = k1;
+                                }
                             }
                             else if (this.jmhover === k1) {
-                                cl[i].jmhover = k2;
+                                if (BSWG.game.editMode) {
+                                    cl[i].jmhover = k2;
+                                }
                             }
                             break;
                         }
@@ -275,69 +298,84 @@ BSWG.component = function (desc, args) {
             return;
         }
 
+        var doWelds = false;
+
         if (BSWG.game.editMode) {
 
             if (this.jmhover >= 0 && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift')) {
-                for (var i=0; i<this.jmatch.length; i++) {
-                    if (this.jmatch[i][0] === this.jmhover && this.jmatch[i][1].id > this.id) {
-                        if (!this.welds[this.jmatch[i][0]]) {
-                            var obj = BSWG.physics.createWeld(this.obj.body, this.jmatch[i][1].obj.body,
-                                                              this.jpoints[this.jmatch[i][0]],
-                                                              this.jmatch[i][1].jpoints[this.jmatch[i][2]],
-                                                              true,
-                                                              this.jpointsNormals[this.jmatch[i][0]],
-                                                              this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
-                                                              this.jmatch[i][3],
-                                                              this.jmatch[i][4],
-                                                              [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
-                                                              );
 
-                            if (this.onCC && !this.jmatch[i][1].onCC) {
-                                this.jmatch[i][1].onCC = this.onCC;
-                            }
-                            if (!this.onCC && this.jmatch[i][1].onCC) {
-                                this.onCC = this.jmatch[i][1].onCC;
-                            }
+                doWelds = true;
 
-                            this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
-                            this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
+            }
+        }
 
-                            BSWG.updateOnCC(this, this.jmatch[i][1]);
+        var autos = null;
 
-                            var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
-                            var p1 = this.jpointsw[this.jmatch[i][0]];
+        if (BSWG.componentList.autoWelds) {
+            autos = BSWG.componentList.autoWelds;
+            doWelds = true;
+        }
 
-                            BSWG.render.boom.palette = chadaboom3D.blue;
-                            BSWG.render.boom.add(
-                                new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2),
-                                0.75,
-                                32,
-                                0.4,
-                                1.0
-                            );
+        if (doWelds) {
+            for (var i=0; i<this.jmatch.length; i++) {
+                if (((this.jmatch[i][0] === this.jmhover || this.jmatch[i][5]) && this.jmatch[i][1].id > this.id)) {
+                    if (!this.welds[this.jmatch[i][0]]) {
+                        var obj = BSWG.physics.createWeld(this.obj.body, this.jmatch[i][1].obj.body,
+                                                          this.jpoints[this.jmatch[i][0]],
+                                                          this.jmatch[i][1].jpoints[this.jmatch[i][2]],
+                                                          true,
+                                                          this.jpointsNormals[this.jmatch[i][0]],
+                                                          this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
+                                                          this.jmatch[i][3],
+                                                          this.jmatch[i][4],
+                                                          [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
+                                                          );
 
-                            BSWG.input.EAT_MOUSE('left');
+                        if (this.onCC && !this.jmatch[i][1].onCC) {
+                            this.jmatch[i][1].onCC = this.onCC;
                         }
-                        else {
-                            BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
-                            this.welds[this.jmatch[i][0]].other = null;
-                            this.welds[this.jmatch[i][0]] = null;
-                            this.jmatch[i][1].welds[this.jmatch[i][2]].other = null;
-                            this.jmatch[i][1].welds[this.jmatch[i][2]] = null;  
-
-                            BSWG.updateOnCC(this, this.jmatch[i][1]);
-
-                            BSWG.render.boom.palette = chadaboom3D.fire;
-                            BSWG.render.boom.add(
-                                this.jpointsw[this.jmatch[i][0]].particleWrap(0.2),
-                                1.25,
-                                32,
-                                0.4,
-                                1.0
-                            );
-
-                            BSWG.input.EAT_MOUSE('left');
+                        if (!this.onCC && this.jmatch[i][1].onCC) {
+                            this.onCC = this.jmatch[i][1].onCC;
                         }
+
+                        this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
+                        this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
+
+                        BSWG.updateOnCC(this, this.jmatch[i][1]);
+
+                        var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
+                        var p1 = this.jpointsw[this.jmatch[i][0]];
+
+                        BSWG.render.boom.palette = chadaboom3D.blue;
+                        BSWG.render.boom.add(
+                            new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2),
+                            0.75,
+                            32,
+                            0.4,
+                            1.0
+                        );
+
+                        BSWG.input.EAT_MOUSE('left');
+                    }
+                    else if (!autos) {
+                        BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
+                        this.welds[this.jmatch[i][0]].other = null;
+                        this.welds[this.jmatch[i][0]] = null;
+                        this.jmatch[i][1].welds[this.jmatch[i][2]].other = null;
+                        this.jmatch[i][1].welds[this.jmatch[i][2]] = null;  
+
+                        BSWG.updateOnCC(this, this.jmatch[i][1]);
+
+                        BSWG.render.boom.palette = chadaboom3D.fire;
+                        BSWG.render.boom.add(
+                            this.jpointsw[this.jmatch[i][0]].particleWrap(0.2),
+                            1.25,
+                            32,
+                            0.4,
+                            1.0
+                        );
+
+                        BSWG.input.EAT_MOUSE('left');
                     }
                 }
             }
@@ -420,6 +458,22 @@ BSWG.componentList = new function () {
 
     this.clear = function () {
 
+        this.typeMap = {
+            'blaster':          BSWG.component_Blaster,
+            'block':            BSWG.component_Block,
+            'chainlink':        BSWG.component_ChainLink,
+            'cc':               BSWG.component_CommandCenter,
+            'detacherlauncher': BSWG.component_DetacherLauncher,
+            'hingehalf':        BSWG.component_HingeHalf,
+            'laser':            BSWG.component_Laser,
+            'missile-launcher': BSWG.component_MissileLauncher,
+            'missile':          BSWG.component_Missile,
+            'sawblade':         BSWG.component_SawBlade,
+            'sawmotor':         BSWG.component_SawMotor,
+            'spikes':           BSWG.component_Spikes,
+            'thruster':         BSWG.component_Thruster
+        };
+
         while (this.compList.length) {
             this.compList[0].remove();
         }
@@ -442,7 +496,17 @@ BSWG.componentList = new function () {
 
     this.remove = function (comp) {
 
+        if (comp.removed) {
+            return false;
+        }
+        comp.removed = true;
+
         comp.destroy();
+
+        if (comp.obj) {
+            BSWG.physics.removeObject(comp.obj);
+            comp.obj = null;
+        };
 
         for (var i=0; i<this.compList.length; i++)
             if (this.compList[i] === comp) {
@@ -495,6 +559,7 @@ BSWG.componentList = new function () {
             this.remove(this.compRemove[i]);
         }
         this.compRemove.length = 0;
+        this.autoWelds = null;
 
     };
 
@@ -626,6 +691,112 @@ BSWG.componentList = new function () {
                 ret.push(this.compList[i]);
         }
         return ret;
-    }
+    };
+
+    this.autoWelds = null;
+    this.load = function(obj) {
+
+        var comps = obj.list;
+        var cc = null;
+
+        this.autoWelds = new Array();
+
+        for (var i=0; i<comps.length; i++) {
+            var C = comps[i];
+            var args = new Object();
+            if (C.args) {
+                for (var key in C.args) {
+                    args[key] = C.args[key];
+                }
+            }
+            args.pos = new b2Vec2(C.pos.x, C.pos.y);
+            args.angle = C.angle;
+            var OC = new BSWG.component(this.typeMap[C.type], args);
+            if (OC.type === 'cc') {
+                cc = OC;
+            }
+
+            var WL = C.welds;
+            for (var j=0; j<WL.length; j++) {
+                var pos = new b2Vec2(WL[j].pos.x, WL[j].pos.y);
+                this.autoWelds.push(BSWG.physics.localToWorld(pos, OC.obj.body));
+            }
+        }
+
+        for (var i=0; i<this.autoWelds.length; i++) {
+            for (var j=i+1; j<this.autoWelds.length; j++) {
+                var dist = Math.distVec2(this.autoWelds[i], this.autoWelds[j]);
+                if (dist <= Math.sqrt(BSWG.component_jMatchClickRange)) {
+                    this.autoWelds.splice(j, 1);
+                    j -= 1;
+                    continue;
+                }
+            }
+        }
+
+        return cc;
+
+    };
+
+    // returns JSON
+    this.serialize = function(onCC, everything) {
+
+        var comps = new Array();
+
+        // Filter list
+        for (var i=0; i<this.compList.length; i++) {
+            var C = this.compList[i];
+
+            if (C.serialize && (everything || C.onCC === onCC)) {
+                comps.push(C);
+            }
+        }
+
+        var out = new Array(comps.length);
+
+        for (var i=0; i<comps.length; i++) {
+            var C  = comps[i];
+            var OC = new Object();
+
+            var body = C.obj.body;
+            var pos = body.GetPosition();
+            var angle = body.GetAngle();
+
+            OC.type = C.type;
+            OC.id = C.id;
+            OC.onCC = C.onCC ? C.onCC.id : null;
+            OC.pos = { x: pos.x, y: pos.y };
+            OC.angle = angle;
+
+            OC.args = new Object();
+            for (var j=0; j<C.serialize.length; j++) {
+                var key = C.serialize[j];
+                OC.args[key] = C[key];
+            }
+
+            OC.welds = new Array();
+            if (C.welds) {
+                for (var key in C.welds) {
+                    var W = C.welds[key];
+                    if (W && W.other) {
+                        var OW = new Object();
+                        OW.other = W.other.id;
+                        OW.index = parseInt(key);
+                        var jp = C.jpoints[OW.index];
+                        OW.pos = { x: jp.x, y: jp.y }; // Local to current component
+                        OC.welds.push(OW);
+                    }
+                }
+            }
+
+            out[i] = OC;
+        }
+
+        var ret = new Object();
+        ret.list = out;
+
+        return ret;
+
+    };
 
 }();

@@ -8,6 +8,10 @@ BSWG.component_Blaster = {
 
     hasConfig: true,
 
+    serialize: [
+        'fireKey'
+    ],
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

@@ -10,6 +10,9 @@ BSWG.component_CommandCenter = {
 
     hasConfig: false,
 
+    serialize: [
+    ],
+
     init: function(args) {
 
         this.width  = 2;

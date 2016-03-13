@@ -8,6 +8,11 @@ BSWG.component_SawMotor = {
 
     hasConfig: true,
 
+    serialize: [
+        'size',
+        'rotKey'
+    ],
+
     init: function(args) {
 
         this.size   = args.size || 1;
