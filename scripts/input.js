@@ -406,6 +406,10 @@ BSWG.input = new function(){
 
         jQuery(div).click(function(e){
 
+            if (BSWG.game.grabbedBlock) {
+                return;
+            }
+
             var x = mouseState.x, y = mouseState.y;
 
             for (var i=0; i<self.gfiles.length; i++) {

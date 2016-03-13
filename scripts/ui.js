@@ -358,12 +358,12 @@ BSWG.uiControl = function (desc, args) {
         else
             this.mouseIn = false;
 
-        if (this.mouseIn && this.click && BSWG.input.MOUSE_RELEASED('left'))
+        if (this.mouseIn && this.click && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock)
         {
             this.click(this);
         }
 
-        this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left');
+        this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock;
 
         this.update();
 

@@ -346,14 +346,16 @@ BSWG.component = function (desc, args) {
                         var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
                         var p1 = this.jpointsw[this.jmatch[i][0]];
 
-                        BSWG.render.boom.palette = chadaboom3D.blue;
-                        BSWG.render.boom.add(
-                            new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2),
-                            0.75,
-                            32,
-                            0.4,
-                            1.0
-                        );
+                        if (!autos) {
+                            BSWG.render.boom.palette = chadaboom3D.blue;
+                            BSWG.render.boom.add(
+                                new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2),
+                                0.75,
+                                32,
+                                0.4,
+                                1.0
+                            );
+                        }
 
                         BSWG.input.EAT_MOUSE('left');
                     }

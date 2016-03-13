@@ -656,6 +656,7 @@ BSWG.game = new function(){
                             grabbedBlock = null;
                             grabbedLocal = null;
                             BSWG.physics.endMouseDrag();
+                            BSWG.input.EAT_MOUSE('left');
                         }
 
                         if (grabbedBlock && BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT)) {
@@ -836,9 +837,9 @@ BSWG.game = new function(){
                 var x = self.loadBtn.p.x + 10 + self.loadBtn.w;
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
-                ctx.font = '18px Orbitron';
+                ctx.font = '10px Orbitron';
                 ctx.textAlign = 'left';
-                ctx.fillTextB(self.exportFN, x, self.loadBtn.p.y + self.loadBtn.h * 0.5 + 18/2, true);
+                ctx.fillTextB(self.exportFN, x, self.loadBtn.p.y + self.loadBtn.h * 0.5 + 10/2, true);
             }
 
             if (self.mapImage) {
