@@ -98,7 +98,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     this.volume = initVolume;
     
-    var patternLength = bpm*BSWG.song_subBeat * 3;
+    var patternLength = bpm*BSWG.song_subBeat * 4;
 
     this.channels = new Array(nChannels);
 
@@ -422,72 +422,96 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     var allBfrs = [];
 
     var self = this;
-    var queue = function() {
 
-        var patIndex = 0;
-        var ctime = audioCtx.currentTime;
+    var patIndex = 0;
+    var ctime = audioCtx.currentTime;
 
-        while (patIndex < patternLength) {
+    var queue = function(limit) {
 
-            for (var i=0; i<self.channels.length; i++) {
-                var C = self.channels[i];
+        if (patIndex >= patternLength) {
+            return;
+        }
 
-                if (!C.conv.buffer) {
-                    C.conv.buffer = impulseResponse(0.05);
-                }
+        if (limit > 0) {
 
-                var P = C.pattern;
-                var N = P[patIndex];
-                if (N) {
-                    if (patIndex > (patternLength - BSWG.song_subBeat*4)) {
-                        var t = (patternLength - patIndex) / (BSWG.song_subBeat*4);
-                        N[1] *= t;
+            while (patIndex < patternLength && limit > 0) {
+
+                limit --;
+
+                for (var i=0; i<self.channels.length; i++) {
+                    var C = self.channels[i];
+
+                    if (!C.conv.buffer) {
+                        C.conv.buffer = impulseResponse(0.05);
                     }
-                    if (!N[0]) {
+
+                    var P = C.pattern;
+                    var N = P[patIndex];
+                    if (N) {
+                        if (patIndex > (patternLength - BSWG.song_subBeat*4)) {
+                            var t = (patternLength - patIndex) / (BSWG.song_subBeat*4);
+                            N[1] *= t;
+                        }
+                        if (!N[0]) {
+                            try {
+                                C.bfr.stop(ctime);
+                            } catch (err) {}
+                        }
+                        else {
+                            if (N[2]) {
+                                try {
+                                    C.bfr.stop(ctime);
+                                    C.bfr = audioCtx.createBufferSource();
+                                    C.bfr.loop = false;
+                                    C.bfr.buffer = C.inst.buffer;
+                                    C.bfr.connect(C.mGain);
+                                } catch (err) {}
+                                C.bfr.playbackRate.setValueAtTime((N[0] / C.inst.baseFreq) * (1 + Math.random()*0.001-0.0005), ctime);
+                                C.bfr.start(ctime, 1);
+                                allBfrs.push(C.bfr);
+                            }
+                        }
+                        C.gain.gain.setValueAtTime((N[1] * [4.0,5.0,6.0][i]) || 0.0, ctime);
+                    }
+                    else {
+                        C.gain.gain.setValueAtTime(0.0, ctime);
                         try {
                             C.bfr.stop(ctime);
                         } catch (err) {}
                     }
-                    else {
-                        if (N[2]) {
-                            try {
-                                C.bfr.stop(ctime);
-                                C.bfr = audioCtx.createBufferSource();
-                                C.bfr.loop = false;
-                                C.bfr.buffer = C.inst.buffer;
-                                C.bfr.connect(C.mGain);
-                            } catch (err) {}
-                            C.bfr.playbackRate.setValueAtTime((N[0] / C.inst.baseFreq) * (1 + Math.random()*0.001-0.0005), ctime);
-                            C.bfr.start(ctime, 1);
-                            allBfrs.push(C.bfr);
-                        }
-                    }
-                    C.gain.gain.setValueAtTime((N[1] * [4.0,5.0,6.0][i]) || 0.0, ctime);
                 }
-                else {
-                    C.gain.gain.setValueAtTime(0.0, ctime);
-                    try {
-                        C.bfr.stop(ctime);
-                    } catch (err) {}
-                }
+
+                patIndex += 1;
+
+                ctime += 60.0/(bpm*BSWG.song_subBeat);
             }
 
-            patIndex += 1;
+            for (var i=0; i<self.channels.length; i++) {
+                var C = self.channels[i];
+                C.gain.gain.setValueAtTime(0.0, ctime);
+                try {
+                    C.bfr.stop(ctime);
+                } catch (err) {}
+            }
 
-            ctime += 60.0/(bpm*BSWG.song_subBeat);
         }
 
-        for (var i=0; i<self.channels.length; i++) {
-            var C = self.channels[i];
-            C.gain.gain.setValueAtTime(0.0, ctime);
-            try {
-                C.bfr.stop(ctime);
-            } catch (err) {}
-        }
+        window.setTimeout(function(){
+
+            var patsLeft = (ctime - audioCtx.currentTime)/(60.0 / (bpm*BSWG.song_subBeat));
+
+            if (patsLeft < BSWG.song_subBeat*4) {
+                queue(BSWG.song_subBeat*8);
+            }
+            else {
+                queue(0);
+            }
+
+        }, 100);
 
     };
 
-    queue();
+    queue(BSWG.song_subBeat*16);
 
     this.setVolume = function (newVolume, time) {
 
