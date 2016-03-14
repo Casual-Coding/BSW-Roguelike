@@ -20,8 +20,8 @@ BSWG.music = new function() {
     this.audioCtx = new acClass();
 
     this.instruments = [
-        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-electric-guitar.wav' },
-        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-distorted-guitar.wav' }
+        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-electric-guitar.ogg' },
+        { baseFreq: BSWG.music_NoteFreq(2, 4), url: 'music/e2-distorted-guitar.ogg' }
     ];
 
     this.init = function(onload) {
@@ -348,7 +348,10 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                 v = v + ~~(cProg[i-1]);
             }
             if (Math.pow(Math.random(), 2.0) > (1-mood.drop)) {
-                v -= 2;
+                v -= 1;
+            }
+            if (Math.pow(Math.random(), 2.0) > (1-mood.rise)) {
+                v += 1;
             }
             if (cMag[i] !== cMag[i-1]) {
                 if (lScale(v, 0) !== cScale(v, 0)) {
@@ -507,11 +510,11 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                 queue(0);
             }
 
-        }, 100);
+        }, 60.0/(bpm*BSWG.song_subBeat) * 1000.0 * 2);
 
     };
 
-    queue(BSWG.song_subBeat*16);
+    queue(BSWG.song_subBeat*8);
 
     this.setVolume = function (newVolume, time) {
 
