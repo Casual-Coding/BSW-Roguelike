@@ -521,8 +521,8 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
             var patsLeft = (ctime - audioCtx.currentTime)/(60.0 / (bpm*BSWG.song_subBeat));
 
-            if (patsLeft < BSWG.song_subBeat*2) {
-                queue(BSWG.song_subBeat*4);
+            if (patsLeft < BSWG.song_subBeat*4) {
+                queue(BSWG.song_subBeat*8);
             }
             else {
                 queue(0);
@@ -532,7 +532,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     };
 
-    queue(BSWG.song_subBeat*1);
+    queue(BSWG.song_subBeat*8);
 
     this.setVolume = function (newVolume, time) {
 
