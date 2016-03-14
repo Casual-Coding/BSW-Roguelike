@@ -175,7 +175,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     }
     var defaults = {
         'happy': true,
-        'root': 0.95,
+        'root': 0.05,
         'crazy': 0.005,
         'rep': 0.9,
         'rise': 0.9,
@@ -234,7 +234,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         else {
             var last = 0;
             var dropper = Math.random() < 0.5;
-            var rootPer = mood.root;
+            var rootPer = 1-mood.root;
             var crazyPer = 1-mood.crazy;
             var repPer = mood.rep;
             var risePer = 1-mood.rise;
@@ -340,15 +340,15 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         var cScale = cMag[i] ? major : minor;
         var k = 100;
         while (k-- > 0) {
-            var v = ~~(Math.random() * 10 - 2);
+            var v = ~~(Math.random() * 14 - 6);
             if (cMag[i-1] && !cMag[i]) {
-                v = ~~(v + cProg[i-1] + 5) * 0.5;
+                v = v + ~~(cProg[i-1]);
             }
             else if (cMag[i] && !cMag[i-1]) {
-                v = ~~(v + cProg[i-1] - 5) * 0.5;
+                v = v + ~~(cProg[i-1]);
             }
-            if (Math.random() > (1-mood.drop)) {
-                v -= 3;
+            if (Math.pow(Math.random(), 2.0) > (1-mood.drop)) {
+                v -= 2;
             }
             if (cMag[i] !== cMag[i-1]) {
                 if (lScale(v, 0) !== cScale(v, 0)) {

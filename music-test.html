@@ -26,6 +26,7 @@
                 font-size: 26px;
                 background-color: #181818;
                 padding: 10px;
+                margin-left: 9px;
             }
             #loading {
                 color: #88eeff;
@@ -67,6 +68,7 @@
         <canvas id='intenseSlider'></canvas><br>
         <canvas id='harmonizeSlider'></canvas><br>
         <canvas id='repSlider'></canvas><br>
+        <canvas id='rootSlider'></canvas><br>
         <canvas id='bpmSlider'></canvas><br>
         <canvas id='seedSlider'></canvas><br>
         <canvas id='seed2Slider'></canvas><br>
@@ -181,7 +183,7 @@
                 document.body.removeChild(document.getElementById('loading'));
                 document.getElementById('generate').style.visibility = 'visible';
 
-                var order = [ 'happy', 'smooth', 'rise', 'drop', 'crazy', 'intense', 'harmonize', 'rep', 'bpm', 'seed', 'seed2' ];
+                var order = [ 'happy', 'smooth', 'rise', 'drop', 'crazy', 'intense', 'harmonize', 'rep', 'bpm', 'seed', 'seed2', 'root' ];
                 var qs = window.location.href.split('#')[1] || "";
                 var tok = qs.split("v");
 
@@ -194,7 +196,8 @@
                     crazy: Math.pow(Math.random(), 2.0),
                     harmonize: Math.random(),
                     intense: Math.random(),
-                    rep: 0.05
+                    rep: 0.05,
+                    root: 0.05,
                 };
 
                 var seed = ~~(Math.random() * 100.999);
@@ -228,6 +231,7 @@
                 var S_bpm = new slider(document.getElementById('bpmSlider'), 400, 40, 40, 160, bpm, 'bpm', 1);
                 var S_seed = new slider(document.getElementById('seedSlider'), 400, 40, 0, 100, seed, 'seed', 1);
                 var S_seed2 = new slider(document.getElementById('seed2Slider'), 400, 40, 0, 100, seed2, 'seed2', 1);
+                var S_root = new slider(document.getElementById('rootSlider'), 400, 40, 0.0, 1.0, settings.root, 'root', 100);
 
                 document.getElementById('generate').onclick = function() {
                     var vals = [
@@ -241,7 +245,8 @@
                         ~~(S_rep.value * 100) + '',
                         ~~(S_bpm.value) + '',
                         ~~(S_seed.value) + '',
-                        ~~(S_seed2.value) + ''
+                        ~~(S_seed2.value) + '',
+                        ~~(S_root.value * 100) + '',
                     ];
                     var qs2 = vals.join("v");
                     window.location.href = window.location.href.split('#')[0] +'#'+ qs2;
