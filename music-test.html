@@ -4,16 +4,49 @@
         <script src="scripts/lib/sound-loader.js"></script>
         <script src="scripts/lib/seedrandom.js"></script>
         <style>
-            a {
+            body {
+                font-family: Arial, Sans-Serif;
+                font-size: 14px;
+            }
+            #generate {
                 text-decoration: none;
                 font-weight: bold;
-                color: white;
+                color: #88ffee;
                 font-size: 30px;
+                margin-left: 240px;
+                background-color: #333;
+                padding: 10px;
+                visibility: hidden;
+            }
+            #generate:hover {
+                background-color: #363;
+            }
+            .title {
+                color: #88eeff;
+                font-size: 26px;
+                background-color: #181818;
+                padding: 10px;
+            }
+            #loading {
+                color: #88eeff;
+                font-size: 26px;
+                padding: 10px;
+                height: 60px;
             }
             span.left {
                 display: inline-block;
                 width: 300px;
                 font-size: 20px;
+            }
+            canvas {
+                -webkit-touch-callout: none; /* iOS Safari */
+                -webkit-user-select: none;   /* Chrome/Safari/Opera */
+                -khtml-user-select: none;    /* Konqueror */
+                -moz-user-select: none;      /* Firefox */
+                -ms-user-select: none;       /* IE/Edge */
+                user-select: none;           /* non-prefixed version, currently
+                                                not supported by any browser */
+                height: 1px;
             }
         </style>
     </head>
@@ -23,14 +56,134 @@
         <div id='#info'>
         </div>
 
+        <br>
+        <span class='title'>BSWR Procedural Music Demo</span><br><br>
+
+        <canvas id='happySlider'></canvas><br>
+        <canvas id='smoothSlider'></canvas><br>
+        <canvas id='riseSlider'></canvas><br>
+        <canvas id='dropSlider'></canvas><br>
+        <canvas id='crazySlider'></canvas><br>
+        <canvas id='intenseSlider'></canvas><br>
+        <canvas id='harmonizeSlider'></canvas><br>
+        <canvas id='repSlider'></canvas><br>
+        <canvas id='bpmSlider'></canvas><br>
+        <canvas id='seedSlider'></canvas><br>
+        <canvas id='seed2Slider'></canvas><br>
+
+        <div id='loading'>Loading ...</div>
+        <br>
+
+        <a href="#" id='generate'>generate</a>
+
         <script>
+
+            var mouseDown = false;
+            var mouseX=-1, mouseY=-1;
+
+            document.body.onmousedown = function (e) {
+                mouseDown = true;
+            };
+            document.body.onmouseup = function (e) {
+                mouseDown = false;
+            };
+            document.body.onmousemove = function (e) {
+                e = e || window.event;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            }
+
+            var slider = function(canvas, width, height, minv, maxv, value, name, displayMul) {
+
+                var inCanvas = !!canvas;
+
+                var canvas = canvas || document.createElement("canvas");
+                canvas.width = canvas.style.width = width;
+                canvas.height = canvas.style.height = height;
+
+                var bfr = height/2;
+
+                if (!(value > minv)) {
+                    value = minv;
+                }
+                if (!(value < maxv)) {
+                    value = maxv;
+                }
+                this.value = value;
+                this.iValue = value;
+
+                canvas.style.cursor = 'default';
+
+                var ctx = canvas.getContext('2d');
+
+                if (!inCanvas) {
+                    document.body.appendChild(canvas);
+                }
+
+                var self = this;
+                var update = function () {
+                    if (mouseDown) {
+                        var x = mouseX - canvas.offsetLeft;
+                        var y = mouseY - canvas.offsetTop;
+                        if (x >= 0 && x < width && y >= 0 && y < height) {
+                            value = ((x - bfr) / (width - bfr * 2)) * (maxv - minv) + minv;
+                            if (value < minv) {
+                                value = minv;
+                            }
+                            if (value > maxv) {
+                                value = maxv;
+                            }
+                        }
+                    }
+
+                    self.value = value;
+
+                    ctx.clearRect(0, 0, width, height);
+
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(bfr, bfr-1, width-bfr*2, 3);
+                    ctx.fillStyle = '#aaa';
+                    ctx.fillRect(bfr, bfr, width-bfr*2, 1);
+
+                    var xv = (self.iValue - minv) / (maxv - minv) * (width - bfr * 2);
+
+                    ctx.globalAlpha = 0.5;
+
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(bfr-1 + xv, bfr-6, 3, 12);
+                    ctx.fillStyle = '#aaa';
+                    ctx.fillRect(bfr + xv, bfr-6, 1, 12);
+
+                    ctx.globalAlpha = 1.0;
+
+                    var xv = (value - minv) / (maxv - minv) * (width - bfr * 2);
+
+                    ctx.fillStyle = '#999';
+                    ctx.fillRect(bfr-1 + xv, bfr-6, 3, 12);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(bfr + xv, bfr-6, 1, 12);
+
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#aaa';
+                    ctx.fillText(name, bfr, bfr*0.75);
+
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = '#aaa';
+                    ctx.fillText(""+~~(value * displayMul), width-bfr, bfr*0.75);
+                };
+                window.setInterval(update, 1000/10);
+            };
 
             BSWG.music.init(function(){
 
-                var seed = parseInt(window.location.href.split('#')[1] || (~~(Math.random()*10000000) + ''));
-                window.location.href = '#' + seed;
+                document.body.removeChild(document.getElementById('loading'));
+                document.getElementById('generate').style.visibility = 'visible';
 
-                Math.seedrandom(seed);
+                var order = [ 'happy', 'smooth', 'rise', 'drop', 'crazy', 'intense', 'harmonize', 'rep', 'bpm', 'seed', 'seed2' ];
+                var qs = window.location.href.split('#')[1] || "";
+                var tok = qs.split("v");
 
                 var bpm = 40.0 + ~~(Math.random() * 80);
 
@@ -40,8 +193,65 @@
                     rise: Math.random(), drop: Math.random(),
                     crazy: Math.pow(Math.random(), 2.0),
                     harmonize: Math.random(),
-                    intense: Math.random()
+                    intense: Math.random(),
+                    rep: 0.05
                 };
+
+                var seed = ~~(Math.random() * 100.999);
+                var seed2 = 0;
+
+                for (var i=0; i<tok.length; i++) {
+                    v = tok[i];
+                    v = (order[i] === 'bpm' || order[i] === 'seed' || order[i] === 'seed2') ? parseInt(v) : (parseFloat(v) / 100);
+                    if (order[i] === 'seed') {
+                        seed = v;
+                    }
+                    else if (order[i] === 'seed2') {
+                        seed2 = v;
+                    }
+                    else if (order[i] === 'bpm') {
+                        bpm = v;
+                    }
+                    else {
+                        settings[order[i]] = v;
+                    }
+                }
+
+                console.log(settings);
+
+                var S_happy = new slider(document.getElementById('happySlider'), 400, 40, 0.0, 1.0, settings.happy, 'happy', 100);
+                var S_smooth = new slider(document.getElementById('smoothSlider'), 400, 40, 0.0, 1.0, settings.smooth, 'smooth', 100);
+                var S_rise = new slider(document.getElementById('riseSlider'), 400, 40, 0.0, 1.0, settings.rise, 'rise', 100);
+                var S_drop = new slider(document.getElementById('dropSlider'), 400, 40, 0.0, 1.0, settings.drop, 'drop', 100);
+                var S_crazy = new slider(document.getElementById('crazySlider'), 400, 40, 0.0, 1.0, settings.crazy, 'crazy', 100);
+                var S_intense = new slider(document.getElementById('intenseSlider'), 400, 40, 0.0, 1.0, settings.intense, 'intense', 100);
+                var S_harmonize = new slider(document.getElementById('harmonizeSlider'), 400, 40, 0.0, 1.0, settings.harmonize, 'harmonize', 100);
+                var S_rep = new slider(document.getElementById('repSlider'), 400, 40, 0.0, 1.0, settings.rep, 'rep', 100);
+                var S_bpm = new slider(document.getElementById('bpmSlider'), 400, 40, 40, 160, bpm, 'bpm', 1);
+                var S_seed = new slider(document.getElementById('seedSlider'), 400, 40, 0, 100, seed, 'seed', 1);
+                var S_seed2 = new slider(document.getElementById('seed2Slider'), 400, 40, 0, 100, seed2, 'seed2', 1);
+
+                document.getElementById('generate').onclick = function() {
+                    var vals = [
+                        ~~(S_happy.value * 100) + '',
+                        ~~(S_smooth.value * 100) + '',
+                        ~~(S_rise.value * 100) + '',
+                        ~~(S_drop.value * 100) + '',
+                        ~~(S_crazy.value * 100) + '',
+                        ~~(S_intense.value * 100) + '',
+                        ~~(S_harmonize.value * 100) + '',
+                        ~~(S_rep.value * 100) + '',
+                        ~~(S_bpm.value) + '',
+                        ~~(S_seed.value) + '',
+                        ~~(S_seed2.value) + ''
+                    ];
+                    var qs2 = vals.join("v");
+                    window.location.href = window.location.href.split('#')[0] +'#'+ qs2;
+                    window.location.reload();
+                    return false;
+                };
+
+                Math.seedrandom(seed + seed2 * 1000.0);
 
                 window.song = new BSWG.song(
                     3,
@@ -52,7 +262,7 @@
 
                 settings['bpm'] = bpm;
 
-                var div = document.getElementById('#info');
+                /*var div = document.getElementById('#info');
 
                 for (var k in settings) {
                     var v = settings[k];
@@ -60,16 +270,12 @@
                         v = Math.floor(v*100) + '%';
                     }
                     div.innerHTML += '<span class="left">' + k + '</span>' + ': ' + v + '<br>';
-                }
+                }*/
 
                 song.setVolume(1.0, 3.0);
 
             });
 
         </script>
-
-        <br>
-
-        <a href="#" onclick="window.location.reload();">NEW MUSIC</a>
     </body>
 </html>

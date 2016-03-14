@@ -98,7 +98,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     this.volume = initVolume;
     
-    var patternLength = bpm*BSWG.song_subBeat * 5;
+    var patternLength = bpm*BSWG.song_subBeat * 3;
 
     this.channels = new Array(nChannels);
 
@@ -239,8 +239,12 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             var repPer = mood.rep;
             var risePer = 1-mood.rise;
             var dropPer = 1-mood.drop;
+            var repPer = 1-mood.rep;
             for (var i=0; i<pat.length; i++) {
-                if (i === 0 || Math.random() > rootPer) {
+                if (Math.random() > repPer) {
+                    pat[i] = last;
+                }
+                else if (i === 0 || Math.random() > rootPer) {
                     pat[i] = 0;
                     last = 0;
                 }
@@ -435,6 +439,10 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                 var P = C.pattern;
                 var N = P[patIndex];
                 if (N) {
+                    if (patIndex > (patternLength - BSWG.song_subBeat*4)) {
+                        var t = (patternLength - patIndex) / (BSWG.song_subBeat*4);
+                        N[1] *= t;
+                    }
                     if (!N[0]) {
                         try {
                             C.bfr.stop(ctime);
