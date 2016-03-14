@@ -554,6 +554,8 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     this.stop = function () {
 
+        patIndex = patternLength+1;
+
         for (var i=0; i<allBfrs.length; i++) {
             try {
                 allBfrs[i][1].stop();
