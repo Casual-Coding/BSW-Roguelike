@@ -3,6 +3,7 @@
 BSWG.component_DetacherLauncher = {
 
     type: 'detacherlauncher',
+    name: 'Detaching Thruster',
 
     sortOrder:       1,
     hasConfig:       true,
@@ -11,6 +12,12 @@ BSWG.component_DetacherLauncher = {
     serialize: [
         'size',
         'launchKey'
+    ],
+
+    sbadd: [
+        { title: 'Size 1', size: 1 },
+        { title: 'Size 2', size: 2 },
+        { title: 'Size 3', size: 3 }
     ],
 
     init: function(args) {

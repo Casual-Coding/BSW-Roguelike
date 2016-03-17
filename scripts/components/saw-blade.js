@@ -3,6 +3,7 @@
 BSWG.component_SawBlade = {
 
     type: 'sawblade',
+    name: 'Saw Blade',
 
     sortOrder:       1,
     hasConfig:       false,
@@ -10,6 +11,12 @@ BSWG.component_SawBlade = {
 
     serialize: [
         'size'
+    ],
+
+    sbadd: [
+        { title: 'Size 1', size: 1 },
+        { title: 'Size 2', size: 2 },
+        { title: 'Size 3', size: 3 }
     ],
 
     init: function(args) {

@@ -3,6 +3,7 @@
 BSWG.component_MissileLauncher = {
 
     type: 'missile-launcher',
+    name: 'Missile Launcher',
 
     sortOrder: 2,
 
@@ -10,6 +11,10 @@ BSWG.component_MissileLauncher = {
 
     serialize: [
         'fireKey'
+    ],
+
+    sbadd: [
+        { title: 'Add' }
     ],
 
     init: function(args) {

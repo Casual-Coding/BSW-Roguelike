@@ -476,6 +476,16 @@ BSWG.componentList = new function () {
             'thruster':         BSWG.component_Thruster
         };
 
+        this.sbTypes = new Array();
+        for (var key in this.typeMap) {
+            if (this.typeMap[key].sbadd) {
+                this.sbTypes.push(this.typeMap[key]);
+            }
+        }
+        this.sbTypes.sort(function(a, b){
+            return a.name.localeCompare(b.name);
+        });
+
         while (this.compList.length) {
             this.compList[0].remove();
         }

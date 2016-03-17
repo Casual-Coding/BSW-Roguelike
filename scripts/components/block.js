@@ -3,6 +3,7 @@
 BSWG.component_Block = {
 
     type: 'block',
+    name: 'Bulkhead',
 
     sortOrder: 3,
 
@@ -13,6 +14,24 @@ BSWG.component_Block = {
         'height',
         'armour',
         'triangle'
+    ],
+
+    sbadd: [
+        { title: 'Box 1x1', width: 1, height: 1, triangle: 0 },
+        { title: 'Box 2x2', width: 2, height: 2, triangle: 0 },
+        { title: 'Box 3x3', width: 3, height: 3, triangle: 0 },
+        { title: 'Box 1x2', width: 1, height: 2, triangle: 0 },
+        { title: 'Box 1x3', width: 1, height: 3, triangle: 0 },
+        { title: 'Box 2x3', width: 2, height: 3, triangle: 0 },
+        { title: 'Tri 1x1', width: 1, height: 1, triangle: 1 },
+        { title: 'Tri 2x2', width: 2, height: 2, triangle: 1 },
+        { title: 'Tri 3x3', width: 3, height: 3, triangle: 1 },
+        { title: 'Tri 1x2', width: 1, height: 2, triangle: 1 },
+        { title: 'Tri 2x1', width: 2, height: 1, triangle: 1 },
+        { title: 'Tri 1x3', width: 1, height: 3, triangle: 1 },
+        { title: 'Tri 3x1', width: 3, height: 1, triangle: 1 },
+        { title: 'Tri 2x3', width: 2, height: 3, triangle: 1 },
+        { title: 'Tri 3x2', width: 3, height: 2, triangle: 1 }
     ],
 
     init: function(args) {

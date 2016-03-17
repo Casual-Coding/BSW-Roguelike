@@ -3,6 +3,7 @@
 BSWG.component_HingeHalf = {
 
     type: 'hingehalf',
+    name: 'Hinge',
 
     sortOrder: 1,
 
@@ -12,6 +13,13 @@ BSWG.component_HingeHalf = {
         'rotKey',
         'size',
         'motor'
+    ],
+
+    sbadd: [
+        { title: 'Motor 1', size: 1, motor: true },
+        { title: 'Motor 2', size: 2, motor: true },
+        { title: 'Hinge 1', size: 1, motor: false },
+        { title: 'Hinge 2', size: 2, motor: false }
     ],
 
     init: function(args) {

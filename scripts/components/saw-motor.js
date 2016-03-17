@@ -3,6 +3,7 @@
 BSWG.component_SawMotor = {
 
     type: 'sawmotor',
+    name: 'Saw Motor',
 
     sortOrder: 2,
 
@@ -11,6 +12,12 @@ BSWG.component_SawMotor = {
     serialize: [
         'size',
         'rotKey'
+    ],
+
+    sbadd: [
+        { title: 'Size 1', size: 1 },
+        { title: 'Size 2', size: 2 },
+        { title: 'Size 3', size: 3 }
     ],
 
     init: function(args) {

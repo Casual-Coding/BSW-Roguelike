@@ -3,6 +3,7 @@
 BSWG.component_Spikes = {
 
     type: 'spikes',
+    name: 'Spikes',
 
     sortOrder: 1,
     hasConfig: false,
@@ -10,6 +11,15 @@ BSWG.component_Spikes = {
     serialize: [
         'size',
         'pike'
+    ],
+
+    sbadd: [
+        { title: 'Spikes 1', size: 1, pike: false },
+        { title: 'Spikes 2', size: 2, pike: false },
+        { title: 'Spikes 3', size: 3, pike: false },
+        { title: 'Pike 1', size: 1, pike: true },
+        { title: 'Pike 2', size: 2, pike: true },
+        { title: 'Pike 3', size: 3, pike: true }
     ],
 
     init: function(args) {

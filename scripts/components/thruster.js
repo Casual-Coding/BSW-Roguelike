@@ -3,6 +3,7 @@
 BSWG.component_Thruster = {
 
     type: 'thruster',
+    name: 'Thruster',
 
     sortOrder: 2,
 
@@ -10,6 +11,10 @@ BSWG.component_Thruster = {
 
     serialize: [
         'thrustKey'
+    ],
+
+    sbadd: [
+        { title: 'Add' }
     ],
 
     init: function(args) {

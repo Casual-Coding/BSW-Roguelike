@@ -3,6 +3,7 @@
 BSWG.component_Laser = {
 
     type: 'laser',
+    name: 'Laser',
 
     sortOrder: 2,
 
@@ -10,6 +11,10 @@ BSWG.component_Laser = {
 
     serialize: [
         'fireKey'
+    ],
+
+    sbadd: [
+        { title: 'Add' }
     ],
 
     init: function(args) {

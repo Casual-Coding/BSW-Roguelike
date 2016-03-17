@@ -552,6 +552,11 @@ BSWG.physics = new function(){
         return Math.distVec2(arc.p, brc.p) - (arc.r + brc.r);
     };
 
+    this.bodyDistancePoint = function(a, b, br) {
+        var arc = this.getRadiusCenter(a);
+        return Math.distVec2(arc.p, b) - (arc.r + br);
+    };
+
     this.reset = function (){
 
         while (this.welds.length) {

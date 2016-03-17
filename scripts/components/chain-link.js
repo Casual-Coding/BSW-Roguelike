@@ -3,12 +3,17 @@
 BSWG.component_ChainLink = {
 
     type: 'chainlink',
+    name: 'Chain Link',
 
     sortOrder:       1,
     hasConfig:       false,
     canMoveAttached: true,
 
     serialize: [
+    ],
+
+    sbadd: [
+        { title: 'Add' }
     ],
 
     init: function(args) {

@@ -5,6 +5,7 @@ BSWG.uberFastCC = false;
 BSWG.component_CommandCenter = {
 
     type: 'cc',
+    name: 'Command Center',
 
     sortOrder: 2,
 

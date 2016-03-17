@@ -3,6 +3,7 @@
 BSWG.component_Blaster = {
 
     type: 'blaster',
+    name: 'Blaster',
 
     sortOrder: 2,
 
@@ -10,6 +11,10 @@ BSWG.component_Blaster = {
 
     serialize: [
         'fireKey'
+    ],
+
+    sbadd: [
+        { title: 'Add' }
     ],
 
     init: function(args) {

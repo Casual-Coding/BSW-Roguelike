@@ -139,6 +139,146 @@ BSWG.control_Button = {
 
 };
 
+BSWG.control_CompPalette = {
+
+    init: function (args) {
+
+        var x = 10, y = 10;
+
+        var CL = BSWG.componentList.sbTypes;
+        var headers = new Array(CL.length);
+        var buttons = new Array();
+
+        if (args.clickInner) {
+            this.clickInner = args.clickInner;
+        }
+
+        for (var i=0; i<CL.length; i++) {
+            headers[i] = {
+                x: x,
+                y: y,
+                text: CL[i].name
+            };
+            y += 20;
+
+            var SBL = CL[i].sbadd;
+            var x2 = x;
+            var w = ~~((this.w-20) / 3);
+            for (var j=0; j<SBL.length; j++) {
+                buttons.push({
+                    args: SBL[j],
+                    text: SBL[j].title,
+                    comp: CL[i],
+                    x: x2, y: y,
+                    w: w, h: 18,
+                    mouseIn: false,
+                    mouseDown: false
+                });
+                x2 += w;
+                if (((j+1)%3) === 0) {
+                    x2 = x;
+                    y += 20;
+                }
+            }
+            if (SBL.length % 3) {
+                y += 20;
+            }
+            y += 5;
+        }
+
+        this.h = y+5;
+
+        this.headers = headers;
+        this.buttons = buttons;
+
+    },
+
+    render: function (ctx, viewport) {
+
+        ctx.font = '16px Orbitron';
+
+        ctx.fillStyle = 'rgba(35,35,50,0.5)';
+            
+        ctx.lineWidth = 2.0;
+
+        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 4, false, null);
+
+        ctx.lineWidth = 1.0;
+
+        for (var i=0; i<this.headers.length; i++) {
+            var H = this.headers[i];
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#111';
+            ctx.fillTextB(H.text, this.p.x + H.x, this.p.y + H.y + 12);            
+        }
+
+        for (var i=0; i<this.buttons.length; i++) {
+            var B = this.buttons[i];
+            ctx.font = '12px Orbitron';
+            ctx.strokeStyle = '#888';
+            ctx.fillStyle = 'rgba(35,35,50,1)';
+                
+            ctx.lineWidth = 2.0;
+
+            ctx.fillStyle = B.mouseDown ?
+                'rgba(16, 16, 16, 0.8)' :
+                (B.mouseIn ?
+                    'rgba(64, 64, 64, 0.6)' :
+                    'rgba(128, 128, 128, 0.5)'
+                );
+            ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
+
+            ctx.lineWidth = 1.0;
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = B.mouseDown ? '#fff' : '#000';
+            ctx.fillText(B.text, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5+4);
+
+            ctx.textAlign = 'left';            
+        }
+
+    },
+
+    update: function () {
+
+        var toX = 10 - this.w;
+
+        if (BSWG.game.editMode) {
+            toX = 10;
+        }
+
+        this.p.x += (toX - this.p.x) / 60.0 * 4.0;
+
+        if (this.buttons && this.mouseIn) {
+
+            var mx = BSWG.input.MOUSE('x') - this.p.x;
+            var my = BSWG.input.MOUSE('y') - this.p.y;
+
+            for (var i=0; i<this.buttons.length; i++) {
+
+                var B = this.buttons[i];
+
+                if (mx >= B.x && my >= B.y && mx < (B.x + B.w) && my < (B.y + B.h) && !BSWG.game.grabbedBlock)
+                    B.mouseIn = true;
+                else
+                    B.mouseIn = false;
+
+                if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock)
+                {
+                    this.clickInner(this, B);
+                }
+
+                B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock;
+
+            }
+
+        }
+
+    },
+
+};
+
 BSWG.ui_3dScreen = function(p, z) {
     return BSWG.render.unproject3D(p, z || 0.0).THREE(z || 0.0);
 };
