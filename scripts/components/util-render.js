@@ -113,6 +113,10 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         extra: {
             type: 'v4',
             value: new THREE.Vector4(1,0,0,0)
+        },
+        warpIn: {
+            type: 'f',
+            value: 1.0
         }
     });
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
@@ -161,6 +165,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         self.mat.uniforms.extra.value.y = Math.clamp(self.anchorT, 0, 1);
         self.mat.uniforms.extra.value.z = BSWG.render.time;
+
+        self.mat.uniforms.warpIn.value -= BSWG.render.dt * 2.0;
+        if (self.mat.uniforms.warpIn.value < 0.0) {
+            self.mat.uniforms.warpIn.value = 0.0;
+        }
 
         if (clr) {
             self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);

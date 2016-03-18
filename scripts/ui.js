@@ -274,6 +274,17 @@ BSWG.control_CompPalette = {
             }
 
         }
+        else if (this.buttons) {
+
+            for (var i=0; i<this.buttons.length; i++) {
+
+                var B = this.buttons[i];
+
+                B.mouseIn = B.mouseDown = false;
+
+            }
+
+        }
 
     },
 

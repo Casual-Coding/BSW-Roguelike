@@ -9,6 +9,7 @@ uniform sampler2D map;
 uniform vec4 light;
 uniform vec4 clr;
 uniform vec4 extra;
+uniform float warpIn;
 
 void main() {
 
@@ -32,6 +33,13 @@ void main() {
     else {
         float al = (sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5) * extra.y * 0.5;
         gl_FragColor = vec4(clr.rgb*vec3(al*1.0+(1.0-al), al*0.5+(1.0-al), 0.25*al+(1.0-al))*l, 1.0);
+    }
+
+    if (warpIn > 0.9) {
+        gl_FragColor = vec4(1., 1., 1., 1.0 - (warpIn - 0.9) / 0.1);
+    }
+    else {
+        gl_FragColor = mix(gl_FragColor, vec4(1.,1.,1.,1.), (warpIn - 0.1) / 0.9);
     }
 
 }
