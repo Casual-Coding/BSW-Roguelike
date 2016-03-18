@@ -26,7 +26,7 @@ BSWG.component_HingeHalf = {
 
         this.size   = args.size || 1;
         this.motor  = args.motor || false;
-        this.rotKey = args.rotKey || (this.motor ? BSWG.KEY.A : BSWG.KEY.D);
+        this.rotKey = args.rotKey ? args.rotKey : (this.motor ? BSWG.KEY.A : BSWG.KEY.D);
 
         var verts = [
             //new b2Vec2(this.size * -0.5, this.size * -0.5),
@@ -149,7 +149,7 @@ BSWG.component_HingeHalf = {
 
         var robj = null;
         for (var k in this.welds) {
-            if (this.welds[k] && this.welds[k].obj.revolute) {
+            if (this.welds[k] && this.welds[k].obj.revolute ) {
                 robj = this.welds[k].obj;
                 break;
             }
@@ -157,7 +157,7 @@ BSWG.component_HingeHalf = {
 
         if (robj) {
             if (keys[this.rotKey]) {
-                robj.joint.SetMotorSpeed(this.motor ? 1 : -1);
+                robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1 : 1));
             }
         }
 

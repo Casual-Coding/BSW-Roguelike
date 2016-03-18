@@ -101,8 +101,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
             case BSWG.planet_HELL:
                 colors = [
-                    new THREE.Vector4(0.67, 0.04, 0.04, 1.0),
-                    new THREE.Vector4(0.55, 0.03, 0.03, 1.0),
+                    new THREE.Vector4(0.7, 0.04, 0.04, 1.0),
+                    new THREE.Vector4(0.55, 0.13, 0.13, 1.0),
                     new THREE.Vector4(0.5, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.8, 0.5, 0.5, 1.0)
                 ];

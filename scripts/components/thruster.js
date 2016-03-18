@@ -10,22 +10,26 @@ BSWG.component_Thruster = {
     hasConfig: true,
 
     serialize: [
-        'thrustKey'
+        'thrustKey',
+        'size'
     ],
 
     sbadd: [
-        { title: 'Add' }
+        { title: 'Size 1', size: 1 },
+        { title: 'Size 2', size: 2 },
     ],
 
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;
 
+        this.size = args.size || 1;
+
         var verts = [
-            Math.rotVec2(new b2Vec2(-0.2, -0.5), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.2, -0.5), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.4,  0.5), offsetAngle),
-            Math.rotVec2(new b2Vec2(-0.4,  0.5), offsetAngle)
+            Math.rotVec2(new b2Vec2(-0.2 * this.size, -0.5 * this.size), offsetAngle),
+            Math.rotVec2(new b2Vec2( 0.2 * this.size, -0.5 * this.size), offsetAngle),
+            Math.rotVec2(new b2Vec2( 0.4 * this.size,  0.5 * this.size), offsetAngle),
+            Math.rotVec2(new b2Vec2(-0.4 * this.size,  0.5 * this.size), offsetAngle)
         ];
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
@@ -37,7 +41,7 @@ BSWG.component_Thruster = {
             'thrust': [ '', new b2Vec2(0.0, 0.0) ],
         };
 
-        this.jpoints = [ new b2Vec2(0.0, 0.5) ];
+        this.jpoints = [ new b2Vec2(0.0, 0.5 * this.size) ];
 
         this.thrustKey = args.thrustKey || BSWG.KEY.UP;
         this.thrustT = 0.0;
@@ -45,7 +49,7 @@ BSWG.component_Thruster = {
         //BSWG.blockPolySmooth = 0.1;
 
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((verts[2].x + verts[3].x) * 0.5,
-                                                                             (verts[2].y + verts[3].y) * 0.5 - 0.25));
+                                                                             (verts[2].y + verts[3].y) * 0.5 - 0.25 * this.size), null, 0.3);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
@@ -75,17 +79,17 @@ BSWG.component_Thruster = {
 
         if (this.thrustT > 0) {
 
-            var p = Math.rotVec2(new b2Vec2(0.0, -0.55));
+            var p = Math.rotVec2(new b2Vec2(0.0, -0.55 * this.size));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
             var a = this.obj.body.GetAngle() + Math.PI/2.0 + Math.random()*Math.PI/8.0 - Math.PI/16.0;
-            v.x -= Math.cos(a) * 6;
-            v.y -= Math.sin(a) * 6;
+            v.x -= Math.cos(a) * 6 * this.size;
+            v.y -= Math.sin(a) * 6 * this.size;
             p = BSWG.physics.localToWorld(p, this.obj.body);
 
             BSWG.render.boom.palette = chadaboom3D.fire;
             BSWG.render.boom.add(
-                p.particleWrap(0.025),
-                1.0*this.thrustT*5.0,
+                p.particleWrap(0.025*this.size),
+                1.0*this.thrustT*5.0 * this.size,
                 32,
                 0.3*this.thrustT*5.0,
                 4.0,
@@ -133,7 +137,7 @@ BSWG.component_Thruster = {
 
         if (accel && this.thrustT < 0.025) { // add shockwave
             for (var i=-10; i<=10; i++) {
-                var p = Math.rotVec2(new b2Vec2(0.0, -0.55));
+                var p = Math.rotVec2(new b2Vec2(0.0, -0.55 * this.size));
                 var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
                 var a = this.obj.body.GetAngle() + Math.PI/2.0 + (i/10) * Math.PI/2.7;
                 v.x -= Math.cos(a) * 4;
@@ -142,8 +146,8 @@ BSWG.component_Thruster = {
 
                 BSWG.render.boom.palette = chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
-                    p.particleWrap(0.025),
-                    1.35*0.3*5.0,
+                    p.particleWrap(0.025 * this.size),
+                    1.35*0.3*5.0 * this.size,
                     32,
                     0.3*0.3*5.0,
                     4.0,
@@ -155,7 +159,7 @@ BSWG.component_Thruster = {
         if (accel)
         {
             var a = this.obj.body.GetAngle() + Math.PI/2.0;
-            accel *= 20.0;
+            accel *= 20.0 * [1,3][this.size-1];
             this.obj.body.SetAwake(true);
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);
