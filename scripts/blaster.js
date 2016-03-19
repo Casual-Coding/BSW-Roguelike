@@ -45,7 +45,7 @@ BSWG.blasterList = new function () {
                 new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
                 0.65,
                 16,
-                0.1,
+                0.2,
                 1.5,
                 new b2Vec2(B.v.x*0.65, B.v.y*0.65).THREE(0.0)
             );

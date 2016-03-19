@@ -134,7 +134,7 @@ chadaboom3D.prototype.init = function () {
         },
         damping: {
             type: 'f',
-            value: Math.pow(0.98, 60.0)
+            value: Math.pow(0.995, 60.0)
         }
     };
 
@@ -345,7 +345,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
 
     var rot = Math.random() * Math.PI * 2.0;
 
-    size *= 0.5;
+    size *= 0.45;
 
     for (var k=0; k<3; k++) {
         this.posAttr.array[idx * 3 * 3 + 0 + k*3] = pos.x;

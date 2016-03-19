@@ -79,6 +79,6 @@ void main() {
         clr = mix(pal3.rgb, pal4.rgb, (amp-pal3.a) / (1.0 - pal3.a));
     }
 
-    gl_FragColor = vec4(clr.rgb, amp);
+    gl_FragColor = vec4(clr.rgb*0.75, amp);
 
 }
