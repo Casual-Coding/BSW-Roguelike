@@ -76,7 +76,7 @@ chadaboom3D.prototype.init = function () {
 
     this.hasInit = true;
 
-    this.MAX_PRT = 8192;
+    this.MAX_PRT = 8192*2;
     // 0: startPosition.x
     // 1: startPosition.y
     // 2: startPosition.z
@@ -275,7 +275,7 @@ chadaboom3D.blue = 2;
 chadaboom3D.blue_bright = 3;
 chadaboom3D.green = 4;
 
-chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
+chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub) {
 
     if (!this.hasInit) {
         return false;
@@ -317,7 +317,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
     var tex = bb.img[Math.floor(Math.random()*1000000) % bb.count].texture;
     var found = false;
 
-    for (var i=0; i<this.allTextures.length; i++) {
+    for (var i=0; i<this.allTextures.length && i<4; i++) {
         if (this.allTextures[i] === tex) {
             tex = i;
             found = true;
@@ -338,6 +338,20 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
     if (typeof sizeFn === "function") {
         size = sizeFn(res);
     }
+
+    if (!noSub && size > 0.1) {
+        for (var i=0; i<8; i++) {
+            var len = size * Math.random() * 2.0;
+            var a = Math.random() * Math.PI * 2.0;
+            var v2 = {
+                x: vel.x + Math.cos(a) * len,
+                y: vel.y + Math.sin(a) * len,
+                z: vel.z
+            };
+            this.add(pos, size*0.15, 32, life * 1.0, attack, v2, true);
+        }
+    }
+
 
     var palIdx = this.palette || chadaboom3D.fire;
 
