@@ -11,6 +11,8 @@ window.chadaboom3D = function(batches, onLoad) {
         toLoad += b.count;
     }
 
+    this.allTextures = [];
+
     for (var i=0; i<batches.length; i++) {
         var b = batches[i];
         b.img = [];
@@ -49,8 +51,12 @@ window.chadaboom3D = function(batches, onLoad) {
 
                             });
 
+                            self.allTextures.push(bk.img[k2].texture)
+
                         }
                     }
+
+                    self.init();
 
                     if (onLoad)
                         onLoad();
@@ -63,41 +69,159 @@ window.chadaboom3D = function(batches, onLoad) {
     }
 
     this.batches = batches;
-    this.list = [];
-    this.geom = new THREE.PlaneGeometry(1.0, 1.0, 1, 1);
+
+}
+
+chadaboom3D.prototype.init = function () {
+
+    this.hasInit = true;
+
+    this.MAX_PRT = 8192;
+    // 0: startPosition.x
+    // 1: startPosition.y
+    // 2: startPosition.z
+    this.vertices = new Float32Array(this.MAX_PRT * 3 * 3);
+    // 3: startVelocity.x
+    // 4: startVelocity.y
+    // 5: startVelocity.z
+    // 6: startTime
+    this.attr1 = new Float32Array(this.MAX_PRT * 4 * 3);
+    // 7: (int)batch * 10 + (int)palette
+    // 8: attack
+    // 9: life
+    // 10: rot
+    this.attr2 = new Float32Array(this.MAX_PRT * 4 * 3);
+    // 11: uv.x
+    // 12: uv.y
+    // 13: size
+    this.attr3 = new Float32Array(this.MAX_PRT * 3 * 3);
+
+    for (var i=0; i<this.MAX_PRT*3; i++) {
+        this.vertices[i*3 + 0] =
+            this.vertices[i*3 + 1] =
+            this.vertices[i*3 + 2] = 0.0;
+        this.attr1[i*4 + 0] =
+            this.attr1[i*4 + 1] =
+            this.attr1[i*4 + 2] =
+            this.attr1[i*4 + 3] = 0.0;
+        this.attr2[i*3 + 0] =
+            this.attr2[i*3 + 1] =
+            this.attr2[i*3 + 2] =
+            this.attr2[i*3 + 3] = 0.0;
+        this.attr3[i*3 + 0] =
+            this.attr3[i*3 + 1] =
+            this.attr3[i*3 + 2] = 0.0;
+    }
+
+    this.faces = new Uint32Array(this.MAX_PRT * 3);
+    for (var i=0; i<this.MAX_PRT*3; i++) {
+        this.faces[i] = i;
+    }
+
+    this.time = 0.0;
+
+    geom = new THREE.BufferGeometry();
+    geom.setIndex( new THREE.BufferAttribute( this.faces, 1 ) );
+    geom.addAttribute( 'position', new THREE.BufferAttribute( this.vertices, 3 ).setDynamic(true) );
+    geom.addAttribute( 'attr1',    new THREE.BufferAttribute( this.attr1, 4 ).setDynamic(true) );
+    geom.addAttribute( 'attr2',    new THREE.BufferAttribute( this.attr2, 4 ).setDynamic(true) );
+    geom.addAttribute( 'attr3',    new THREE.BufferAttribute( this.attr3, 3 ).setDynamic(true) );
+
+    var uniforms = {
+        time: {
+            type: 'f',
+            value: this.time
+        },
+        damping: {
+            type: 'f',
+            value: Math.pow(0.98, 60.0)
+        }
+    };
+
+    for (var i=0; i<this.allTextures.length && i<8; i++) {
+        uniforms['tex' + (i+1)] = {
+            type: 't',
+            value: this.allTextures[i]
+        };
+    }
+
+    for (var i=0; i<chadaboom3D.palettes.length; i++) {
+        var pal = chadaboom3D.palettes[i];
+        for (var j=0; j<4; j++) {
+            uniforms['pal' + i + '_' + j] = {
+                type: 'v4',
+                value: new THREE.Vector4(pal[j][0], pal[j][1], pal[j][2], pal[j][3])
+            }
+        }
+    }
+
+    this.mat = BSWG.render.newMaterial("expVertex", "expFragment", uniforms, THREE.AdditiveBlending);
+    this.mat.depthWrite = false;
+
+    mesh = new THREE.Mesh( geom, this.mat );
+    mesh.frustumCulled = false;
+    mesh.position.z = 2.0;
+
+    geom.needsUpdate = true;
+    this.mat.needsUpdate = true;
+    mesh.needsUpdate = true;
+
+    BSWG.render.scene.add( mesh );
+
+    this.mesh = mesh;
+
+    this.posAttr = geom.getAttribute('position');
+    this.a1Attr = geom.getAttribute('attr1');
+    this.a2Attr = geom.getAttribute('attr2');
+    this.a3Attr = geom.getAttribute('attr3');
+
+    this.particleIdx = 0;
+    this.particleUpdate = false;
+    this.pOffset = 0;
+    this.pCount = 0;
 
 };
 
 chadaboom3D.prototype.render = function(dt) {
 
-    for (var i=0; i<this.list.length; i++) {
-        var B = this.list[i];
-        B.t -= dt;
-        if (B.t <= 0.0) {
-            B.eraseMesh();
-            this.list.splice(i, 1);
-            i --;
-            continue;
+    if (!this.hasInit) {
+        return;
+    }
+
+    this.time += dt;
+    this.mat.uniforms.time.value = this.time;
+    this.mat.needsUpdate = true;
+
+    if (this.particleUpdate == true) {
+        this.particleUpdate = false;
+
+        if ((this.pOffset + this.pCount) < this.MAX_PRT) {
+            this.posAttr.updateRange.offset = this.pOffset * 3 * 3;
+            this.posAttr.updateRange.count = this.pCount * 3 * 3;
+            this.a1Attr.updateRange.offset = this.pOffset * 4 * 3;
+            this.a1Attr.updateRange.count = this.pCount * 4 * 3;
+            this.a2Attr.updateRange.offset = this.pOffset * 4 * 3;
+            this.a2Attr.updateRange.count = this.pCount * 4 * 3;
+            this.a3Attr.updateRange.offset = this.pOffset * 3 * 3;
+            this.a3Attr.updateRange.count = this.pCount * 3 * 3;
+        } else {
+            this.posAttr.updateRange.offset = 0;
+            this.posAttr.updateRange.count = this.MAX_PRT * 3 * 3;
+            this.a1Attr.updateRange.offset = 0;
+            this.a1Attr.updateRange.count = this.MAX_PRT * 4 * 3;
+            this.a2Attr.updateRange.offset = 0;
+            this.a2Attr.updateRange.count = this.MAX_PRT * 4 * 3;
+            this.a3Attr.updateRange.offset = 0;
+            this.a3Attr.updateRange.count = this.MAX_PRT * 3 * 3;
         }
 
-        var p = B.p(B.vel.x*0, B.vel.y*0, B.vel.z*0);
-        B.vel.x *= 0.995;
-        B.vel.y *= 0.995;
-        B.vel.z *= 0.995;
-        var sz = B.sz(B.res);
-
-        var t = Math.pow(1.0-(B.t / B.maxt), 1.0/B.attack);
-        sz *= Math.pow(t, 0.25);
-        var frame = Math.floor(t * this.nframes);
-
-        B.mesh.position.set(p.x, p.y, p.z);
-        B.mesh.rotation.set(0.0, 0.0, B.rot, 'ZXY');
-        B.mesh.scale.set(sz, sz, 1.0);
-        B.mesh.updateMatrix();
-        B.material.uniforms.frame.value.set((frame%8)/8.0, 1.0 - ~~(frame/8)/8.0, 1.0-Math.pow(t, 3.0));
-        B.material.needsUpdate = true;
-
-        p = B.p(B.vel.x*dt, B.vel.y*dt, B.vel.z*dt);
+        this.posAttr.needsUpdate = true;
+        this.a1Attr.needsUpdate = true;
+        this.a2Attr.needsUpdate = true;
+        this.a3Attr.needsUpdate = true;
+     
+        this.pOffset = 0;
+        this.pCount = 0;
     }
 
 };
@@ -117,27 +241,45 @@ chadaboom3D.fire_bright = [
 ];
 
 chadaboom3D.blue = [
-    [ 0.25, 0.25, 0.25, 1/3 ],
-    [ 0.0,   0.0,  1.0, 2/3 ],
+    [ 0.25, 0.25, 0.25,  1/3 ],
+    [ 0.0,   0.0,  1.0,  2/3 ],
     [ 1.0,   1.0,  1.0,  1.0 ],
     [ 1.0,   1.0,  1.0,  1.0 ]
 ];
 
 chadaboom3D.blue_bright = [
-    [ 0.25, 0.25, 0.25, 1/6 ],
-    [ 0.0,   0.0,  1.0, 1/3 ],
+    [ 0.25, 0.25, 0.25,  1/6 ],
+    [ 0.0,   0.0,  1.0,  1/3 ],
     [ 1.0,   1.0,  1.0,  1.0 ],
     [ 1.0,   1.0,  1.0,  1.0 ]
 ];
 
 chadaboom3D.green = [
-    [ 0.25, 0.25, 0.25, 1/3 ],
-    [ 0.0,   1.0,  0.0, 2/3 ],
+    [ 0.25, 0.25, 0.25,  1/3 ],
+    [ 0.0,   1.0,  0.0,  2/3 ],
     [ 1.0,   1.0,  1.0,  1.0 ],
     [ 1.0,   1.0,  1.0,  1.0 ]
 ];
 
+chadaboom3D.palettes = [
+    chadaboom3D.fire,
+    chadaboom3D.fire_bright,
+    chadaboom3D.blue,
+    chadaboom3D.blue_bright,
+    chadaboom3D.green
+];
+
+chadaboom3D.fire = 0;
+chadaboom3D.fire_bright = 1;
+chadaboom3D.blue = 2;
+chadaboom3D.blue_bright = 3;
+chadaboom3D.green = 4;
+
 chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
+
+    if (!this.hasInit) {
+        return false;
+    }
 
     res = res || 256;
     if (res < 0) {
@@ -172,79 +314,77 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
         return false;
     }
 
-    if (typeof posFn === "object") {
-        var posObj = posFn;
-        posFn = function() {
-            return posObj;
-        };
+    var tex = bb.img[Math.floor(Math.random()*1000000) % bb.count].texture;
+    var found = false;
+
+    for (var i=0; i<this.allTextures.length; i++) {
+        if (this.allTextures[i] === tex) {
+            tex = i;
+            found = true;
+            break;
+        }
     }
 
-    if (typeof sizeFn === "number") {
-        var sizeVal = sizeFn;
-        sizeFn = function(res) {
-            return sizeVal;
-        };
+    if (!found) {
+        tex = Math.min(this.allTextures.length - 1, 8-1);
     }
 
-    var palette = this.palette || chadaboom3D.fire;
+    var pos = posFn;
+    var size = sizeFn;
 
-    var mat = BSWG.render.newMaterial("expVertex", "expFragment", {
-        pal1: {
-            type: 'v4',
-            value: new THREE.Vector4(palette[0][0], palette[0][1], palette[0][2], palette[0][3])
-        },
-        pal2: {
-            type: 'v4',
-            value: new THREE.Vector4(palette[1][0], palette[1][1], palette[1][2], palette[1][3])
-        },
-        pal3: {
-            type: 'v4',
-            value: new THREE.Vector4(palette[2][0], palette[2][1], palette[2][2], palette[2][3])
-        },
-        pal4: {
-            type: 'v4',
-            value: new THREE.Vector4(palette[3][0], palette[3][1], palette[3][2], palette[3][3])
-        },
-        img: {
-            type: 't',
-            value: bb.img[Math.floor(Math.random()*1000000) % bb.count].texture
-        },
-        frame: {
-            type: 'v3',
-            value: new THREE.Vector3(0, 0, 0)
-        }
-    }, THREE.AdditiveBlending);
+    if (typeof posFn === "function") {
+        pos = posFn(0,0,0);
+    }
+    if (typeof sizeFn === "function") {
+        size = sizeFn(res);
+    }
 
-    var mesh = new THREE.Mesh( this.geom, mat );
-    mesh.needsUpdate = true;
-    mat.needsUpdate = true;
-    BSWG.render.scene.add( mesh );
+    var palIdx = this.palette || chadaboom3D.fire;
 
-    this.list.push({
+    var idx = this.particleIdx;
 
-        p: posFn,
-        sz: sizeFn,
-        vel: vel,
-        res: res,
-        bbi: bb.i,
-        t: life,
-        maxt: life,
-        rot: Math.random() * Math.PI * 2.0,
-        attack: attack,
-        mesh: mesh,
-        material: mat,
-        eraseMesh: function () {
-            if (!mesh) {
-                return;
-            }
-            BSWG.render.scene.remove(mesh);
-            mesh.material.dispose();
-            mesh.geometry = null;
-            mesh.material = null;
-            mesh = null;
-        }
+    var rot = Math.random() * Math.PI * 2.0;
 
-    });
+    size *= 0.5;
+
+    for (var k=0; k<3; k++) {
+        this.posAttr.array[idx * 3 * 3 + 0 + k*3] = pos.x;
+        this.posAttr.array[idx * 3 * 3 + 1 + k*3] = pos.y;
+        this.posAttr.array[idx * 3 * 3 + 2 + k*3] = pos.z;
+
+        this.a1Attr.array[idx * 4 * 3 + 0 + k*4] = vel.x;
+        this.a1Attr.array[idx * 4 * 3 + 1 + k*4] = vel.y;
+        this.a1Attr.array[idx * 4 * 3 + 2 + k*4] = vel.z;
+        this.a1Attr.array[idx * 4 * 3 + 3 + k*4] = this.time;
+
+        this.a2Attr.array[idx * 4 * 3 + 0 + k*4] = tex * 10.0 + palIdx;
+        this.a2Attr.array[idx * 4 * 3 + 1 + k*4] = attack;
+        this.a2Attr.array[idx * 4 * 3 + 2 + k*4] = life;
+        this.a2Attr.array[idx * 4 * 3 + 3 + k*4] = rot;
+    }
+
+    this.a3Attr.array[idx * 3 * 3 + 0 + 0] = Math.cos(0);
+    this.a3Attr.array[idx * 3 * 3 + 1 + 0] = Math.sin(0);
+    this.a3Attr.array[idx * 3 * 3 + 2 + 0] = size;
+    this.a3Attr.array[idx * 3 * 3 + 0 + 3] = Math.cos((Math.PI*2.0)/3.0);
+    this.a3Attr.array[idx * 3 * 3 + 1 + 3] = Math.sin((Math.PI*2.0)/3.0);
+    this.a3Attr.array[idx * 3 * 3 + 2 + 3] = size;
+    this.a3Attr.array[idx * 3 * 3 + 0 + 6] = Math.cos(((Math.PI*2.0)/3.0)*2.0);
+    this.a3Attr.array[idx * 3 * 3 + 1 + 6] = Math.sin(((Math.PI*2.0)/3.0)*2.0);
+    this.a3Attr.array[idx * 3 * 3 + 2 + 6] = size;
+    
+    if (this.pOffset == 0) {
+        this.pOffset = this.particleIdx;
+    }
+
+    this.pCount++;
+    this.particleIdx ++;
+
+    if (this.particleIdx >= this.MAX_PRT) {
+        this.particleIdx = 0;
+    }
+
+    this.particleUpdate = true;
 
     return true;
 
@@ -252,9 +392,18 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel) {
 
 chadaboom3D.prototype.clear = function() {
 
-    for (var i=0; i<this.list.length; i++) {
-        this.list[i].eraseMesh();
+    if (!this.hasInit) {
+        return;
     }
-    this.list.length = 0;
+
+    for (var i=0; i<this.MAX_PRT; i++) {
+        this.a1Attr.array[i * 4 * 3 + 3] = -1000.0;
+    }
+    this.a1Attr.updateRange.offset = 0;
+    this.a1Attr.updateRange.count = this.MAX_PRT * 4 * 3;
+
+    this.particleIdx = 0;
+    this.pOffset = 0;
+    this.pCount = 0;
 
 };

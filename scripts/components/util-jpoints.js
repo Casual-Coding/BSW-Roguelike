@@ -44,9 +44,9 @@ BSWG.jpointRenderer = new function() {
 
         geom = new THREE.BufferGeometry();
         geom.setIndex( new THREE.BufferAttribute( faces, 1 ) );
-        geom.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-        geom.addAttribute( 'pos',      new THREE.BufferAttribute( posArray, 4 ) );
-        geom.addAttribute( 'clr',      new THREE.BufferAttribute( clrArray, 4 ) );
+        geom.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ).setDynamic(true) );
+        geom.addAttribute( 'pos',      new THREE.BufferAttribute( posArray, 4 ).setDynamic(true) );
+        geom.addAttribute( 'clr',      new THREE.BufferAttribute( clrArray, 4 ).setDynamic(true) );
 
         mat = BSWG.render.newMaterial("jpointsVertex", "jpointsFragment", null, null, THREE.DoubleSide);
         mesh = new THREE.Mesh( geom, mat );

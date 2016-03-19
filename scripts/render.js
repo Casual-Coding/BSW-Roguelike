@@ -241,33 +241,32 @@ BSWG.render = new function() {
         var ocomplete = complete;
         var self = this;
         complete = function() {
-            self.boom = new chadaboom3D([
-                {
-                    'name': 'images/explosion',
-                    'size': 64,
-                    'count': 4
-                },
-                {
-                    'name': 'images/explosion',
-                    'size': 128,
-                    'count': 2
-                },
-                {
-                    'name': 'images/explosion',
-                    'size': 256,
-                    'count': 2
-                },
-                {
-                    'name': 'images/explosion',
-                    'size': 512,
-                    'count': 1
-                }
-            ],
-            function(){
-                var loader = new THREE.FontLoader();
-                loader.load('fonts/orbitron-400.js', function (response) {
-                    self.font3D = response;
-                    self.loadShaders(shaders, ocomplete);
+            self.loadShaders(shaders, function() {
+                self.boom = new chadaboom3D([
+                    {
+                        'name': 'images/explosion',
+                        'size': 64,
+                        'count': 4
+                    },
+                    {
+                        'name': 'images/explosion',
+                        'size': 128,
+                        'count': 2
+                    },
+                    {
+                        'name': 'images/explosion',
+                        'size': 256,
+                        'count': 2
+                    }
+                ],
+                function(){
+                    var loader = new THREE.FontLoader();
+                    loader.load('fonts/orbitron-400.js', function (response) {
+                        self.font3D = response;
+                        if (ocomplete) {
+                            ocomplete();
+                        }
+                    });
                 });
             });
         };
