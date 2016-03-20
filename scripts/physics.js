@@ -111,7 +111,7 @@ BSWG.physics = new function(){
             obj.jointDef.enableMotor = !obj.noMotor;
             if (obj.jointDef.enableMotor) {
                 obj.jointDef.motorSpeed = 0.0;
-                obj.jointDef.maxMotorTorque = bodyA.GetMass() * 30.0;
+                obj.jointDef.maxMotorTorque = bodyA.GetMass() * 90.0;
             }
         }
     

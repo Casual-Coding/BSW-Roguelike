@@ -277,6 +277,10 @@ chadaboom3D.green = 4;
 
 chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub) {
 
+    if (!(res > 0 && life > 0 && attack > 0)) {
+        return false;
+    }
+
     if (!this.hasInit) {
         return false;
     }
@@ -339,6 +343,10 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         size = sizeFn(res);
     }
 
+    if (!(size > 0)) {
+        return false;
+    }
+
     if (!noSub && size > 0.1) {
         for (var i=0; i<8; i++) {
             var len = size * Math.random() * 2.0;
@@ -353,7 +361,10 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     }
 
 
-    var palIdx = this.palette || chadaboom3D.fire;
+    var palIdx = Math.clamp(this.palette || chadaboom3D.fire, 0, chadaboom3D.palettes.length-1);
+    if (typeof palIdx !== 'number' || !(palIdx > -1)) {
+        palIdx = 0;
+    }
 
     var idx = this.particleIdx;
 
@@ -411,7 +422,9 @@ chadaboom3D.prototype.clear = function() {
     }
 
     for (var i=0; i<this.MAX_PRT; i++) {
-        this.a1Attr.array[i * 4 * 3 + 3] = -1000.0;
+        this.a1Attr.array[i * 4 * 3 + 3] = 
+            this.a1Attr.array[i * 4 * 3 + 3 + 4] = 
+            this.a1Attr.array[i * 4 * 3 + 3 + 8] = -1000.0;
     }
     this.a1Attr.updateRange.offset = 0;
     this.a1Attr.updateRange.count = this.MAX_PRT * 4 * 3;
