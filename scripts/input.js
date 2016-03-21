@@ -454,4 +454,20 @@ BSWG.input = new function(){
             lmouseState[k] = mouseState[k];
     };
 
+    this.EAT_ALL = function () {
+        for (var k in lkeyMap) {
+            lkeyMap[k] = null;
+            delete lkeyMap[k];
+        }
+        for (var k in keyMap) {
+            keyMap[k] = null;
+            delete keyMap[k];
+        }
+        for (var k in mouseState) {
+            if (k !== 'x' && k !== 'y') {
+                mouseState[k] = lmouseState[k];
+            }
+        }
+    };
+
 }();

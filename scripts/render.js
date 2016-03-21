@@ -320,7 +320,7 @@ BSWG.render = new function() {
         }
         for (var i=0; i<shaders.length; i++)
         {
-            jQuery.get("shaders/" + shaders[i][0] + ".glsl", function(shader){ return function(data){
+            jQuery.get("shaders/" + shaders[i][0] + ".glsl", null, function(shader){ return function(data){
                 var script = jQuery("<script id=\'SHADER_" + shader[0] + "\' type=\'" + shader[1] + "\'>");
                 script.html(data);
                 script.appendTo(jQuery(document.head));
@@ -394,6 +394,10 @@ BSWG.render = new function() {
             self.sizeViewport();
             self.ctx.clearRect(0, 0, self.viewport.w, self.viewport.h);
 
+            if (BSWG.ai.editor && BSWG.ai.editor.isFocused()) {
+                BSWG.input.EAT_ALL();
+            }
+
             if (self.renderCbk) {
                 self.renderCbk(self.dt, self.time, self.ctx);
             }
@@ -441,10 +445,13 @@ BSWG.render = new function() {
         self.animFrameID = window.requestAnimationFrame(renderFrame);
     };
 
-    this.updateCam3D = function ( cam ) {
+    this.updateCam3D = function ( cam, offset ) {
+        if (!offset) {
+            offset = new THREE.Vector3(0,0,0);
+        }
         if (cam) {
             var f = Math.min(this.viewport.h / this.viewport.w, this.viewport.w / this.viewport.h) * 0.54;
-            this.cam3D.position.set(cam.x, cam.y, f/cam.z);
+            this.cam3D.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z);
             this.cam3D.lookAt(new THREE.Vector3(cam.x, cam.y, 0.0));
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();

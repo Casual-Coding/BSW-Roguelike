@@ -24,13 +24,15 @@ BSWG.component_Missile = {
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
             verts:  verts,
             smooth: 0.0,
-            offsetAngle: -Math.PI/8.0
+            offsetAngle: -Math.PI/8.0,
+            restitution: 0.75
         });
         
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
         this.fireT = 3.5;
+        this.nextDestroy = false;
     },
 
     destroy: function() {
@@ -51,7 +53,7 @@ BSWG.component_Missile = {
 
     update: function(dt) {
 
-        if (this.fireT > 0 && (this.obj.body.__lastForce||0.0) < 0.01) {
+        if (this.fireT > 0 && (this.obj.body.__lastForce||0.0) < 0.01 && !this.nextDestroy) {
 
             var p = Math.rotVec2(new b2Vec2(this.size * 0.6, 0.0));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
@@ -84,33 +86,38 @@ BSWG.component_Missile = {
         }
         else {
 
-            if (this.fireT > 0.0) {
-                BSWG.render.boom.palette = chadaboom3D.fire_bright;
-                var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
-                BSWG.render.boom.add(
-                    this.obj.body.GetWorldCenter().particleWrap(0.05),
-                    1.0*4.0*this.size*1.5,
-                    128,
-                    1.0,
-                    1.5,
-                    v.THREE(Math.random()*2.0)
-                );
-                for (var i=0; i<16; i++) {
-                    var a = Math.random()*Math.PI*2.0;
-                    var r = Math.random()*3.0+0.5;
+            if (!this.nextDestroy) {
+                this.nextDestroy = true;
+            }
+            else {
+                if (this.fireT > 0.0) {
+                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                    var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
                     BSWG.render.boom.add(
                         this.obj.body.GetWorldCenter().particleWrap(0.05),
-                        1.0*4.0*this.size*(0.25+Math.random()*0.15),
-                        32,
+                        1.0*4.0*this.size*1.5,
+                        128,
                         1.0,
-                        4.0,
-                        new b2Vec2(v.x+Math.cos(a)*r, v.y+Math.sin(a)*r).THREE(Math.random()*2.0)
+                        1.5,
+                        v.THREE(Math.random()*2.0)
                     );
+                    for (var i=0; i<16; i++) {
+                        var a = Math.random()*Math.PI*2.0;
+                        var r = Math.random()*3.0+0.5;
+                        BSWG.render.boom.add(
+                            this.obj.body.GetWorldCenter().particleWrap(0.05),
+                            1.0*4.0*this.size*(0.25+Math.random()*0.15),
+                            32,
+                            1.0,
+                            4.0,
+                            new b2Vec2(v.x+Math.cos(a)*r, v.y+Math.sin(a)*r).THREE(Math.random()*2.0)
+                        );
+                    }
                 }
-            }
 
-            this.fireT = 0.0;
-            this.removeSafe();
+                this.fireT = 0.0;
+                this.removeSafe();
+            }
         }
     }
 

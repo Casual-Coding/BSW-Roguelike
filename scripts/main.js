@@ -16,6 +16,8 @@ var BSWG = new function(){
         'mapgen.js',
         'fg-nebulas.js',
         'random-name.js',
+        'ai.js',
+       ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
         'components/chain-link.js',
@@ -120,10 +122,18 @@ var BSWG = new function(){
 
         for (var i=0; i<scripts.length; i++)
         {
-            var script = document.createElement('script');
-            script.onload = scriptsLoaded;
-            script.src = "scripts/" + scripts[i];
-            document.head.appendChild(script);
+            if (typeof scripts[i] === 'string') {
+                var script = document.createElement('script');
+                script.onload = scriptsLoaded;
+                script.src = "scripts/" + scripts[i];
+                document.head.appendChild(script);
+            }
+            else {
+                jQuery.get("scripts/" + scripts[i][0], null, function(script){ return function(data){
+                    BSWG[script[1]] = data;
+                    scriptsLoaded();
+                }; }(scripts[i]), "text");
+            }
         }
     };
 }();

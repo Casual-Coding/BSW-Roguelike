@@ -60,6 +60,7 @@ BSWG.game = new function(){
         BSWG.laserList.clear();
         BSWG.planets.init();
         BSWG.ui.clear();
+        BSWG.ai.init();
 
         this.map = null;
         this.mapImage = null;
@@ -275,7 +276,7 @@ BSWG.game = new function(){
                 });
                 if (scene === BSWG.SCENE_GAME2) {
                     this.compPal = new BSWG.uiControl(BSWG.control_CompPalette, {
-                        x: 10 - 128 * 3, y: 70,
+                        x: -10 - 128 * 3, y: 70,
                         w: 128 * 3,
                         h: 650,
                         clickInner: function (me, B) {
@@ -340,6 +341,22 @@ BSWG.game = new function(){
                         }
                         
                     }, "text");
+                    this.aiBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10 + 150 + 10 + 150 + 10, y: 10,
+                        w: 150, h: 50,
+                        text: "AI Editor",
+                        selected: false,
+                        click: function (me) {
+                            if (!me.selected) {
+                                me.selected = true;
+                                BSWG.ai.openEditor(self.ccblock);
+                            }
+                            else {
+                                me.selected = false;
+                                BSWG.ai.closeEditor();
+                            }
+                        }
+                    });
                 }
 
                 if (scene === BSWG.SCENE_GAME1) {
@@ -562,7 +579,13 @@ BSWG.game = new function(){
                     break;
             }
 
-            BSWG.render.updateCam3D(self.cam);
+            var offset = null;
+            /*if (self.ccblock) {
+                var offset = self.ccblock.obj.body.GetLinearVelocity().THREE(0.0);  
+                offset.x = -offset.x * 0.5;
+                offset.y = -offset.y * 0.5;
+            }*/
+            BSWG.render.updateCam3D(self.cam, offset);
             BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
@@ -689,6 +712,9 @@ BSWG.game = new function(){
                     }
 
                     self.exitBtn.p.x = BSWG.render.viewport.w - self.exitBtn.w - 10;
+                    if (self.aiBtn) {
+                        self.aiBtn.p.x = self.exitBtn.p.x - self.aiBtn.w - 10;
+                    }
 
                 default:
                     break;
@@ -773,6 +799,8 @@ BSWG.game = new function(){
             }
 
             BSWG.ui.render(ctx, viewport);
+
+            BSWG.ai.update(ctx, dt);
 
             if (self.scene === BSWG.SCENE_GAME2) {
                 var x = self.loadBtn.p.x + 10 + self.loadBtn.w;

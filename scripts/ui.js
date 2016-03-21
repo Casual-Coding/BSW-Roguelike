@@ -242,7 +242,7 @@ BSWG.control_CompPalette = {
 
     update: function () {
 
-        var toX = 10 - this.w;
+        var toX = -10 - this.w;
 
         if (BSWG.game.editMode) {
             toX = 10;
