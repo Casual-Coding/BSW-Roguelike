@@ -8,11 +8,21 @@ BSWG.ai = new function() {
 
     };
 
+    this.saveCode = function () {
+
+        if (this.editor && this.editorCC) {
+            this.editorCC.aiStr = this.editor.getValue();
+        }
+
+    };
+
     this.openEditor = function (ccblock) {
 
         var self = this;
 
         this.closeEditor();
+
+        this.editorCC = ccblock;
 
         this.editorDiv = document.createElement('div');
         this.editorDiv.style.position = 'fixed';
@@ -27,8 +37,12 @@ BSWG.ai = new function() {
         this.editor.setFontSize(14);
         this.editor.setTheme("ace/theme/monokai");
         this.editor.getSession().setMode("ace/mode/javascript");
+        this.editor.focus();
 
-        this.editor.setValue(ccblock.aiStr || BSWG.ai_Template);
+        this.editor.setValue(ccblock.aiStr || BSWG.ai_Template, -1);
+        if (this.lastCursor) {
+            this.editor.navigateTo(this.lastCursor.row, this.lastCursor.column);
+        }
 
         this.runBtn = new BSWG.uiControl(BSWG.control_Button, {
             x: 10, y: 10,
@@ -36,7 +50,17 @@ BSWG.ai = new function() {
             text: "Run",
             selected: false,
             click: function (me) {
-                ccblock.aiStr = self.editor.getValue();
+                self.saveCode();
+            }
+        });
+
+        this.updateBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 125, h: 50,
+            text: "Update",
+            selected: false,
+            click: function (me) {
+                self.saveCode();
             }
         });
 
@@ -46,20 +70,36 @@ BSWG.ai = new function() {
 
         if (this.editorDiv) {
 
+            this.saveCode();
+
+            this.lastCursor = this.editor.getCursorPosition();
+
             document.body.removeChild(this.editorDiv);
             this.editorDiv = null;
+            this.editor.destroy();
             this.editor = null;
             this.runBtn.destroy();
             this.runBtn.remove();
             this.runBtn = null;
-
+            this.updateBtn.destroy();
+            this.updateBtn.remove();
+            this.updateBtn = null;
+            this.editorCC = null;
         }
 
     }
 
+    this.nextSave = 10;
+
     this.update = function ( ctx, dt ) {
 
         if (this.editorDiv) {
+
+            if (this.nextSave <= 0) {
+                this.saveCode();
+                this.nextSave = 60 * 5;
+            }
+            this.nextSave -= 1;
 
             var mx = BSWG.input.MOUSE('x'), my = BSWG.input.MOUSE('y');
 
@@ -75,8 +115,10 @@ BSWG.ai = new function() {
                 BSWG.render.setCustomCursor(true);
             }
 
-            this.runBtn.p.x = BSWG.render.viewport.w - EDITOR_WIDTH - 10;
-            this.runBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
+            this.updateBtn.p.x = BSWG.render.viewport.w - EDITOR_WIDTH - 10;
+            this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
+            this.runBtn.p.x = this.updateBtn.p.x + this.updateBtn.w + 10;
+            this.runBtn.p.y = this.updateBtn.p.y;
 
             if (this.editor.isFocused()) {
                 this.editorDiv.style.border = '4px solid rgba(140,140,200,1.0)';

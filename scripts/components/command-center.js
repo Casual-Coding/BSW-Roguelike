@@ -12,6 +12,7 @@ BSWG.component_CommandCenter = {
     hasConfig: false,
 
     serialize: [
+        'aiStr'
     ],
 
     init: function(args) {
@@ -66,6 +67,8 @@ BSWG.component_CommandCenter = {
         BSWG.componentList.makeQueryable(this, this.meshObj3.mesh);
 
         BSWG.blockPolySmooth = null;
+
+        this.aiStr = args.aiStr || null;
     },
 
     destroy: function() {

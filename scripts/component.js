@@ -5,6 +5,30 @@ BSWG.compActiveConfMenu = null;
 BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
+BSWG.generateTag = function () {
+    var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var chars2 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    var k = 1000;
+    while (k--) {
+        var ret = chars1.charAt(Math.floor(Math.random() * chars1.length)) +
+                  chars2.charAt(Math.floor(Math.random() * chars2.length));
+                  //chars2.charAt(Math.floor(Math.random() * chars2.length)) +
+                  //chars2.charAt(Math.floor(Math.random() * chars2.length));
+        var found = false;
+        for (var i=0; !found && i<BSWG.componentList.compList.length; i++) {
+            if (BSWG.componentList.compList[i].tag === ret) {
+                found = true;
+            }
+        }
+        if (!found) {
+            return ret;
+        }
+    }
+
+    return null;
+}
+
 BSWG.componentHoverFn = function(self) {
     if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
         return false;
@@ -94,6 +118,7 @@ BSWG.component = function (desc, args) {
     this.jmatch = -1;
     this.welds = new Object();
     this.onCC = null;
+    this.tag = BSWG.generateTag();
     if (this.type === 'cc')
         this.onCC = this;
 
@@ -153,8 +178,8 @@ BSWG.component = function (desc, args) {
                     var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
                     var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
                     ctx.globalAlpha = 0.5;
-                    ctx.fillStyle = '#fff';
-                    BSWG.draw3DRect(ctx, p.x - w * 0.5, p.y - 10, w, 20, 3, info[2] || false);
+                    ctx.fillStyle = info[2] ? '#777' : '#fff';
+                    ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
 
                     ctx.save();
 
@@ -172,6 +197,32 @@ BSWG.component = function (desc, args) {
                     ctx.restore();
                 }
             }
+        }
+
+        if (this.tag && BSWG.ai.editor && !BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
+            var text = this.tag;
+            var rot = 0.0;
+
+            ctx.font = '14px Orbitron';
+            var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+            var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
+
+            ctx.save();
+
+            ctx.translate(Math.floor(p.x), Math.floor(p.y));
+            ctx.rotate(rot);
+            ctx.translate(0, 3);
+
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 0, 0);
+            ctx.textAlign = 'left';
+
+            ctx.restore();
         }
 
         ctx.globalAlpha = 1.0;
@@ -726,6 +777,9 @@ BSWG.componentList = new function () {
             if (OC.type === 'cc') {
                 cc = OC;
             }
+            if (C.tag) {
+                OC.tag = C.tag;
+            }
 
             var WL = C.welds;
             for (var j=0; j<WL.length; j++) {
@@ -778,6 +832,7 @@ BSWG.componentList = new function () {
             OC.onCC = C.onCC ? C.onCC.id : null;
             OC.pos = { x: pos.x, y: pos.y };
             OC.angle = angle;
+            OC.tag = C.tag ? C.tag : BSWG.generateTag();
 
             OC.args = new Object();
             for (var j=0; j<C.serialize.length; j++) {

@@ -324,6 +324,9 @@ BSWG.game = new function(){
                                    x <= (self.loadBtn.p.x + self.loadBtn.w) && y <= (self.loadBtn.p.y + self.loadBtn.h);
                         }
 
+                        BSWG.ai.closeEditor();
+                        self.aiBtn.selected = false;
+
                         var backup = BSWG.componentList.serialize(null, true);
 
                         try {
