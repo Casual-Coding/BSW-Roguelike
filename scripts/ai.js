@@ -2,9 +2,17 @@ BSWG.ai = new function() {
 
     var EDITOR_WIDTH = 550;
 
+    this.getFile = false;
+    this.testOtherShip = null;
+
     this.init = function () {
 
         this.closeEditor();
+        this.testMenuOpen = false;
+        if (this.getFile) {
+            BSWG.input.REMOVE_GFILE(this.getFile);
+            this.getFile = null;
+        }
 
     };
 
@@ -64,9 +72,76 @@ BSWG.ai = new function() {
             }
         });
 
+        this.testMenuOpen = false;
+
+        this.testBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 100, h: 50,
+            text: "Test",
+            selected: this.testMenuOpen,
+            click: function (me) {
+                self.testMenuOpen = !self.testMenuOpen;
+                me.selected = self.testMenuOpen;
+                if (self.testMenuOpen) {
+                    self.testSelBtn.add();
+                    if (self.testOtherShip && self.testOtherShipName) {
+                        self.testRunBtn.add();
+                    }
+                }
+                else {
+                    self.testSelBtn.remove();
+                    self.testRunBtn.remove();
+                }
+            }
+        });
+
+        this.testSelBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 115, h: 50,
+            text: "Import",
+            selected: false,
+            click: function (me) {
+            }
+        });
+
+        this.testRunBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 115, h: 50,
+            text: "Run Test",
+            selected: false,
+            click: function (me) {
+            }
+        });
+        this.testSelBtn.remove();
+        this.testRunBtn.remove();
+
+        this.getFile = BSWG.input.GET_FILE(function(data, x, y){
+            if (!data) {
+                if (!self.testSelBtn || !self.testMenuOpen) {
+                    return false;
+                }
+                return x >= self.testSelBtn.p.x && y >= self.testSelBtn.p.y &&
+                       x <= (self.testSelBtn.p.x + self.testSelBtn.w) && y <= (self.testSelBtn.p.y + self.testSelBtn.h);
+            }
+
+            try {
+                self.testOtherShip = JSON.parse(data.data);
+                self.testOtherShipName = data.filename;
+            } catch (err) {
+                self.testOtherShip = null;
+                self.testOtherShipName = null;
+            }
+            
+        }, "text");
+
     };
 
     this.closeEditor = function () {
+
+        if (this.getFile) {
+            BSWG.input.REMOVE_GFILE(this.getFile);
+            this.getFile = null;
+        }
 
         if (this.editorDiv) {
 
@@ -84,6 +159,16 @@ BSWG.ai = new function() {
             this.updateBtn.destroy();
             this.updateBtn.remove();
             this.updateBtn = null;
+            this.testBtn.destroy();
+            this.testBtn.remove();
+            this.testBtn = null;
+            this.testSelBtn.destroy();
+            this.testSelBtn.remove();
+            this.testSelBtn = null;
+            this.testRunBtn.destroy();
+            this.testRunBtn.remove();
+            this.testRunBtn = null;
+
             this.editorCC = null;
         }
 
@@ -104,7 +189,7 @@ BSWG.ai = new function() {
             var mx = BSWG.input.MOUSE('x'), my = BSWG.input.MOUSE('y');
 
             this.editorDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
-            this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4) + 'px';
+            this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4 - (this.testMenuOpen ? 60 : 0)) + 'px';
 
             if (mx >= parseInt(this.editorDiv.style.left) && my >= parseInt(this.editorDiv.style.top) &&
                 mx < parseInt(this.editorDiv.style.left) + parseInt(this.editorDiv.style.width) &&
@@ -119,6 +204,24 @@ BSWG.ai = new function() {
             this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
             this.runBtn.p.x = this.updateBtn.p.x + this.updateBtn.w + 10;
             this.runBtn.p.y = this.updateBtn.p.y;
+            this.testBtn.p.x = this.runBtn.p.x + this.runBtn.w + 10;
+            this.testBtn.p.y = this.runBtn.p.y;
+
+            if (this.testMenuOpen) {
+                this.testSelBtn.p.x = this.updateBtn.p.x;
+                this.testSelBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h;
+                this.testRunBtn.p.x = BSWG.render.viewport.w - 10 - this.testRunBtn.w;
+                this.testRunBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h;
+                if (this.testOtherShip && this.testOtherShipName) {
+                    var x = this.testSelBtn.p.x + 10 + this.testSelBtn.w;
+                    ctx.fillStyle = '#aaa';
+                    ctx.strokeStyle = '#00f';
+                    ctx.font = '10px Orbitron';
+                    ctx.textAlign = 'left';
+                    ctx.fillTextB(this.testOtherShipName, x, this.testSelBtn.p.y + this.testSelBtn.h * 0.5 + 10/2, true);
+                    this.testRunBtn.add();
+                }
+            }
 
             if (this.editor.isFocused()) {
                 this.editorDiv.style.border = '4px solid rgba(140,140,200,1.0)';
