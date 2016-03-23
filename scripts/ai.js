@@ -11,6 +11,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
     };
 
+    var aiobj = obj;
+
     obj.make_sensor = function (type, args) {
 
         var obj = new Object();
@@ -28,7 +30,42 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
                     // update
 
+                    var refBlock = this.refObject || aiobj.ccblock;
+                    var refOffset = this.refOffset || new b2Vec2(0, 0);
+                    this.minDist = this.distance && this.distance[0] ? this.distance[0] : 0.0;
+                    this.maxDist = this.distance && this.distance[1] ? this.distance[1] : 10.0;
+                    this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
+                    this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
+                    this.minAngle += refBlock.obj.body.GetAngle();
+                    this.maxAngle += refBlock.obj.body.GetAngle();
+                    this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
+                    this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
+                    if (this.minAngle < 0.0) {
+                        this.minAngle += 2.0 * Math.PI;
+                        this.maxAngle += 2.0 * Math.PI;
+                    }
+                    if (this.maxAngle < 0.0) {
+                        this.minAngle += 2.0 * Math.PI;
+                        this.maxAngle += 2.0 * Math.PI;
+                    }
+                    this.cWorld = refBlock.obj.body.GetWorldPoint(refOffset);
+                    this.cScreen = BSWG.game.cam.toScreen(BSWG.render.viewport, this.cWorld);
+                    this.minDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.minDist);
+                    this.maxDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.maxDist);
+
+                    this.found = false;
+                    this.first = null;
+
                     if (ctx) { // render
+
+                        ctx.fillStyle = 'rgba(' + (this.enemy ? '255' : '0') + ',' + (this.friendly ? '255' : '0') + ',' + (this.neutral ? '255' : '0') + ',0.25)';
+                        ctx.beginPath();
+                        ctx.moveTo(this.cScreen.x, this.cScreen.y);
+                        ctx.arc(this.cScreen.x, this.cScreen.y, this.maxDistScreen, Math.PI*2.0-this.maxAngle, Math.PI*2.0-this.minAngle, false);
+                        ctx.moveTo(this.cScreen.x, this.cScreen.y);
+                        ctx.arc(this.cScreen.x, this.cScreen.y, this.minDistScreen, Math.PI*2.0-this.minAngle, Math.PI*2.0-this.maxAngle, true);
+                        ctx.closePath();
+                        ctx.fill();
 
                     }
 
@@ -36,7 +73,11 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
                 sensors.push(obj);
                 break;
+            default:
+                break;
         }
+
+        return obj;
 
     };
 
@@ -70,8 +111,18 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         }
     };
 
+    obj.get = function(tag) {
+        for (var i=0; i<BSWG.componentList.compList.length; i++) {
+            var comp = BSWG.componentList.compList[i];
+            if (comp && comp.onCC === self && comp.tag === tag) {
+                return comp;
+            }
+        }
+    };
 
-}
+    obj.ccblock = self;
+
+};
 
 BSWG.ai = new function() {
 

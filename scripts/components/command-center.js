@@ -116,7 +116,7 @@ BSWG.component_CommandCenter = {
 
     },
 
-    updateAI: function(dt) {
+    updateAI: function(ctx, dt) {
 
         if (this.aiLoadID) {
 

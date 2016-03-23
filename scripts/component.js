@@ -199,20 +199,20 @@ BSWG.component = function (desc, args) {
             }
         }
 
-        if (this.tag && BSWG.ai.editor && !BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
+        if (this.tag && BSWG.ai.editor && !BSWG.game.showControls && this.onCC === BSWG.game.ccblock && BSWG.componentList.compHover2 === this) {
             var text = this.tag;
             var rot = 0.0;
 
-            ctx.font = '14px Orbitron';
+            ctx.font = '14px Courier, monospace';
             var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
             var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 1.0;
             ctx.fillStyle = '#fff';
-            ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
+            ctx.fillRect(p.x - w * 0.5, p.y - 10 - 15, w, 20);
 
             ctx.save();
 
-            ctx.translate(Math.floor(p.x), Math.floor(p.y));
+            ctx.translate(Math.floor(p.x), Math.floor(p.y) - 15);
             ctx.rotate(rot);
             ctx.translate(0, 3);
 
@@ -636,6 +636,8 @@ BSWG.componentList = new function () {
         var pw = BSWG.render.unproject3D(p, 0.0);
         var len = this.compList.length;
 
+        this.compHover2 = this.atPoint(pw);
+
         this.mouseOver = null;
         for (var i=0; i<len; i++) {
             if (this.compList[i].confm && this.compList[i].confm === BSWG.compActiveConfMenu) {
@@ -648,7 +650,7 @@ BSWG.componentList = new function () {
             }
         }
         if (!this.mouseOver) {
-            this.mouseOver = this.atPoint(pw);
+            this.mouseOver = this.compHover2;
         }
         if (this.mouseOver && BSWG.componentHoverFn(this.mouseOver) && (!BSWG.ui.mouseBlock || BSWG.game.grabbedBlock)) {
             if (this.mouseOver.hasConfig && this.mouseOver.onCC && BSWG.game.editMode && !BSWG.ui.mouseBlock) {
@@ -670,6 +672,12 @@ BSWG.componentList = new function () {
         }
 
         BSWG.jpointRenderer.render();
+
+        for (var i=0; i<len; i++) {
+            if (this.compList[i].ai && this.compList[i].ai.__update_sensors) {
+                this.compList[i].ai.__update_sensors(BSWG.ai.editor ? ctx : null, dt);
+            }
+        }
     };
 
     this.atPoint = function (p) {
