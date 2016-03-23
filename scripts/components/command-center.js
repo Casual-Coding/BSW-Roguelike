@@ -17,6 +17,8 @@ BSWG.component_CommandCenter = {
         'aiStr'
     ],
 
+    frontOffset: -Math.PI/2,
+
     init: function(args) {
 
         this.width  = 2;
@@ -116,7 +118,51 @@ BSWG.component_CommandCenter = {
 
     },
 
-    updateAI: function(ctx, dt) {
+    aiPause: function(time) {
+
+        if (this.ai) {
+            if (!this.aiCmdBfr) {
+                this.aiCmdBfr = new Array();
+            }
+            this.aiCmdBfr.push({
+                type: 'pause',
+                t: time
+            });
+        }
+
+    },
+
+    aiHold: function(time) {
+
+        if (this.ai) {
+            if (!this.aiCmdBfr) {
+                this.aiCmdBfr = new Array();
+            }
+            this.aiCmdBfr.push({
+                type: 'hold',
+                t: time
+            });
+        }
+
+    },
+
+    aiSub: function(time, fn) {
+
+        if (this.ai) {
+            if (!this.aiCmdBfr) {
+                this.aiCmdBfr = new Array();
+            }
+            this.aiCmdBfr.push({
+                type: 'sub',
+                fn: fn,
+                t: time,
+                t0: 0.0
+            });
+        }
+
+    },
+
+    updateAI: function(dt) {
 
         if (this.aiLoadID) {
 
@@ -155,9 +201,37 @@ BSWG.component_CommandCenter = {
 
         if (this.ai && !this.aiPaused) {
 
+            var cmd = this.aiCmdBfr ? this.aiCmdBfr[0] : null;
+            if (cmd && cmd.t) {
+                cmd.t -= dt;
+                if (typeof cmd.t0 === 'number') {
+                    cmd.t0 += dt;
+                }
+                if (!(cmd.t > 0)) {
+                    this.aiCmdBfr.splice(0, 1);
+                    cmd = this.aiCmdBfr ? this.aiCmdBfr[0] : null;
+                }
+            }
+
             var keys = new Object();
             try {
-                this.ai.update(dt, keys);
+                if (cmd && cmd.type === 'hold') {
+                    for (var k in this.aiLastKeys) {
+                        keys[k] = this.aiLastKeys[k];
+                    }
+                }
+                else if (cmd && cmd.type === 'pause') {
+                    // keys should be empty
+                }
+                else if (cmd && cmd.type === 'sub') {
+                    if (cmd.fn(dt, keys, cmd.t0)) {
+                        cmd.t = 0;
+                    }
+                }
+                else {
+                    this.ai.update(dt, keys);
+                    this.aiLastKeys = keys;
+                }
                 return keys;
             } catch (e) {
                 BSWG.ai.logError("Error in AI script frame update:");
@@ -208,6 +282,21 @@ BSWG.component_CommandCenter = {
 
     },
 
+    removeAI: function () {
+
+        if (this.aiScriptTag) {
+            var head = document.getElementsByTagName("head")[0];
+            head.removeChild(this.aiScriptTag);
+            this.aiScriptTag = null;
+        }
+
+        this.aiLoadID = null;
+        this.ai = null;
+        this.aiPaused = true;
+        this.aiCmdBfr = null;
+
+    },
+
     reloadAI: function (paused) {
 
         if (this.aiScriptTag) {
@@ -217,6 +306,7 @@ BSWG.component_CommandCenter = {
         }
 
         this.aiLoadID = null;
+        this.aiCmdBfr = null;
 
         if (!this.aiStr) {
             BSWG.ai.logError("No AI code set for this ship.");

@@ -16,6 +16,8 @@ BSWG.component_ChainLink = {
         { title: 'Add' }
     ],
 
+    frontOffset: 0.0,
+
     init: function(args) {
 
         this.size   = 1;

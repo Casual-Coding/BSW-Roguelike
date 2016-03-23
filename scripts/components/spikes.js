@@ -22,6 +22,8 @@ BSWG.component_Spikes = {
         { title: 'Pike 3', size: 3, pike: true }
     ],
 
+    frontOffset: Math.PI/2 - Math.PI/16 - Math.PI/50,
+
     init: function(args) {
 
         this.size      = args.size || 1;

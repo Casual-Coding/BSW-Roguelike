@@ -19,6 +19,8 @@ BSWG.component_Thruster = {
         { title: 'Size 2', size: 2 },
     ],
 
+    frontOffset: -Math.PI/2,
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

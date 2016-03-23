@@ -17,6 +17,8 @@ BSWG.component_MissileLauncher = {
         { title: 'Add' }
     ],
 
+    frontOffset: Math.PI/2,
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

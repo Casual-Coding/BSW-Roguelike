@@ -22,6 +22,8 @@ BSWG.component_HingeHalf = {
         { title: 'Hinge 2', size: 2, motor: false }
     ],
 
+    frontOffset: Math.PI,
+
     init: function(args) {
 
         this.size   = args.size || 1;

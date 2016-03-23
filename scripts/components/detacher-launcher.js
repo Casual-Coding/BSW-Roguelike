@@ -20,6 +20,8 @@ BSWG.component_DetacherLauncher = {
         { title: 'Size 3', size: 3 }
     ],
 
+    frontOffset: Math.PI,
+
     init: function(args) {
 
         this.size      = args.size || 2;

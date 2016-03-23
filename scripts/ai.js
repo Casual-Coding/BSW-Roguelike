@@ -13,6 +13,15 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
     var aiobj = obj;
 
+    obj.vec = function(x,y) {
+        return new b2Vec2(x||0, y||0);
+    };
+
+    obj.world = function (comp, vec) {
+        var v2 = Math.rotVec2(vec, comp.frontOffset);
+        return comp.obj.body.GetWorldPoint(v2);
+    };
+
     obj.make_sensor = function (type, args) {
 
         var obj = new Object();
@@ -36,8 +45,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     this.maxDist = this.distance && this.distance[1] ? this.distance[1] : 10.0;
                     this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
                     this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
-                    this.minAngle += refBlock.obj.body.GetAngle();
-                    this.maxAngle += refBlock.obj.body.GetAngle();
+                    this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
+                    this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
                     this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
                     this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
                     if (this.minAngle < 0.0) {
@@ -48,7 +57,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         this.minAngle += 2.0 * Math.PI;
                         this.maxAngle += 2.0 * Math.PI;
                     }
-                    this.cWorld = refBlock.obj.body.GetWorldPoint(refOffset);
+                    this.cWorld = aiobj.world(refBlock, refOffset);
                     this.cScreen = BSWG.game.cam.toScreen(BSWG.render.viewport, this.cWorld);
                     this.minDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.minDist);
                     this.maxDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.maxDist);
@@ -93,11 +102,15 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
     };
 
     obj.pause = function(time) {
-        // TODO
+        self.aiPause(time);
     };
 
     obj.hold = function(time) {
-        // TODO
+        self.aiHold(time);
+    };
+
+    obj.sub = function(time, fn) {
+        self.aiSub(time, fn);
     };
 
     obj.each = function(cbk) {
@@ -198,6 +211,7 @@ BSWG.ai = new function() {
             text: "Run",
             selected: false,
             click: function (me) {
+                self.logError('Run -------------');
                 self.saveCode();
                 self.editorCC.reloadAI();
             }
@@ -209,8 +223,20 @@ BSWG.ai = new function() {
             text: "Update",
             selected: false,
             click: function (me) {
+                self.logError('Update ----------');
                 self.saveCode();
                 self.editorCC.reloadAI(true);
+            }
+        });
+
+        this.stopBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 100, h: 50,
+            text: "Stop",
+            selected: false,
+            click: function (me) {
+                self.editorCC.removeAI();
+                self.logError('Stop ------------');
             }
         });
 
@@ -303,6 +329,9 @@ BSWG.ai = new function() {
             this.updateBtn.destroy();
             this.updateBtn.remove();
             this.updateBtn = null;
+            this.stopBtn.destroy();
+            this.stopBtn.remove();
+            this.stopBtn = null;
             this.testBtn.destroy();
             this.testBtn.remove();
             this.testBtn = null;
@@ -367,8 +396,10 @@ BSWG.ai = new function() {
             this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
             this.runBtn.p.x = this.updateBtn.p.x + this.updateBtn.w + 10;
             this.runBtn.p.y = this.updateBtn.p.y;
-            this.testBtn.p.x = this.runBtn.p.x + this.runBtn.w + 10;
-            this.testBtn.p.y = this.runBtn.p.y;
+            this.stopBtn.p.x = this.runBtn.p.x + this.runBtn.w + 10;
+            this.stopBtn.p.y = this.runBtn.p.y;
+            this.testBtn.p.x = this.stopBtn.p.x + this.stopBtn.w + 10;
+            this.testBtn.p.y = this.stopBtn.p.y;
 
             if (this.testMenuOpen) {
                 this.testSelBtn.p.x = this.updateBtn.p.x;

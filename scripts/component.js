@@ -108,6 +108,7 @@ BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
 
     this.handleInput = function(key) {};
+    this.frontOffset = 0.0;
 
     for (var key in desc)
         this[key] = desc[key];
@@ -607,7 +608,10 @@ BSWG.componentList = new function () {
         var len = this.compList.length;
         for (var i=0; i<len; i++) {
             if (this.compList[i].updateAI) {
-                this.compList[i].updateAI(dt);
+                var keys = this.compList[i].updateAI(dt);
+                if (keys) {
+                    this.handleInput(this.compList[i], keys);
+                }
             }
         }
         for (var i=0; i<len; i++) {
