@@ -1,3 +1,78 @@
+BSWG.applyAIHelperFunctions = function (obj, self) {
+
+    obj.log = function (text) {
+        BSWG.ai.logError(self.tag + '/' + self.id + ': ' + text);
+    };
+
+    var sensors = new Array();
+    obj.get_sensors = function () {
+
+        return sensors;
+
+    };
+
+    obj.make_sensor = function (type, args) {
+
+        var obj = new Object();
+
+        for (var key in args) {
+            obj[key] = args[key];
+        }
+
+        obj.type = type;
+
+        switch (type) {
+            case 'radius':
+
+                obj.updateRender = function (ctx, dt) {
+
+                    // update
+
+                    if (ctx) { // render
+
+                    }
+
+                };
+
+                sensors.push(obj);
+                break;
+        }
+
+    };
+
+    obj.__update_sensors = function (ctx, dt) {
+
+        for (var i=0; i<sensors.length; i++) {
+            var S = sensors[i];
+            if (S.updateRender) {
+                S.updateRender(ctx, dt);
+            }
+        }
+
+    };
+
+    obj.pause = function(time) {
+        // TODO
+    };
+
+    obj.hold = function(time) {
+        // TODO
+    };
+
+    obj.each = function(cbk) {
+        if (typeof cbk === 'function') {
+            for (var i=0; i<BSWG.componentList.compList.length; i++) {
+                var comp = BSWG.componentList.compList[i];
+                if (comp && comp.onCC === self) {
+                    cbk(comp);
+                }
+            }                
+        }
+    };
+
+
+}
+
 BSWG.ai = new function() {
 
     var EDITOR_WIDTH = 550;

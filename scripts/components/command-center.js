@@ -2,7 +2,7 @@
 
 BSWG.uberFastCC = false;
 
-window.__newAI = {};
+BSWG.newAI = {};
 
 BSWG.component_CommandCenter = {
 
@@ -121,21 +121,18 @@ BSWG.component_CommandCenter = {
         if (this.aiLoadID) {
 
             try {
-                this.ai = window.__newAI[this.aiLoadID];
+                this.ai = BSWG.newAI[this.aiLoadID];
                 if (this.ai) {
                     try {
-                        window.__newAI[this.aiLoadID] = null;
-                        delete window.__newAI[this.aiLoadID];
+                        BSWG.newAI[this.aiLoadID] = null;
+                        delete BSWG.newAI[this.aiLoadID];
                         this.aiLoadID = null;
                         var head = document.getElementsByTagName("head")[0];
                         head.removeChild(this.aiScriptTag);
                         this.aiScriptTag = null;
                     } catch (e) { }
                     // <- define helper functions here
-                    var self = this;
-                    this.ai.log = function (text) {
-                        BSWG.ai.logError(self.tag + '/' + self.id + ': ' + text);
-                    };
+                    BSWG.applyAIHelperFunctions(this.ai, this);
                     this.ai.init(this);
                 }
             } catch (e) {
@@ -144,8 +141,8 @@ BSWG.component_CommandCenter = {
                 this.ai = null;
                 this.aiPaused = true;
                 try {
-                    window.__newAI[this.aiLoadID] = null;
-                    delete window.__newAI[this.aiLoadID];
+                    BSWG.newAI[this.aiLoadID] = null;
+                    delete BSWG.newAI[this.aiLoadID];
                     this.aiLoadID = null;
                     var head = document.getElementsByTagName("head")[0];
                     head.removeChild(this.aiScriptTag);
@@ -246,10 +243,10 @@ BSWG.component_CommandCenter = {
         }
         this.aiLoadID = guid();
 
-        window.__newAI[this.aiLoadID] = null;
+        BSWG.newAI[this.aiLoadID] = null;
 
         script.src = "data:text/javascript;base64," + btoa(
-            "try { window.__newAI[\"" + this.aiLoadID + "\"] = " + this.aiStr + "; } catch (e) { BSWG.ai.logError('Error parsing AI script:'); BSWG.ai.logError(e.stack); }"
+            "try { BSWG.newAI[\"" + this.aiLoadID + "\"] = " + this.aiStr + "; } catch (e) { BSWG.ai.logError('Error parsing AI script:'); BSWG.ai.logError(e.stack); }"
         );
 
         this.aiPaused = !!paused;
