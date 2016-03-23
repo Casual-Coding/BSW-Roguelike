@@ -606,6 +606,11 @@ BSWG.componentList = new function () {
 
         var len = this.compList.length;
         for (var i=0; i<len; i++) {
+            if (this.compList[i].updateAI) {
+                this.compList[i].updateAI(dt);
+            }
+        }
+        for (var i=0; i<len; i++) {
             this.compList[i].cacheJPW();
         }
         for (var i=0; i<len; i++) {

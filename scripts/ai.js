@@ -41,6 +41,20 @@ BSWG.ai = new function() {
         this.editorDiv.style.border = '4px solid rgba(70,70,100,1.0)';
         document.body.appendChild(this.editorDiv);
 
+        this.consoleDiv = document.createElement('code');
+        this.consoleDiv.style.position = 'fixed';
+        this.consoleDiv.style.zIndex = '50';
+        this.consoleDiv.style.width = (EDITOR_WIDTH-8) + 'px';
+        this.consoleDiv.style.height = '144px';
+        this.consoleDiv.style.top = '66px';
+        this.consoleDiv.style.border = '4px solid rgba(70,70,100,1.0)';
+        this.consoleDiv.style.overflowX = 'hidden';
+        this.consoleDiv.style.overflowY = 'scroll';
+        this.consoleDiv.style.color = 'rgb(248, 248, 242)';
+        this.consoleDiv.style.backgroundColor = 'rgb(39, 40, 34)';
+        this.consoleDiv.readOnly = true;
+        document.body.appendChild(this.consoleDiv);
+
         this.editor = ace.edit(this.editorDiv);
         this.editor.setFontSize(14);
         this.editor.setTheme("ace/theme/monokai");
@@ -59,6 +73,7 @@ BSWG.ai = new function() {
             selected: false,
             click: function (me) {
                 self.saveCode();
+                self.editorCC.reloadAI();
             }
         });
 
@@ -69,6 +84,7 @@ BSWG.ai = new function() {
             selected: false,
             click: function (me) {
                 self.saveCode();
+                self.editorCC.reloadAI(true);
             }
         });
 
@@ -151,6 +167,8 @@ BSWG.ai = new function() {
 
             document.body.removeChild(this.editorDiv);
             this.editorDiv = null;
+            document.body.removeChild(this.consoleDiv);
+            this.consoleDiv = null;
             this.editor.destroy();
             this.editor = null;
             this.runBtn.destroy();
@@ -172,7 +190,23 @@ BSWG.ai = new function() {
             this.editorCC = null;
         }
 
-    }
+    };
+
+    this.logError = function(text) {
+        text = text + '';
+        var lines = text.match(/[^\r\n]+/g);
+        for (var i=0; i<lines.length; i++) {
+            if (lines[i].length > 70) {
+                lines[i] = lines[i].substring(0, 35) + ' ... ' + lines[i].substring(lines[i].length-35);
+            }
+        }
+        text = lines.join('\n') + '\n';
+        console.log(text);
+        if (this.consoleDiv) {
+            this.consoleDiv.innerText += text + '\n';
+            this.consoleDiv.scrollTop = this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight;
+        }
+    };
 
     this.nextSave = 10;
 
@@ -189,12 +223,15 @@ BSWG.ai = new function() {
             var mx = BSWG.input.MOUSE('x'), my = BSWG.input.MOUSE('y');
 
             this.editorDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
-            this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4 - (this.testMenuOpen ? 60 : 0)) + 'px';
+            this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4 - (this.testMenuOpen ? 60 : 0) - 150) + 'px';
+            this.consoleDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
+            this.consoleDiv.style.top = (parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height) + 12) + 'px';
 
             if (mx >= parseInt(this.editorDiv.style.left) && my >= parseInt(this.editorDiv.style.top) &&
                 mx < parseInt(this.editorDiv.style.left) + parseInt(this.editorDiv.style.width) &&
-                my < parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height)) {
+                my < parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height) + 162) {
                 BSWG.render.setCustomCursor(false);
+                BSWG.input.EAT_MOUSE('wheel');
             }
             else {
                 BSWG.render.setCustomCursor(true);

@@ -142,6 +142,9 @@ BSWG.input = new function(){
         if (v === 'left' || v === 'middle' || v === 'right' || v === 'shift') {
             mouseState[v] = lmouseState[v] = false;
         }
+        else if (v === 'wheel' || v === 'x' || v === 'y') {
+            mouseState[v] = lmouseState[v];
+        }
     };
 
     this.wheelLimits = function ( w1, w2 ) {

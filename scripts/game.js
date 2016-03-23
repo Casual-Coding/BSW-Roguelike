@@ -247,6 +247,7 @@ BSWG.game = new function(){
                     text: "Exit",
                     selected: this.editMode,
                     click: function (me) {
+                        BSWG.ai.closeEditor();
                         self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
                     }
                 });

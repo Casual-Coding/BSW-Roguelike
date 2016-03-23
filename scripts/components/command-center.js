@@ -2,6 +2,8 @@
 
 BSWG.uberFastCC = false;
 
+window.__newAI = {};
+
 BSWG.component_CommandCenter = {
 
     type: 'cc',
@@ -114,6 +116,65 @@ BSWG.component_CommandCenter = {
 
     },
 
+    updateAI: function(dt) {
+
+        if (this.aiLoadID) {
+
+            try {
+                this.ai = window.__newAI[this.aiLoadID];
+                if (this.ai) {
+                    try {
+                        window.__newAI[this.aiLoadID] = null;
+                        delete window.__newAI[this.aiLoadID];
+                        this.aiLoadID = null;
+                        var head = document.getElementsByTagName("head")[0];
+                        head.removeChild(this.aiScriptTag);
+                        this.aiScriptTag = null;
+                    } catch (e) { }
+                    // <- define helper functions here
+                    var self = this;
+                    this.ai.log = function (text) {
+                        BSWG.ai.logError(self.tag + '/' + self.id + ': ' + text);
+                    };
+                    this.ai.init(this);
+                }
+            } catch (e) {
+                BSWG.ai.logError("Error initializing AI script:");
+                BSWG.ai.logError(e.stack);
+                this.ai = null;
+                this.aiPaused = true;
+                try {
+                    window.__newAI[this.aiLoadID] = null;
+                    delete window.__newAI[this.aiLoadID];
+                    this.aiLoadID = null;
+                    var head = document.getElementsByTagName("head")[0];
+                    head.removeChild(this.aiScriptTag);
+                    this.aiScriptTag = null;
+                } catch (e) { }
+                return null;
+            }
+
+        }
+
+        if (this.ai && !this.aiPaused) {
+
+            var keys = new Object();
+            try {
+                this.ai.update(dt, keys);
+                return keys;
+            } catch (e) {
+                BSWG.ai.logError("Error in AI script frame update:");
+                BSWG.ai.logError(e.stack);
+                this.aiPaused = true;
+                return null;
+            }
+
+        }
+
+        return null;
+
+    },
+
     handleInput: function(keys) {
 
         var rot = 0;
@@ -149,5 +210,52 @@ BSWG.component_CommandCenter = {
         }
 
     },
+
+    reloadAI: function (paused) {
+
+        if (this.aiScriptTag) {
+            var head = document.getElementsByTagName("head")[0];
+            head.removeChild(this.aiScriptTag);
+            this.aiScriptTag = null;
+        }
+
+        this.aiLoadID = null;
+
+        if (!this.aiStr) {
+            BSWG.ai.logError("No AI code set for this ship.");
+            this.ai = null;
+            return false;
+        }
+
+        this.ai = null;
+
+        var ai = null;
+
+        var head = document.getElementsByTagName("head")[0],
+            script = document.createElement("script");
+
+        head.insertBefore(script, head.lastChild);
+        this.aiScriptTag = script;
+
+        // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+        function guid() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        }
+        this.aiLoadID = guid();
+
+        window.__newAI[this.aiLoadID] = null;
+
+        script.src = "data:text/javascript;base64," + btoa(
+            "try { window.__newAI[\"" + this.aiLoadID + "\"] = " + this.aiStr + "; } catch (e) { BSWG.ai.logError('Error parsing AI script:'); BSWG.ai.logError(e.stack); }"
+        );
+
+        this.aiPaused = !!paused;
+
+        return true;
+
+    }
 
 };
