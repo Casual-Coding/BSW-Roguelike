@@ -174,6 +174,42 @@ Math.pointDistance = function (p1, p2) {
 // https://gist.github.com/wteuber/6241786
 Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
 
+Math.angleBetween = function (a,b) {
+    var dx = b.x - a.x, dy = b.y - a.y;
+    return Math.atan2(dx, dy);
+};
+
+Math.angleDist = function (a,b) {
+    return Math.atan2(Math.sin(a-b), Math.cos(a-b));
+};
+
+Math.pointBetween = function(c, a1, a2, p) {
+    a1 = Math.atan2(Math.sin(a1), Math.cos(a1));
+    a2 = Math.atan2(Math.sin(a2), Math.cos(a2));
+    if (a2 <= a1) {
+        a2 += Math.PI * 2.0;
+    }
+    if (a2-a1 >= Math.PI * 2.0) {
+        return true;
+    }
+    var ca = (a1+a2)*0.5;
+    var ad = Math.abs(ca - a2);
+    var dx1 = p.x - c.x, dy1 = p.y - c.y;
+    var dx2 = Math.cos(ca), dy2 = Math.sin(ca);
+    var len1 = Math.sqrt(dx1*dx1+dy1*dy1);
+    if (!len1) {
+        return true;
+    }
+    dx1 /= len1; dy1 /= len1;
+    var ad2 = dx1*dx2+dy1*dy2;
+    if (Math.abs(ad2) > Math.cos(ad)) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 Math.rotVec2 = function(vec, angle)
 {
     var x = vec.x,

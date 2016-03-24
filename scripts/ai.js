@@ -22,6 +22,10 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         return comp.obj.body.GetWorldPoint(v2);
     };
 
+    obj.trace = function (comp, clr) {
+        comp.traceClr = clr || null;
+    };
+
     obj.make_sensor = function (type, args) {
 
         var obj = new Object();
@@ -35,6 +39,10 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         switch (type) {
             case 'radius':
 
+                obj.list = [];
+                obj.first = null;
+                obj.found = false;
+
                 obj.updateRender = function (ctx, dt) {
 
                     // update
@@ -43,20 +51,19 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     var refOffset = this.refOffset || new b2Vec2(0, 0);
                     this.minDist = this.distance && this.distance[0] ? this.distance[0] : 0.0;
                     this.maxDist = this.distance && this.distance[1] ? this.distance[1] : 10.0;
-                    this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
-                    this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
-                    this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
-                    this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
-                    this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
-                    this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
-                    if (this.minAngle < 0.0) {
-                        this.minAngle += 2.0 * Math.PI;
-                        this.maxAngle += 2.0 * Math.PI;
+                    this.fullRange = false;
+                    if (!this.angle) {
+                        this.fullRange = true;
                     }
-                    if (this.maxAngle < 0.0) {
-                        this.minAngle += 2.0 * Math.PI;
-                        this.maxAngle += 2.0 * Math.PI;
+                    else {
+                        this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
+                        this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
+                        this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
+                        this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
+                        this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
                     }
+                        this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
+
                     this.cWorld = aiobj.world(refBlock, refOffset);
                     this.cScreen = BSWG.game.cam.toScreen(BSWG.render.viewport, this.cWorld);
                     this.minDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.minDist);
@@ -64,15 +71,66 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
                     this.found = false;
                     this.first = null;
+                    this.list.length = 0;
+
+                    var CL = BSWG.componentList.compList;
+                    for (var i=0; i<CL.length; i++) {
+                        if (!CL[i] || !CL[i].obj) {
+                            continue;
+                        }
+                        var enemy = CL[i].onCC === BSWG.game.ccblock && BSWG.game.ccblock !== self;
+                        var friendly = CL[i].onCC && !enemy;
+                        var neutral = !enemy && !friendly;
+                        if ((enemy && this.enemy) ||
+                            (friendly && this.friendly) ||
+                            (neutral && this.neutral)) {
+                            var radius = CL[i].obj.radius || 0.0;
+                            var dist = Math.distSqVec2(this.cWorld, CL[i].obj.body.GetWorldCenter());
+                            if (dist > Math.pow(this.minDist-radius, 2.0) &&
+                                dist < Math.pow(this.maxDist+radius, 2.0)) {
+                                if (this.fullRange || Math.pointBetween(this.cWorld, this.minAngle, this.maxAngle, CL[i].obj.body.GetWorldCenter())) {
+                                    this.list.push([CL[i], dist]);
+                                }
+                            }
+                        }
+                    }
+
+                    this.list.sort(function(a,b){
+                        return a[1] - b[1];
+                    });
+                    for (var i=0; i<this.list.length; i++) {
+                        this.list[i] = this.list[i][0];
+                    }
+
+                    if (this.list.length > 0) {
+                        this.first = this.list[0];
+                        this.found = true;
+                    }
 
                     if (ctx) { // render
+
+                        var minAngle = this.minAngle || 0;
+                        if (minAngle < 0.0) {
+                            minAngle += 2.0 * Math.PI;
+                            maxAngle += 2.0 * Math.PI;
+                        }
+                        var maxAngle = this.maxAngle || 0;
+                        if (maxAngle < 0.0) {
+                            minAngle += 2.0 * Math.PI;
+                            maxAngle += 2.0 * Math.PI;
+                        }
+
+                        if (this.fullRange) {
+                            minAngle = 0;
+                            maxAngle = Math.PI * 2.0;
+                        }
 
                         ctx.fillStyle = 'rgba(' + (this.enemy ? '255' : '0') + ',' + (this.friendly ? '255' : '0') + ',' + (this.neutral ? '255' : '0') + ',0.25)';
                         ctx.beginPath();
                         ctx.moveTo(this.cScreen.x, this.cScreen.y);
-                        ctx.arc(this.cScreen.x, this.cScreen.y, this.maxDistScreen, Math.PI*2.0-this.maxAngle, Math.PI*2.0-this.minAngle, false);
+                        ctx.arc(this.cScreen.x, this.cScreen.y, this.maxDistScreen, Math.PI*2.0-maxAngle, Math.PI*2.0-minAngle, false);
                         ctx.moveTo(this.cScreen.x, this.cScreen.y);
-                        ctx.arc(this.cScreen.x, this.cScreen.y, this.minDistScreen, Math.PI*2.0-this.minAngle, Math.PI*2.0-this.maxAngle, true);
+                        ctx.arc(this.cScreen.x, this.cScreen.y, this.minDistScreen, Math.PI*2.0-minAngle, Math.PI*2.0-maxAngle, true);
                         ctx.closePath();
                         ctx.fill();
 

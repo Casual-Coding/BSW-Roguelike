@@ -228,6 +228,14 @@ BSWG.component = function (desc, args) {
 
         ctx.globalAlpha = 1.0;
 
+        if (this.traceClr) {
+            ctx.globalAlpha = 0.85;
+            var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+            ctx.fillStyle = this.traceClr;
+            ctx.fillRect(p.x-5, p.y-5, 10, 10);
+            ctx.globalAlpha = 1.0;
+        }
+
     };
 
     this.cacheJPW = function() {
