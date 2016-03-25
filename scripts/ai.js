@@ -46,6 +46,11 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                 var comp = obj.comp;
                 var hinge = obj.hinge || false;
                 var oradius = obj.radius || comp.obj.radius;
+                var revRadius = obj.revRadius || (oradius * 2.0);
+                var forwardOffset = obj.forwardOffset || 0.0;
+                var charge = obj.charge || false;
+
+                obj.reached = false;
 
                 obj.timeStop = function (tmag, ptype) {
 
@@ -59,12 +64,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         damping = comp.obj.body.GetLinearDamping();
                     }
 
-                    if (mag < 0.000001) {
+                    if (mag < 0.000001 || tmag < 0.000001) {
                         return 1000000.0;
-                    }
-
-                    if (!(tmag > mag * 0.05)) {
-                        tmag = mag * 0.05;
                     }
 
                     return Math.log(tmag/mag) / Math.log(damping);
@@ -91,7 +92,9 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     return Math.log(-dist*ld/mag + 1.0) / -ld;
                 };
 
-                obj.moveTo = function (p, keyDown, left, right, forward) { // Stateless
+                var moveTos = new Array();
+
+                obj.moveTo = function (p, keyDown, left, right, forward, reverse) { // Stateless
 
                     left = left || BSWG.KEY.LEFT;
                     right = right || BSWG.KEY.RIGHT;
@@ -99,14 +102,30 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         forward = forward || BSWG.KEY.UP;
                     }
 
+                    var doReverse = false;
+
                     var mp = comp.obj.body.GetWorldCenter();
                     var radius = oradius;
                     var distance = Math.distVec2(mp, p);
 
-                    if (distance > radius) {
-                        var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngle() + comp.frontOffset);
-                        angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
-                        if (this.timeTarget(Math.abs(angDiff), 'ang') > this.timeStop(Math.PI/90, 'ang') && Math.abs(angDiff) > Math.PI/45) {
+                    var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset);
+                    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
+                    if (Math.abs(angDiff) > Math.PI*0.5 && reverse && distance < revRadius && !this.tracker) {
+                        doReverse = true;
+                        angDiff = Math.atan2(Math.sin(angDiff+Math.PI), Math.cos(angDiff+Math.PI));
+                    }
+
+                    moveTos.push({
+                        p: p,
+                        mp: mp,
+                        a: -(comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset + (doReverse ? Math.PI : 0)),
+                        r: radius
+                    });
+
+                    this.reached = this.tracker ? (Math.abs(angDiff) < Math.PI/90) : (distance <= radius);
+
+                    if (distance > radius || this.tracker) {
+                        if ((this.timeTarget(Math.abs(angDiff), 'ang') > this.timeStop(Math.PI/90, 'ang') || hinge) && Math.abs(angDiff) > Math.PI/90) {
                             if (angDiff > 0.0) {
                                 keyDown[left] = true;
                             }
@@ -115,18 +134,51 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                             }
                         }
                         if (!this.tracker) {
-                            if (Math.abs(angDiff) < Math.PI/9 && this.timeTarget(distance, 'vel') > this.timeStop(0.1, 'vel')) {
-                                keyDown[forward] = true;
+                            if (Math.abs(angDiff) < Math.PI/4 && (this.timeTarget(distance, 'vel') > this.timeStop(0.2, 'vel') || charge)) {
+                                keyDown[doReverse ? reverse : forward] = true;
                             }
                         }
                     }
+
+                    this.angDist = angDiff;
 
                 };
 
                 obj.updateRender = function (ctx, dt) {
 
+                    if (!ctx) {
+                        moveTos.length = 0;
+                        return;
+                    }
+
+                    for (var i=0; i<moveTos.length; i++) {
+                        var MT = moveTos[i];
+                        var p = BSWG.game.cam.toScreen(BSWG.render.viewport, MT.p);
+                        var mp = BSWG.game.cam.toScreen(BSWG.render.viewport, MT.mp);
+                        var r = BSWG.game.cam.toScreenSize(BSWG.render.viewport, MT.r);
+                        var a = MT.a;
+                        ctx.lineWidth = 2.0;
+                        ctx.strokeStyle = 'rgba(0,255,0,0.5)';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, r, 0.0, Math.PI*2.0);
+                        ctx.closePath();
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(mp.x, mp.y);
+                        ctx.closePath();
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(mp.x, mp.y);
+                        ctx.lineTo(mp.x + Math.cos(a) * r, mp.y + Math.sin(a) * r);
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                    moveTos.length = 0;
+
                 };
 
+                sensors.push(obj);
                 break;
 
             case 'radius': // Sensor
@@ -283,6 +335,13 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                 return comp;
             }
         }
+    };
+
+    obj.mouse = function() {
+        var mx = BSWG.input.MOUSE('x');
+        var my = BSWG.input.MOUSE('y');
+        var mps = new b2Vec2(mx, my);
+        return BSWG.render.unproject3D(mps, 0.0);
     };
 
     obj.ccblock = self;
