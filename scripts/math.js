@@ -176,7 +176,7 @@ Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPreci
 
 Math.angleBetween = function (a,b) {
     var dx = b.x - a.x, dy = b.y - a.y;
-    return Math.atan2(dx, dy);
+    return Math.atan2(dy, dx);
 };
 
 Math.angleDist = function (a,b) {

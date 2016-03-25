@@ -37,7 +37,92 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         obj.type = type;
 
         switch (type) {
-            case 'radius':
+
+            case 'movement': // Controller
+
+                var comp = obj.comp;
+                var hinge = obj.hinge || false;
+                var oradius = obj.radius || comp.obj.radius;
+
+                obj.timeStop = function (tmag, ptype) {
+
+                    var mag = Math.abs(comp.obj.body.GetAngularVelocity());
+                    if (!ptype || ptype === 'vel') {
+                        mag = Math.lenVec2(comp.obj.body.GetLinearVelocity());
+                    }
+
+                    var damping = comp.obj.body.GetAngularDamping();
+                    if (!ptype || ptype === 'vel') {
+                        damping = comp.obj.body.GetLinearDamping();
+                    }
+
+                    if (mag < 0.000001) {
+                        return 1000000.0;
+                    }
+
+                    if (!(tmag > mag * 0.05)) {
+                        tmag = mag * 0.05;
+                    }
+
+                    return Math.log(tmag/mag) / Math.log(damping);
+
+                };
+
+                obj.timeTarget = function (dist, ptype) {
+
+                    var mag = Math.abs(comp.obj.body.GetAngularVelocity());
+                    if (!ptype || ptype === 'vel') {
+                        mag = Math.lenVec2(comp.obj.body.GetLinearVelocity());
+                    }
+
+                    var damping = comp.obj.body.GetAngularDamping();
+                    if (!ptype || ptype === 'vel') {
+                        damping = comp.obj.body.GetLinearDamping();
+                    }
+
+                    if (mag < 0.000001) {
+                        return 1500000.0;
+                    }
+
+                    var ld = Math.log(damping);
+                    return Math.log(-dist*ld/mag + 1.0) / -ld;
+                };
+
+                obj.moveTo = function (p, keyDown, left, right, forward) { // Stateless
+
+                    left = left || BSWG.KEY.LEFT;
+                    right = right || BSWG.KEY.RIGHT;
+                    forward = forward || BSWG.KEY.UP;
+
+                    var mp = comp.obj.body.GetWorldCenter();
+                    var radius = oradius;
+                    var distance = Math.distVec2(mp, p);
+
+                    if (distance > radius) {
+                        var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngle() + comp.frontOffset);
+                        angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
+                        if (this.timeTarget(Math.abs(angDiff), 'ang') > this.timeStop(Math.PI/90, 'ang') && Math.abs(angDiff) > Math.PI/45) {
+                            if (angDiff > 0.0) {
+                                keyDown[left] = true;
+                            }
+                            else if (angDiff < 0.0) {
+                                keyDown[right] = true;
+                            }
+                        }
+                        if (Math.abs(angDiff) < Math.PI/9 && this.timeTarget(distance, 'vel') > this.timeStop(0.1, 'vel')) {
+                            keyDown[forward] = true;
+                        }
+                    }
+
+                };
+
+                obj.updateRender = function (ctx, dt) {
+
+                };
+
+                break;
+
+            case 'radius': // Sensor
 
                 obj.list = [];
                 obj.first = null;
@@ -147,6 +232,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         return obj;
 
     };
+
+    obj.make_controller = obj.make_sensor;
 
     obj.__update_sensors = function (ctx, dt) {
 
