@@ -38,6 +38,9 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
         switch (type) {
 
+            case 'tracker': //
+                obj.tracker = true;
+
             case 'movement': // Controller
 
                 var comp = obj.comp;
@@ -92,7 +95,9 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
                     left = left || BSWG.KEY.LEFT;
                     right = right || BSWG.KEY.RIGHT;
-                    forward = forward || BSWG.KEY.UP;
+                    if (!this.tracker) {
+                        forward = forward || BSWG.KEY.UP;
+                    }
 
                     var mp = comp.obj.body.GetWorldCenter();
                     var radius = oradius;
@@ -109,8 +114,10 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                                 keyDown[right] = true;
                             }
                         }
-                        if (Math.abs(angDiff) < Math.PI/9 && this.timeTarget(distance, 'vel') > this.timeStop(0.1, 'vel')) {
-                            keyDown[forward] = true;
+                        if (!this.tracker) {
+                            if (Math.abs(angDiff) < Math.PI/9 && this.timeTarget(distance, 'vel') > this.timeStop(0.1, 'vel')) {
+                                keyDown[forward] = true;
+                            }
                         }
                     }
 
