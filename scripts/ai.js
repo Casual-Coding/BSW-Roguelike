@@ -297,8 +297,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
                         this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
                         this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
-                    }
                         this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
+                    }
 
                     this.cWorld = aiobj.world(refBlock, refOffset);
                     this.cScreen = BSWG.game.cam.toScreen(BSWG.render.viewport, this.cWorld);
@@ -325,7 +325,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                             if (dist > Math.pow(this.minDist-radius, 2.0) &&
                                 dist < Math.pow(this.maxDist+radius, 2.0)) {
                                 if (this.fullRange || Math.pointBetween(this.cWorld, this.minAngle, this.maxAngle, CL[i].obj.body.GetWorldCenter())) {
-                                    this.list.push([CL[i], dist]);
+                                    this.list.push([CL[i], dist, enemy, friendly, neutral]);
                                 }
                             }
                         }
@@ -335,7 +335,14 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         return a[1] - b[1];
                     });
                     for (var i=0; i<this.list.length; i++) {
-                        this.list[i] = this.list[i][0];
+                        this.list[i] = {
+                            comp: this.list[i][0],
+                            distance: this.list[i][1],
+                            angle: Math.angleBetween(this.cWorld, this.list[i][0].p()),
+                            enemy: this.list[i][2],
+                            friendly: this.list[i][3],
+                            neutral: this.list[i][4]
+                        };
                     }
 
                     if (this.list.length > 0) {
@@ -623,6 +630,7 @@ BSWG.ai = new function() {
                     me.text = "Run Test";
                     self.addEditor();
                     BSWG.game.shipTest();
+                    self.editorCC = BSWG.game.ccblock;
                 }
             }
         });
