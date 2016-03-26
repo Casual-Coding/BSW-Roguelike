@@ -361,6 +361,37 @@ BSWG.game = new function(){
                             }
                         }
                     });
+                    this.shipTest = function(obj) {
+
+                        if (obj) {
+                            this.backup = BSWG.componentList.serialize(null, true);
+                            try {
+                                self.ccblock = null;
+                                BSWG.componentList.clear();
+                                BSWG.blasterList.clear();
+                                BSWG.laserList.clear();
+                                self.ccblock = BSWG.componentList.load(obj, {p: new b2Vec2(0, -50)});
+                                self.aiship = BSWG.componentList.load(this.backup, {p: new b2Vec2(0, 0)});
+                                window.setTimeout(function(){
+                                    self.aiship.reloadAI();
+                                },10);                                
+                                if (!self.ccblock || !self.aiship) {
+                                    throw "no cc";
+                                }
+                            } catch (err) {
+                                BSWG.componentList.clear();
+                                self.ccblock = BSWG.componentList.load(backup);
+                            }
+                        }
+                        else {
+                            BSWG.componentList.clear();
+                            BSWG.blasterList.clear();
+                            BSWG.laserList.clear();
+                            self.ccblock = BSWG.componentList.load(this.backup);
+                            self.aiship = null;
+                        }
+
+                    };
                 }
 
                 if (scene === BSWG.SCENE_GAME1) {
@@ -523,6 +554,8 @@ BSWG.game = new function(){
 
     };
 
+    this.shipTest = null;
+
     this.start = function ()
     {
         var self = this;
@@ -656,7 +689,9 @@ BSWG.game = new function(){
 
                     self.grabbedBlock = grabbedBlock;
 
-                    BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
+                    if (!self.ccblock.ai) {
+                        BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
+                    }
                     break;
 
                 default:
@@ -745,6 +780,16 @@ BSWG.game = new function(){
                 self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
                 self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
                 self.loadBtn.p.x = self.saveBtn.p.x + 10 + self.saveBtn.w;
+                if (BSWG.ai.runMode) {
+                    self.saveBtn.p.y = -1000;
+                    self.loadBtn.p.y = -1000;
+                    self.aiBtn.p.y = -1000;
+                }
+                else {
+                    self.saveBtn.p.y = 10;
+                    self.loadBtn.p.y = 10;
+                    self.aiBtn.p.y = 10;
+                }
             }
 
             if (self.map) {
@@ -806,7 +851,7 @@ BSWG.game = new function(){
 
             BSWG.ai.update(ctx, dt);
 
-            if (self.scene === BSWG.SCENE_GAME2) {
+            if (self.scene === BSWG.SCENE_GAME2 && !BSWG.ai.runMode) {
                 var x = self.loadBtn.p.x + 10 + self.loadBtn.w;
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';

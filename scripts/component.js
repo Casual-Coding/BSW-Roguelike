@@ -147,6 +147,15 @@ BSWG.component = function (desc, args) {
 
     }
 
+    this.p = function (v) {
+        if (!v) {
+            return this.obj.body.GetWorldCenter();
+        }
+        else {
+            return this.obj.body.GetLocalPoint(v);
+        }
+    };
+
     this.remove = function() {
 
         BSWG.componentList.remove(this);
@@ -295,8 +304,8 @@ BSWG.component = function (desc, args) {
             if (cl[i] !== this && BSWG.physics.bodyDistance(this.obj.body, cl[i].obj.body) < 1.0) {
                 var jpw2 = cl[i].jpointsw;
 
-                for (var k1=0; k1<jpw.length; k1++)
-                    for (var k2=0; k2<jpw2.length; k2++)
+                for (var k1=0; jpw && k1<jpw.length; k1++)
+                    for (var k2=0; jpw2 && k2<jpw2.length; k2++)
                     {
                         var p1 = jpw[k1];
                         var p2 = jpw2[k2];
@@ -687,7 +696,7 @@ BSWG.componentList = new function () {
 
         for (var i=0; i<len; i++) {
             if (this.compList[i].ai && this.compList[i].ai.__update_sensors) {
-                this.compList[i].ai.__update_sensors(BSWG.ai.editor ? ctx : null, dt);
+                this.compList[i].ai.__update_sensors(BSWG.ai.consoleDiv ? ctx : null, dt);
             }
         }
     };
@@ -781,22 +790,42 @@ BSWG.componentList = new function () {
     };
 
     this.autoWelds = null;
-    this.load = function(obj) {
+    this.load = function(obj, spawn) {
 
         var comps = obj.list;
         var cc = null;
 
-        this.autoWelds = new Array();
+        var shipOnly = !!spawn;
+        spawn = spawn || {};
+        var offset = (spawn.p || new b2Vec2(0, 0)).clone();
+        var angle  = spawn.a || 0.0;
+
+        this.autoWelds = this.autoWelds || new Array();
+
+        if (shipOnly) {
+            for (var i=0; i<comps.length; i++) {
+                var C = comps[i];
+                if (C.type === 'cc') {
+                    offset.x -= C.pos.x;
+                    offset.y -= C.pos.y;
+                    break;
+                }
+            }
+        }
 
         for (var i=0; i<comps.length; i++) {
             var C = comps[i];
+            if (shipOnly && C.onCC === null) {
+                continue;
+            }
+
             var args = new Object();
             if (C.args) {
                 for (var key in C.args) {
                     args[key] = C.args[key];
                 }
             }
-            args.pos = new b2Vec2(C.pos.x, C.pos.y);
+            args.pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
             args.angle = C.angle;
             var OC = new BSWG.component(this.typeMap[C.type], args);
             if (OC.type === 'cc') {

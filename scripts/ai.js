@@ -26,6 +26,22 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         comp.traceClr = clr || null;
     };
 
+    obj.player_cc = function () {
+        return BSWG.game.ccblock || null;
+    };
+
+    obj.player_comp = function () {
+        var cc = this.player_cc();
+        var list = new Array();
+        var CL = BSWG.componentList.compList;
+        for (var i=0; cc && i<CL.length; i++) {
+            if (CL[i].onCC === cc) {
+                list.push(CL[i]);
+            }
+        }
+        return list;
+    };
+
     obj.make_sensor = function (type, args) {
 
         var obj = new Object();
@@ -49,47 +65,88 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                 var revRadius = obj.revRadius || (oradius * 2.0);
                 var forwardOffset = obj.forwardOffset || 0.0;
                 var charge = obj.charge || false;
+                var exclusive = obj.exclusive || false;
+                var predComp = obj.predComp || comp;
 
                 obj.reached = false;
 
+                var lastDT = 1.0/60.0;
+                var aDists = [];
+                var pDists = [];
+
+                var computeVel = function(dists) {
+                    if (dists.length < 2) {
+                        return 0.0;
+                    }
+                    else {
+                        var vels = 0, count = 0;
+                        for (var i=1; i<dists.length; i++) {
+                            vels += (dists[i] - dists[i-1]) / lastDT;
+                            count += 1.0;
+                        }
+                        return vels / count;
+                    }
+                };
+
                 obj.timeStop = function (tmag, ptype) {
 
-                    var mag = Math.abs(comp.obj.body.GetAngularVelocity());
-                    if (!ptype || ptype === 'vel') {
-                        mag = Math.lenVec2(comp.obj.body.GetLinearVelocity());
-                    }
+                    var mag = Math.abs(computeVel(ptype === 'vel' ? pDists : aDists));
 
                     var damping = comp.obj.body.GetAngularDamping();
                     if (!ptype || ptype === 'vel') {
                         damping = comp.obj.body.GetLinearDamping();
                     }
+
+                    damping = (1/(1 + lastDT * damping));
 
                     if (mag < 0.000001 || tmag < 0.000001) {
                         return 1000000.0;
                     }
 
-                    return Math.log(tmag/mag) / Math.log(damping);
+                    var ret = Math.log(tmag/mag) / Math.log(damping);
+                    if (isNaN(ret) || !(ret>0)) {
+                        return 1500000.0;
+                    }
+                    return ret;
 
                 };
 
                 obj.timeTarget = function (dist, ptype) {
 
-                    var mag = Math.abs(comp.obj.body.GetAngularVelocity());
-                    if (!ptype || ptype === 'vel') {
-                        mag = Math.lenVec2(comp.obj.body.GetLinearVelocity());
-                    }
+                    var mag = Math.abs(computeVel(ptype === 'vel' ? pDists : aDists));
 
                     var damping = comp.obj.body.GetAngularDamping();
                     if (!ptype || ptype === 'vel') {
                         damping = comp.obj.body.GetLinearDamping();
                     }
 
-                    if (mag < 0.000001) {
+                    damping = (1/(1 + damping));
+
+                    if (Math.abs(mag) < 0.001) {
                         return 1500000.0;
                     }
 
                     var ld = Math.log(damping);
-                    return Math.log(-dist*ld/mag + 1.0) / -ld;
+                    var ret = Math.log(dist*ld/mag + 1.0) / ld;
+                    if (isNaN(ret) || !(ret>0)) {
+                        return 1500000.0;
+                    }
+                    return ret;
+                };
+
+                obj.predict = function (t, ptype) {
+
+                    var mag = computeVel(ptype === 'vel' ? pDists : aDists);
+
+                    var damping = comp.obj.body.GetAngularDamping();
+                    if (!ptype || ptype === 'vel') {
+                        damping = comp.obj.body.GetLinearDamping();
+                    }
+
+                    damping = (1/(1 + damping));
+
+                    return mag * (Math.pow(damping, t) - 1.0) / Math.log(damping);
+
                 };
 
                 var moveTos = new Array();
@@ -108,11 +165,38 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     var radius = oradius;
                     var distance = Math.distVec2(mp, p);
 
-                    var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset);
+                    var vel = predComp.obj.body.GetLinearVelocity().clone();
+                    var vlen = Math.lenVec2(vel);
+
+                    if (vlen > 1.0) {
+                        vel.x /= vlen;
+                        vel.y /= vlen;
+
+                        var t = Math.min(4, this.timeTarget(distance, 'vel'));
+                        var len2 = this.predict(t, 'vel');
+
+                        vel.x = p.x + vel.x * len2;
+                        vel.y = p.y + vel.y * len2;
+                    }
+                    else {
+                        vel.x = p.x;
+                        vel.y = p.y;
+                    }
+
+                    var angDiff = Math.angleBetween(mp, vel) - (comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset);
                     angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
                     if (Math.abs(angDiff) > Math.PI*0.5 && reverse && distance < revRadius && !this.tracker) {
                         doReverse = true;
                         angDiff = Math.atan2(Math.sin(angDiff+Math.PI), Math.cos(angDiff+Math.PI));
+                    }
+
+                    aDists.push(angDiff);
+                    pDists.push(distance);
+                    while (aDists.length > 10) {
+                        aDists.splice(0, 1);
+                    }
+                    while (pDists.length > 10) {
+                        pDists.splice(0, 1);
                     }
 
                     moveTos.push({
@@ -125,16 +209,18 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     this.reached = this.tracker ? (Math.abs(angDiff) < Math.PI/90) : (distance <= radius);
 
                     if (distance > radius || this.tracker) {
-                        if ((this.timeTarget(Math.abs(angDiff), 'ang') > this.timeStop(Math.PI/90, 'ang') || hinge) && Math.abs(angDiff) > Math.PI/90) {
-                            if (angDiff > 0.0) {
+                        if (Math.abs(angDiff) > Math.PI/45) {
+                            var ad2 = angDiff + this.predict(1.0, 'ang') 
+                            if (ad2 > 0.0) {
                                 keyDown[left] = true;
                             }
-                            else if (angDiff < 0.0) {
+                            else if (ad2 < 0.0) {
                                 keyDown[right] = true;
                             }
                         }
-                        if (!this.tracker) {
-                            if (Math.abs(angDiff) < Math.PI/4 && (this.timeTarget(distance, 'vel') > this.timeStop(0.2, 'vel') || charge)) {
+                        if (!this.tracker && !(exclusive && (keyDown[left] || keyDown[right]))) {
+                            var tt = this.timeTarget(distance, 'vel');
+                            if (Math.abs(angDiff) < Math.PI/4 && (tt > this.timeStop(0.2, 'vel') || (tt>10.0 && Math.abs(angDiff) < Math.PI/12) || charge)) {
                                 keyDown[doReverse ? reverse : forward] = true;
                             }
                         }
@@ -145,6 +231,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                 };
 
                 obj.updateRender = function (ctx, dt) {
+
+                    lastDT = dt;
 
                     if (!ctx) {
                         moveTos.length = 0;
@@ -374,13 +462,11 @@ BSWG.ai = new function() {
 
     };
 
-    this.openEditor = function (ccblock) {
+    this.addEditor = function ( ) {
 
-        var self = this;
-
-        this.closeEditor();
-
-        this.editorCC = ccblock;
+        if (this.editor) {
+            this.removeEditor();
+        }
 
         this.editorDiv = document.createElement('div');
         this.editorDiv.style.position = 'fixed';
@@ -390,6 +476,41 @@ BSWG.ai = new function() {
         this.editorDiv.style.top = '66px';
         this.editorDiv.style.border = '4px solid rgba(70,70,100,1.0)';
         document.body.appendChild(this.editorDiv);
+
+        this.editor = ace.edit(this.editorDiv);
+        this.editor.setFontSize(14);
+        this.editor.setTheme("ace/theme/monokai");
+        this.editor.getSession().setMode("ace/mode/javascript");
+        this.editor.focus();
+
+        this.editor.setValue(this.editorCC.aiStr || BSWG.ai_Template, -1);
+
+    };
+
+    this.removeEditor = function ( ) {
+
+        if (!this.editor) {
+            return;
+        }
+
+        this.lastCursor = this.editor.getCursorPosition();
+
+        document.body.removeChild(this.editorDiv);
+        this.editorDiv = null;
+        this.editor.destroy();
+        this.editor = null;
+
+    };
+
+    this.openEditor = function (ccblock) {
+
+        var self = this;
+
+        this.closeEditor();
+
+        this.editorCC = ccblock;
+
+        this.addEditor();
 
         this.consoleDiv = document.createElement('code');
         this.consoleDiv.style.position = 'fixed';
@@ -405,13 +526,6 @@ BSWG.ai = new function() {
         this.consoleDiv.readOnly = true;
         document.body.appendChild(this.consoleDiv);
 
-        this.editor = ace.edit(this.editorDiv);
-        this.editor.setFontSize(14);
-        this.editor.setTheme("ace/theme/monokai");
-        this.editor.getSession().setMode("ace/mode/javascript");
-        this.editor.focus();
-
-        this.editor.setValue(ccblock.aiStr || BSWG.ai_Template, -1);
         if (this.lastCursor) {
             this.editor.navigateTo(this.lastCursor.row, this.lastCursor.column);
         }
@@ -483,12 +597,29 @@ BSWG.ai = new function() {
             }
         });
 
+        this.runMode = false;
+
         this.testRunBtn = new BSWG.uiControl(BSWG.control_Button, {
             x: 10, y: 10,
             w: 115, h: 50,
             text: "Run Test",
             selected: false,
             click: function (me) {
+                me.selected = !me.selected;
+                self.runMode = me.selected;
+                if (me.selected) {
+                    self.logError('Test Start ------');
+                    self.saveCode();
+                    me.text = "Stop Test";
+                    self.removeEditor();
+                    BSWG.game.shipTest(self.testOtherShip);
+                }
+                else {
+                    self.logError('Test End --------');
+                    me.text = "Run Test";
+                    self.addEditor();
+                    BSWG.game.shipTest();
+                }
             }
         });
         this.testSelBtn.remove();
@@ -526,14 +657,10 @@ BSWG.ai = new function() {
 
             this.saveCode();
 
-            this.lastCursor = this.editor.getCursorPosition();
+            this.removeEditor();
 
-            document.body.removeChild(this.editorDiv);
-            this.editorDiv = null;
             document.body.removeChild(this.consoleDiv);
             this.consoleDiv = null;
-            this.editor.destroy();
-            this.editor = null;
             this.runBtn.destroy();
             this.runBtn.remove();
             this.runBtn = null;
@@ -578,63 +705,85 @@ BSWG.ai = new function() {
 
     this.update = function ( ctx, dt ) {
 
+        if (!this.consoleDiv) {
+            return;
+        }
+
+        if (this.nextSave <= 0 && this.editor) {
+            this.saveCode();
+            this.nextSave = 60 * 5;
+        }
+        this.nextSave -= 1;
+
+        var mx = BSWG.input.MOUSE('x'), my = BSWG.input.MOUSE('y');
+
         if (this.editorDiv) {
-
-            if (this.nextSave <= 0) {
-                this.saveCode();
-                this.nextSave = 60 * 5;
-            }
-            this.nextSave -= 1;
-
-            var mx = BSWG.input.MOUSE('x'), my = BSWG.input.MOUSE('y');
-
             this.editorDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
             this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4 - (this.testMenuOpen ? 60 : 0) - 150) + 'px';
-            this.consoleDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
+        }
+        this.consoleDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
+        if (this.editorDiv) {
             this.consoleDiv.style.top = (parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height) + 12) + 'px';
+        }
 
-            if (mx >= parseInt(this.editorDiv.style.left) && my >= parseInt(this.editorDiv.style.top) &&
+        if ((this.editorDiv &&
+                mx >= parseInt(this.editorDiv.style.left) && my >= parseInt(this.editorDiv.style.top) &&
                 mx < parseInt(this.editorDiv.style.left) + parseInt(this.editorDiv.style.width) &&
-                my < parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height) + 162) {
-                BSWG.render.setCustomCursor(false);
-                BSWG.input.EAT_MOUSE('wheel');
-            }
-            else {
-                BSWG.render.setCustomCursor(true);
+                my < parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height)) ||
+            (this.consoleDiv &&
+                mx >= parseInt(this.consoleDiv.style.left) && my >= parseInt(this.consoleDiv.style.top) &&
+                mx < parseInt(this.consoleDiv.style.left) + parseInt(this.consoleDiv.style.width) &&
+                my < parseInt(this.consoleDiv.style.top) + parseInt(this.consoleDiv.style.height))) {
+            BSWG.render.setCustomCursor(false);
+            BSWG.input.EAT_MOUSE('wheel');
+        }
+        else {
+            BSWG.render.setCustomCursor(true);
+        }
+
+        this.updateBtn.p.x = BSWG.render.viewport.w - EDITOR_WIDTH - 10;
+        this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
+        this.runBtn.p.x = this.updateBtn.p.x + this.updateBtn.w + 10;
+        this.runBtn.p.y = this.updateBtn.p.y;
+        this.stopBtn.p.x = this.runBtn.p.x + this.runBtn.w + 10;
+        this.stopBtn.p.y = this.runBtn.p.y;
+        this.testBtn.p.x = this.stopBtn.p.x + this.stopBtn.w + 10;
+        this.testBtn.p.y = this.stopBtn.p.y;
+
+        if (this.testMenuOpen) {
+            this.testSelBtn.p.x = this.updateBtn.p.x;
+            this.testSelBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h + 3;
+            this.testRunBtn.p.x = BSWG.render.viewport.w - 10 - this.testRunBtn.w;
+            this.testRunBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h + 3;
+
+            if (this.runMode) {
+                this.consoleDiv.style.top = (window.innerHeight - (parseInt(this.consoleDiv.style.height) + 5 + 8)) + 'px';
+                this.testSelBtn.p.y += 1000;
+                this.testRunBtn.p.y = parseInt(this.consoleDiv.style.top) - (this.testRunBtn.h + 5);
+                this.runBtn.p.y += 1000;
+                this.stopBtn.p.y += 1000;
+                this.testBtn.p.y += 1000;
+                this.updateBtn.p.y += 1000;
             }
 
-            this.updateBtn.p.x = BSWG.render.viewport.w - EDITOR_WIDTH - 10;
-            this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
-            this.runBtn.p.x = this.updateBtn.p.x + this.updateBtn.w + 10;
-            this.runBtn.p.y = this.updateBtn.p.y;
-            this.stopBtn.p.x = this.runBtn.p.x + this.runBtn.w + 10;
-            this.stopBtn.p.y = this.runBtn.p.y;
-            this.testBtn.p.x = this.stopBtn.p.x + this.stopBtn.w + 10;
-            this.testBtn.p.y = this.stopBtn.p.y;
-
-            if (this.testMenuOpen) {
-                this.testSelBtn.p.x = this.updateBtn.p.x;
-                this.testSelBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h;
-                this.testRunBtn.p.x = BSWG.render.viewport.w - 10 - this.testRunBtn.w;
-                this.testRunBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h;
-                if (this.testOtherShip && this.testOtherShipName) {
-                    var x = this.testSelBtn.p.x + 10 + this.testSelBtn.w;
-                    ctx.fillStyle = '#aaa';
-                    ctx.strokeStyle = '#00f';
-                    ctx.font = '10px Orbitron';
-                    ctx.textAlign = 'left';
-                    ctx.fillTextB(this.testOtherShipName, x, this.testSelBtn.p.y + this.testSelBtn.h * 0.5 + 10/2, true);
-                    this.testRunBtn.add();
-                }
+            if (this.testOtherShip && this.testOtherShipName) {
+                var x = this.runMode ? this.testSelBtn.p.x : this.testSelBtn.p.x + 10 + this.testSelBtn.w;
+                ctx.fillStyle = '#aaa';
+                ctx.strokeStyle = '#00f';
+                ctx.font = '10px Orbitron';
+                ctx.textAlign = 'left';
+                ctx.fillTextB(this.testOtherShipName, x, this.testSelBtn.p.y + this.testSelBtn.h * 0.5 + 10/2, true);
+                this.testRunBtn.add();
             }
+        }
 
+        if (this.editorDiv) {
             if (this.editor.isFocused()) {
                 this.editorDiv.style.border = '4px solid rgba(140,140,200,1.0)';
             }
             else {
                 this.editorDiv.style.border = '4px solid rgba(70,70,100,1.0)';
             }
-
         }
 
     };

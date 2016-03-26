@@ -385,6 +385,8 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
+            self.animFrameID = window.requestAnimationFrame(renderFrame);
+
             var frameTime = Date.timeStamp();
             self.actualDt = frameTime - self.lastFrameTime;
             self.lastFrameTime = frameTime;
@@ -438,8 +440,6 @@ BSWG.render = new function() {
             }
 
             BSWG.input.newFrame();
-
-            self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);

@@ -159,7 +159,7 @@ BSWG.component_HingeHalf = {
 
         if (robj) {
             if (keys[this.rotKey]) {
-                robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1 : 1));
+                robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1.5 : 1.5));
             }
         }
 
