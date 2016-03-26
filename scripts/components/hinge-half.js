@@ -71,7 +71,7 @@ BSWG.component_HingeHalf = {
         this.selMeshObj1 = BSWG.genereteBlockPolyOutline(this.obj);
         //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
-        this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body }, 0.7, this.motorC, !this.motor ? 0.05 : 0.0, 0.05);
+        this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body, comp: this }, 0.7, this.motorC, !this.motor ? 0.05 : 0.0, 0.05);
         this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);
         BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
 

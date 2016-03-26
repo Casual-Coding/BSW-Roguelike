@@ -97,7 +97,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         damping = comp.obj.body.GetLinearDamping();
                     }
 
-                    damping = (1/(1 + lastDT * damping));
+                    damping = (1/(1 + damping));
 
                     if (mag < 0.000001 || tmag < 0.000001) {
                         return 1000000.0;
@@ -165,6 +165,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     var radius = oradius;
                     var distance = Math.distVec2(mp, p);
 
+                    this.distance = distance;
+
                     var vel = predComp.obj.body.GetLinearVelocity().clone();
                     var vlen = Math.lenVec2(vel);
 
@@ -189,6 +191,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         doReverse = true;
                         angDiff = Math.atan2(Math.sin(angDiff+Math.PI), Math.cos(angDiff+Math.PI));
                     }
+
+                    this.angleDistance = angDiff;
 
                     aDists.push(angDiff);
                     pDists.push(distance);

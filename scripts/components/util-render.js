@@ -131,7 +131,19 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     self.anchorT = 0.0;
 
+    self.enemyT = 0.0;
+    self.lclr = null;
+
     ret.update = function(clr, texScale, anchor) {
+
+        if (obj && obj.comp) {
+            if (obj.comp.onCC && (obj.comp.onCC !== BSWG.game.ccblock || obj.comp.onCC.ai)) {
+                self.enemyT += (1 - self.enemyT) * BSWG.render.dt;
+            }
+            else {
+                self.enemyT += (0 - self.enemyT) * BSWG.render.dt;
+            }
+        }
 
         var matrix = self.mesh.matrix;
 
@@ -173,6 +185,13 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         if (clr) {
             self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+            self.lclr = clr;
+        }
+
+        if (self.lclr) {
+            var t = self.enemyT * 0.25;
+            var clr2 = self.mat.uniforms.clr.value;
+            clr2.set(self.lclr[0] * (1-t) + t * 2, self.lclr[1] * (1-t), self.lclr[2] * (1-t), self.lclr[3]);
         }
 
         self.mat.needsUpdate = true;

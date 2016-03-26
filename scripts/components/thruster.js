@@ -90,10 +90,10 @@ BSWG.component_Thruster = {
 
             BSWG.render.boom.palette = chadaboom3D.fire;
             BSWG.render.boom.add(
-                p.particleWrap(0.025*this.size),
-                1.0*this.thrustT*5.0 * this.size,
+                p.particleWrap(0.04),
+                1.0*this.thrustT*3.5 * this.size,
                 32,
-                0.3*this.thrustT*5.0,
+                0.3*this.thrustT*3.0,
                 4.0,
                 v.THREE(Math.random()*2.0)
             );

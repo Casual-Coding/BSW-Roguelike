@@ -59,7 +59,7 @@ BSWG.component_DetacherLauncher = {
         ];
         
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
-        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: arrowVerts}, 0.7, Math.polyCentroid(arrowVerts), 0.3);
+        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: arrowVerts, comp: this}, 0.7, Math.polyCentroid(arrowVerts), 0.3);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
     },

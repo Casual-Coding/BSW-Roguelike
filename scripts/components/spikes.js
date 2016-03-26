@@ -86,7 +86,8 @@ BSWG.component_Spikes = {
         for (var i=0; i<this.obj.verts.length; i++) {
             var tmpObj = {
                 body: this.obj.body,
-                verts: this.obj.verts[i]
+                verts: this.obj.verts[i],
+                comp: this
             };
             var center = null;
             if (i>0) {

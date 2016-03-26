@@ -134,7 +134,7 @@ chadaboom3D.prototype.init = function () {
         },
         damping: {
             type: 'f',
-            value: Math.pow(0.995, 60.0)
+            value: (1/(1 + 0.1))
         }
     };
 
@@ -348,7 +348,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     }
 
     if (!noSub && size > 0.1) {
-        for (var i=0; i<8; i++) {
+        for (var i=0; i<2; i++) {
             var len = size * Math.random() * 2.0;
             var a = Math.random() * Math.PI * 2.0;
             var v2 = {
@@ -359,7 +359,6 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
             this.add(pos, size*0.15, 32, life * 1.0, attack, v2, true);
         }
     }
-
 
     var palIdx = Math.clamp(this.palette || chadaboom3D.fire, 0, chadaboom3D.palettes.length-1);
     if (typeof palIdx !== 'number' || !(palIdx > -1)) {
@@ -380,7 +379,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         this.a1Attr.array[idx * 4 * 3 + 0 + k*4] = vel.x;
         this.a1Attr.array[idx * 4 * 3 + 1 + k*4] = vel.y;
         this.a1Attr.array[idx * 4 * 3 + 2 + k*4] = vel.z;
-        this.a1Attr.array[idx * 4 * 3 + 3 + k*4] = this.time;
+        this.a1Attr.array[idx * 4 * 3 + 3 + k*4] = this.time + BSWG.render.dt;
 
         this.a2Attr.array[idx * 4 * 3 + 0 + k*4] = tex * 10.0 + palIdx;
         this.a2Attr.array[idx * 4 * 3 + 1 + k*4] = attack;

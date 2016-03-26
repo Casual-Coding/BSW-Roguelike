@@ -70,7 +70,7 @@ BSWG.component_Missile = {
                     p.particleWrap(0.025),
                     1.0*T*4.0*this.size,
                     32,
-                    0.7*T*2.0,
+                    0.7*T*1.25,
                     4.0,
                     v.THREE(Math.random()*2.0)
                 );

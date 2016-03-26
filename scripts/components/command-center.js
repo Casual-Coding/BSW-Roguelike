@@ -57,7 +57,7 @@ BSWG.component_CommandCenter = {
             new b2Vec2( this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75),
             new b2Vec2(-this.width * 0.3 * 0.75, -this.height * 0.5 * 0.75)
         ].reverse();
-        this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5), 0.7);
+        this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body, comp: this }, 0.8, new b2Vec2(0, -this.height * 0.5 * 0.75 * 0.5), 0.7);
         BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
         
         var poly = [
@@ -67,7 +67,7 @@ BSWG.component_CommandCenter = {
             new b2Vec2(-this.width * 0.5 * 0.7, this.height * 0.5 * 0.05)
         ].reverse();
 
-        this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body }, 0.8, new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5), 0.7);
+        this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: poly, body: this.obj.body, comp: this }, 0.8, new b2Vec2(0, this.height * 0.5 * 0.8 * 0.5), 0.7);
         BSWG.componentList.makeQueryable(this, this.meshObj3.mesh);
 
         BSWG.blockPolySmooth = null;

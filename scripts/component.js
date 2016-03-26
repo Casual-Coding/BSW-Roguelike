@@ -120,10 +120,15 @@ BSWG.component = function (desc, args) {
     this.welds = new Object();
     this.onCC = null;
     this.tag = BSWG.generateTag();
-    if (this.type === 'cc')
+    if (this.type === 'cc') {
         this.onCC = this;
+    }
 
     this.init(args);
+
+    if (this.obj) {
+        this.obj.comp = this;
+    }
 
     if (this.obj.body && args.vel) {
         this.obj.body.SetLinearVelocity(args.vel.clone());

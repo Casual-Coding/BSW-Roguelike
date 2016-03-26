@@ -480,6 +480,8 @@ BSWG.physics = new function(){
             return;
         }
 
+        obj.comp = null;
+
         while (obj.welds && obj.welds.length > 0) {
             this.removeWeld(obj.welds[0]);
         }
