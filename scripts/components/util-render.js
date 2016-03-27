@@ -110,6 +110,10 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             type: 't',
             value: BSWG.render.images['test_nm'].texture
         },
+        dmgMap: {
+            type: 't',
+            value: BSWG.render.images['damage_nm'].texture
+        },
         extra: {
             type: 'v4',
             value: new THREE.Vector4(1,0,0,0)
@@ -177,6 +181,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         self.mat.uniforms.extra.value.y = Math.clamp(self.anchorT, 0, 1);
         self.mat.uniforms.extra.value.z = BSWG.render.time;
+        self.mat.uniforms.extra.value.w = Math.sin(BSWG.render.time) * 0.5 + 0.5;
 
         self.mat.uniforms.warpIn.value -= BSWG.render.dt * 2.0;
         if (self.mat.uniforms.warpIn.value < 0.0) {

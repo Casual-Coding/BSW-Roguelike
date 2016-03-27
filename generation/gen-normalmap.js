@@ -36,6 +36,30 @@ var newArr = function(size, val) {
         }
         this[Math.floor(x)+Math.floor(y)*size] += val;
     };
+    ret.setBleed = function(x, y, val) {
+        this.set(x, y, Math.min(val, 1));
+        if (val > 1) {
+            this.setBleed(x-1, y, (val-1)*0.25);
+            this.setBleed(x+1, y, (val-1)*0.25);
+            this.setBleed(x, y-1, (val-1)*0.25);
+            this.setBleed(x, y+1, (val-1)*0.25);
+        }
+    };
+    ret.incBleed = function(x, y, val) {
+        this.inc(x, y, Math.max(-1, Math.min(val, 1)));
+        if (val > 1) {
+            this.incBleed(x-1, y, (val-1)*0.5);
+            this.incBleed(x+1, y, (val-1)*0.5);
+            this.incBleed(x, y-1, (val-1)*0.5);
+            this.incBleed(x, y+1, (val-1)*0.5);
+        }
+        else if (val < -1) {
+            this.incBleed(x-1, y, (val + 1)*0.5);
+            this.incBleed(x+1, y, (val + 1)*0.5);
+            this.incBleed(x, y-1, (val + 1)*0.5);
+            this.incBleed(x, y+1, (val + 1)*0.5);
+        }
+    };
     var rot = function(v) {
         while (v<0) {
             v += size;
@@ -125,6 +149,60 @@ var genPerlin = function(sz, min, max, k) {
 };
 
 switch (type) {
+    case 'cracks':
+        var list = new Array(16*2);
+        for (var i=0; i<list.length; i+=2) {
+            var x = Math.random()*sz*0.6 + sz*0.2,
+                y = Math.random()*sz*0.6 + sz*0.2,
+                a = Math.random()*Math.PI*2.0;
+            list[i] = {
+                x: x,
+                y: y,
+                a: a,
+                str: Math.random()*4+4
+            };
+            list[i+1] = {
+                x: x,
+                y: y,
+                a: a + (Math.random()*Math.PI/16 - Math.PI/32) + Math.PI,
+                str: Math.random()*4+4
+            };
+        }
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                hmap.set(x, y, 1.0);
+                bmap.set(x, y, 1.0);
+            }
+        }
+        var t = 0;
+        while (list.length) {
+            t += 1;
+            for (var i=0; i<list.length; i++) {
+                var C = list[i];
+                C.str -= 0.005;
+                if (C.str <= 0 || C.x < 0 || C.y < 0 || C.x >= sz || C.y >= sz) {
+                    list.splice(i, 1);
+                    i --;
+                    continue;
+                }
+                hmap.incBleed(C.x, C.y, -C.str);
+                bmap.incBleed(C.x, C.y, -C.str);
+                C.a += Math.random()*Math.PI/16 - Math.PI/32;
+                C.x += Math.cos(C.a); C.y += Math.sin(C.a);
+                if (Math.pow(Math.random(), 0.25) < (C.str / 16)) {
+                    list.push({
+                        x: C.x,
+                        y: C.y,
+                        a: C.a + (Math.random()*Math.PI/5 + Math.PI/5) * (Math.random() < 0.5 ? 1 : -1),
+                        str: C.str * 0.4
+                    });
+                    list[list.length-1].x += Math.cos(list[list.length-1].a);
+                    list[list.length-1].y += Math.sin(list[list.length-1].a);
+                }
+            }
+        }
+        break;
+
     case 'grass':
         var p = genPerlin(sz, 0.0, 1.0, 12);
         for (var x=0; x<sz; x++) {

@@ -68,6 +68,7 @@ var BSWG = new function(){
         'test_nm': 'test-normalmap.png',
         'grass_nm': 'grass-nm.png',
         'water_nm': 'water-nm.png',
+        'damage_nm': 'damage-nm.png',
         'cursor-normal': 'cursor-normal.png',
         'cursor-pressed': 'cursor-pressed.png',
         'cursor-pressed-right': 'cursor-pressed-right.png',
