@@ -135,7 +135,7 @@ BSWG.component_Blaster = {
             BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*15.0 + v.x, -Math.sin(a)*15.0 + v.y), v, this);
             accel = 1;
 
-            this.fireT = 0.5;
+            this.fireT = 0.75;
             this.kickBack = 1.0;
         }
         

@@ -1,8 +1,8 @@
 // BSWR - Laser beam objects
 
-BSWG.laserRange = 25.0;
+BSWG.laserRange = 42.5;
 BSWG.laserWidth = 0.35;
-BSWG.laserDmg = 15; // per second
+BSWG.laserDmg = 30; // per second
 
 BSWG.laserList = new function () {
 

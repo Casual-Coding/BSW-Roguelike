@@ -1,6 +1,6 @@
 // BSWR - Missile object
 
-BSWG.missileDmg = 8;
+BSWG.missileDmg = 14;
 
 BSWG.component_Missile = {
 
