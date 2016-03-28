@@ -743,7 +743,7 @@ BSWG.ai = new function() {
 
         if (this.nextSave <= 0 && this.editor) {
             this.saveCode();
-            this.nextSave = 60 * 5;
+            this.nextSave = ~~(60 * 0.5);
         }
         this.nextSave -= 1;
 
