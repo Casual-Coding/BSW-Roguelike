@@ -339,7 +339,7 @@ BSWG.component = function (desc, args) {
             autos = BSWG.componentList.autoWelds;
         }
 
-        if (!this.jpointsw || (this.onCC !== BSWG.game.ccblock && !BSWG.componentList.autoWelds)) {
+        if (!this.jpointsw || (this.onCC !== BSWG.game.ccblock && this.onCC !== null && !BSWG.componentList.autoWelds)) {
             return;
         }
 
