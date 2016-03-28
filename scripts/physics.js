@@ -1,5 +1,8 @@
 // BlockShip Wars Physics
 
+BSWG.hitDmg  = 0.01;
+BSWG.meleDmg = 6.0;
+
 BSWG.physics = new function(){
 
     this.physicsDT          = 1.0/60.0;
@@ -356,6 +359,8 @@ BSWG.physics = new function(){
         obj.body.SetLinearDamping(0.1);
         obj.body.SetAngularDamping(0.1);
 
+        obj.body.__mele = !!def.isMele;
+
         obj.fixtureDef = new b2FixtureDef();
         obj.fixtureDef.density = def.density || 1.0;
         obj.fixtureDef.friction = (def.friction || def.friction === 0) ? def.friction : 0.25;
@@ -481,6 +486,9 @@ BSWG.physics = new function(){
         }
 
         obj.comp = null;
+        if (obj.body) {
+            obj.body.__comp = null;
+        }
 
         while (obj.welds && obj.welds.length > 0) {
             this.removeWeld(obj.welds[0]);
@@ -664,6 +672,14 @@ BSWG.physics = new function(){
         bb.__lastHit = ba;
 
         if (tforce > 1.0) {
+
+            if (ba.__comp && bb.__comp) {
+                ba.__comp.takeDamage(forceA * (ba.__mele ? 1/BSWG.meleDmg : 1)
+                                            * (bb.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, bb.__comp);
+                bb.__comp.takeDamage(forceA * (bb.__mele ? 1/BSWG.meleDmg : 1)
+                                            * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
+            }
+
             var wm = new b2WorldManifold();
             contact.GetWorldManifold(wm);
             var p = wm.m_points[0];

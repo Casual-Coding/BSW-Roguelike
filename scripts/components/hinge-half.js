@@ -30,6 +30,8 @@ BSWG.component_HingeHalf = {
         this.motor  = args.motor || false;
         this.rotKey = args.rotKey ? args.rotKey : (this.motor ? BSWG.KEY.A : BSWG.KEY.D);
 
+        this.maxHP = this.size * 80 / 2;
+
         var verts = [
             //new b2Vec2(this.size * -0.5, this.size * -0.5),
             new b2Vec2(this.size *  0.5, this.size * -0.5),

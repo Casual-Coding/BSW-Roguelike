@@ -28,6 +28,8 @@ BSWG.component_SawMotor = {
         this.motor  = true;
         this.rotKey = BSWG.KEY.G;
 
+        this.maxHP = this.size * 70 / 3;
+
         this.motorAccel = 0.0;
         this.motorSpeed = 0.0;
 

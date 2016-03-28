@@ -5,6 +5,8 @@ BSWG.component_Blaster = {
     type: 'blaster',
     name: 'Blaster',
 
+    maxHP: 20,
+
     sortOrder: 2,
 
     hasConfig: true,

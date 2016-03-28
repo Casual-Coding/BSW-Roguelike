@@ -5,6 +5,8 @@ BSWG.component_Laser = {
     type: 'laser',
     name: 'Laser',
 
+    maxHP: 40,
+
     sortOrder: 2,
 
     hasConfig: true,
@@ -57,6 +59,10 @@ BSWG.component_Laser = {
 
         this.meshObj.destroy();
         this.selMeshObj.destroy();
+        if (this.laser) {
+            BSWG.laserList.remove(this.laser);
+            this.laser = null;
+        }
 
     },
 

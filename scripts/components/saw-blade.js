@@ -33,6 +33,8 @@ BSWG.component_SawBlade = {
             );
         }
 
+        this.maxHP = this.size * 100 / 3;
+
         var verts = new Array(this.nteeth+1);
         verts[0] = wheelVerts;
         for (var i=0; i<this.nteeth; i++) {
@@ -49,7 +51,8 @@ BSWG.component_SawBlade = {
             verts: verts,
             density: 1.0/3.0,
             friction: 0.05,
-            restitution: 0.0
+            restitution: 0.0,
+            isMele: true
         });
 
         var cjp = new b2Vec2(0.0, 0.0);

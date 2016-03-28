@@ -1,5 +1,7 @@
 // BSWR - Missile object
 
+BSWG.missileDmg = 8;
+
 BSWG.component_Missile = {
 
     type: 'missile',
@@ -9,6 +11,8 @@ BSWG.component_Missile = {
     canMoveAttached: false,
 
     serialize: false,
+
+    maxHP: 10,
 
     init: function(args) {
 
@@ -93,6 +97,11 @@ BSWG.component_Missile = {
                 if (this.fireT > 0.0) {
                     BSWG.render.boom.palette = chadaboom3D.fire_bright;
                     var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
+                    if (this.obj.body.__lastHit) {
+                        if (this.obj.body.__lastHit.__comp) {
+                            this.obj.body.__lastHit.__comp.takeDamage(BSWG.missileDmg);
+                        }
+                    }
                     BSWG.render.boom.add(
                         this.obj.body.GetWorldCenter().particleWrap(0.05),
                         1.0*4.0*this.size*1.5,

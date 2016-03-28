@@ -27,6 +27,8 @@ BSWG.component_Thruster = {
 
         this.size = args.size || 1;
 
+        this.maxHP = this.size * this.size * 125 / 4;
+
         var verts = [
             Math.rotVec2(new b2Vec2(-0.2 * this.size, -0.5 * this.size), offsetAngle),
             Math.rotVec2(new b2Vec2( 0.2 * this.size, -0.5 * this.size), offsetAngle),

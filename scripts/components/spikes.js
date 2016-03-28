@@ -31,6 +31,8 @@ BSWG.component_Spikes = {
         this.toothSize = [0.8, 1.6, 2.8][this.size-1];
         this.pike      = args.pike || false;
 
+        this.maxHP = this.size * 90 / 3;
+
         if (this.pike) {
             this.toothSize *= 2.0;
         }
@@ -75,7 +77,8 @@ BSWG.component_Spikes = {
         this.obj = BSWG.physics.createObject('multipoly', args.pos, args.angle || 0, {
             verts: verts,
             density: 1.0/3.0,
-            frictionList: friction
+            frictionList: friction,
+            isMele: true
         });
 
         this.jpoints = BSWG.createPolyJPoints([wheelVerts[wheelVerts.length-1], wheelVerts[0]], [1], false);

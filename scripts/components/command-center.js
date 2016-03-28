@@ -9,6 +9,8 @@ BSWG.component_CommandCenter = {
     type: 'cc',
     name: 'Command Center',
 
+    maxHP: 200,
+
     sortOrder: 2,
 
     hasConfig: false,

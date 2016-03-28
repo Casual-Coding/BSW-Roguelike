@@ -31,6 +31,8 @@ BSWG.component_DetacherLauncher = {
         };
         this.fireT = 0.0;
 
+        this.maxHP = this.size * 100 / 3;
+
         var verts = [
             new b2Vec2(this.size * -0.35, this.size * -0.25),
             new b2Vec2(this.size *  0.35, this.size * -0.25),

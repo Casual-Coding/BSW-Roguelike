@@ -5,6 +5,8 @@ BSWG.component_MissileLauncher = {
     type: 'missile-launcher',
     name: 'Missile Launcher',
 
+    maxHP: 50,
+
     sortOrder: 2,
 
     hasConfig: true,

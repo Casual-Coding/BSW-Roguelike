@@ -5,6 +5,8 @@ BSWG.compActiveConfMenu = null;
 BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
+BSWG.friendlyFactor = 1/4;
+
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var chars2 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -45,7 +47,7 @@ BSWG.compAnchored = function(self) {
 
 BSWG.updateOnCC = function (a, b) {
 
-    var cc = a.onCC || b.onCC;
+    var cc = a.onCC || (b && b.onCC);
 
     var scan = function(n, u) {
 
@@ -100,7 +102,9 @@ BSWG.updateOnCC = function (a, b) {
     };
 
     mark(a, scan(a));
-    mark(b, scan(b));
+    if (b) {
+        mark(b, scan(b));
+    }
 
 };
 
@@ -128,8 +132,62 @@ BSWG.component = function (desc, args) {
 
     this.init(args);
 
+    if (!this.maxHP) {
+        this.maxHP = 100;
+    }
+
+    this.hp = this.maxHP;
+    this.destroyed = false;
+
+    this.takeDamage = function (amt, fromC) {
+
+        if (fromC && fromC.onCC === this.onCC && this.onCC) {
+            amt *= BSWG.friendlyFactor;
+        }
+
+        if (amt < 1) {
+            return;
+        }
+
+        this.hp -= amt;
+        if (this.hp > this.maxHP) {
+            this.hp = this.maxHP;
+        }
+        if (this.hp <= 0 && !this.destroyed) {
+            if (this.obj && this.obj.body) {
+                var p = this.obj.body.GetWorldCenter();
+                var v = this.obj.body.GetLinearVelocity();
+                var r = this.obj.radius;
+                for (var i=0; i<20; i++) {
+                    var a = Math.random() * Math.PI * 2.0;
+                    var r2 = Math.random() * r * 0.5;
+                    var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
+                                        p.y + Math.sin(a) * r2);
+                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                    BSWG.render.boom.add(
+                        p2.particleWrap(0.025),
+                        r*(3.5 + 2.5*Math.random()),
+                        256,
+                        1 + Math.pow(r, 1/3) * Math.random(),
+                        2.0,
+                        v.THREE(Math.random()*2.0)
+                    );
+                }
+            }
+
+            this.hp = 0;
+            this.destroyed = true;
+            this.onCC = null;
+            this.removeSafe();
+        }
+
+    };
+
     if (this.obj) {
         this.obj.comp = this;
+        if (this.obj.body) {
+            this.obj.body.__comp = this;
+        }
     }
 
     if (this.obj.body && args.vel) {
@@ -155,11 +213,16 @@ BSWG.component = function (desc, args) {
     }
 
     this.p = function (v) {
-        if (!v) {
-            return this.obj.body.GetWorldCenter();
+        if (this.obj && this.obj.body) {
+            if (!v) {
+                return this.obj.body.GetWorldCenter();
+            }
+            else {
+                return this.obj.body.GetLocalPoint(v);
+            }
         }
         else {
-            return this.obj.body.GetLocalPoint(v);
+            return null;
         }
     };
 
@@ -596,11 +659,35 @@ BSWG.componentList = new function () {
             comp.obj = null;
         };
 
+        var oldCC = comp.onCC;
+        comp.onCC = null;
+        if (comp.welds) {
+            for (var k in comp.welds) {
+                if (comp.welds[k]) {
+                    var other = comp.welds[k].other;
+                    var k2;
+                    for (k2 in other.welds) {
+                        if (other.welds[k2] && other.welds[k2].obj === comp.welds[k].obj) {
+                            BSWG.physics.removeWeld(comp.welds[k].obj);
+                            comp.welds[k].other = null;
+                            comp.welds[k] = null;
+                            other.welds[k2].other = null;
+                            other.welds[k2] = null; 
+                            BSWG.updateOnCC(comp, other);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        comp.welds = null;
+
         for (var i=0; i<this.compList.length; i++)
             if (this.compList[i] === comp) {
                 this.compList.splice(i, 1);
                 return true;
             }
+
         return false;
 
     };

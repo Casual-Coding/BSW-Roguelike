@@ -591,25 +591,27 @@ BSWG.game = new function(){
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
-                    var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
-                    var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
-                    self.cam.zoomTo(dt*2.5, toZ);
-                    var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-                    var p = self.ccblock.obj.body.GetWorldCenter().clone();
-                    p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
-                    p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
+                    if (!self.ccblock.destroyed) {
+                        var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
+                        var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
+                        self.cam.zoomTo(dt*2.5, toZ);
+                        var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
+                        var p = self.ccblock.obj.body.GetWorldCenter().clone();
+                        p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
+                        p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
 
-                    var bfr = BSWG.camVelLookBfr * viewport.w;
-                    var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
-                    var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
-                    var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
-                    var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
-                    var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
+                        var bfr = BSWG.camVelLookBfr * viewport.w;
+                        var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
+                        var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
+                        var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
+                        var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
+                        var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
 
-                    p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
-                    p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
+                        p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
+                        p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
 
-                    self.cam.panTo(dt*8.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
+                        self.cam.panTo(dt*8.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));                       
+                    }
                     break;
 
                 default:
@@ -635,7 +637,7 @@ BSWG.game = new function(){
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
 
-                    if (self.editMode) {
+                    if (self.editMode && !self.ccblock.destroyed) {
 
                         if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.ui.mouseBlock) {
                             if (BSWG.componentList.mouseOver) {
@@ -759,7 +761,7 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter())) {
+            if (self.ccblock && !self.ccblock.destroyed && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter())) {
                 if (!self.saveHealAdded) {
                     self.saveBtn.add();
                     self.healBtn.add();
@@ -792,7 +794,7 @@ BSWG.game = new function(){
                 }
             }
 
-            if (self.map) {
+            if (self.map && self.ccblock && !self.ccblock.destroyed) {
                 var zones = self.map.zones;
                 for (var i=0; i<zones.length; i++) {
                     if (!zones[i].zoneTitle) {
