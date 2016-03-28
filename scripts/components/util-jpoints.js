@@ -77,7 +77,11 @@ BSWG.jpointRenderer = new function() {
 
         var compList = new Array();
         for (var i=0; i<BSWG.componentList.compList.length; i++) {
-            compList.push(BSWG.componentList.compList[i]);
+            var C = BSWG.componentList.compList[i];
+            if ((C.onCC && C.onCC !== BSWG.game.ccblock) || (!C.onCC && !BSWG.game.editMode)) {
+                continue;
+            }
+            compList.push(C);
         }
         var comp0center = new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y);
         compList.sort(function(a, b){

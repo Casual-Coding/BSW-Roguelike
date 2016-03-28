@@ -175,6 +175,9 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         vel.y /= vlen;
 
                         var t = Math.min(4, this.timeTarget(distance, 'vel'));
+                        if (charge) {
+                            t = Math.max(t, 1);
+                        }
                         var len2 = this.predict(t, 'vel');
 
                         vel.x = p.x + vel.x * len2;
@@ -513,6 +516,8 @@ BSWG.ai = new function() {
 
     };
 
+    this.showDebug = false;
+
     this.openEditor = function (ccblock) {
 
         var self = this;
@@ -520,6 +525,7 @@ BSWG.ai = new function() {
         this.closeEditor();
 
         this.editorCC = ccblock;
+        this.showDebug = true;
 
         this.addEditor();
 
@@ -624,6 +630,7 @@ BSWG.ai = new function() {
                     me.text = "Stop Test";
                     self.removeEditor();
                     BSWG.game.shipTest(self.testOtherShip);
+                    self.showDebugBtn.add();
                 }
                 else {
                     self.logError('Test End --------');
@@ -631,11 +638,24 @@ BSWG.ai = new function() {
                     self.addEditor();
                     BSWG.game.shipTest();
                     self.editorCC = BSWG.game.ccblock;
+                    self.showDebugBtn.remove();
                 }
             }
         });
         this.testSelBtn.remove();
         this.testRunBtn.remove();
+
+        this.showDebugBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 150, h: 50,
+            text: "Show Debug",
+            selected: this.showDebug,
+            click: function (me) {
+                self.showDebug = !self.showDebug;
+                me.selected = self.showDebug;
+            }
+        });
+        this.showDebugBtn.remove();
 
         this.getFile = BSWG.input.GET_FILE(function(data, x, y){
             if (!data) {
@@ -665,7 +685,7 @@ BSWG.ai = new function() {
             this.getFile = null;
         }
 
-        if (this.editorDiv) {
+        if (this.consoleDiv) {
 
             this.saveCode();
 
@@ -772,6 +792,8 @@ BSWG.ai = new function() {
                 this.consoleDiv.style.top = (window.innerHeight - (parseInt(this.consoleDiv.style.height) + 5 + 8)) + 'px';
                 this.testSelBtn.p.y += 1000;
                 this.testRunBtn.p.y = parseInt(this.consoleDiv.style.top) - (this.testRunBtn.h + 5);
+                this.showDebugBtn.p.y = this.testRunBtn.p.y;
+                this.showDebugBtn.p.x = this.testRunBtn.p.x - this.showDebugBtn.w - 10;
                 this.runBtn.p.y += 1000;
                 this.stopBtn.p.y += 1000;
                 this.testBtn.p.y += 1000;

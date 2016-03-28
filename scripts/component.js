@@ -104,6 +104,8 @@ BSWG.updateOnCC = function (a, b) {
 
 };
 
+BSWG.comp_hashSize = 2.0;
+
 BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
 
@@ -274,7 +276,7 @@ BSWG.component = function (desc, args) {
             autos = BSWG.componentList.autoWelds;
         }
 
-        if (!this.jpointsw) {
+        if (!this.jpointsw || (this.onCC !== BSWG.game.ccblock && !BSWG.componentList.autoWelds)) {
             return;
         }
 
@@ -625,10 +627,49 @@ BSWG.componentList = new function () {
 
     };
 
+    this.hash = {};
+    this.hashXY = function ( v ) {
+        return Math.floor(v/BSWG.comp_hashSize);
+    };
+    this.hashKey = function ( x, y ) {
+        return Math.floor(x/BSWG.comp_hashSize) + Math.floor(y/BSWG.comp_hashSize) * 10000000;
+    };
+    this.hashKey2 = function ( x, y ) {
+        return x + y * 10000000;
+    };
+
     this.update = function (dt) {
+
+        for (var key in this.hash) {
+            var list = this.hash[key];
+            for (var i=0; i<list.length; i++) {
+                list[i] = null;
+            }
+            list.length = 0;
+            list = null;
+            this.hash[key] = null;
+            delete this.hash[key];
+        }
 
         var len = this.compList.length;
         for (var i=0; i<len; i++) {
+
+            var C = this.compList[i];
+            var p = C.obj.body.GetWorldCenter();
+            var r = C.obj.radius * 1.25;
+            var x1 = this.hashXY(p.x - r), y1 = this.hashXY(p.y - r),
+                x2 = this.hashXY(p.x + r), y2 = this.hashXY(p.y + r);
+
+            for (var x=x1; x<=x2; x++) {
+                for (var y=y1; y<=y2; y++) {
+                    var key = this.hashKey2(x,y);
+                    if (!this.hash[key]) {
+                        this.hash[key] = [];
+                    }
+                    this.hash[key].push(C);
+                }
+            }
+
             if (this.compList[i].updateAI) {
                 var keys = this.compList[i].updateAI(dt);
                 if (keys) {
@@ -701,25 +742,67 @@ BSWG.componentList = new function () {
 
         for (var i=0; i<len; i++) {
             if (this.compList[i].ai && this.compList[i].ai.__update_sensors) {
-                this.compList[i].ai.__update_sensors(BSWG.ai.consoleDiv ? ctx : null, dt);
+                this.compList[i].ai.__update_sensors(BSWG.ai.consoleDiv && BSWG.ai.showDebug ? ctx : null, dt);
             }
         }
     };
 
     this.atPoint = function (p) {
 
+        var CL = this.hash[this.hashKey(p.x, p.y)];
+        if (!CL) {
+            return;
+        }
+
         var raycaster = BSWG.render.raycaster;
 
         raycaster.set(new THREE.Vector3(p.x, p.y, 0.4), new THREE.Vector3(0.0, 0.0, -1.0));
 
-        var len = this.compList.length;
+        var len = CL.length;
         for (var i=0; i<len; i++) {
-            if (raycaster.intersectObjects(this.compList[i].queryMeshes).length > 0) {
-                return this.compList[i];
+            if (!CL[i].removed && raycaster.intersectObjects(CL[i].queryMeshes).length > 0) {
+                return CL[i];
             }
         }
         return null;
 
+    };
+
+    this.inLine = function(_x1, _y1, _x2, _y2, fn) {
+        var x1 = this.hashXY(_x1), y1 = this.hashXY(_y1),
+            x2 = this.hashXY(_x2), y2 = this.hashXY(_y2);
+
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var len = Math.sqrt(dx*dx+dy*dy);
+        dx /= len;
+        dy /= len;
+
+        var found = {};
+
+        for (var t=0; t<=len; t+=1.0) {
+            var ox = Math.floor(x1 + dx * t),
+                oy = Math.floor(y1 + dy * t);
+            for (var _x=-1; _x<=1; _x++) {
+                for (var _y=-1; _y<=1; _y++) {
+                    if (_x && _y) {
+                        continue;
+                    }
+                    var key = this.hashKey2(ox + _x, oy + _y);
+                    var list = this.hash[key];
+                    if (list) {
+                        for (var i=0; i<list.length; i++) {
+                            if (!found[list[i].id] && !list[i].removed) {
+                                found[list[i].id] = true;
+                                fn(list[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        found = null;
     };
 
     this.withRay = function (p, p2) {
@@ -731,20 +814,19 @@ BSWG.componentList = new function () {
 
         raycaster.set(p, new THREE.Vector3(dx/vlen, dy/vlen, dz/vlen));
 
-        var len = this.compList.length;
         var dist = vlen+0.001;
         var best = null, bestP = null;
-        for (var i=0; i<len; i++) {
-            var inter = raycaster.intersectObjects(this.compList[i].queryMeshes);
+        this.inLine(p.x, p.y, p2.x, p2.y, function(C){
+            var inter = raycaster.intersectObjects(C.queryMeshes);
             for (var j=0; j<inter.length; j++)
             {
                 if (inter[j].distance < dist) {
                     dist = inter[j].distance;
-                    best = this.compList[i];
+                    best = C;
                     bestP = inter[j].point;
                 }
             }
-        }
+        });
 
         if (best) {
             return {
@@ -781,16 +863,40 @@ BSWG.componentList = new function () {
 
     };
 
+    this.withinBox = function (_x1, _y1, _x2, _y2, fn) {
+        var x1 = this.hashXY(_x1), y1 = this.hashXY(_y1),
+            x2 = this.hashXY(_x2), y2 = this.hashXY(_y2);
+
+        var found = {};
+
+        for (var x=x1; x<=x2; x++) {
+            for (var y=y1; y<=y2; y++) {
+                var key = this.hashKey2(x,y);
+                var list = this.hash[key];
+                if (list) {
+                    for (var i=0; i<list.length; i++) {
+                        if (!found[list[i].id] && !list[i].removed) {
+                            found[list[i].id] = true;
+                            fn(list[i]);
+                        }
+                    }
+                }
+            }
+        }
+
+        found = null;
+    };
+
     this.withinRadius = function (p, r) {
         var ret = new Array();
-        var len = this.compList.length;
-        for (var i=0; i<len; i++) {
-            var p2 = this.compList[i].obj.body.GetWorldCenter();
+        this.withinBox(p.x-r, p.y-r, p.x+r, p.y+r, function(C){
+            var p2 = C.obj.body.GetWorldCenter();
             var dist = Math.pow(p2.x - p.x, 2.0) +
                        Math.pow(p2.y - p.y, 2.0);
-            if (dist < Math.pow(r+this.compList[i].obj.radius, 2.0))
-                ret.push(this.compList[i]);
-        }
+            if (dist < Math.pow(r+C.obj.radius, 2.0)) {
+                ret.push(C);
+            }
+        });
         return ret;
     };
 
