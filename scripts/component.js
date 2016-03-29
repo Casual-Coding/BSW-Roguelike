@@ -29,7 +29,7 @@ BSWG.generateTag = function () {
     }
 
     return null;
-}
+};
 
 BSWG.componentHoverFn = function(self) {
     if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {

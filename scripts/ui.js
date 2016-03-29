@@ -1,94 +1,114 @@
+BSWG.d3dr_LUT = {};
+
 BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
-    ctx.save();
+    var key = ctx.fillStyle + ',' + w + ',' + h + ',' + insz + ',' + pressedIn + ',' + outline;
 
-    var x2 = x1+w, y2 = y1+h;
-
-    var zcenter = new b2Vec2((x1+x2)*0.5, (y1+y2)*0.5);
-    var iscaleh = (w-insz) / w, iscalev = (h-insz) / h;
-
-    var overts = [
-        new b2Vec2(x1, y1),
-        new b2Vec2(x2, y1),
-        new b2Vec2(x2, y2),
-        new b2Vec2(x1, y2)
-    ];
-    if (pressedIn) overts.reverse();
-    var len = overts.length;
-    var iverts = new Array(len);
-
-    for (var i=0; i<len; i++) {
-        var vec = new b2Vec2(
-            (overts[i].x - zcenter.x) * iscaleh + zcenter.x,
-            (overts[i].y - zcenter.y) * iscalev + zcenter.y
-        );
-        iverts[i] = vec;
+    if (BSWG.d3dr_LUT[key]) {
+        ctx.drawImage(BSWG.d3dr_LUT[key], x1-1, y1-1);
+        return;
     }
 
-    ctx.beginPath();
-    ctx.moveTo(overts[0].x, overts[0].y);
-    for (var i=1; i<len; i++) {
-        ctx.lineTo(overts[i].x, overts[i].y);
-    }
-    ctx.closePath();
-    ctx.fill();
+    var octx = ctx;
+    var ox1 = x1, oy1 = y1;
 
-    if (outline) {
-        ctx.strokeStyle = outline;
-        ctx.lineWidth = 2.0;
-        ctx.stroke();
-        ctx.lineWidth = 1.0;
-    }
+    x1 = y1 = 1;
 
-    var oAlpha = parseFloat(ctx.globalAlpha);
-    ctx.fillStyle = '#aaf';
+    BSWG.d3dr_LUT[key] = BSWG.render.proceduralImage(w+2, h+2, function(ctx){
 
-    for (var i=0; i<len; i++) {
-        var j = (i+1) % len;
+        ctx.clearRect(0, 0, w+2, h+2);
+        ctx.globalAlpha = octx.globalAlpha;
+        ctx.fillStyle = octx.fillStyle;
 
-        var a = overts[i], b = overts[j],
-            c = iverts[j], d = iverts[i];
+        var x2 = x1+w, y2 = y1+h;
 
-        var angle = Math.atan2(b.y - a.y, b.x - a.x);
-        var alpha = Math.sin(angle + Math.PI/4.0) * 0.5 + 0.5;
-        ctx.globalAlpha = oAlpha * alpha * 0.6;
+        var zcenter = new b2Vec2((x1+x2)*0.5, (y1+y2)*0.5);
+        var iscaleh = (w-insz) / w, iscalev = (h-insz) / h;
 
-        var grad = ctx.createLinearGradient(a.x,a.y, c.x,c.y);
-        grad.addColorStop(0,"#aaf");
-        grad.addColorStop(1,"#668");
+        var overts = [
+            new b2Vec2(x1, y1),
+            new b2Vec2(x2, y1),
+            new b2Vec2(x2, y2),
+            new b2Vec2(x1, y2)
+        ];
+        if (pressedIn) overts.reverse();
+        var len = overts.length;
+        var iverts = new Array(len);
 
-        ctx.fillStyle = grad;
+        for (var i=0; i<len; i++) {
+            var vec = new b2Vec2(
+                (overts[i].x - zcenter.x) * iscaleh + zcenter.x,
+                (overts[i].y - zcenter.y) * iscalev + zcenter.y
+            );
+            iverts[i] = vec;
+        }
 
         ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.lineTo(c.x, c.y);
-        ctx.lineTo(d.x, d.y);
+        ctx.moveTo(overts[0].x, overts[0].y);
+        for (var i=1; i<len; i++) {
+            ctx.lineTo(overts[i].x, overts[i].y);
+        }
         ctx.closePath();
         ctx.fill();
-    }
 
-    var grad = ctx.createLinearGradient(iverts[0].x,iverts[0].y, iverts[2].x, iverts[2].y);
-    if (pressedIn) {
-        grad.addColorStop(0,"#000");
-        grad.addColorStop(1,"#223");
-    }
-    else
-    {
-        grad.addColorStop(0,"#aaf");
-        grad.addColorStop(1,"#779");        
-    }
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.globalAlpha = 0.65 * (pressedIn ? 0.4 : 1.0);
-    ctx.moveTo(iverts[0].x, iverts[0].y);
-    for (var i=1; i<len; i++) {
-        ctx.lineTo(iverts[i].x, iverts[i].y);
-    }
-    ctx.closePath();
-    ctx.fill();
+        if (outline) {
+            ctx.strokeStyle = outline;
+            ctx.lineWidth = 2.0;
+            ctx.stroke();
+            ctx.lineWidth = 1.0;
+        }
 
-    ctx.restore();
+        var oAlpha = parseFloat(ctx.globalAlpha);
+        ctx.fillStyle = '#aaf';
+
+        for (var i=0; i<len; i++) {
+            var j = (i+1) % len;
+
+            var a = overts[i], b = overts[j],
+                c = iverts[j], d = iverts[i];
+
+            var angle = Math.atan2(b.y - a.y, b.x - a.x);
+            var alpha = Math.sin(angle + Math.PI/4.0) * 0.5 + 0.5;
+            ctx.globalAlpha = oAlpha * alpha * 0.6;
+
+            var grad = ctx.createLinearGradient(a.x,a.y, c.x,c.y);
+            grad.addColorStop(0,"#aaf");
+            grad.addColorStop(1,"#668");
+
+            ctx.fillStyle = grad;
+
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.lineTo(c.x, c.y);
+            ctx.lineTo(d.x, d.y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        var grad = ctx.createLinearGradient(iverts[0].x,iverts[0].y, iverts[2].x, iverts[2].y);
+        if (pressedIn) {
+            grad.addColorStop(0,"#000");
+            grad.addColorStop(1,"#223");
+        }
+        else
+        {
+            grad.addColorStop(0,"#aaf");
+            grad.addColorStop(1,"#779");        
+        }
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.globalAlpha = 0.65 * (pressedIn ? 0.4 : 1.0);
+        ctx.moveTo(iverts[0].x, iverts[0].y);
+        for (var i=1; i<len; i++) {
+            ctx.lineTo(iverts[i].x, iverts[i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+    });
+
+    octx.drawImage(BSWG.d3dr_LUT[key], ox1-1, oy1-1);
 
 };
 
