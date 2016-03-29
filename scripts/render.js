@@ -155,12 +155,14 @@ BSWG.initCanvasContext = function(ctx) {
         if (!noBorder) {
             var tmp = ctx.fillStyle;
             ctx.fillStyle = ctx.strokeStyle;
+            ctx.lineWidth = 3.5;
             for (var i=0; i<widths.length; i++) {
                 var ch = text.charAt(i) + '';
-                ctx.fillText(ch, x-2, y);
+                /*ctx.fillText(ch, x-2, y);
                 ctx.fillText(ch, x+2, y);
                 ctx.fillText(ch, x, y-2);
-                ctx.fillText(ch, x, y+2);
+                ctx.fillText(ch, x, y+2);*/
+                ctx.strokeText(ch, x, y);
                 x += widths[i];
             }
             ctx.fillStyle = tmp;
