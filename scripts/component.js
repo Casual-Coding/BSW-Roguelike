@@ -139,13 +139,13 @@ BSWG.component = function (desc, args) {
     this.hp = this.maxHP;
     this.destroyed = false;
 
-    this.takeDamage = function (amt, fromC) {
+    this.takeDamage = function (amt, fromC, noMin) {
 
-        if (fromC && fromC.onCC === this.onCC && this.onCC) {
+        if (fromC && fromC.onCC && this.onCC && fromC.onCC.id === this.onCC.id) {
             amt *= BSWG.friendlyFactor;
         }
 
-        if (amt < 1) {
+        if (amt < 1 && !noMin) {
             return;
         }
 

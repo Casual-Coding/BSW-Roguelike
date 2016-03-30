@@ -96,7 +96,7 @@ BSWG.laserList = new function () {
             var ret = BSWG.componentList.withRay(this.p.THREE(0.0), p2.THREE(0.0));
 
             if (ret) {
-                ret.comp.takeDamage(BSWG.laserDmg * dt, source);
+                ret.comp.takeDamage(BSWG.laserDmg * dt, source, true);
                 this.mat.uniforms.laser.value.x = ret.d;
                 var tforce = 100.0;
                 var p = new b2Vec2(ret.p.x, ret.p.y);

@@ -1,6 +1,6 @@
 // BlockShip Wars Rougelike - Helper functions for jpoints (weld points)
 
-BSWG.maxJPointsRender = 192;
+BSWG.maxJPointsRender = 512;
 BSWG.jpointRenderer = new function() {
 
     var baseLen, geom, len, posArray, clrArray, mat, mesh, vertices, faces;
