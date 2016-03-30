@@ -181,7 +181,32 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         self.mat.uniforms.extra.value.y = Math.clamp(self.anchorT, 0, 1);
         self.mat.uniforms.extra.value.z = BSWG.render.time;
-        self.mat.uniforms.extra.value.w = (obj && obj.comp) ? (1.0 - (obj.comp.hp / obj.comp.maxHP)) : 0.0;
+        var dmg = (obj && obj.comp) ? (1.0 - (obj.comp.hp / obj.comp.maxHP)) : 0.0;
+
+        self.mat.uniforms.extra.value.w = dmg;
+
+        if (obj && obj.comp && obj.comp.p && dmg > 0.25) {
+            if (Math.pow(Math.random(), 0.25) < dmg) {
+                var a = Math.random() * Math.PI * 2.0;
+                var r = Math.random() * (obj.radius || 1.0);
+                var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+                var p = obj.comp.p(lp);
+                if (BSWG.componentList.atPoint(p, obj.comp)) {
+                    var v = obj.body.GetLinearVelocityFromLocalPoint(lp).clone();
+                    v.x *= 0.75;
+                    v.y *= 0.75;
+                    BSWG.render.boom.palette = chadaboom3D.fire;
+                    BSWG.render.boom.add(
+                        p.particleWrap(0.1),
+                        Math.random()*0.5+0.1,
+                        32,
+                        Math.random()*0.5+1.0,
+                        4.0,
+                        v.THREE(Math.random()*2.0)
+                    );
+                }
+            }
+        }
 
         self.mat.uniforms.warpIn.value -= BSWG.render.dt * 2.0;
         if (self.mat.uniforms.warpIn.value < 0.0) {

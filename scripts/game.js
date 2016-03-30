@@ -3,6 +3,7 @@ BSWG.grabSlowdownDistStart = 3.0;
 BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 BSWG.camVelLookBfr         = 0.1; // * viewport.w
+BSWG.lookRange             = 45.0;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -594,6 +595,16 @@ BSWG.game = new function(){
                     if (!self.ccblock.destroyed) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
+
+                        var ccs = BSWG.componentList.allCCs();
+                        var avgDist = 0.0;
+                        for (var i=0; i<ccs.length; i++) {
+                            avgDist += Math.distVec2(ccs[i].p(), self.ccblock.p());
+                        }
+                        avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
+                        toZ /= Math.max(Math.log(avgDist), 1.0);
+                        toZ = Math.max(toZ, 0.007);
+
                         self.cam.zoomTo(dt*2.5, toZ);
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
                         var p = self.ccblock.obj.body.GetWorldCenter().clone();

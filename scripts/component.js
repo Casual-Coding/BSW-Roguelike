@@ -218,7 +218,7 @@ BSWG.component = function (desc, args) {
                 return this.obj.body.GetWorldCenter();
             }
             else {
-                return this.obj.body.GetLocalPoint(v);
+                return this.obj.body.GetWorldPoint(v);
             }
         }
         else {
@@ -633,6 +633,17 @@ BSWG.componentList = new function () {
 
     };
 
+    this.allCCs = function () {
+        var len = this.compList.length;
+        var ret = new Array();
+        for (var i=0; i<len; i++) {
+            if (this.compList[i].type === 'cc') {
+                ret.push(this.compList[i]);
+            }
+        }
+        return ret;
+    };
+
     this.add = function (comp) {
 
         this.compList.push(comp);
@@ -834,9 +845,9 @@ BSWG.componentList = new function () {
         }
     };
 
-    this.atPoint = function (p) {
+    this.atPoint = function (p, only) {
 
-        var CL = this.hash[this.hashKey(p.x, p.y)];
+        var CL = only ? [ only ] : this.hash[this.hashKey(p.x, p.y)];
         if (!CL) {
             return;
         }
