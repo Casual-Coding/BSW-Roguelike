@@ -1,4 +1,4 @@
-BSWG.blasterDmg = 3.5;
+BSWG.blasterDmg = 7.0;
 
 BSWG.blasterList = new function () {
 
@@ -84,7 +84,7 @@ BSWG.blasterList = new function () {
 
             p: p,
             v: v,
-            t: 4.0,
+            t: 2.0,
             source: source
 
         });
