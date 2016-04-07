@@ -69,6 +69,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                 var predComp = obj.predComp || comp;
 
                 obj.reached = false;
+                obj.spinner = obj.spinner || false;
 
                 var lastDT = 1.0/60.0;
                 var aDists = [];
@@ -216,8 +217,16 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     this.reached = this.tracker ? (Math.abs(angDiff) < Math.PI/90) : (distance <= radius);
 
                     if (distance > radius || this.tracker) {
-                        if (Math.abs(angDiff) > Math.PI/45) {
-                            var ad2 = angDiff + this.predict(1.0, 'ang') 
+                        if (this.spinner) {
+                            if (computeVel(aDists) > 0) {
+                                keyDown[right] = true;
+                            }
+                            else {
+                                keyDown[left] = true;
+                            }
+                        }
+                        else if (Math.abs(angDiff) > Math.PI/45) {
+                            var ad2 = angDiff + this.predict(1.0, 'ang');
                             if (ad2 > 0.0) {
                                 keyDown[left] = true;
                             }
@@ -225,7 +234,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                                 keyDown[right] = true;
                             }
                         }
-                        if (!this.tracker && !(exclusive && (keyDown[left] || keyDown[right]))) {
+                        if (!this.tracker && (!(exclusive && (keyDown[left] || keyDown[right])) || this.spinner)) {
                             var tt = this.timeTarget(distance, 'vel');
                             if (Math.abs(angDiff) < Math.PI/4 && (tt > this.timeStop(0.2, 'vel') || (tt>10.0 && Math.abs(angDiff) < Math.PI/12) || charge)) {
                                 keyDown[doReverse ? reverse : forward] = true;

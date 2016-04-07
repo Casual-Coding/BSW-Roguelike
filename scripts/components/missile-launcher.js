@@ -26,10 +26,10 @@ BSWG.component_MissileLauncher = {
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = [
-            Math.rotVec2(new b2Vec2(-0.5,  -0.3), offsetAngle),
+            Math.rotVec2(new b2Vec2(-0.45,  -0.3), offsetAngle),
             Math.rotVec2(new b2Vec2(-0.4,  0.85), offsetAngle),
             Math.rotVec2(new b2Vec2( 0.4,  0.85), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.5,  -0.3), offsetAngle)
+            Math.rotVec2(new b2Vec2( 0.45,  -0.3), offsetAngle)
         ].reverse();
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
