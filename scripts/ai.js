@@ -297,6 +297,17 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
                     var refBlock = this.refObject || aiobj.ccblock;
                     var refOffset = this.refOffset || new b2Vec2(0, 0);
+
+                    if (!refBlock || !refBlock.obj || !refBlock.obj.body) {
+                        refBlock = aiobj.ccblock;
+                        if (!refBlock || !refBlock.obj || !refBlock.obj.body) {
+                            this.found = false;
+                            this.first = null;
+                            this.list.length = 0;
+                            return;
+                        }
+                    }
+
                     this.minDist = this.distance && this.distance[0] ? this.distance[0] : 0.0;
                     this.maxDist = this.distance && this.distance[1] ? this.distance[1] : 10.0;
                     this.fullRange = false;
