@@ -585,6 +585,9 @@ BSWG.component = function (desc, args) {
     };
 
     this.distanceTo = function (comp2) {
+        if (!this.obj || !this.obj.body || !comp2.obj || !comp2.obj.body) {
+            return 1000000.0;
+        }
         return Math.distVec2(this.obj.body.GetWorldCenter(), comp2.obj.body.GetWorldCenter());
     };
 

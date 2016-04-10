@@ -161,10 +161,17 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     }
 
                     var doReverse = false;
-
                     var mp = comp.obj.body.GetWorldCenter();
-                    var radius = oradius;
                     var distance = Math.distVec2(mp, p);
+
+                    if (charge) {
+                        p = p.clone();
+                        p.x += (p.x - mp.x) / distance * oradius * 2;
+                        p.y += (p.y - mp.y) / distance * oradius * 2;
+                        distance = Math.distVec2(mp, p);
+                    }
+
+                    var radius = oradius;
 
                     this.distance = distance;
 
