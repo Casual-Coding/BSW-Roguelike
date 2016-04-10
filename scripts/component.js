@@ -5,7 +5,7 @@ BSWG.compActiveConfMenu = null;
 BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
-BSWG.friendlyFactor = 1/4;
+BSWG.friendlyFactor = 1/16;
 
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
