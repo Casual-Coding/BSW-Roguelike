@@ -598,16 +598,23 @@ BSWG.game = new function(){
 
                         var ccs = BSWG.componentList.allCCs();
                         var avgDist = 0.0;
+                        var avgP = self.ccblock.p().clone();
+                        avgP.x *= 2;
+                        avgP.y *= 2;
                         for (var i=0; i<ccs.length; i++) {
                             avgDist += Math.distVec2(ccs[i].p(), self.ccblock.p());
+                            avgP.x += ccs[i].p().x;
+                            avgP.y += ccs[i].p().y;
                         }
+                        avgP.x /= (2 + ccs.length);
+                        avgP.y /= (2 + ccs.length);
                         avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
                         toZ /= Math.max(Math.log(avgDist), 1.0);
                         toZ = Math.max(toZ, 0.007);
 
                         self.cam.zoomTo(dt*2.5, toZ);
-                        var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-                        var p = self.ccblock.obj.body.GetWorldCenter().clone();
+                        var ccp = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
+                        var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
                         p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
                         p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
 
