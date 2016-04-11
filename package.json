@@ -15,12 +15,11 @@
     "toolbar": false,
     "frame": true,
     "fullscreen": false,
+    "min_width": 1280,
+    "min_height": 768,
     "width": 1280,
     "height": 768,
-    "min_width": 800,
-    "min_height": 600,
-    "max_width": 1920,
-    "max_height": 1080
+    "maximized": true
   },
   "webkit": {
     "plugin": true

@@ -183,6 +183,12 @@ BSWG.initCanvasContext = function(ctx) {
 
 BSWG.render = new function() {
 
+    var win = BSWG.nwg ? BSWG.nwg.Window.get() : null;
+    if (win) {
+        win.show();
+        win.maximize();
+    }
+
     this.canvas = null;
     this.ctx = null;
     this.viewport = null;
@@ -386,6 +392,18 @@ BSWG.render = new function() {
 
         var self = this;
         var renderFrame = function () {
+
+            if (win) {
+                if (BSWG.input.KEY_PRESSED(BSWG.KEY['F11'])) {
+                    win.toggleFullscreen();
+                }
+                if (BSWG.input.KEY_PRESSED(BSWG.KEY['F12'])) {
+                    if (win.isDevToolsOpen()) {
+                        win.closeDevTools();
+                    }
+                    win.showDevTools();
+                }
+            }
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
 

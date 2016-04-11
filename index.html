@@ -25,6 +25,11 @@
 
         <script>
 
+            BSWG.nwg = null;
+            if (require) {
+                BSWG.nwg = require('nw.gui') || null;
+            }
+
             jQuery = jQuery.noConflict();
 
             if (!Detector.webgl) {
