@@ -345,6 +345,7 @@ BSWG.input = new function(){
 
         jQuery(div).keydown(function(e){
             keyMap[e.which] = true;
+            
             if (self.mouseWheelKeys) {
                 var dir = 0;
                 for (i=0; i<self.mouseWheelKeys.plus.length; i++) {
@@ -373,6 +374,18 @@ BSWG.input = new function(){
 
         jQuery(div).keyup(function(e){
             keyMap[e.which] = false;
+            var win = BSWG.render.win;
+            if (win) {
+                if (e.which === BSWG.KEY['F11']) {
+                    win.toggleFullscreen();
+                }
+                else if (e.which === BSWG.KEY['F12']) {
+                    if (win.isDevToolsOpen()) {
+                        win.closeDevTools();
+                    }
+                    win.showDevTools();
+                }
+            }
         });
 
         self.dgOpenTime = 0;

@@ -188,6 +188,7 @@ BSWG.render = new function() {
         win.show();
         win.maximize();
     }
+    this.win = win;
 
     this.canvas = null;
     this.ctx = null;
@@ -392,18 +393,6 @@ BSWG.render = new function() {
 
         var self = this;
         var renderFrame = function () {
-
-            if (win) {
-                if (BSWG.input.KEY_PRESSED(BSWG.KEY['F11'])) {
-                    win.toggleFullscreen();
-                }
-                if (BSWG.input.KEY_PRESSED(BSWG.KEY['F12'])) {
-                    if (win.isDevToolsOpen()) {
-                        win.closeDevTools();
-                    }
-                    win.showDevTools();
-                }
-            }
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
 
