@@ -1,0 +1,36 @@
+{
+  "main": "index.html",
+  "name": "BSWR",
+  "description": "BlockShip Wars: Roguelike",
+  "version": "0.2.0",
+  "keywords": [
+    "game",
+    "roguelike",
+    "bswr",
+    "node-webkit"
+  ],
+  "single-instance": false,
+  "window": {
+    "title": "BlockShip Wars: Roguelike",
+    "toolbar": false,
+    "frame": true,
+    "fullscreen": false,
+    "width": 1280,
+    "height": 768,
+    "min_width": 800,
+    "min_height": 600,
+    "max_width": 1920,
+    "max_height": 1080
+  },
+  "webkit": {
+    "plugin": true
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-util": "^3.0.7",
+    "nw-builder": "^2.2.0",
+    "simple-glob": "^0.1.0"
+  }
+}

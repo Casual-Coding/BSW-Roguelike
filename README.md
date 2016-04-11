@@ -7,3 +7,7 @@ BlockShip Wars Roguelike
 
 # License
 See LICENSE
+
+# Build standalone win64/osx64/linux64
+ * npm install
+ * gulp build
