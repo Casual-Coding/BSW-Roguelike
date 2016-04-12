@@ -102,6 +102,36 @@ var BSWG = new function(){
             'laserFragment'
         ]
     };
+    var ai = [
+        'big-flail',
+        'big-spinner',
+        'brute',
+        'crippler',
+        'cruncher-boss',
+        'fighter',
+        'four-blaster',
+        'heavy-fighter',
+        'laser-fighter',
+        'little-brute',
+        'little-charger-2',
+        'little-charger',
+        'little-cruncher',
+        'mele-boss',
+        'missile-boss',
+        'missile-spinner',
+        'msl-fighter',
+        'scorpion',
+        'spinner',
+        'uni-dir-fighter',
+        'uni-fight-msl',
+        'uni-laser'
+    ];
+    for (var i=0; i<ai.length; i++) {
+        scripts.push([
+            'ai/' + ai[i] + '.json',
+            'ais_' + ai[i]
+        ]);
+    }
 
     this.init = function ()
     {

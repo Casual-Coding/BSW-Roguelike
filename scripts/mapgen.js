@@ -5,7 +5,70 @@ BSWG.map_flPlanetDist    = 0.9; // * size
 BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
 BSWG.map_planetSafeDist  = 6.5; // Size of zone surrounding planet
 
-BSWG.genMap = function(size, numZones, numPlanets) {
+BSWG.enemySettings = [
+    {
+        minLevel: 0,
+        maxLevel: 10,
+        minComponents: [
+            { type: 'thruster', size: 1 },
+            { type: 'blaster' },
+            { type: 'block', width: 2, height: 2 },
+            { type: 'hingehalf', size: 2 },
+            { type: 'spikes', size: 2, pike: true }
+        ],
+        maxComponents: [
+            { type: 'thruster', size: 2, prob: 1.5 },
+            { type: 'missile-launcher', prob: 1.5 },
+            { type: 'laser', prob: 2.0 },
+            { type: 'sawblade', size: 3, prob: 2.0 },
+            { type: 'detacherlauncher', size: 2, prob: 1.75 },
+            { type: 'spikes', size: 3, pike: true, prob: 1.75 },
+            { type: 'spikes', size: 3, pike: false, prob: 1.75 },
+            { type: 'chainlink', prob: 1.25 }
+        ],
+        bosses: [ // ordered by difficulty
+            [ { type: 'missile-boss', levelInc: 2 } ],
+            [ { type: 'mele-boss', levelInc: 2 } ],
+            [ { type: 'big-flail', levelInc: 2 } ],
+            [ { type: 'crippler', levelInc: 2 }, { type: 'little-cruncher', levelInc: 1 } ],
+            [ { type: 'cruncher-boss', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 }, { type: 'heavy-fighter', levelInc: 1 } ], // TODO
+        ],
+        enemies: [
+            { type: 'big-flail',        levels: [8,9,10] },
+            { type: 'big-spinner',      levels: [6,7,8] },
+            { type: 'brute',            levels: [5,6,7] },
+            { type: 'brute',            levels: [8,9,10], max: 2 },
+            { type: 'crippler',         levels: [8,9,10] },
+            { type: 'fighter',          levels: [0,1,2,5,6], max: 2 },
+            { type: 'four-blaster',     levels: [0,1,2] },
+            { type: 'heavy-fighter',    levels: [6,7,9,10] },
+            { type: 'laser-fighter',    levels: [4,5,6] },
+            { type: 'little-brute',     levels: [3,4,5,6], max: 2 },
+            { type: 'little-charger-2', levels: [3,4,5,6], max: 2 },
+            { type: 'little-charger',   levels: [4,5,6,7], max: 3 },
+            { type: 'little-cruncher',  levels: [5,6,7] },
+            { type: 'mele-boss',        levels: [8,9] },
+            { type: 'missile-boss',     levels: [6,7,8] },
+            { type: 'missile-spinner',  levels: [2,3,4] },
+            { type: 'missile-spinner',  levels: [6,7,8], max: 2 },
+            { type: 'missile-spinner',  levels: [9,10], max: 3 },
+            { type: 'msl-fighter',      levels: [2,3,4,5], max: 2 },
+            { type: 'scorpion',         levels: [5,6,7] },
+            { type: 'spinner',          levels: [4,5,6], max: 2 },
+            { type: 'spinner',          levels: [7,8], max: 3 },
+            { type: 'uni-dir-fighter',  levels: [0,1] },
+            { type: 'uni-dir-fighter',  levels: [2,3], max: 2 },
+            { type: 'uni-fight-msl',    levels: [2,3] },
+            { type: 'uni-fight-msl',    levels: [4,5], max: 2 },
+            { type: 'uni-laser',        levels: [5,6,7], max: 2 },
+            { type: 'uni-laser',        levels: [8,9,10], max: 4 }
+        ]
+    }
+];
+
+BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
+
+    var eInfo = BSWG.enemySettings[areaNo || 0];
 
     var ret = new Object();
 
