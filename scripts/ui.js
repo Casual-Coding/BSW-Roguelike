@@ -59,7 +59,7 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
         }
 
         var oAlpha = parseFloat(ctx.globalAlpha);
-        ctx.fillStyle = '#aaf';
+        ctx.fillStyle = '#ddd';
 
         for (var i=0; i<len; i++) {
             var j = (i+1) % len;
@@ -72,8 +72,8 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
             ctx.globalAlpha = oAlpha * alpha * 0.6;
 
             var grad = ctx.createLinearGradient(a.x,a.y, c.x,c.y);
-            grad.addColorStop(0,"#aaf");
-            grad.addColorStop(1,"#668");
+            grad.addColorStop(0,"#ddd");
+            grad.addColorStop(1,"#777");
 
             ctx.fillStyle = grad;
 
@@ -89,12 +89,12 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
         var grad = ctx.createLinearGradient(iverts[0].x,iverts[0].y, iverts[2].x, iverts[2].y);
         if (pressedIn) {
             grad.addColorStop(0,"#000");
-            grad.addColorStop(1,"#223");
+            grad.addColorStop(1,"#222");
         }
         else
         {
-            grad.addColorStop(0,"#aaf");
-            grad.addColorStop(1,"#779");        
+            grad.addColorStop(0,"#ddd");
+            grad.addColorStop(1,"#888");        
         }
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -119,22 +119,22 @@ BSWG.control_Button = {
         ctx.font = '16px Orbitron';
 
         if (this.selected) {
-            ctx.strokeStyle = '#484';
+            ctx.strokeStyle = '#777';
         }
         else {
-            ctx.strokeStyle = '#888';
+            ctx.strokeStyle = '#999';
         }
 
         if (this.selected) {
-            ctx.fillStyle = 'rgba(60,60,100,1)';
+            ctx.fillStyle = 'rgba(100,100,100,1)';
         }
         else {
-            ctx.fillStyle = 'rgba(35,35,50,1)';
+            ctx.fillStyle = 'rgba(50,50,50,1)';
         }
             
         ctx.lineWidth = 2.0;
 
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 10, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
+        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 7, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
 
         ctx.lineWidth = 1.0;
 
@@ -217,7 +217,7 @@ BSWG.control_CompPalette = {
 
         ctx.font = '16px Orbitron';
 
-        ctx.fillStyle = 'rgba(35,35,50,0.5)';
+        ctx.fillStyle = 'rgba(50,50,50,0.5)';
             
         ctx.lineWidth = 2.0;
 
@@ -237,7 +237,7 @@ BSWG.control_CompPalette = {
             var B = this.buttons[i];
             ctx.font = '12px Orbitron';
             ctx.strokeStyle = '#888';
-            ctx.fillStyle = 'rgba(35,35,50,1)';
+            ctx.fillStyle = 'rgba(50,50,50,1)';
                 
             ctx.lineWidth = 2.0;
 
@@ -245,7 +245,7 @@ BSWG.control_CompPalette = {
                 'rgba(16, 16, 16, 0.8)' :
                 (B.mouseIn ?
                     'rgba(64, 64, 64, 0.6)' :
-                    'rgba(128, 128, 128, 0.5)'
+                    'rgba(64, 64, 64, 0.3)'
                 );
             ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
 
@@ -414,8 +414,8 @@ BSWG.control_KeyConfig = {
 
         ctx.font = '16px Orbitron';
 
-        ctx.strokeStyle = '#8f8';
-        ctx.fillStyle = 'rgba(25,50,25,1.0)';
+        ctx.strokeStyle = '#aaa';
+        ctx.fillStyle = 'rgba(50,50,50,1.0)';
 
         ctx.lineWidth = 2.0;
 

@@ -515,7 +515,7 @@ BSWG.ai = new function() {
         this.editorDiv.style.width = (EDITOR_WIDTH-8) + 'px';
         this.editorDiv.style.height = '400px';
         this.editorDiv.style.top = '66px';
-        this.editorDiv.style.border = '4px solid rgba(70,70,100,1.0)';
+        this.editorDiv.style.border = '4px solid rgba(100,100,100,1.0)';
         document.body.appendChild(this.editorDiv);
 
         this.editor = ace.edit(this.editorDiv);
@@ -562,7 +562,7 @@ BSWG.ai = new function() {
         this.consoleDiv.style.width = (EDITOR_WIDTH-8) + 'px';
         this.consoleDiv.style.height = '144px';
         this.consoleDiv.style.top = '66px';
-        this.consoleDiv.style.border = '4px solid rgba(70,70,100,1.0)';
+        this.consoleDiv.style.border = '4px solid rgba(100,100,100,1.0)';
         this.consoleDiv.style.overflowX = 'hidden';
         this.consoleDiv.style.overflowY = 'scroll';
         this.consoleDiv.style.color = 'rgb(248, 248, 242)';
@@ -840,10 +840,10 @@ BSWG.ai = new function() {
 
         if (this.editorDiv) {
             if (this.editor.isFocused()) {
-                this.editorDiv.style.border = '4px solid rgba(140,140,200,1.0)';
+                this.editorDiv.style.border = '4px solid rgba(200,200,200,1.0)';
             }
             else {
-                this.editorDiv.style.border = '4px solid rgba(70,70,100,1.0)';
+                this.editorDiv.style.border = '4px solid rgba(100,100,100,1.0)';
             }
         }
 
