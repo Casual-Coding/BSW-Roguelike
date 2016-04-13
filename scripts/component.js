@@ -108,6 +108,83 @@ BSWG.updateOnCC = function (a, b) {
 
 };
 
+BSWG.compImplied = function (a, b) {
+
+    var parse = function(str) {
+        var tok = str.split(',');
+        var ret = new Object();
+        ret.type = tok[0];
+        for (var i=1; i<tok.length; i++) {
+            var kvtok = tok[i].split('=');
+            if (kvtok[1] === 'true') {
+                ret[kvtok[0]] = true;
+            }
+            else if (kvtok[1] === 'false') {
+                ret[kvtok[0]] = false;
+            }
+            else {
+                ret[kvtok[0]] = parseInt(kvtok[1]);
+            }
+        }
+        return ret;
+    };
+
+    if (typeof a === 'string') {
+        a = parse(a);
+    }
+    if (typeof b === 'string') {
+        b = parse(b);
+    }
+
+    if (a.type != b.type) {
+        if (!((a.type === 'sawmotor' && b.type === 'sawblade') ||
+              (b.type === 'sawmotor' && a.type === 'sawblade'))) {
+            return false;
+        }
+    }
+
+    switch (a.type) {
+        case 'blaster':
+            return true;
+            break;
+        case 'block':
+            return Math.max(a.width, a.height) <= Math.max(b.width, b.height);
+            break;
+        case 'chainlink':
+            return true;
+            break;
+        case 'detacherlauncher':
+            return a.size <= b.size;
+            break;
+        case 'hingehalf':
+            return a.size <= b.size;
+            break;
+        case 'laser':
+            return true;
+            break;
+        case 'missile-launcher':
+            return true;
+            break;
+        case 'sawblade':
+            return a.size <= b.size;
+            break;
+        case 'sawmotor':
+            return a.size <= b.size;
+            break;
+        case 'spikes':
+            return a.size <= b.size && a.pike === b.pike;
+            break;
+        case 'thruster':
+            return a.size <= b.size;
+            break;
+        default:
+            return false;
+    }
+
+    return false;
+
+};
+
 BSWG.comp_hashSize = 2.0;
 
 BSWG.nextCompID = 1;
@@ -999,6 +1076,36 @@ BSWG.componentList = new function () {
             }
         });
         return ret;
+    };
+
+    this.loadScan = function(obj) {
+
+        var ret = {};
+
+        var comps = obj.list;
+        for (var i=0; i<comps.length; i++) {
+            var C = comps[i];
+            if (C.onCC === null) {
+                continue;
+            }
+
+            var key = C.type;
+
+            var desc = this.typeMap[C.type];
+            if (desc.serialize) {
+                for (var j=0; j<desc.serialize.length; j++) {
+                    var k2 = desc.serialize[j];
+                    if (C.args[k2] || C.args[k2] == false) {
+                        key += ',' + k2 + '=' + C.args[k2];
+                    }
+                }
+            }
+
+            ret[key] = (ret[key] || 0) + 1;
+        }
+
+        return ret;
+
     };
 
     this.autoWelds = null;

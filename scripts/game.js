@@ -199,7 +199,7 @@ BSWG.game = new function(){
                 this.map = BSWG.genMap(128, 30, 8);
                 Math.seedrandom();
                 for (var i=0; i<this.map.planets.length; i++) {
-                    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE()});
+                    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
                     this.map.planets[i].pobj = planet;
                 }
                 startPos = this.map.planets[0].worldP.clone();

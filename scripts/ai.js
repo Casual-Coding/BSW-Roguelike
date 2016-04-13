@@ -1,3 +1,54 @@
+BSWG.enemyStats = {};
+BSWG.getEnemy = function(type) {
+
+    var estr = BSWG['ais_' + type];
+    var eobj = estr ? JSON.parse(estr) : null;
+    var stats = BSWG.enemyStats[type] || null;
+
+    if (BSWG.componentList && !stats && eobj) {
+        stats = BSWG.componentList.loadScan(eobj);
+        BSWG.enemyStats[type] = stats;
+    }
+
+    return {
+        obj: eobj,
+        stats: stats,
+        compStats: function (ostats) {
+            var ustats = {};
+            for (var stat in stats) {
+                var found = false;
+                var count = stats[stat];
+                for (var statj in stats) {
+                    if (stat.localeCompare(statj) < 0 && BSWG.compImplied(stat, statj)) {
+                        found = true;
+                    }
+                    if (BSWG.compImplied(statj, stat)) {
+                        count += stats[statj];
+                    }
+                }
+                if (!found) {
+                    ustats[stat] = count;
+                }
+            }
+            var f = 0, nf = 0;
+            for (var stat in ustats) {
+                var found = false;
+                for (var i=0; i<ostats.length && !found; i++) {
+                    if (BSWG.compImplied(stat, ostats[i])) {
+                        f += ustats[stat];
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    nf += ustats[stat];
+                }
+            }
+            return f / (f+nf);
+        }
+    };
+};
+
 BSWG.applyAIHelperFunctions = function (obj, self) {
 
     obj.log = function (text) {

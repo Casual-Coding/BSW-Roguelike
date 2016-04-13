@@ -5,6 +5,16 @@ BSWG.map_flPlanetDist    = 0.9; // * size
 BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
 BSWG.map_planetSafeDist  = 6.5; // Size of zone surrounding planet
 
+BSWG.enemySettings_compToStr = function (obj) {
+    var str = obj.type;
+    for (var key in obj) {
+        if (key !== 'type' && key !== 'minLevel' && key !== 'alwaysLevel' && key !== 'minProb') {
+            str += ',' + key + '=' + obj[key];
+        }
+    }
+    return str;
+};
+
 BSWG.enemySettings = [
     {
         minLevel: 0,
@@ -17,14 +27,15 @@ BSWG.enemySettings = [
             { type: 'spikes', size: 2, pike: true }
         ],
         maxComponents: [
-            { type: 'thruster', size: 2, prob: 1.5 },
-            { type: 'missile-launcher', prob: 1.5 },
-            { type: 'laser', prob: 2.0 },
-            { type: 'sawblade', size: 3, prob: 2.0 },
-            { type: 'detacherlauncher', size: 2, prob: 1.75 },
-            { type: 'spikes', size: 3, pike: true, prob: 1.75 },
-            { type: 'spikes', size: 3, pike: false, prob: 1.75 },
-            { type: 'chainlink', prob: 1.25 }
+            { type: 'block', width: 3, height: 3,   minLevel: 5, alwaysLevel: 8,  minProb: 0.8 },
+            { type: 'thruster', size: 2,            minLevel: 3, alwaysLevel: 6,  minProb: 0.5 },
+            { type: 'missile-launcher',             minLevel: 3, alwaysLevel: 6,  minProb: 0.5 },
+            { type: 'laser',                        minLevel: 7, alwaysLevel: 10, minProb: 0.65 },
+            { type: 'sawblade', size: 3,            minLevel: 5, alwaysLevel: 7,  minProb: 0.8 },
+            { type: 'detacherlauncher', size: 2,    minLevel: 5, alwaysLevel: 8,  minProb: 0.8 },
+            { type: 'spikes', size: 3, pike: true,  minLevel: 5, alwaysLevel: 8,  minProb: 0.9 },
+            { type: 'spikes', size: 3, pike: false, minLevel: 5, alwaysLevel: 8,  minProb: 0.9 },
+            { type: 'chainlink',                    minLevel: 3, alwaysLevel: 5,  minProb: 0.6 }
         ],
         bosses: [ // ordered by difficulty
             [ { type: 'missile-boss', levelInc: 2 } ],
@@ -41,20 +52,26 @@ BSWG.enemySettings = [
             { type: 'crippler',         levels: [8,9,10] },
             { type: 'fighter',          levels: [0,1,2,5,6], max: 2 },
             { type: 'four-blaster',     levels: [0,1,2] },
+            { type: 'four-blaster',     levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
+            { type: 'four-blaster',     levels: [0,1,2], with: [ 'fighter' ] },
             { type: 'heavy-fighter',    levels: [6,7,9,10] },
             { type: 'laser-fighter',    levels: [4,5,6] },
+            { type: 'laser-fighter',    levels: [4,5,6], with: [ 'msl-fighter' ] },
             { type: 'little-brute',     levels: [3,4,5,6], max: 2 },
             { type: 'little-charger-2', levels: [3,4,5,6], max: 2 },
             { type: 'little-charger',   levels: [4,5,6,7], max: 3 },
             { type: 'little-cruncher',  levels: [5,6,7] },
             { type: 'mele-boss',        levels: [8,9] },
-            { type: 'missile-boss',     levels: [6,7,8] },
+            { type: 'missile-boss',     levels: [6,7,8], max: 2 },
             { type: 'missile-spinner',  levels: [2,3,4] },
+            { type: 'missile-spinner',  levels: [2,3,4], with: [ 'fighter' ] },
             { type: 'missile-spinner',  levels: [6,7,8], max: 2 },
             { type: 'missile-spinner',  levels: [9,10], max: 3 },
             { type: 'msl-fighter',      levels: [2,3,4,5], max: 2 },
-            { type: 'scorpion',         levels: [5,6,7] },
+            { type: 'scorpion',         levels: [5,6,7], with: [ 'uni-laser', 'uni-laser'] },
             { type: 'spinner',          levels: [4,5,6], max: 2 },
+            { type: 'spinner',          levels: [4,5,6], max: 2, with: [ 'little-charger', 'little-charger' ] },
+            { type: 'spinner',          levels: [4,5,6], max: 2, with: [ 'little-charger-2', 'little-charger-2' ] },
             { type: 'spinner',          levels: [7,8], max: 3 },
             { type: 'uni-dir-fighter',  levels: [0,1] },
             { type: 'uni-dir-fighter',  levels: [2,3], max: 2 },
@@ -68,13 +85,14 @@ BSWG.enemySettings = [
 
 BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
-    var eInfo = BSWG.enemySettings[areaNo || 0];
-
     var ret = new Object();
 
     size       = size || 128;
     numZones   = numZones || 20;
     numPlanets = numPlanets || 5;
+    areaNo     = areaNo || 0;
+
+    var eInfo = BSWG.enemySettings[areaNo];
 
     ret.size     = size;
     ret.zones    = new Array(numZones);
@@ -142,6 +160,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 ret.planets[1].worldP = new b2Vec2(ret.planets[1].p.x * ret.gridSize, ret.planets[1].p.y * ret.gridSize);
                 ret.zones[i].hasPlanet = true;
                 ret.zones[j].hasPlanet = true;
+                ret.zones[i].home = true;
+                ret.zones[j].end = true;
                 found = true;
             }
         }
@@ -284,6 +304,111 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         return this.zones[best];
     };
 
+    BSWG.genMap_EnemyPlacement(ret, eInfo);
+
     return ret;
+
+};
+
+BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
+
+    var startZone = ret.planets[0].zone;
+    var endZone = ret.planets[1].zone;
+    var tDist = Math.distSqVec2(startZone.p, endZone.p);
+
+    var withBoss = new Array();
+
+    for (var i=0; i<ret.zones.length; i++) {
+        var zone = ret.zones[i];
+        var startDist = Math.distSqVec2(zone.p, startZone.p);
+        var endDist = Math.distSqVec2(zone.p, endZone.p);
+
+        var level1 = (startDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
+        var level2 = (1.0 - endDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
+
+        zone.minLevel = Math.floor(Math.min(level1, level2));
+        zone.maxLevel = Math.ceil(Math.max(level1, level2));
+        zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-2);
+
+        if (!zone.hasPlanet) {
+            BSWG.genMap_EnemyPlacement_Zone(zone, eInfo);
+        }
+        else if (!zone.home) {
+            withBoss.push(zone);
+        }
+    }
+
+    withBoss.sort(function(a,b){
+        return (a.minLevel + a.maxLevel) * 0.5 < (b.minLevel + b.maxLevel) * 0.5;
+    });
+
+    for (var i=0; i<withBoss.length && i<eInfo.bosses.length; i++) {
+        withBoss[i].boss = eInfo.bosses[i];
+    }
+
+};
+
+BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
+
+    zone.tech = new Array();
+    for (var i=0; i<eInfo.minComponents.length; i++) {
+        zone.tech.push(BSWG.enemySettings_compToStr(eInfo.minComponents[i]));
+    }
+    for (var i=0; i<eInfo.maxComponents.length; i++) {
+        var C = eInfo.maxComponents[i];
+        if (C.minLevel <= zone.minLevel) {
+            var t = Math.clamp((C.minLevel - zone.minLevel) / (C.alwaysLevel - C.minLevel), 0, 1);
+            var prob = t + C.minProb * (1-t);
+            if (prob >= Math.random()) {
+                zone.tech.push(BSWG.enemySettings_compToStr(C));
+            }
+        }
+    }
+    for (var i=0; i<zone.tech.length; i++) {
+        var found = false;
+        for (var j=i+1; j<zone.tech.length && !found; j++) {
+            if (BSWG.compImplied(zone.tech[i], zone.tech[j])) {
+                found = true;
+            }
+        }
+        if (found) {
+            zone.tech.splice(i, 1);
+            i --;
+            continue;
+        }
+    }
+
+    zone.enemies = new Array();
+    var k = 5;
+    while (zone.enemies.length < 4 && k-- > 0) {
+        for (var i=0; i<eInfo.enemies.length; i++) {
+            var E = eInfo.enemies[i];
+            var found = false;
+            for (var j=0; j<zone.enemies.length && !found; j++) {
+                if (zone.enemies[j] === E) {
+                    found = true;
+                }
+            }
+            if (found) {
+                continue;
+            }
+            found = false;
+            for (var j=0; j<E.levels.length; j++) {
+                if (E.levels[j] >= zone.minLevel && E.levels[j] <= zone.maxLevel) {
+                    found = true;
+                }
+            }
+            if (found) {
+                var E2 = BSWG.getEnemy(E.type);
+                if (E2 && E2.obj && E2.stats) {
+                    var prob = E2.compStats(zone.tech);
+                    prob = Math.pow(prob, 2.5);
+                    if (Math.random() < prob) {
+                        zone.enemies.push(E);
+                    }
+                }
+            }
+        }
+    }
 
 };
