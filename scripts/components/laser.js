@@ -134,7 +134,7 @@ BSWG.component_Laser = {
             accel = 1;
 
             this.fireT = 1.5;
-            this.kickBack = Math.clamp(this.kickBack + 1.0/60 * 2.0, 0.0, 1.5);
+            this.kickBack = Math.clamp(this.kickBack + BSWG.render.dt * 2.0, 0.0, 1.5);
 
             if (this.laser) {
                 this.laser.set(this.obj.body.GetWorldCenter(), this.obj.body.GetAngle());

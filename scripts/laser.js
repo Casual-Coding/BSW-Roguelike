@@ -123,7 +123,7 @@ BSWG.laserList = new function () {
         };
 
         ret.valid = true;
-        ret.update(1.0/60);
+        ret.update(BSWG.render.dt);
         this.list.push(ret);
 
         return ret;

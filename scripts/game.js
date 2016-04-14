@@ -573,7 +573,7 @@ BSWG.game = new function(){
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
             
-            document.title = "BSWR - " + Math.floor(1/BSWG.render.actualDt) + " fps";
+            document.title = "BlockShip Wars: Roguelike - " + Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + ")";
 
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');

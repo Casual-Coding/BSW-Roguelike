@@ -535,7 +535,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         };
 
-        obj.update(1.0/60.0);
+        obj.update(BSWG.render.dt);
 
         BSWG.render.scene.add( obj.mesh );
         if (obj.meshr) {

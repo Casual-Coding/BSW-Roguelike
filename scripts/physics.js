@@ -5,7 +5,7 @@ BSWG.meleDmg = 12.0;
 
 BSWG.physics = new function(){
 
-    this.physicsDT          = 1.0/60.0;
+    this.physicsDT          = 1.0/60.0; // not used
     this.positionIterations = 60;
     this.velocityIterations = 60;
     this.world              = null;

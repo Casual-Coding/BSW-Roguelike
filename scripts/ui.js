@@ -268,7 +268,7 @@ BSWG.control_CompPalette = {
             toX = 10;
         }
 
-        this.p.x += (toX - this.p.x) / 60.0 * 4.0;
+        this.p.x += (toX - this.p.x) * BSWG.render.dt * 4.0;
 
         if (this.buttons && this.mouseIn) {
 

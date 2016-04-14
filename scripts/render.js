@@ -382,14 +382,22 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
+    var last60dt = new Array(60);
+    for (var i=0; i<last60dt.length; i++) {
+        last60dt[i] = 1.0/60;
+    }
+    var l60ptr = 0;
+
     this.startRenderer = function (cbk) {
-        
+
         if (this.animFrameID !== null) {
             window.cancelAnimationFrame(this.animFrameID);
             this.animFrameID = null;
         }
 
         this.renderCbk = cbk;
+
+        sumDt = 1;
 
         var self = this;
         var renderFrame = function () {
@@ -399,7 +407,44 @@ BSWG.render = new function() {
             var frameTime = Date.timeStamp();
             self.actualDt = frameTime - self.lastFrameTime;
             self.lastFrameTime = frameTime;
-            self.dt = 1.0/60.0;
+
+            last60dt[l60ptr] = self.actualDt;
+            l60ptr = (l60ptr+1) % last60dt.length;
+
+            var avg = 1/60.0;
+            for (var i=0; i<last60dt.length; i++) {
+                avg += last60dt[i];
+            }
+            avg /= last60dt.length + 1;
+            if (Math.random() < 1/60) {
+                console.log(last60dt);
+            }
+
+            var targetDt = 1/60;
+            if ((1/avg) < 15) {
+                targetDt = 1/10;
+            }
+            else if ((1/avg) < 25) {
+                targetDt = 1/20;
+            }
+            else if ((1/avg) < 35) {
+                targetDt = 1/30;
+            }
+            else if ((1/avg) < 45) {
+                targetDt = 1/40;
+            }
+            else if ((1/avg) < 55) {
+                targetDt = 1/50;
+            }
+
+            sumDt += self.actulDt;
+
+            if (sumDt < targetDt) {
+                return;
+            }
+            sumDt -= targetDt;
+
+            self.dt = targetDt;
             self.time += self.dt;
 
             self.sizeViewport();
