@@ -416,9 +416,6 @@ BSWG.render = new function() {
                 avg += last60dt[i];
             }
             avg /= last60dt.length + 1;
-            if (Math.random() < 1/60) {
-                console.log(last60dt);
-            }
 
             var targetDt = 1/60;
             if ((1/avg) < 15) {
