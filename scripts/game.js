@@ -16,23 +16,32 @@ BSWG.game = new function(){
     this.setSong = function(bpm, settings, vol, fadeIn) {
         this.lastSong = [ bpm, settings, vol, fadeIn ];
         if (this.curSong) {
-            this.curSong.fadeOutStop(0.5);
+            this.curSong.fadeOutStop(1.0);
         }
         settings = settings || {};
         bpm = bpm || 120;
         Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
         this.curSong = new BSWG.song(3, bpm, 0.0, settings);
-        this.curSong.setVolume(vol || 0.5, fadeIn || 3.0);
+        this.curSong.start();
+        this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
+    };
+    this.setSongCache = function(song, vol, fadeIn) {
+        if (this.curSong) {
+            this.curSong.fadeOutStop(1.0);
+        }
+        this.curSong = song;
+        this.curSong.start();
+        this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.repeatSong = function() {
-        if (this.lastSong) {
-            this.setSong(this.lastSong[0], this.lastSong[1], this.lastSong[2], this.lastSong[3]);
+        if (this.curSong) {
+            this.curSong.start();
         }
     };
 
-    this.stopMusic = function() {
+    this.stopMusic = function(t) {
         if (this.curSong) {
-            this.curSong.fadeOutStop(3.0);
+            this.curSong.fadeOutStop(t||1.0);
         }
         this.curSong = null;
     };
@@ -46,6 +55,8 @@ BSWG.game = new function(){
     this.switchScene = null;
 
     this.changeScene = function (scene, args, fadeColor, fadeTime, force) {
+
+        this.stopMusic(1.0);
 
         if (this.switchScene && !force) {
             return;
@@ -220,17 +231,18 @@ BSWG.game = new function(){
                 this.curPanPos = 0;
                 this.panPosTime = this.panPosStartTime = 20.0;
 
-                this.setSong(135, {
-                    seed1: 51,
-                    seed2: 0,
-                    happy: 0,
-                    intense: 0.8,
-                    smooth: 0.5,
-                    rise: 0.8,
-                    drop: 0.3,
-                    crazy: 0.1,
-                    rep: 0.2,
-                    harmonize: 0.5
+                this.setSong(134, {
+                    seed1: 48,
+                    seed2: 55,
+                    happy: 0.63,
+                    intense: 0.96,
+                    smooth: 0.69,
+                    rise: 0.51,
+                    drop: 0.28,
+                    crazy: 0.0,
+                    rep: 0.25,
+                    root: 0.05,
+                    harmonize: 1.0
                 }, 0.45, 8.0);
                 break;
 
@@ -901,10 +913,10 @@ BSWG.game = new function(){
                         }
                     }
 
-                    var bpm = self.inZone.musicBPM;
-                    var settings = self.inZone.musicSettings;
+                    /*var bpm = self.inZone.musicBPM;
+                    var settings = self.inZone.musicSettings;*/
 
-                    self.setSong(bpm, settings, 0.35, 3.0);
+                    self.setSongCache(self.inZone.song, 0.35, 3.0);
                 }
                 else {
                     self.inZone.zoneTitle.hoverColor[3] = Math.min(self.zoneChangeT, 1.0);

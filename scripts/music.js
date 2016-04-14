@@ -5,6 +5,10 @@ BSWG.music_a = Math.pow(2.0, 1.0/12.0);
 BSWG.music_NoteFreq = function(octave, halfStep) {
 
     var steps = (halfStep-9) + (octave - 4) * 12;
+    while (steps > 24) {
+        steps -= 12;
+    }
+
     return f = 440.0 * Math.pow(BSWG.music_a, steps);
 
 };
@@ -221,7 +225,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     }
 
     var scale = null;
-    var rootNote = ~~(Math.random()*12) + 12*2.5;
+    var rootNote = ~~(Math.random()*12) + 12*2;
 
     var spats = new Array(32);
     for (var j=0; j<spats.length; j++) {
@@ -431,6 +435,14 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     var qIndex = 0;
     var startTime = ctime;
 
+    this.reset = function() {
+        patIndex = 0;
+        ctime = audioCtx.currentTime;
+        allBfrs = [];
+        qIndex = 0;
+        startTime = ctime;
+    };
+
     var queue = function(limit) {
 
         if (patIndex >= patternLength) {
@@ -449,7 +461,7 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
                     var C = self.channels[i];
 
                     if (!C.conv.buffer) {
-                        C.conv.buffer = impulseResponse(0.15);
+                        C.conv.buffer = impulseResponse(0.25);
                     }
 
                     var P = C.pattern;
@@ -537,7 +549,12 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         return audioCtx.currentTime - startTime;
     };
 
-    queue(BSWG.song_subBeat*8);
+    this.start = function ( ) {
+        var self = this;
+        this.reset();
+        queue(BSWG.song_subBeat*8);
+        this.setVolume(this.volume);
+    };
 
     this.setVolume = function (newVolume, time) {
 
@@ -555,29 +572,23 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     };
 
-    this.setVolume(this.volume);
-
-    this.stop = function () {
+    this.stop = function (time) {
 
         patIndex = patternLength+1;
 
         for (var i=0; i<allBfrs.length; i++) {
             try {
-                allBfrs[i][1].stop();
+                allBfrs[i][1].stop(audioCtx.currentTime+(time||0));
                 allBfrs[i] = null;
             } catch (err) { }
         }
         allBfrs = null;
-        this.channels = null;
 
     };
 
     this.fadeOutStop = function(time) {
         this.setVolume(0.0, time);
-        var self = this;
-        window.setTimeout(function(){
-            self.stop();
-        }, ~~(time*1000+100))
+        this.stop(time);
     }
 
 };

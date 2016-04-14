@@ -356,7 +356,7 @@ BSWG.getMap_MusicSettings_Zone = function(zone, eInfo) {
     diff -= eInfo.minLevel * 0.5;
     diff = Math.clamp(diff/10, 0, 1);
 
-    var bpm = 80 + ~~(45 * diff);
+    var bpm = 100 + ~~(45 * diff);
     var settings = {
         happy: 1.0-diff,
         intense: diff,
@@ -365,13 +365,15 @@ BSWG.getMap_MusicSettings_Zone = function(zone, eInfo) {
         crazy: Math.random()*diff*0.9+0.1,
         harmonize: Math.random(),
         smooth: 1-Math.random()*diff,
-        rep: Math.random(),
+        rep: 0.05,
         seed1: ~~(Math.random()*100),
         seed2: 1 + ~~(Math.random()*99)
     };
 
     zone.musicBPM = bpm;
     zone.musicSettings = settings;
+    Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
+    zone.song = new BSWG.song(3, bpm, 0.0, settings);
 
 };
 

@@ -439,7 +439,9 @@ BSWG.render = new function() {
             if (sumDt < targetDt) {
                 return;
             }
-            sumDt -= targetDt;
+            while (sumDt >= targetDt) {
+                sumDt -= targetDt;
+            }
 
             self.dt = targetDt;
             self.time += self.dt;
