@@ -10,6 +10,33 @@ BSWG.SCENE_GAME1 = 2;
 
 BSWG.game = new function(){
 
+    this.curSong = null;
+    this.lastSong = null;
+
+    this.setSong = function(bpm, settings, vol, fadeIn) {
+        this.lastSong = [ bpm, settings, vol, fadeIn ];
+        if (this.curSong) {
+            this.curSong.fadeOutStop(0.5);
+        }
+        settings = settings || {};
+        bpm = bpm || 120;
+        Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
+        this.curSong = new BSWG.song(3, bpm, 0.0, settings);
+        this.curSong.setVolume(vol || 0.5, fadeIn || 3.0);
+    };
+    this.repeatSong = function() {
+        if (this.lastSong) {
+            this.setSong(this.lastSong[0], this.lastSong[1], this.lastSong[2], this.lastSong[3]);
+        }
+    };
+
+    this.stopMusic = function() {
+        if (this.curSong) {
+            this.curSong.fadeOutStop(3.0);
+        }
+        this.curSong = null;
+    };
+
     this.test = function ()
     {
         console.log('a');
@@ -137,8 +164,8 @@ BSWG.game = new function(){
                     w: 800, h: 100,
                     vpXCenter: true,
                     text: "r o g u e l i k e",
-                    color: [0.4, 0.4, 0.85, 1.0],
-                    hoverColor: [0.4, 0.4, 0.85, 1.0],
+                    color: [0.85, 0.2, 0.2, 1.0],
+                    hoverColor: [0.85, 0.2, 0.2, 1.0],
                     click: function (me) {
                     }
                 });
@@ -192,6 +219,19 @@ BSWG.game = new function(){
                 }
                 this.curPanPos = 0;
                 this.panPosTime = this.panPosStartTime = 20.0;
+
+                this.setSong(135, {
+                    seed1: 51,
+                    seed2: 0,
+                    happy: 0,
+                    intense: 0.8,
+                    smooth: 0.5,
+                    rise: 0.8,
+                    drop: 0.3,
+                    crazy: 0.1,
+                    rep: 0.2,
+                    harmonize: 0.5
+                }, 0.45, 8.0);
                 break;
 
             case BSWG.SCENE_GAME1:
@@ -570,6 +610,12 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            if (self.curSong) {
+                if (self.curSong.timeIndex() > (3 * 60 + 3)) {
+                    self.repeatSong();
+                }
+            }
+
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
             
@@ -855,6 +901,10 @@ BSWG.game = new function(){
                         }
                     }
 
+                    var bpm = self.inZone.musicBPM;
+                    var settings = self.inZone.musicSettings;
+
+                    self.setSong(bpm, settings, 0.35, 3.0);
                 }
                 else {
                     self.inZone.zoneTitle.hoverColor[3] = Math.min(self.zoneChangeT, 1.0);
@@ -895,7 +945,7 @@ BSWG.game = new function(){
                     ctx.strokeStyle = '#226';
                     ctx.font = '24px Orbitron';
                     ctx.textAlign = 'left';
-                    ctx.fillTextB(self.inZone.name, 10 + 128 + 10, viewport.h - 10);
+                    ctx.fillTextB(self.inZone.name + ' - L' + self.inZone.minLevel + '', 10 + 128 + 10, viewport.h - 10);
                 }
             }
 

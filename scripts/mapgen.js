@@ -330,6 +330,8 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         zone.maxLevel = Math.ceil(Math.max(level1, level2));
         zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-2);
 
+        BSWG.getMap_MusicSettings_Zone(zone, eInfo);
+
         if (!zone.hasPlanet) {
             BSWG.genMap_EnemyPlacement_Zone(zone, eInfo);
         }
@@ -345,6 +347,31 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
     for (var i=0; i<withBoss.length && i<eInfo.bosses.length; i++) {
         withBoss[i].boss = eInfo.bosses[i];
     }
+
+};
+
+BSWG.getMap_MusicSettings_Zone = function(zone, eInfo) {
+
+    var diff = Math.random() * (zone.maxLevel - zone.minLevel) + zone.minLevel;
+    diff -= eInfo.minLevel * 0.5;
+    diff = Math.clamp(diff/10, 0, 1);
+
+    var bpm = 80 + ~~(45 * diff);
+    var settings = {
+        happy: 1.0-diff,
+        intense: diff,
+        rise: Math.random(),
+        drop: Math.random(),
+        crazy: Math.random()*diff*0.9+0.1,
+        harmonize: Math.random(),
+        smooth: 1-Math.random()*diff,
+        rep: Math.random(),
+        seed1: ~~(Math.random()*100),
+        seed2: 1 + ~~(Math.random()*99)
+    };
+
+    zone.musicBPM = bpm;
+    zone.musicSettings = settings;
 
 };
 

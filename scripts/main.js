@@ -143,12 +143,14 @@ var BSWG = new function(){
             if (scriptsLeft >= 1)
                 return;
 
-            BSWG.render.init(function(){
-                BSWG.physics.init();
-                BSWG.input.init();
-                BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
-                BSWG.game.start();
-            }, images, shaders);
+            BSWG.music.init(function(){
+                BSWG.render.init(function(){
+                    BSWG.physics.init();
+                    BSWG.input.init();
+                    BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
+                    BSWG.game.start();
+                }, images, shaders);
+            });
         };
 
         for (var i=0; i<scripts.length; i++)

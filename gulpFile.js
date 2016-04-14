@@ -6,7 +6,7 @@ var exec = require('child_process').execSync;
  
 var getNW = function (run) {
 
-    var files = [ 'package.json', 'index.html', 'scripts/**', 'shaders/*', 'images/*', 'fonts/*', 'css/*', 'sounds/*' ];
+    var files = [ 'package.json', 'index.html', 'scripts/**', 'shaders/*', 'images/*', 'fonts/*', 'css/*', 'sounds/*', 'music/*' ];
 
     files.push('node_modules/lowdb/**');
     files.push('node_modules/open/**');
