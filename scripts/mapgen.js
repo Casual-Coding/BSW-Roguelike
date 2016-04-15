@@ -41,6 +41,8 @@ BSWG.enemySettings = [
             [ { type: 'missile-boss', levelInc: 2 } ],
             [ { type: 'mele-boss', levelInc: 2 } ],
             [ { type: 'big-flail', levelInc: 2 } ],
+            [ { type: 'mele-boss', levelInc: 2 }, { type: 'brute', levelInc: 1 } ],
+            [ { type: 'big-flail', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 } ],
             [ { type: 'crippler', levelInc: 2 }, { type: 'little-cruncher', levelInc: 1 } ],
             [ { type: 'cruncher-boss', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 }, { type: 'heavy-fighter', levelInc: 1 } ], // TODO
         ],
@@ -374,6 +376,17 @@ BSWG.getMap_MusicSettings_Zone = function(zone, eInfo) {
     zone.musicSettings = settings;
     Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
     zone.song = new BSWG.song(3, bpm, 0.0, settings);
+
+    if (zone.hasPlanet) {
+        var capSettings = {};
+        for (var key in settings) {
+            capSettings[key] = settings[key];
+        }
+        capSettings.happy = Math.random()*0.4 + 0.6;
+        capSettings.intense *= 0.5;
+        zone.musicCapSettings = capSettings;
+        zone.songCap = new BSWG.song(3, bpm, 0.0, capSettings);
+    }
 
 };
 

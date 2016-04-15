@@ -12,6 +12,170 @@ BSWG.game = new function(){
 
     this.curSong = null;
     this.lastSong = null;
+    this.hudBtn = new Array();
+
+    this.initHUD = function (scene) {
+
+        if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
+
+            this.hudBtn = new Array();
+            var self = this;
+
+            this.hudNM = BSWG.render.proceduralImage(2048, 2048, function(ctx, w, h){
+
+                var len = w*h;
+                var H = new Array(len);
+                for (var i=0; i<len; i++) {
+                    H[i] = 0.0;
+                }
+                var S = function(x,y,v) {
+                    if (x>=0 && y>=0 && x<w && y<h) {
+                        H[(~~x)+(~~y)*w] = v;
+                    }
+                };
+                var G = function(x,y) {
+                    if (x>=0 && y>=0 && x<w && y<h) {
+                        return H[(~~x)+(~~y)*w];
+                    }
+                    else {
+                        return 0.0;
+                    }
+                };
+                var circ = function(sx,sy,r, depthEdge, depth) {
+                    for (var x=sx-r; x<=(sx+r); x++) {
+                        for (var y=sy-r; y<=(sy+r); y++) {
+                            var dedge = r - Math.sqrt((x-sx)*(x-sx)+(y-sy)*(y-sy));
+                            if (dedge >= 0) {
+                                var t = Math.max(dedge/2.5, 1.0);
+                                S(x,y,depth*t+depthEdge*(1-t));
+                            }
+                        }
+                    }
+                };
+                var box = function(sx,sy,bw,bh, depthEdge, depth) {
+                    for (var x=sx; x<(sx+bw); x++) {
+                        for (var y=sy; y<(sy+bh); y++) {
+                            var dedge = Math.min(x-sx, Math.min(y-sy, Math.min((sx+bw-1)-x, (sy+bh-1)-y)));
+                            var t = Math.clamp(dedge / 5, 0.0, 1.0);
+                            S(x,y,depth*t+depthEdge*(1-t));
+                        }
+                    }
+                };
+                var plate = function(sx,sy,bw,bh, depthEdge, depth) {
+                    box(sx,sy,bw,bh, depthEdge, depth);
+                    circ(sx+11, sy+11, 4, depth+0.1, depth+0.2);
+                    circ(sx+bw-11, sy+bh-11, 4, depth+0.1, depth+0.2);
+                    circ(sx+11, sy+bh-11, 4, depth+0.1, depth+0.2);
+                    circ(sx+bw-11, sy+11, 4, depth+0.1, depth+0.2);
+                    if (depth < depthEdge) {
+                        self.hudBtn.push([sx,sy,sx+bw,sy+bh]);
+                    }
+                };
+
+                plate(256, h-128, w-256, 128, 0.25, 0.5);
+                plate(0, h-256, 256, 256, 0.25, 0.5);
+                plate(7, h-256+7, 256-14, 256-14, 0.5, 0.25); // 0
+
+                plate(w/2-224, h-256, 448, 256, 0.25, 0.5);
+                plate(w/2-224+32, h-256+32, 448-64, 96, 0.5, 0.25); // 1
+
+                plate(w/2-224+32, h-(96+32), 96, 96, 0.5, 0.25); // 2
+                plate(w/2-224+32+96, h-(96+32), 96, 96, 0.5, 0.25); // 3
+                plate(w/2-224+32+96*2, h-(96+32), 96, 96, 0.5, 0.25); // 4
+                plate(w/2-224+32+96*3, h-(96+32), 96, 96, 0.5, 0.25); // 5
+
+                plate(w/2+224+32, h-64-96/2, 96, 96, 0.5, 0.35); // 6
+                plate(w/2+224+32+96, h-64-96/2, 96, 96, 0.5, 0.35); // 7
+                plate(w/2+224+32+96*2, h-64-96/2, 96, 96, 0.5, 0.35); // 8
+                plate(w/2+224+32+96*3, h-64-96/2, 96, 96, 0.5, 0.35); // 9
+                plate(w/2+224+32+96*4, h-64-96/2, 96, 96, 0.5, 0.35); // 10
+
+                plate(256+32, h-64-96/2, w/2-224-256-64, 96, 0.5, 0.35); // 11
+
+                plate(0, 0, w, 48, 0.25, 0.5);
+
+                BSWG.render.hightMapToNormalMap(H, ctx, w, h);
+
+            }, true);
+
+        }
+
+        this.hudGeom = new THREE.PlaneGeometry(2.0, 2.0, 1, 1);
+        this.hudMat = BSWG.render.newMaterial("bgVertex", "hudFragment", {
+            vp: {
+                type: 'v2',
+                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+            },
+            hudNm: {
+                type: 't',
+                value: this.hudNM.texture
+            },
+            texNm: {
+                type: 't',
+                value: BSWG.render.images['grass_nm'].texture
+            },
+        });
+
+        this.hudMesh = new THREE.Mesh( this.hudGeom, this.hudMat );
+        this.hudMesh.frustumCulled = false;
+        this.hudMesh.position.set(-1.0, -1.0, 4.0);
+        this.hudMesh.updateMatrix();
+        
+        this.hudMesh.needsUpdate = true;
+        this.hudMat.needsUpdate = true;
+        
+        BSWG.render.scene.add( this.hudMesh );
+
+    };
+
+    this.hudX = function (x) {
+
+        return x / 2048 * BSWG.render.viewport.w;
+
+    };
+
+    this.hudY = function (y) {
+
+        var aspect = BSWG.render.viewport.w / BSWG.render.viewport.h;
+
+        y = (y / 2048);
+
+        if (y<0.5) {
+            return (y * aspect) * BSWG.render.viewport.h;
+        }
+        else {
+            return (y + (1.0/aspect - 1.0)) * aspect * BSWG.render.viewport.h;
+        }
+
+    };
+
+    this.removeHUD = function () {
+
+        if (!this.hudMesh) {
+            return;
+        }
+
+        BSWG.render.scene.remove( this.hudMesh );
+
+        this.hudMesh.geometry.dispose();
+        this.hudMesh.material.dispose();
+        this.hudMesh.geometry = null;
+        this.hudMesh.material = null;
+        this.hudMesh = null;
+        this.hudMat = null;
+        this.hudGeom = null;
+
+    };
+
+    this.updateHUD = function () {
+
+        if (this.bgMesh) {
+            this.hudMesh.position.set(BSWG.game.cam.x, BSWG.game.cam.y, this.hudMesh.position.z);
+            this.hudMesh.updateMatrix();
+            this.hudMat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+        }
+
+    };
 
     this.setSong = function(bpm, settings, vol, fadeIn) {
         this.lastSong = [ bpm, settings, vol, fadeIn ];
@@ -22,7 +186,7 @@ BSWG.game = new function(){
         bpm = bpm || 120;
         Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
         this.curSong = new BSWG.song(3, bpm, 0.0, settings);
-        this.curSong.start();
+        //this.curSong.start();
         this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.setSongCache = function(song, vol, fadeIn) {
@@ -30,7 +194,7 @@ BSWG.game = new function(){
             this.curSong.fadeOutStop(1.0);
         }
         this.curSong = song;
-        this.curSong.start();
+        //this.curSong.start();
         this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.repeatSong = function() {
@@ -100,6 +264,8 @@ BSWG.game = new function(){
         BSWG.planets.init();
         BSWG.ui.clear();
         BSWG.ai.init();
+
+        this.removeHUD();
 
         this.map = null;
         this.mapImage = null;
@@ -263,8 +429,8 @@ BSWG.game = new function(){
             case BSWG.SCENE_GAME2:
                 this.editBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
-                    w: 150, h: 50,
-                    text: "Build Mode",
+                    w: 65, h: 65,
+                    text: BSWG.render.images['build-mode'],
                     selected: this.editMode,
                     click: function (me) {
                         me.selected = !me.selected;
@@ -272,22 +438,21 @@ BSWG.game = new function(){
                     }
                 });
                 this.anchorBtn = new BSWG.uiControl(BSWG.control_Button, {
-                    x: 10 + 150 + 10, y: 10,
-                    w: 150, h: 50,
-                    text: "Anchor",
+                    x: 10 + 65 + 10, y: 10,
+                    w: 65, h: 65,
+                    text: BSWG.render.images['anchor'],
                     selected: false,
                     click: function (me) {
-                        if (self.ccblock)
-                        {
+                        if (self.ccblock) {
                             self.ccblock.anchored = !self.ccblock.anchored;
                             me.selected = self.ccblock.anchored;
                         }
                     }
                 });
                 this.showControlsBtn = new BSWG.uiControl(BSWG.control_Button, {
-                    x: 10 + 150 + 10 + 150 + 10, y: 10,
-                    w: 200, h: 50,
-                    text: "Show Controls",
+                    x: 10 + 65 + 10 + 65 + 10, y: 10,
+                    w: 65, h: 65,
+                    text: BSWG.render.images['show-controls'],
                     selected: this.showControls,
                     click: function (me) {
                         me.selected = !me.selected;
@@ -296,7 +461,7 @@ BSWG.game = new function(){
                 });
                 this.exitBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
-                    w: 100, h: 50,
+                    w: 100, h: 65,
                     text: "Exit",
                     selected: this.editMode,
                     click: function (me) {
@@ -306,9 +471,9 @@ BSWG.game = new function(){
                 });
 
                 this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
-                    x: 10 + 150 + 10 + 150 + 10, y: 10,
-                    w: 110, h: 50,
-                    text: scene === BSWG.SCENE_GAME2 ? "Export" : "Save",
+                    x: 10 + 65 + 10 + 65 + 10, y: 10,
+                    w: 65, h: 65,
+                    text: BSWG.render.images['save'],
                     selected: false,
                     click: function (me) {
                         if (self.scene === BSWG.SCENE_GAME2) {
@@ -322,8 +487,8 @@ BSWG.game = new function(){
                 });
                 this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
-                    w: 110, h: 50,
-                    text: "Repair",
+                    w: 65, h: 65,
+                    text: BSWG.render.images['repair'],
                     selected: false,
                     click: function (me) {
                     }
@@ -365,8 +530,8 @@ BSWG.game = new function(){
                         }
                     });
                     this.loadBtn = new BSWG.uiControl(BSWG.control_Button, {
-                        x: 10 + 150 + 10 + 150 + 10, y: 10,
-                        w: 110, h: 50,
+                        x: 10 + 50 + 10 + 50 + 10, y: 10,
+                        w: 110, h: 65,
                         text: "Import",
                         selected: false,
                         click: function (me) {
@@ -599,6 +764,8 @@ BSWG.game = new function(){
                 self.cam.x = startPos.x;
                 self.cam.y = startPos.y;
                 BSWG.render.updateCam3D(self.cam);
+
+                self.initHUD(scene);
                 break;
 
             default:
@@ -888,7 +1055,11 @@ BSWG.game = new function(){
                     }
                 }
                 self.inZone = self.map.getZone(self.ccblock.obj.body.GetWorldCenter());
-                if (self.lastZone !== self.inZone) {
+                if (!self.zSwitchTime) {
+                    self.zSwitchTime = Date.timeStamp() - 5;
+                }
+                if (self.lastZone !== self.inZone && (Date.timeStamp() - self.zSwitchTime)>1.0) {
+                    self.zSwitchTime = Date.timeStamp();
                     if (self.lastZone) {
                         //self.lastZone.zoneTitle.remove();
                         self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
@@ -916,7 +1087,12 @@ BSWG.game = new function(){
                     /*var bpm = self.inZone.musicBPM;
                     var settings = self.inZone.musicSettings;*/
 
-                    self.setSongCache(self.inZone.song, 0.35, 3.0);
+                    if (self.inZone.pobj && self.inZone.pobj.captured) {
+                        self.setSongCache(self.inZone.songCap, 0.35, 3.0);
+                    }
+                    else {
+                        self.setSongCache(self.inZone.song, 0.35, 3.0);
+                    }
                 }
                 else {
                     self.inZone.zoneTitle.hoverColor[3] = Math.min(self.zoneChangeT, 1.0);
@@ -928,6 +1104,36 @@ BSWG.game = new function(){
                     }
                 }
             }
+            
+            if (self.editBtn) {
+                self.editBtn.p.x = self.hudX(self.hudBtn[6][0]);
+                self.editBtn.p.y = self.hudY(self.hudBtn[6][1]);
+                self.editBtn.w = self.hudX(self.hudBtn[6][2]) - self.editBtn.p.x;
+                self.editBtn.h = self.hudY(self.hudBtn[6][3]) - self.editBtn.p.y;
+            }
+
+            if (self.anchorBtn) {
+                self.anchorBtn.p.x = self.hudX(self.hudBtn[7][0]);
+                self.anchorBtn.p.y = self.hudY(self.hudBtn[7][1]);
+                self.anchorBtn.w = self.hudX(self.hudBtn[7][2]) - self.anchorBtn.p.x;
+                self.anchorBtn.h = self.hudY(self.hudBtn[7][3]) - self.anchorBtn.p.y;
+            }
+
+            if (self.showControlsBtn) {
+                self.showControlsBtn.p.x = self.hudX(self.hudBtn[8][0]);
+                self.showControlsBtn.p.y = self.hudY(self.hudBtn[8][1]);
+                self.showControlsBtn.w = self.hudX(self.hudBtn[8][2]) - self.showControlsBtn.p.x;
+                self.showControlsBtn.h = self.hudY(self.hudBtn[8][3]) - self.showControlsBtn.p.y;
+            }
+
+            if (self.healBtn) {
+                self.healBtn.p.x = self.hudX(self.hudBtn[9][0]);
+                self.healBtn.p.y = self.hudY(self.hudBtn[9][1]);
+                self.healBtn.w = self.hudX(self.hudBtn[9][2]) - self.healBtn.p.x;
+                self.healBtn.h = self.hudY(self.hudBtn[9][3]) - self.healBtn.p.y;
+            }
+
+            self.updateHUD();
 
             BSWG.ui.render(ctx, viewport);
 

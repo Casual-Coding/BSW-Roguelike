@@ -201,6 +201,7 @@ BSWG.render = new function() {
     this.images = {};
     this.cam3D = null;
     this.dlgOpen = false;
+    this.resized = true;
 
     var maxRes = { w: 1920, h: 1080 };
 
@@ -359,6 +360,48 @@ BSWG.render = new function() {
 
     };
 
+    this.hightMapToNormalMap = function (srcHm, dstCtx, w, h) {
+
+        var H = function(a, b) {
+            if (a < 0 || b < 0 || a >= w || b >= h) {
+                return 0.0;
+            }
+            else {
+                return srcHm[(~~a)+(~~b)*w];
+            }
+        };
+
+        var O = function(v) {
+            return Math.max(0, Math.min(255, Math.floor(v * 255)));
+        };
+
+        var imgData = dstCtx.getImageData(0, 0, w, h);
+        for (var i=0; i<imgData.data.length; i+=4) {
+            var x = (~~(i/4)) % w;
+            var y = ((~~(i/4)) - x) / w;
+    
+            var sx = H(x+1, y) - H(x-1, y);
+            var sy = H(x, y+1) - H(x, y-1);
+
+            var dx = -sx*64, dy = 2; dz = sy*64;
+            var len = Math.sqrt(dx*dx+dy*dy+dz*dz);
+            if (len < 0.000001) {
+                dx = dy = dz = 0.0;
+            }
+            else {
+                dx /= len; dy /= len; dz /= len;
+            }
+
+            imgData.data[i]   = O((dx + 1.0) * 0.5);
+            imgData.data[i+2] = O((dy + 1.0) * 0.5);
+            imgData.data[i+1] = O((dz + 1.0) * 0.5);
+            imgData.data[i+3] = O(H(x, y));
+        }
+
+        dstCtx.putImageData(imgData, 0, 0);
+
+    };
+
     this.sizeViewport = function() {
 
         var lvp = this.viewport;
@@ -375,6 +418,10 @@ BSWG.render = new function() {
             this.renderer.setSize( this.viewport.w, this.viewport.h );
             this.cam3D.aspect = this.viewport.w / this.viewport.h;
             this.cam3D.updateProjectionMatrix();
+            this.resized = true;
+        }
+        else {
+            this.resized = false;
         }
     };
 

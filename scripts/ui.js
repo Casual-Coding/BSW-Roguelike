@@ -14,7 +14,7 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
     x1 = y1 = 1;
 
-    BSWG.d3dr_LUT[key] = BSWG.render.proceduralImage(w+2, h+2, function(ctx){
+    BSWG.d3dr_LUT[key] = BSWG.render.proceduralImage(w+2, h+2, function(ctx) {
 
         ctx.clearRect(0, 0, w+2, h+2);
         ctx.globalAlpha = octx.globalAlpha;
@@ -59,7 +59,7 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
         }
 
         var oAlpha = parseFloat(ctx.globalAlpha);
-        ctx.fillStyle = '#ddd';
+        ctx.fillStyle = '#999';
 
         for (var i=0; i<len; i++) {
             var j = (i+1) % len;
@@ -72,8 +72,8 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
             ctx.globalAlpha = oAlpha * alpha * 0.6;
 
             var grad = ctx.createLinearGradient(a.x,a.y, c.x,c.y);
-            grad.addColorStop(0,"#ddd");
-            grad.addColorStop(1,"#777");
+            grad.addColorStop(0,"#999");
+            grad.addColorStop(1,"#555");
 
             ctx.fillStyle = grad;
 
@@ -91,10 +91,9 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
             grad.addColorStop(0,"#000");
             grad.addColorStop(1,"#222");
         }
-        else
-        {
-            grad.addColorStop(0,"#ddd");
-            grad.addColorStop(1,"#888");        
+        else {
+            grad.addColorStop(0,"#999");
+            grad.addColorStop(1,"#666");        
         }
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -134,7 +133,13 @@ BSWG.control_Button = {
             
         ctx.lineWidth = 2.0;
 
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 7, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
+        ctx.globalAlpha = 0.5;
+
+        if (typeof this.text === 'string') {
+            BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 7, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
+        }
+
+        ctx.globalAlpha = 1.0;
 
         ctx.lineWidth = 1.0;
 
@@ -147,7 +152,12 @@ BSWG.control_Button = {
         }
 
         ctx.strokeStyle = '#111';
-        ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+        if (typeof this.text !== 'string') {
+            ctx.drawImage(this.text, 0, 0, this.text.width, this.text.height, this.p.x + this.h*0.2, this.p.y + this.h*0.2, this.h*0.6, this.h*0.6);
+        }
+        else {
+            ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+        }
 
         ctx.textAlign = 'left';
 

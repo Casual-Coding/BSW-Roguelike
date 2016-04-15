@@ -74,7 +74,12 @@ var BSWG = new function(){
         'cursor-pressed-right': 'cursor-pressed-right.png',
         'cursor-custom-1': 'cursor-welder.png',
         'cursor-custom-2': 'cursor-mover.png',
-        'cursor-custom-3': 'cursor-settings.png'
+        'cursor-custom-3': 'cursor-settings.png',
+        'anchor': 'anchor.png',
+        'build-mode': 'build-mode.png',
+        'save': 'save.png',
+        'show-controls': 'show-controls.png',
+        'repair': 'repair.png'
     };
     var shaders = {
         'vertex': [
@@ -83,7 +88,8 @@ var BSWG = new function(){
             'jpointsVertex',
             'expVertex',
             'planetVertex',
-            'pRangeVertex'
+            'pRangeVertex',
+            'hudVertex'
         ],
         'fragment': [
             'basicFragment',
@@ -99,7 +105,8 @@ var BSWG = new function(){
             'planetRingFragment',
             'pRangeFragment',
             'textFragment',
-            'laserFragment'
+            'laserFragment',
+            'hudFragment'
         ]
     };
     var ai = [
