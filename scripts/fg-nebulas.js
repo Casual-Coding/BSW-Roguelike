@@ -108,7 +108,7 @@ BSWG.nebulas = function(map){
 
     this.render = function(ctx, cam, viewport) {
 
-        mesh.position.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.render.cam3D.position.z-0.001);
+        mesh.position.set(BSWG.game.cam.x, BSWG.game.cam.y, 4.0-0.01);
         mesh.updateMatrix();
 
         mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);

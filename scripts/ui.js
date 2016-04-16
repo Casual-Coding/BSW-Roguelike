@@ -2,12 +2,15 @@ BSWG.d3dr_LUT = {};
 
 BSWG.ui_HM = function(w, h, aw, ah) {
 
-    aw = aw || w;
-    ah = ah || h;
+    w = ~~w;
+    h = ~~h;
+
+    aw = ~~(aw || w);
+    ah = ~~(ah || h);
 
     var max = Math.max(aw, ah);
-    aw = (aw / max) * Math.max(w, h);
-    ah = (ah / max) * Math.max(w, h);
+    aw = ~~((aw / max) * Math.max(w, h));
+    ah = ~~((ah / max) * Math.max(w, h));
 
     var len = w*h;
     var H = new Array(len);
@@ -395,35 +398,53 @@ BSWG.control_Button = {
 
     init: function (args) {
 
-        var max = Math.max(this.w, this.h);
-        var sz = 1;
-
-        while (sz < max && sz < 2048) {
-            sz *= 2;
-        }
-
-        var aw = this.w, ah = this.h;
-
-        this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
-
-            var H = BSWG.ui_HM(w, h, aw, ah);
-            H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
-            BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
-
-        }, true);
-
     },
 
     destroy: function () {
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
         if (this.hudObj) {
             this.hudObj.remove();
             this.hudObj = null;
         }
     },
 
+    onremove: function() {
+        this.destroy();
+    },
+
     render: function (ctx, viewport) {
 
         if (!this.hudObj) {
+
+            var aw = this.w, ah = this.h;
+
+            if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+                if (this.hudNM) {
+                    this.hudNM.destroy();
+                }
+
+                var max = Math.max(this.w, this.h);
+                var sz = 64;
+                while (sz < max && sz < 2048) {
+                    sz *= 2;
+                }
+
+                this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                    var H = BSWG.ui_HM(w, h, aw, ah);
+                    H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
+                    BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+
+                }, true);
+
+                this.lastAW = aw;
+                this.lastAH = ah;
+            }
+
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
                 this.p.x, this.p.y, // x, y
@@ -441,7 +462,7 @@ BSWG.control_Button = {
             this.hudObj.set_clr(this.mouseIn ? [1.1, 1.1, 1.3, 1] : [0.9, 0.9, 1, 1]);
         }
 
-        ctx.font = '16px Orbitron';
+        ctx.font = Math.min(~~(this.h * 0.5), 16) + 'px Orbitron';
 
         if (this.selected) {
             ctx.strokeStyle = '#777';
@@ -479,7 +500,7 @@ BSWG.control_Button = {
 
         ctx.strokeStyle = '#111';
         if (typeof this.text !== 'string') {
-            ctx.drawImage(this.text, 0, 0, this.text.width, this.text.height, this.p.x + this.h*0.2, this.p.y + this.h*0.2, this.h*0.6, this.h*0.6);
+            ctx.drawImage(this.text, 0, 0, this.text.width, this.text.height, this.p.x + this.w * 0.5 - this.h*0.3, this.p.y + this.h*0.2, this.h*0.6, this.h*0.6);
         }
         else {
             ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
@@ -834,6 +855,10 @@ BSWG.uiControl = function (desc, args) {
     this.init(args);
 
     this.remove = function () {
+
+        if (this.onremove) {
+            this.onremove();
+        }
 
         BSWG.ui.remove(this);
 

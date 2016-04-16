@@ -356,6 +356,14 @@ BSWG.render = new function() {
         canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
         canvas.texture.needsUpdate = true;
 
+        canvas.destroy = function () {
+
+            canvas.texture.dispose();
+            canvas.texture = null;
+            canvas = null;
+
+        };
+
         return canvas;
 
     };
@@ -435,6 +443,15 @@ BSWG.render = new function() {
     }
     var l60ptr = 0;
 
+    this.next60 = true;
+    this.resetl60 = function(){
+        for (var i=0; i<last60dt.length; i++) {
+            last60dt[i] = 1.0/60;
+        }
+        l60ptr = 0;
+        this.next60 = true;
+    };
+
     this.startRenderer = function (cbk) {
 
         if (this.animFrameID !== null) {
@@ -453,7 +470,15 @@ BSWG.render = new function() {
 
             var frameTime = Date.timeStamp();
             self.actualDt = frameTime - self.lastFrameTime;
+            if (self.actualDt > 1/10) {
+                self.actualDt = 1/10;
+            }
             self.lastFrameTime = frameTime;
+
+            if (self.next60) {
+                self.actualDt = 1/60;
+                self.next60 = false;
+            }
 
             last60dt[l60ptr] = self.actualDt;
             l60ptr = (l60ptr+1) % last60dt.length;
@@ -481,9 +506,9 @@ BSWG.render = new function() {
                 targetDt = 1/50;
             }
 
-            sumDt += self.actulDt;
+            sumDt += self.actualDt;
 
-            if (sumDt < targetDt) {
+            if (sumDt < targetDt * 0.935) {
                 return;
             }
             while (sumDt >= targetDt) {

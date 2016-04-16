@@ -25,9 +25,11 @@ BSWG.game = new function(){
 
                 var H = BSWG.ui_HM(w, h);
 
-                H.plate(256, h-128, w-256, 128, 0.25, 0.5);
-                H.plate(0, h-256, 256, 256, 0.25, 0.5);
-                H.plate(7, h-256+7, 256-14, 256-14, 0.5, 0.25); // 0
+                var off = scene === BSWG.SCENE_GAME1 ? 0 : 256;
+
+                H.plate(256-off, h-128, w-256+off*2, 128, 0.25, 0.5);
+                H.plate(0-off, h-256, 256, 256, 0.15, 0.5);
+                H.plate(7-off, h-256+7, 256-14, 256-14, 0.5, 0.15); // 0
 
                 H.plate(w/2-224, h-256, 448, 256, 0.25, 0.5);
                 H.plate(w/2-224+32, h-256+32, 448-64, 96, 0.5, 0.25); // 1
@@ -43,9 +45,15 @@ BSWG.game = new function(){
                 H.plate(w/2+224+32+96*3, h-64-96/2, 96, 96, 0.5, 0.35); // 9
                 H.plate(w/2+224+32+96*4, h-64-96/2, 96, 96, 0.5, 0.35); // 10
 
-                H.plate(256+32, h-64-96/2, w/2-224-256-64, 96, 0.5, 0.35); // 11
+                H.plate(256+32, h-64-96/2, w/2-224-256-64, 96, 0.5, 0.15); // 11
 
                 H.plate(0, 0, w, 48, 0.25, 0.5);
+
+                H.plate(w-48, (48-40)/2+1, 42, 40, 0.5, 0.35); // 12
+
+                if (scene === BSWG.SCENE_GAME2) {
+                    H.plate(7, (48-40)/2, 128, 42, 0.5, 0.35); // 13
+                }
 
                 BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
 
@@ -191,6 +199,8 @@ BSWG.game = new function(){
         BSWG.planets.init();
         BSWG.ui.clear();
         BSWG.ai.init();
+
+        this.aiBtn = null;
 
         this.removeHUD();
 
@@ -349,7 +359,7 @@ BSWG.game = new function(){
                 }
                 startPos = this.map.planets[0].worldP.clone();
                 this.map.planets[0].pobj.capture();
-                this.mapImage = BSWG.render.proceduralImage(this.map.size, this.map.size, function(ctx, w, h){
+                this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
                 });
                 this.nebulas = new BSWG.nebulas(this.map);
 
@@ -389,7 +399,7 @@ BSWG.game = new function(){
                 this.exitBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
                     w: 100, h: 65,
-                    text: "Exit",
+                    text: BSWG.render.images['menu'],
                     selected: this.editMode,
                     click: function (me) {
                         BSWG.ai.closeEditor();
@@ -490,22 +500,27 @@ BSWG.game = new function(){
                         }
                         
                     }, "text");
-                    this.aiBtn = new BSWG.uiControl(BSWG.control_Button, {
-                        x: 10 + 150 + 10 + 150 + 10, y: 10,
-                        w: 150, h: 50,
-                        text: "AI Editor",
-                        selected: false,
-                        click: function (me) {
-                            if (!me.selected) {
-                                me.selected = true;
-                                BSWG.ai.openEditor(self.ccblock);
+                    if (scene === BSWG.SCENE_GAME2) {
+                        this.aiBtn = new BSWG.uiControl(BSWG.control_Button, {
+                            x: 10 + 150 + 10 + 150 + 10, y: 10,
+                            w: 150, h: 50,
+                            text: "AI Editor",
+                            selected: false,
+                            click: function (me) {
+                                if (!me.selected) {
+                                    me.selected = true;
+                                    BSWG.ai.openEditor(self.ccblock);
+                                }
+                                else {
+                                    me.selected = false;
+                                    BSWG.ai.closeEditor();
+                                }
                             }
-                            else {
-                                me.selected = false;
-                                BSWG.ai.closeEditor();
-                            }
-                        }
-                    });
+                        });
+                    }
+                    else {
+                        this.aiBtn = null;
+                    }
                     this.shipTest = function(obj) {
 
                         if (obj) {
@@ -698,6 +713,8 @@ BSWG.game = new function(){
             default:
                 break;
         }
+
+        BSWG.render.resetl60();
 
     };
 
@@ -922,9 +939,17 @@ BSWG.game = new function(){
 
                     }
 
-                    self.exitBtn.p.x = BSWG.render.viewport.w - self.exitBtn.w - 10;
+                    self.exitBtn.p.x = self.hudX(self.hudBtn[12][0]) + 2;
+                    self.exitBtn.p.y = self.hudY(self.hudBtn[12][1]) + 2;
+                    self.exitBtn.w = self.hudX(self.hudBtn[12][2]) - self.exitBtn.p.x - 4;
+                    self.exitBtn.h = self.hudY(self.hudBtn[12][3]) - self.exitBtn.p.y - 4;
+
+                    //self.exitBtn.p.x = BSWG.render.viewport.w - self.exitBtn.w - 10;
                     if (self.aiBtn) {
-                        self.aiBtn.p.x = self.exitBtn.p.x - self.aiBtn.w - 10;
+                        self.aiBtn.p.x = self.hudX(self.hudBtn[13][0]) + 1;
+                        self.aiBtn.p.y = self.hudY(self.hudBtn[13][1]) + 1;
+                        self.aiBtn.w = self.hudX(self.hudBtn[13][2]) - self.aiBtn.p.x - 2;
+                        self.aiBtn.h = self.hudY(self.hudBtn[13][3]) - self.aiBtn.p.y - 2;
                     }
 
                 default:
@@ -960,7 +985,7 @@ BSWG.game = new function(){
                 else {
                     self.saveBtn.p.y = 10;
                     self.loadBtn.p.y = 10;
-                    self.aiBtn.p.y = 10;
+                    self.aiBtn.p.y = self.hudY(self.hudBtn[13][1]) + 1;
                 }
             }
 
@@ -1000,14 +1025,14 @@ BSWG.game = new function(){
                     var ctx2 = self.mapImage.getContext('2d');
 
                     ctx2.globalAlpha = 1.0;
-                    self.map.renderZoneMap(ctx2, '#002', true, null, true);
-                    self.map.renderEdgeMap(ctx2, '#00f', true, null, true);
+                    self.map.renderZoneMap(ctx2, '#002', true, 4, true);
+                    self.map.renderEdgeMap(ctx2, '#00f', true, 4, true);
 
                     for (var i=0; i<self.map.planets.length; i++) {
                         if (self.map.planets[i].zone.discovered) {
                             var p = self.map.worldToMap(self.map.planets[i].worldP);
                             ctx2.fillStyle = '#0f0';
-                            ctx2.fillRect(p.x/self.map.size * 128-1, p.y/self.map.size * 128-1, 3, 3);
+                            ctx2.fillRect(p.x/self.map.size * 128*4-6, p.y/self.map.size * 128*4-6, 12, 12);
                         }
                     }
 
@@ -1076,21 +1101,27 @@ BSWG.game = new function(){
             }
 
             if (self.mapImage) {
-                ctx.fillStyle = '#000';
-                ctx.strokeStyle = '#88f';
-                ctx.fillRect(9, viewport.h - 11 - 128, 128+2, 128+2);
-                ctx.strokeRect(9, viewport.h - 11 - 128, 128+2, 128+2);
-                ctx.drawImage(self.mapImage, 0, 0, self.map.size, self.map.size, 10, viewport.h - 10 - 128, 128, 128);
+                var x = self.hudX(self.hudBtn[0][0])+1,
+                    y = self.hudY(self.hudBtn[0][1])+1;
+                var w = self.hudX(self.hudBtn[0][2])-x-2,
+                    h = self.hudY(self.hudBtn[0][3])-y-2;
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(x, y, w, h);
+                ctx.drawImage(self.mapImage, 0, 0, self.map.size*4, self.map.size*4, x, y, w, h);
                 var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(10 + p.x/self.map.size * 128-1, viewport.h - 10 - 128 + p.y/self.map.size * 128-1, 3, 3);
+                ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
 
                 if (self.inZone) {
+                    var x = self.hudX(self.hudBtn[11][0])+1,
+                        y = self.hudY(self.hudBtn[11][1])+1;
+                    var w = self.hudX(self.hudBtn[11][2])-x-2,
+                        h = self.hudY(self.hudBtn[11][3])-y-2;
                     ctx.fillStyle = '#88f';
                     ctx.strokeStyle = '#226';
-                    ctx.font = '24px Orbitron';
+                    ctx.font = '18px Orbitron';
                     ctx.textAlign = 'left';
-                    ctx.fillTextB(self.inZone.name + ' - L' + self.inZone.minLevel + '', 10 + 128 + 10, viewport.h - 10);
+                    ctx.fillTextB(self.inZone.name + ' - L' + self.inZone.minLevel + '', x + 15, y + 10 + 18);
                 }
             }
 

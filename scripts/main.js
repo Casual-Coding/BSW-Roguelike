@@ -79,7 +79,8 @@ var BSWG = new function(){
         'build-mode': 'build-mode.png',
         'save': 'save.png',
         'show-controls': 'show-controls.png',
-        'repair': 'repair.png'
+        'repair': 'repair.png',
+        'menu': 'menu.png'
     };
     var shaders = {
         'vertex': [

@@ -626,7 +626,7 @@ BSWG.ai = new function() {
         }
 
         this.runBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 80, h: 50,
             text: "Run",
             selected: false,
@@ -638,7 +638,7 @@ BSWG.ai = new function() {
         });
 
         this.updateBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 125, h: 50,
             text: "Update",
             selected: false,
@@ -650,7 +650,7 @@ BSWG.ai = new function() {
         });
 
         this.stopBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 100, h: 50,
             text: "Stop",
             selected: false,
@@ -663,7 +663,7 @@ BSWG.ai = new function() {
         this.testMenuOpen = false;
 
         this.testBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 100, h: 50,
             text: "Test",
             selected: this.testMenuOpen,
@@ -684,7 +684,7 @@ BSWG.ai = new function() {
         });
 
         this.testSelBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 115, h: 50,
             text: "Import",
             selected: false,
@@ -695,7 +695,7 @@ BSWG.ai = new function() {
         this.runMode = false;
 
         this.testRunBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 115, h: 50,
             text: "Run Test",
             selected: false,
@@ -724,7 +724,7 @@ BSWG.ai = new function() {
         this.testRunBtn.remove();
 
         this.showDebugBtn = new BSWG.uiControl(BSWG.control_Button, {
-            x: 10, y: 10,
+            x: 10, y: -1000,
             w: 150, h: 50,
             text: "Show Debug",
             selected: this.showDebug,
@@ -828,10 +828,10 @@ BSWG.ai = new function() {
         var mx = BSWG.input.MOUSE('x'), my = BSWG.input.MOUSE('y');
 
         if (this.editorDiv) {
-            this.editorDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
-            this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4 - (this.testMenuOpen ? 60 : 0) - 150) + 'px';
+            this.editorDiv.style.left = (10) + 'px';
+            this.editorDiv.style.height = (window.innerHeight - 70 - 20 - 50 - 4 - (this.testMenuOpen ? 60 : 0) - 150 - 128) + 'px';
         }
-        this.consoleDiv.style.left = (window.innerWidth - EDITOR_WIDTH - 10) + 'px';
+        this.consoleDiv.style.left = (10) + 'px';
         if (this.editorDiv) {
             this.consoleDiv.style.top = (parseInt(this.editorDiv.style.top) + parseInt(this.editorDiv.style.height) + 12) + 'px';
         }
@@ -851,8 +851,8 @@ BSWG.ai = new function() {
             BSWG.render.setCustomCursor(true);
         }
 
-        this.updateBtn.p.x = BSWG.render.viewport.w - EDITOR_WIDTH - 10;
-        this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10;
+        this.updateBtn.p.x = 10;
+        this.updateBtn.p.y = BSWG.render.viewport.h - this.runBtn.h - 10 - 128;
         this.runBtn.p.x = this.updateBtn.p.x + this.updateBtn.w + 10;
         this.runBtn.p.y = this.updateBtn.p.y;
         this.stopBtn.p.x = this.runBtn.p.x + this.runBtn.w + 10;
@@ -863,7 +863,7 @@ BSWG.ai = new function() {
         if (this.testMenuOpen) {
             this.testSelBtn.p.x = this.updateBtn.p.x;
             this.testSelBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h + 3;
-            this.testRunBtn.p.x = BSWG.render.viewport.w - 10 - this.testRunBtn.w;
+            this.testRunBtn.p.x = parseInt(this.consoleDiv.style.width) + parseInt(this.consoleDiv.style.left) - this.testRunBtn.w;
             this.testRunBtn.p.y = this.updateBtn.p.y - 10 - this.testSelBtn.h + 3;
 
             if (this.runMode) {

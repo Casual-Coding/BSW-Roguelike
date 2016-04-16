@@ -246,8 +246,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             for (var y=0; y<this.size; y++) {
                 var val = ret.zoneMap[x][y];
                 if (val > -1 && (!onlyDisc || this.zones[val].discovered)) {
-                    ctx.globalAlpha = alpha * (val+1) / ret.zones.length;
+                    ctx.globalAlpha = alpha * (val+1) / ret.zones.length * 0.5;
                     ctx.fillRect(x*scale, (flipY ? (this.size-1)-y : y) * scale, scale, scale);
+                    ctx.globalAlpha = alpha * (val+1) / ret.zones.length * 0.5;
+                    ctx.fillRect(x*scale-scale/2, (flipY ? (this.size-1)-y : y) * scale-scale/2, scale*2, scale*2);
                 }
             }
         }
@@ -263,10 +265,13 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         scale = scale || 1;
 
+        ctx.globalAlpha = alpha * 0.5;
+
         for (var x=0; x<this.size; x++) {
             for (var y=0; y<this.size; y++) {
                 var val = ret.edgeMap[x][y];
                 if (val > -1 && (!onlyDisc || this.zones[val].discovered)) {
+                    ctx.fillRect(x*scale+scale/4, (flipY ? (this.size-1)-y : y) * scale+scale/4, scale/2, scale/2);
                     ctx.fillRect(x*scale, (flipY ? (this.size-1)-y : y) * scale, scale, scale);
                 }
             }
