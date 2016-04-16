@@ -73,7 +73,7 @@ BSWG.ui_HM = function(w, h, aw, ah) {
                 return v;
             }
             else {
-                return v + (ah-aw);
+                return v;
             }
         },
         r: function(v) {
@@ -81,7 +81,7 @@ BSWG.ui_HM = function(w, h, aw, ah) {
                 return (w-1)-v;
             }
             else {
-                return ((w-1)-v);
+                return ((w-1)-(ah-aw))-v;
             }
         },
         t: function(v) {
@@ -105,7 +105,7 @@ BSWG.ui_HM = function(w, h, aw, ah) {
 
 BSWG.uiP3D_list = new Array();
 
-BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split) {
+BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
 
     var vp = BSWG.render.viewport;
 
@@ -143,7 +143,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split) {
             value: new THREE.Vector4(
                 split ? 1.0 : 0.0,
                 0.0,
-                0.0,
+                moving ? 1.0 : 0.0,
                 0.0
             )
         },
@@ -183,7 +183,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split) {
         this.hudMat.uniforms.extra.value.set(
             this.split ? 1.0 : 0.0,
             flag ? 1.0 : 0.0,
-            0.0,
+            moving ? 1.0 : 0.0,
             0.0
         );
         this.hudMat.needsUpdate = true;
@@ -673,22 +673,80 @@ BSWG.control_CompPalette = {
 
     },
 
+    destroy: function () {
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
     render: function (ctx, viewport) {
+
+        var aw = this.w, ah = this.h;
+
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+            }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var H = BSWG.ui_HM(w, h, aw, ah);
+                H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+
+            }, true);
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.05, // z
+                [.9,.9,1.1,1], // color
+                false, // split
+                true // moving
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+        }
 
         ctx.font = '16px Orbitron';
 
         ctx.fillStyle = 'rgba(50,50,50,0.5)';
             
-        ctx.lineWidth = 2.0;
+        //ctx.lineWidth = 2.0;
 
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 4, false, null);
+        //BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 4, false, null);
 
         ctx.lineWidth = 1.0;
 
         for (var i=0; i<this.headers.length; i++) {
             var H = this.headers[i];
             ctx.textAlign = 'left';
-            ctx.fillStyle = '#fff';
+            ctx.fillStyle = '#ddd';
             ctx.strokeStyle = '#111';
             ctx.fillTextB(H.text, this.p.x + H.x, this.p.y + H.y + 12);            
         }
@@ -702,17 +760,17 @@ BSWG.control_CompPalette = {
             ctx.lineWidth = 2.0;
 
             ctx.fillStyle = B.mouseDown ?
-                'rgba(16, 16, 16, 0.8)' :
+                'rgba(16, 16, 16, 0.9)' :
                 (B.mouseIn ?
-                    'rgba(64, 64, 64, 0.6)' :
-                    'rgba(64, 64, 64, 0.3)'
+                    'rgba(64, 64, 64, 0.8)' :
+                    'rgba(64, 64, 64, 0.6)'
                 );
             ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
 
             ctx.lineWidth = 1.0;
 
             ctx.textAlign = 'center';
-            ctx.fillStyle = B.mouseDown ? '#fff' : '#000';
+            ctx.fillStyle = B.mouseDown ? '#bbb' : '#bbb';
             ctx.fillText(B.text, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5+4);
 
             ctx.textAlign = 'left';            
@@ -722,13 +780,14 @@ BSWG.control_CompPalette = {
 
     update: function () {
 
-        var toX = -10 - this.w;
+        var toX = 2048;
 
         if (BSWG.game.editMode) {
-            toX = 10;
+            toX = BSWG.render.viewport.w - (this.w);
         }
 
         this.p.x += (toX - this.p.x) * BSWG.render.dt * 4.0;
+        this.p.y = BSWG.game.hudBottomY - this.h;
 
         if (this.buttons && this.mouseIn) {
 

@@ -26,33 +26,36 @@ BSWG.game = new function(){
                 var H = BSWG.ui_HM(w, h);
 
                 var off = scene === BSWG.SCENE_GAME1 ? 0 : 256;
-                var bsz = 72;
+                var bsz = 92;
                 var sc = bsz/96;
                 off *= sc;
+                var bfr = 16;
 
                 if (scene !== BSWG.SCENE_TITLE) {
 
-                    H.plate(256*sc-off, h-128*sc, w-256*sc+off, 128*sc, 0.25, 0.5);
+                    H.plate(256*sc-off, h-(bfr*2 + bsz), w-256*sc+off, bfr*2 + bsz, 0.25, 0.5);
                     H.plate(0-off, h-256*sc, 256*sc, 256*sc, 0.15, 0.5);
                     H.plate(7-off, h-256*sc+7, 256*sc-14, 256*sc-14, 0.5, 0.15); // 0
 
-                    var hh = 32*2 + bsz*2;
+                    var hh = bfr*2 + bsz*2;
 
-                    H.plate(w/2-(32+bsz*2), h-hh, 32*2+bsz*4, hh, 0.25, 0.5);
-                    H.plate(w/2-(32+bsz*2)+32, h-hh+32, (32*2+bsz*4)-64, bsz, 0.5, 0.25); // 1
+                    self.hudBottomYT = h-(bfr*2 + bsz);
 
-                    H.plate(w/2-(32+bsz*2)+32, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 2
-                    H.plate(w/2-(32+bsz*2)+32+bsz, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 3
-                    H.plate(w/2-(32+bsz*2)+32+bsz*2, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 4
-                    H.plate(w/2-(32+bsz*2)+32+bsz*3, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 5
+                    H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr, (bfr*2+bsz*4)-bfr*2, bsz, 0.5, 0.25); // 1
 
-                    H.plate(w/2+(32+bsz*2)+32, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 6
-                    H.plate(w/2+(32+bsz*2)+32+bsz, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 7
-                    H.plate(w/2+(32+bsz*2)+32+bsz*2, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 8
-                    H.plate(w/2+(32+bsz*2)+32+bsz*3, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 9
-                    H.plate(w/2+(32+bsz*2)+32+bsz*4, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 10
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 2
+                    H.plate(w/2-(bfr+bsz*2)+bfr+bsz, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 3
+                    H.plate(w/2-(bfr+bsz*2)+bfr+bsz*2, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 4
+                    H.plate(w/2-(bfr+bsz*2)+bfr+bsz*3, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 5
 
-                    H.plate(256*sc+32, h-64*sc-bsz/2, w/2-(32+bsz*2)-256*sc-64, bsz, 0.5, 0.15); // 11
+                    H.plate(w/2+(bfr+bsz*2)+bfr, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 6
+                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 7
+                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz*2, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 8
+                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz*3, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 9
+                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz*4, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 10
+
+                    H.plate(256*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-256*sc-bfr*2, bsz, 0.5, 0.15); // 11
 
                 }
                 else {
@@ -441,7 +444,7 @@ BSWG.game = new function(){
                 });
                 if (scene === BSWG.SCENE_GAME2) {
                     this.compPal = new BSWG.uiControl(BSWG.control_CompPalette, {
-                        x: -10 - 128 * 3, y: 70,
+                        x: 2048, y: 70,
                         w: 128 * 3,
                         h: 650,
                         clickInner: function (me, B) {
@@ -810,6 +813,8 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            self.hudBottomY = self.hudY(self.hudBottomYT);
+
             if (self.editMode || !(self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2)) {
                 self.emodeTint += (1 - self.emodeTint) * dt * 3;
             }
@@ -819,7 +824,12 @@ BSWG.game = new function(){
 
             if (self.hudObj) {
                 var t = self.emodeTint;
-                self.hudObj.set_clr([0.85+(1-t)*0.05, 0.85+(1-t)*0.05, 1.0+(t)*0.1, 1]);
+                if (self.scene === BSWG.SCENE_TITLE) {
+                    self.hudObj.set_clr([(0.85+(1-t)*0.05) * 0.7, (0.85+(1-t)*0.05) * 0.7, (1.0+(t)*0.1) * 0.7, 1]);
+                }
+                else {
+                    self.hudObj.set_clr([0.85+(1-t)*0.05, 0.85+(1-t)*0.05, 1.0+(t)*0.1, 1]);
+                }
             }
 
             if (self.curSong) {
@@ -1192,9 +1202,9 @@ BSWG.game = new function(){
                 self.healBtn.h = self.hudY(self.hudBtn[9][3]) - self.healBtn.p.y - 4;
             }
 
-            self.updateHUD(dt);
-
             BSWG.ui.render(ctx, viewport);
+
+            self.updateHUD(dt);
 
             BSWG.ai.update(ctx, dt);
 

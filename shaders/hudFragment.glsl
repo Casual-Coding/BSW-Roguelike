@@ -31,7 +31,14 @@ void main() {
         nm.a *= olda;
     }
 
-    vec4 nm2 = texture2D(texNm, gl_FragCoord.xy/1024.0);
+    vec4 nm2;
+
+    if (extra.z < 0.5) {
+        nm2 = texture2D(texNm, gl_FragCoord.xy/1024.0);
+    }
+    else {
+        nm2 = texture2D(texNm, vec2(p.x, p.y/aspect)/4.0+vec2(0.5, 0.5));
+    }
 
     vec3 tNormal = normalize(nm.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
     vec3 tNormal2 = normalize(nm2.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
