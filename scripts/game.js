@@ -732,14 +732,59 @@ BSWG.game = new function(){
                 break;
         }
 
+        this.escMenu = null;
+
         this.exitBtn = new BSWG.uiControl(BSWG.control_Button, {
             x: 10, y: 10,
             w: 100, h: 65,
             text: BSWG.render.images['menu'],
-            selected: this.editMode,
+            selected: false,
+            clickKey: BSWG.KEY.ESC,
             click: function (me) {
-                BSWG.ai.closeEditor();
-                self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
+                if (self.escMenu) {
+                    self.escMenu.remove();
+                    self.escMenu = null;
+                    me.selected = false;
+                    return;
+                }
+                me.selected = true;
+
+                var buttons = [
+                    new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: -1000,
+                        w: 250, h: 32,
+                        text: 'Toggle Fullscreen',
+                        selected: false,
+                        click: function (me) {
+                            var win = BSWG.render.win;
+                            win.toggleFullscreen();
+                        }
+                    }),
+                    new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: -1000,
+                        w: 250, h: 32,
+                        text: 'Exit',
+                        selected: false,
+                        click: function (me) {
+                            if (self.scene === BSWG.SCENE_TITLE) {
+                                var app = BSWG.app;
+                                app.quit();
+                            }
+                            else {
+                                BSWG.ai.closeEditor();
+                                self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
+                            }
+                        }
+                    })
+                ];
+
+                self.escMenu = new BSWG.uiControl(BSWG.control_Menu, {
+                    x: BSWG.render.viewport.w - (250 + 16),
+                    y: self.exitBtn.p.y + self.exitBtn.h + 3,
+                    w: 1, h: 1,
+                    buttons: buttons
+                });
+
             }
         });
 

@@ -30,6 +30,7 @@
             BSWG.nwg = null;
             if (require) {
                 BSWG.nwg = require('nw.gui') || null;
+                BSWG.app = BSWG.nwg.App || null;
             }
 
             jQuery = jQuery.noConflict();

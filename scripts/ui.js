@@ -417,33 +417,37 @@ BSWG.control_Button = {
 
     render: function (ctx, viewport) {
 
-        if (!this.hudObj) {
+        var aw = this.w, ah = this.h;
 
-            var aw = this.w, ah = this.h;
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
 
-            if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
-
-                if (this.hudNM) {
-                    this.hudNM.destroy();
-                }
-
-                var max = Math.max(this.w, this.h);
-                var sz = 64;
-                while (sz < max && sz < 2048) {
-                    sz *= 2;
-                }
-
-                this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
-
-                    var H = BSWG.ui_HM(w, h, aw, ah);
-                    H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
-                    BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
-
-                }, true);
-
-                this.lastAW = aw;
-                this.lastAH = ah;
+            if (this.hudNM) {
+                this.hudNM.destroy();
             }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var H = BSWG.ui_HM(w, h, aw, ah);
+                H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
+                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+
+            }, true);
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
 
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
@@ -507,6 +511,105 @@ BSWG.control_Button = {
         }
 
         ctx.textAlign = 'left';
+
+    },
+
+    update: function () {
+
+    },
+
+};
+
+BSWG.control_Menu = {
+
+    init: function (args) {
+
+        this.w = 0;
+        this.h = 8;
+
+        for (var i=0; i<args.buttons.length; i++) {
+            this.w = Math.max(this.w, 16 + args.buttons[i].w);
+            this.h += args.buttons[i].h + 8;
+        }
+
+        this.buttons = args.buttons;
+
+    },
+
+    destroy: function () {
+        for (var i=0; i<this.buttons.length; i++) {
+            this.buttons[i].remove();
+        }
+        this.buttons.length = 0;
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
+    onremove: function() {
+        this.destroy();
+    },
+
+    render: function (ctx, viewport) {
+
+        var y = this.p.y + 8;
+        for (var i=0; i<this.buttons.length; i++) {
+            this.buttons[i].w = this.w-16;
+            this.buttons[i].p.x = this.p.x+8;
+            this.buttons[i].p.y = y;
+            y += this.buttons[i].h + 8;
+        }
+
+        var aw = this.w, ah = this.h;
+
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+            }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var H = BSWG.ui_HM(w, h, aw, ah);
+                H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+
+            }, true);
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.05, // z
+                [1,1,1,1], // color
+                false // split
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+        }
 
     },
 
@@ -855,6 +958,7 @@ BSWG.uiControl = function (desc, args) {
     this.text = args.text || "";
     this.selected = args.selected || null;
     this.vpXCenter = args.vpXCenter || false;
+    this.clickKey = args.clickKey || null;
 
     this.init(args);
 
@@ -894,7 +998,7 @@ BSWG.uiControl = function (desc, args) {
         else
             this.mouseIn = false;
 
-        if (this.mouseIn && this.click && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock)
+        if (this.click && ((this.mouseIn && BSWG.input.MOUSE_RELEASED('left')) || (this.clickKey && BSWG.input.KEY_PRESSED(this.clickKey))) && !BSWG.game.grabbedBlock)
         {
             this.click(this);
         }
