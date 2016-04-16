@@ -142,7 +142,7 @@ BSWG.game = new function(){
         bpm = bpm || 120;
         Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
         this.curSong = new BSWG.song(3, bpm, 0.0, settings);
-        //this.curSong.start();
+        this.curSong.start();
         this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.setSongCache = function(song, vol, fadeIn) {
@@ -150,7 +150,7 @@ BSWG.game = new function(){
             this.curSong.fadeOutStop(1.0);
         }
         this.curSong = song;
-        //this.curSong.start();
+        this.curSong.start();
         this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.repeatSong = function() {
