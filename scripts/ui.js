@@ -1,5 +1,285 @@
 BSWG.d3dr_LUT = {};
 
+BSWG.ui_HM = function(w, h, aw, ah) {
+
+    aw = aw || w;
+    ah = ah || h;
+
+    var max = Math.max(aw, ah);
+    aw = (aw / max) * Math.max(w, h);
+    ah = (ah / max) * Math.max(w, h);
+
+    var len = w*h;
+    var H = new Array(len);
+    for (var i=0; i<len; i++) {
+        H[i] = 0.0;
+    }
+    var hudBtn = new Array();
+    var S = function(x,y,v) {
+        if (x>=0 && y>=0 && x<w && y<h) {
+            H[(~~x)+(~~y)*w] = v;
+        }
+    };
+    var G = function(x,y) {
+        if (x>=0 && y>=0 && x<w && y<h) {
+            return H[(~~x)+(~~y)*w];
+        }
+        else {
+            return 0.0;
+        }
+    };
+    var circ = function(sx,sy,r, depthEdge, depth) {
+        for (var x=sx-r; x<=(sx+r); x++) {
+            for (var y=sy-r; y<=(sy+r); y++) {
+                var dedge = r - Math.sqrt((x-sx)*(x-sx)+(y-sy)*(y-sy));
+                if (dedge >= 0) {
+                    var t = Math.max(dedge/2.5, 1.0);
+                    S(x,y,depth*t+depthEdge*(1-t));
+                }
+            }
+        }
+    };
+    var box = function(sx,sy,bw,bh, depthEdge, depth) {
+        for (var x=sx; x<(sx+bw); x++) {
+            for (var y=sy; y<(sy+bh); y++) {
+                var dedge = Math.min(x-sx, Math.min(y-sy, Math.min((sx+bw-1)-x, (sy+bh-1)-y)));
+                var t = Math.clamp(dedge / 5, 0.0, 1.0);
+                S(x,y,depth*t+depthEdge*(1-t));
+            }
+        }
+    };
+    var plate = function(sx,sy,bw,bh, depthEdge, depth) {
+        box(sx,sy,bw,bh, depthEdge, depth);
+        circ(sx+11, sy+11, 4, depth+0.1, depth+0.2);
+        circ(sx+bw-11, sy+bh-11, 4, depth+0.1, depth+0.2);
+        circ(sx+11, sy+bh-11, 4, depth+0.1, depth+0.2);
+        circ(sx+bw-11, sy+11, 4, depth+0.1, depth+0.2);
+        if (depth < depthEdge) {
+            hudBtn.push([sx,sy,sx+bw,sy+bh]);
+        }
+    };
+    var aspect = aw/ah;
+    return {
+        H: H,
+        circ: circ,
+        box: box,
+        plate: plate,
+        hudBtn: hudBtn,
+        l: function(v) {
+            if (aspect >= 1) {
+                return v;
+            }
+            else {
+                return v + (ah-aw);
+            }
+        },
+        r: function(v) {
+            if (aspect >= 1) {
+                return (w-1)-v;
+            }
+            else {
+                return ((w-1)-v);
+            }
+        },
+        t: function(v) {
+            if (aspect <= 1) {
+                return v;
+            }
+            else {
+                return v + (aw-ah);
+            }
+        },
+        b: function(v) {
+            if (aspect <= 1) {
+                return (h-1)-v;
+            }
+            else {
+                return ((h-1)-v);
+            }
+        }
+    };
+};
+
+BSWG.uiP3D_list = new Array();
+
+BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split) {
+
+    var vp = BSWG.render.viewport;
+
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = split ? vp.w : w;
+    this.h = split ? vp.h : h;
+
+    this.hudGeom = new THREE.PlaneGeometry(2.0, 2.0, 1, 1);
+    this.hudMat = BSWG.render.newMaterial("hudVertex", "hudFragment", {
+        vp: {
+            type: 'v2',
+            value: new THREE.Vector2(w, h)
+        },
+        hudNm: {
+            type: 't',
+            value: hudNM.texture
+        },
+        texNm: {
+            type: 't',
+            value: BSWG.render.images['grass_nm'].texture
+        },
+        clr: {
+            type: 'v4',
+            value: new THREE.Vector4(
+                clr ? clr[0] : 1,
+                clr ? clr[1] : 1,
+                clr ? clr[2] : 1,
+                clr ? clr[3] : 1
+            )
+        },
+        extra: {
+            type: 'v4',
+            value: new THREE.Vector4(
+                split ? 1.0 : 0.0,
+                0.0,
+                0.0,
+                0.0
+            )
+        },
+        scale: {
+            type: 'v4',
+            value: new THREE.Vector4(w/vp.w, h/vp.h, this.x/vp.w, this.y/vp.h)
+        }
+    });
+
+    this.hudMesh = new THREE.Mesh( this.hudGeom, this.hudMat );
+    this.hudMesh.frustumCulled = false;
+    this.hudMesh.position.set(-1.0, -1.0, 4.0 + this.z);
+    this.hudMesh.scale.set(w/vp.w, h/vp.h, 1.0);
+    this.hudMesh.updateMatrix();
+    
+    this.hudMesh.needsUpdate = true;
+    this.hudMat.needsUpdate = true;
+
+    this.set_pos = function (_x, _y) {
+        this.x = _x;
+        this.y = _y;
+    };
+
+    this.set_z = function (_z) {
+        this.z = _z;
+    };
+
+    this.set_size = function (_w, _h) {
+        this.w = _w;
+        this.h = _h;
+    };
+
+    this.set_invert = function (flag) {
+        if (!this.hudMat) {
+            return;
+        }
+        this.hudMat.uniforms.extra.value.set(
+            this.split ? 1.0 : 0.0,
+            flag ? 1.0 : 0.0,
+            0.0,
+            0.0
+        );
+        this.hudMat.needsUpdate = true;
+    }
+
+    this.set_clr = function (clr) {
+        if (!this.hudMat) {
+            return;
+        }
+        this.hudMat.uniforms.clr.value.set(
+            clr ? clr[0] : 1,
+            clr ? clr[1] : 1,
+            clr ? clr[2] : 1,
+            clr ? clr[3] : 1
+        );
+        this.hudMat.needsUpdate = true;
+    };
+
+    this.set_nm = function (nm) {
+        if (!this.hudMat) {
+            return;
+        }
+        this.hudMat.uniforms.hudNm.value = nm.texture;
+        this.hudMat.needsUpdate = true;
+    };
+
+    this.update = function (dt) {
+
+        if (this.hudMesh) {
+            var vp = BSWG.render.viewport;
+            var p = BSWG.game.cam.toWorld(vp, this.x, this.y);
+
+            if (split) {
+                this.w = vp.w;
+                this.h = vp.h;
+            }
+
+            this.hudMesh.position.set(p.x, p.y, 4.0 + this.z);
+            this.hudMesh.scale.set(this.w/vp.w, this.h/vp.h, 1.0);
+            this.hudMesh.updateMatrix();
+
+            var x = this.x;
+            var y = this.y;
+
+            if (!split) {
+                x -= vp.w * 0.5;
+                y -= vp.h * 0.5;
+                x += this.w * 0.5;
+                y += this.h * 0.5;
+            }
+
+            this.hudMat.uniforms.scale.value.set(this.w/vp.w, this.h/vp.h, x/vp.w*2.0, y/vp.h*2.0);
+            this.hudMat.uniforms.vp.value.set(this.w, this.h);
+            this.hudMat.needsUpdate = true;
+        }
+
+    };
+
+    this.update(1/60);
+
+    this.remove = function () {
+
+        if (!this.hudMesh) {
+            return;
+        }
+
+        BSWG.render.scene.remove( this.hudMesh );
+
+        this.hudMesh.geometry.dispose();
+        this.hudMesh.material.dispose();
+        this.hudMesh.geometry = null;
+        this.hudMesh.material = null;
+        this.hudMesh = null;
+        this.hudMat = null;
+        this.hudGeom = null;
+
+        for (var i=0; i<BSWG.uiP3D_list.length; i++) {
+            if (BSWG.uiP3D_list[i] === this) {
+                BSWG.uiP3D_list.splice(i, 1);
+                break;
+            }
+        }
+
+    };
+    
+    BSWG.render.scene.add( this.hudMesh );
+
+    BSWG.uiP3D_list.push(this);
+
+};
+
+BSWG.uiP3D_update = function(dt) {
+
+    for (var i=0; i<BSWG.uiP3D_list.length; i++) {
+        BSWG.uiP3D_list[i].update(dt);
+    }
+
+};
+
 BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
     var key = ctx.fillStyle + ',' + w + ',' + h + ',' + insz + ',' + pressedIn + ',' + outline;
@@ -113,7 +393,53 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
 BSWG.control_Button = {
 
+    init: function (args) {
+
+        var max = Math.max(this.w, this.h);
+        var sz = 1;
+
+        while (sz < max && sz < 2048) {
+            sz *= 2;
+        }
+
+        var aw = this.w, ah = this.h;
+
+        this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+            var H = BSWG.ui_HM(w, h, aw, ah);
+            H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
+            BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+
+        }, true);
+
+    },
+
+    destroy: function () {
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
     render: function (ctx, viewport) {
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.1, // z
+                [1,1,1,1], // color
+                false // split
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+            this.hudObj.set_invert(this.selected || this.mouseDown);
+            this.hudObj.set_clr(this.mouseIn ? [1.1, 1.1, 1.3, 1] : [0.9, 0.9, 1, 1]);
+        }
 
         ctx.font = '16px Orbitron';
 
@@ -135,9 +461,9 @@ BSWG.control_Button = {
 
         ctx.globalAlpha = 0.5;
 
-        if (typeof this.text === 'string') {
-            BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 7, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
-        }
+        //if (typeof this.text === 'string') {
+        //    BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 7, this.selected || this.mouseDown, this.mouseIn ? 'rgba(255,255,255,0.45)' : null);
+        //}
 
         ctx.globalAlpha = 1.0;
 

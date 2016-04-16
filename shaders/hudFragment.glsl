@@ -1,8 +1,10 @@
 varying vec2 vUv;
 
-uniform vec2 vp; 
+uniform vec2 vp;
 uniform sampler2D hudNm;
 uniform sampler2D texNm;
+uniform vec4 clr;
+uniform vec4 extra;
 
 void main() {
 
@@ -11,14 +13,25 @@ void main() {
     vec4 nm = vec4(0., 0., 0., 0.);
     float aspect = vp.x / vp.y;
 
-    if (p.y < 0.5) {
-        nm = texture2D(hudNm, vec2(p.x, p.y/aspect));
+    if (p.y < 0.5 || extra.x < 0.5) {
+        if (aspect >= 1.0) {
+            nm = texture2D(hudNm, vec2(p.x, p.y/aspect));
+        }
+        else {
+            nm = texture2D(hudNm, vec2(p.x*aspect, p.y));
+        }
     }
     else {
         nm = texture2D(hudNm, vec2(p.x, p.y/aspect - (1.0/aspect - 1.0)));
     }
 
-    vec4 nm2 = texture2D(texNm, vec2(p.x, p.y/aspect));
+    if (extra.y > 0.5) {
+        float olda = nm.a;
+        nm = vec4(1.-nm.r, 1.-nm.g, 1.-nm.b, 1.-nm.a);
+        nm.a *= olda;
+    }
+
+    vec4 nm2 = texture2D(texNm, gl_FragCoord.xy/1024.0);
 
     vec3 tNormal = normalize(nm.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
     vec3 tNormal2 = normalize(nm2.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
@@ -34,6 +47,7 @@ void main() {
 
     nm2.a = pow(nm2.a, 6.0);
 
-    gl_FragColor = vec4(l+nm2.a * l * 0.1, l-nm2.a * l * 0.4, l-nm2.a * l * 0.4, min(nm.a*16.0, 1.0));
+    gl_FragColor = vec4(l+nm2.a * l * 0.1, l-nm2.a * l * 0.31, l-nm2.a * l * 0.4, min(nm.a*16.0, 1.0));
+    gl_FragColor *= clr;
 
 }

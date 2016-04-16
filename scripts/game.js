@@ -23,108 +23,46 @@ BSWG.game = new function(){
 
             this.hudNM = BSWG.render.proceduralImage(2048, 2048, function(ctx, w, h){
 
-                var len = w*h;
-                var H = new Array(len);
-                for (var i=0; i<len; i++) {
-                    H[i] = 0.0;
-                }
-                var S = function(x,y,v) {
-                    if (x>=0 && y>=0 && x<w && y<h) {
-                        H[(~~x)+(~~y)*w] = v;
-                    }
-                };
-                var G = function(x,y) {
-                    if (x>=0 && y>=0 && x<w && y<h) {
-                        return H[(~~x)+(~~y)*w];
-                    }
-                    else {
-                        return 0.0;
-                    }
-                };
-                var circ = function(sx,sy,r, depthEdge, depth) {
-                    for (var x=sx-r; x<=(sx+r); x++) {
-                        for (var y=sy-r; y<=(sy+r); y++) {
-                            var dedge = r - Math.sqrt((x-sx)*(x-sx)+(y-sy)*(y-sy));
-                            if (dedge >= 0) {
-                                var t = Math.max(dedge/2.5, 1.0);
-                                S(x,y,depth*t+depthEdge*(1-t));
-                            }
-                        }
-                    }
-                };
-                var box = function(sx,sy,bw,bh, depthEdge, depth) {
-                    for (var x=sx; x<(sx+bw); x++) {
-                        for (var y=sy; y<(sy+bh); y++) {
-                            var dedge = Math.min(x-sx, Math.min(y-sy, Math.min((sx+bw-1)-x, (sy+bh-1)-y)));
-                            var t = Math.clamp(dedge / 5, 0.0, 1.0);
-                            S(x,y,depth*t+depthEdge*(1-t));
-                        }
-                    }
-                };
-                var plate = function(sx,sy,bw,bh, depthEdge, depth) {
-                    box(sx,sy,bw,bh, depthEdge, depth);
-                    circ(sx+11, sy+11, 4, depth+0.1, depth+0.2);
-                    circ(sx+bw-11, sy+bh-11, 4, depth+0.1, depth+0.2);
-                    circ(sx+11, sy+bh-11, 4, depth+0.1, depth+0.2);
-                    circ(sx+bw-11, sy+11, 4, depth+0.1, depth+0.2);
-                    if (depth < depthEdge) {
-                        self.hudBtn.push([sx,sy,sx+bw,sy+bh]);
-                    }
-                };
+                var H = BSWG.ui_HM(w, h);
 
-                plate(256, h-128, w-256, 128, 0.25, 0.5);
-                plate(0, h-256, 256, 256, 0.25, 0.5);
-                plate(7, h-256+7, 256-14, 256-14, 0.5, 0.25); // 0
+                H.plate(256, h-128, w-256, 128, 0.25, 0.5);
+                H.plate(0, h-256, 256, 256, 0.25, 0.5);
+                H.plate(7, h-256+7, 256-14, 256-14, 0.5, 0.25); // 0
 
-                plate(w/2-224, h-256, 448, 256, 0.25, 0.5);
-                plate(w/2-224+32, h-256+32, 448-64, 96, 0.5, 0.25); // 1
+                H.plate(w/2-224, h-256, 448, 256, 0.25, 0.5);
+                H.plate(w/2-224+32, h-256+32, 448-64, 96, 0.5, 0.25); // 1
 
-                plate(w/2-224+32, h-(96+32), 96, 96, 0.5, 0.25); // 2
-                plate(w/2-224+32+96, h-(96+32), 96, 96, 0.5, 0.25); // 3
-                plate(w/2-224+32+96*2, h-(96+32), 96, 96, 0.5, 0.25); // 4
-                plate(w/2-224+32+96*3, h-(96+32), 96, 96, 0.5, 0.25); // 5
+                H.plate(w/2-224+32, h-(96+32), 96, 96, 0.5, 0.25); // 2
+                H.plate(w/2-224+32+96, h-(96+32), 96, 96, 0.5, 0.25); // 3
+                H.plate(w/2-224+32+96*2, h-(96+32), 96, 96, 0.5, 0.25); // 4
+                H.plate(w/2-224+32+96*3, h-(96+32), 96, 96, 0.5, 0.25); // 5
 
-                plate(w/2+224+32, h-64-96/2, 96, 96, 0.5, 0.35); // 6
-                plate(w/2+224+32+96, h-64-96/2, 96, 96, 0.5, 0.35); // 7
-                plate(w/2+224+32+96*2, h-64-96/2, 96, 96, 0.5, 0.35); // 8
-                plate(w/2+224+32+96*3, h-64-96/2, 96, 96, 0.5, 0.35); // 9
-                plate(w/2+224+32+96*4, h-64-96/2, 96, 96, 0.5, 0.35); // 10
+                H.plate(w/2+224+32, h-64-96/2, 96, 96, 0.5, 0.35); // 6
+                H.plate(w/2+224+32+96, h-64-96/2, 96, 96, 0.5, 0.35); // 7
+                H.plate(w/2+224+32+96*2, h-64-96/2, 96, 96, 0.5, 0.35); // 8
+                H.plate(w/2+224+32+96*3, h-64-96/2, 96, 96, 0.5, 0.35); // 9
+                H.plate(w/2+224+32+96*4, h-64-96/2, 96, 96, 0.5, 0.35); // 10
 
-                plate(256+32, h-64-96/2, w/2-224-256-64, 96, 0.5, 0.35); // 11
+                H.plate(256+32, h-64-96/2, w/2-224-256-64, 96, 0.5, 0.35); // 11
 
-                plate(0, 0, w, 48, 0.25, 0.5);
+                H.plate(0, 0, w, 48, 0.25, 0.5);
 
-                BSWG.render.hightMapToNormalMap(H, ctx, w, h);
+                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+
+                self.hudBtn = H.hudBtn;
 
             }, true);
 
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                0, 0, // x, y
+                BSWG.render.viewport.w, BSWG.render.viewport.h, // w, h
+                0.0, // z
+                [1,1,1,1], // color
+                true // split
+            );
+
         }
-
-        this.hudGeom = new THREE.PlaneGeometry(2.0, 2.0, 1, 1);
-        this.hudMat = BSWG.render.newMaterial("bgVertex", "hudFragment", {
-            vp: {
-                type: 'v2',
-                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
-            },
-            hudNm: {
-                type: 't',
-                value: this.hudNM.texture
-            },
-            texNm: {
-                type: 't',
-                value: BSWG.render.images['grass_nm'].texture
-            },
-        });
-
-        this.hudMesh = new THREE.Mesh( this.hudGeom, this.hudMat );
-        this.hudMesh.frustumCulled = false;
-        this.hudMesh.position.set(-1.0, -1.0, 4.0);
-        this.hudMesh.updateMatrix();
-        
-        this.hudMesh.needsUpdate = true;
-        this.hudMat.needsUpdate = true;
-        
-        BSWG.render.scene.add( this.hudMesh );
 
     };
 
@@ -151,29 +89,18 @@ BSWG.game = new function(){
 
     this.removeHUD = function () {
 
-        if (!this.hudMesh) {
+        if (!this.hudObj) {
             return;
         }
 
-        BSWG.render.scene.remove( this.hudMesh );
-
-        this.hudMesh.geometry.dispose();
-        this.hudMesh.material.dispose();
-        this.hudMesh.geometry = null;
-        this.hudMesh.material = null;
-        this.hudMesh = null;
-        this.hudMat = null;
-        this.hudGeom = null;
+        this.hudObj.remove();
+        this.hudObj = null;
 
     };
 
-    this.updateHUD = function () {
+    this.updateHUD = function (dt) {
 
-        if (this.bgMesh) {
-            this.hudMesh.position.set(BSWG.game.cam.x, BSWG.game.cam.y, this.hudMesh.position.z);
-            this.hudMesh.updateMatrix();
-            this.hudMat.uniforms.vp.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
-        }
+        BSWG.uiP3D_update(dt);
 
     };
 
@@ -1106,34 +1033,34 @@ BSWG.game = new function(){
             }
             
             if (self.editBtn) {
-                self.editBtn.p.x = self.hudX(self.hudBtn[6][0]);
-                self.editBtn.p.y = self.hudY(self.hudBtn[6][1]);
-                self.editBtn.w = self.hudX(self.hudBtn[6][2]) - self.editBtn.p.x;
-                self.editBtn.h = self.hudY(self.hudBtn[6][3]) - self.editBtn.p.y;
+                self.editBtn.p.x = self.hudX(self.hudBtn[6][0]) + 2;
+                self.editBtn.p.y = self.hudY(self.hudBtn[6][1]) + 2;
+                self.editBtn.w = self.hudX(self.hudBtn[6][2]) - self.editBtn.p.x - 4;
+                self.editBtn.h = self.hudY(self.hudBtn[6][3]) - self.editBtn.p.y - 4;
             }
 
             if (self.anchorBtn) {
-                self.anchorBtn.p.x = self.hudX(self.hudBtn[7][0]);
-                self.anchorBtn.p.y = self.hudY(self.hudBtn[7][1]);
-                self.anchorBtn.w = self.hudX(self.hudBtn[7][2]) - self.anchorBtn.p.x;
-                self.anchorBtn.h = self.hudY(self.hudBtn[7][3]) - self.anchorBtn.p.y;
+                self.anchorBtn.p.x = self.hudX(self.hudBtn[7][0]) + 2;
+                self.anchorBtn.p.y = self.hudY(self.hudBtn[7][1]) + 2;
+                self.anchorBtn.w = self.hudX(self.hudBtn[7][2]) - self.anchorBtn.p.x - 4;
+                self.anchorBtn.h = self.hudY(self.hudBtn[7][3]) - self.anchorBtn.p.y - 4;
             }
 
             if (self.showControlsBtn) {
-                self.showControlsBtn.p.x = self.hudX(self.hudBtn[8][0]);
-                self.showControlsBtn.p.y = self.hudY(self.hudBtn[8][1]);
-                self.showControlsBtn.w = self.hudX(self.hudBtn[8][2]) - self.showControlsBtn.p.x;
-                self.showControlsBtn.h = self.hudY(self.hudBtn[8][3]) - self.showControlsBtn.p.y;
+                self.showControlsBtn.p.x = self.hudX(self.hudBtn[8][0]) + 2;
+                self.showControlsBtn.p.y = self.hudY(self.hudBtn[8][1]) + 2;
+                self.showControlsBtn.w = self.hudX(self.hudBtn[8][2]) - self.showControlsBtn.p.x - 4;
+                self.showControlsBtn.h = self.hudY(self.hudBtn[8][3]) - self.showControlsBtn.p.y - 4;
             }
 
             if (self.healBtn) {
-                self.healBtn.p.x = self.hudX(self.hudBtn[9][0]);
-                self.healBtn.p.y = self.hudY(self.hudBtn[9][1]);
-                self.healBtn.w = self.hudX(self.hudBtn[9][2]) - self.healBtn.p.x;
-                self.healBtn.h = self.hudY(self.hudBtn[9][3]) - self.healBtn.p.y;
+                self.healBtn.p.x = self.hudX(self.hudBtn[9][0]) + 2;
+                self.healBtn.p.y = self.hudY(self.hudBtn[9][1]) + 2;
+                self.healBtn.w = self.hudX(self.hudBtn[9][2]) - self.healBtn.p.x - 4;
+                self.healBtn.h = self.hudY(self.hudBtn[9][3]) - self.healBtn.p.y - 4;
             }
 
-            self.updateHUD();
+            self.updateHUD(dt);
 
             BSWG.ui.render(ctx, viewport);
 
