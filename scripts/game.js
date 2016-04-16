@@ -16,7 +16,7 @@ BSWG.game = new function(){
 
     this.initHUD = function (scene) {
 
-        if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
+        if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2 || scene === BSWG.SCENE_TITLE) {
 
             this.hudBtn = new Array();
             var self = this;
@@ -26,26 +26,41 @@ BSWG.game = new function(){
                 var H = BSWG.ui_HM(w, h);
 
                 var off = scene === BSWG.SCENE_GAME1 ? 0 : 256;
+                var bsz = 72;
+                var sc = bsz/96;
+                off *= sc;
 
-                H.plate(256-off, h-128, w-256+off*2, 128, 0.25, 0.5);
-                H.plate(0-off, h-256, 256, 256, 0.15, 0.5);
-                H.plate(7-off, h-256+7, 256-14, 256-14, 0.5, 0.15); // 0
+                if (scene !== BSWG.SCENE_TITLE) {
 
-                H.plate(w/2-224, h-256, 448, 256, 0.25, 0.5);
-                H.plate(w/2-224+32, h-256+32, 448-64, 96, 0.5, 0.25); // 1
+                    H.plate(256*sc-off, h-128*sc, w-256*sc+off, 128*sc, 0.25, 0.5);
+                    H.plate(0-off, h-256*sc, 256*sc, 256*sc, 0.15, 0.5);
+                    H.plate(7-off, h-256*sc+7, 256*sc-14, 256*sc-14, 0.5, 0.15); // 0
 
-                H.plate(w/2-224+32, h-(96+32), 96, 96, 0.5, 0.25); // 2
-                H.plate(w/2-224+32+96, h-(96+32), 96, 96, 0.5, 0.25); // 3
-                H.plate(w/2-224+32+96*2, h-(96+32), 96, 96, 0.5, 0.25); // 4
-                H.plate(w/2-224+32+96*3, h-(96+32), 96, 96, 0.5, 0.25); // 5
+                    var hh = 32*2 + bsz*2;
 
-                H.plate(w/2+224+32, h-64-96/2, 96, 96, 0.5, 0.35); // 6
-                H.plate(w/2+224+32+96, h-64-96/2, 96, 96, 0.5, 0.35); // 7
-                H.plate(w/2+224+32+96*2, h-64-96/2, 96, 96, 0.5, 0.35); // 8
-                H.plate(w/2+224+32+96*3, h-64-96/2, 96, 96, 0.5, 0.35); // 9
-                H.plate(w/2+224+32+96*4, h-64-96/2, 96, 96, 0.5, 0.35); // 10
+                    H.plate(w/2-(32+bsz*2), h-hh, 32*2+bsz*4, hh, 0.25, 0.5);
+                    H.plate(w/2-(32+bsz*2)+32, h-hh+32, (32*2+bsz*4)-64, bsz, 0.5, 0.25); // 1
 
-                H.plate(256+32, h-64-96/2, w/2-224-256-64, 96, 0.5, 0.15); // 11
+                    H.plate(w/2-(32+bsz*2)+32, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 2
+                    H.plate(w/2-(32+bsz*2)+32+bsz, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 3
+                    H.plate(w/2-(32+bsz*2)+32+bsz*2, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 4
+                    H.plate(w/2-(32+bsz*2)+32+bsz*3, h-(bsz+32), bsz, bsz, 0.5, 0.25); // 5
+
+                    H.plate(w/2+(32+bsz*2)+32, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 6
+                    H.plate(w/2+(32+bsz*2)+32+bsz, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 7
+                    H.plate(w/2+(32+bsz*2)+32+bsz*2, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 8
+                    H.plate(w/2+(32+bsz*2)+32+bsz*3, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 9
+                    H.plate(w/2+(32+bsz*2)+32+bsz*4, h-64*sc-bsz/2, bsz, bsz, 0.5, 0.35); // 10
+
+                    H.plate(256*sc+32, h-64*sc-bsz/2, w/2-(32+bsz*2)-256*sc-64, bsz, 0.5, 0.15); // 11
+
+                }
+                else {
+                    for (var i=0; i<12; i++) {
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 0..11
+                    }
+                    H.plate(0, h-48, w, 48, 0.25, 0.5);
+                }
 
                 H.plate(0, 0, w, 48, 0.25, 0.5);
 
@@ -53,6 +68,9 @@ BSWG.game = new function(){
 
                 if (scene === BSWG.SCENE_GAME2) {
                     H.plate(7, (48-40)/2, 128, 42, 0.5, 0.35); // 13
+                    H.plate(7+128+7, (48-40)/2, 128, 42, 0.5, 0.35); // 14
+                    H.plate(7+128+7+128+7, (48-40)/2, 128, 42, 0.5, 0.35); // 15
+                    H.plate(7+128+7+128+7+128+7, (48-40)/2, 384, 42, 0.5, 0.15); // 16
                 }
 
                 BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
@@ -263,60 +281,76 @@ BSWG.game = new function(){
 
                 this.cam.z *= 1.5;
 
-                this.title1 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                    x: BSWG.render.viewport.w*0.5, y: 80,
-                    w: 800, h: 100,
-                    vpXCenter: true,
-                    text: "BlockShip Wars",
-                    color: [0.85, 0.85, 0.85, 1],
-                    hoverColor: [0.85, 0.85, 0.85, 1],
-                    click: function (me) {
-                    }
-                });
-                this.title2 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                    x: BSWG.render.viewport.w*0.5, y: 145,
-                    w: 800, h: 100,
-                    vpXCenter: true,
-                    text: "r o g u e l i k e",
-                    color: [0.85, 0.2, 0.2, 1.0],
-                    hoverColor: [0.85, 0.2, 0.2, 1.0],
-                    click: function (me) {
-                    }
-                });
+                Math.seedrandom();
 
-                this.newGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                    x: BSWG.render.viewport.w*0.5, y: 350,
-                    w: 400, h: 70,
-                    vpXCenter: true,
-                    text: "New Game",
-                    color: [0.35, 0.6, 1., 1.0],
-                    hoverColor: [0.95, 0.95, 0.95, 1.0],
-                    click: function (me) {
-                        self.changeScene(BSWG.SCENE_GAME1, {}, '#000', 0.75);
-                    }
-                });
-                this.sandBoxBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                    x: BSWG.render.viewport.w*0.5, y: 350+70,
-                    w: 400, h: 70,
-                    vpXCenter: true,
-                    text: "Sandbox",
-                    color: [0.35, 0.6, 1., 1.0],
-                    hoverColor: [0.95, 0.95, 0.95, 1.0],
-                    click: function (me) {
-                        self.changeScene(BSWG.SCENE_GAME2, {}, '#000', 0.75);
-                    }
-                });
-                this.optionsBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                    x: BSWG.render.viewport.w*0.5, y: 350+140,
-                    w: 400, h: 70,
-                    vpXCenter: true,
-                    text: "Options",
-                    color: [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0],
-                    hoverColor: [0.3, 0.3, 0.3, 1.0],
-                    click: function (me) {
-                        //self.changeScene(BSWG.SCENE_GAME1, {}, '#fff');
-                    }
-                });
+                if (this.title1) {
+                    this.title1.add();
+                    this.title2.add();
+                    this.newGameBtn.add();
+                    this.loadGameBtn.add();
+                    this.sandBoxBtn.add();
+                }
+                else {
+                    this.title1 = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                        x: BSWG.render.viewport.w*0.5, y: 80+42,
+                        w: 800, h: 100,
+                        vpXCenter: true,
+                        text: "BlockShip Wars",
+                        color: [0.85, 0.85, 0.85, 1],
+                        hoverColor: [0.85, 0.85, 0.85, 1],
+                        noDestroy: true,
+                        click: function (me) {
+                        }
+                    });
+                    this.title2 = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                        x: BSWG.render.viewport.w*0.5, y: 145+42,
+                        w: 800, h: 100,
+                        vpXCenter: true,
+                        text: "r o g u e l i k e",
+                        color: [0.85, 0.2, 0.2, 1.0],
+                        hoverColor: [0.85, 0.2, 0.2, 1.0],
+                        noDestroy: true,
+                        click: function (me) {
+                        }
+                    });
+
+                    this.newGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                        x: BSWG.render.viewport.w*0.5, y: 350,
+                        w: 400, h: 70,
+                        vpXCenter: true,
+                        text: "New Game",
+                        color: [0.35, 0.6, 1., 1.0],
+                        hoverColor: [0.95, 0.95, 0.95, 1.0],
+                        noDestroy: true,
+                        click: function (me) {
+                            self.changeScene(BSWG.SCENE_GAME1, {}, '#000', 0.75);
+                        }
+                    });
+                    this.loadGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                        x: BSWG.render.viewport.w*0.5, y: 350+70,
+                        w: 400, h: 70,
+                        vpXCenter: true,
+                        text: "Load Game",
+                        color: [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0],
+                        hoverColor: [0.3, 0.3, 0.3, 1.0],
+                        noDestroy: true,
+                        click: function (me) {
+                            //self.changeScene(BSWG.SCENE_GAME1, {}, '#fff');
+                        }
+                    });
+                    this.sandBoxBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
+                        x: BSWG.render.viewport.w*0.5, y: 350+140,
+                        w: 400, h: 70,
+                        vpXCenter: true,
+                        text: "Sandbox",
+                        color: [0.35, 0.6, 1., 1.0],
+                        hoverColor: [0.95, 0.95, 0.95, 1.0],
+                        noDestroy: true,
+                        click: function (me) {
+                            self.changeScene(BSWG.SCENE_GAME2, {}, '#000', 0.75);
+                        }
+                    });
+                }
 
                 var r = 500;
                 var n = 5;
@@ -396,32 +430,7 @@ BSWG.game = new function(){
                         self.showControls = me.selected;
                     }
                 });
-                this.exitBtn = new BSWG.uiControl(BSWG.control_Button, {
-                    x: 10, y: 10,
-                    w: 100, h: 65,
-                    text: BSWG.render.images['menu'],
-                    selected: this.editMode,
-                    click: function (me) {
-                        BSWG.ai.closeEditor();
-                        self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
-                    }
-                });
 
-                this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
-                    x: 10 + 65 + 10 + 65 + 10, y: 10,
-                    w: 65, h: 65,
-                    text: BSWG.render.images['save'],
-                    selected: false,
-                    click: function (me) {
-                        if (self.scene === BSWG.SCENE_GAME2) {
-                            setExportFN();
-                            JSON.saveAs(
-                                BSWG.componentList.serialize(null, true),
-                                self.exportFN
-                            );
-                        }
-                    }
-                });
                 this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
                     w: 65, h: 65,
@@ -463,6 +472,21 @@ BSWG.game = new function(){
                                 args.angle = Math.random()*Math.PI*2.0;
                                 new BSWG.component(B.comp, args);
                                 break;
+                            }
+                        }
+                    });
+                    this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10 + 65 + 10 + 65 + 10, y: 10,
+                        w: 65, h: 65,
+                        text: 'Export',
+                        selected: false,
+                        click: function (me) {
+                            if (self.scene === BSWG.SCENE_GAME2) {
+                                setExportFN();
+                                JSON.saveAs(
+                                    BSWG.componentList.serialize(null, true),
+                                    self.exportFN
+                                );
                             }
                         }
                     });
@@ -554,10 +578,6 @@ BSWG.game = new function(){
                     };
                 }
 
-                if (scene === BSWG.SCENE_GAME1) {
-                    this.saveBtn.remove();
-                    this.healBtn.remove();
-                }
                 this.saveHealAdded = false;
 
                 if (scene === BSWG.SCENE_GAME2) {
@@ -706,19 +726,31 @@ BSWG.game = new function(){
                 self.cam.x = startPos.x;
                 self.cam.y = startPos.y;
                 BSWG.render.updateCam3D(self.cam);
-
-                self.initHUD(scene);
                 break;
 
             default:
                 break;
         }
 
+        this.exitBtn = new BSWG.uiControl(BSWG.control_Button, {
+            x: 10, y: 10,
+            w: 100, h: 65,
+            text: BSWG.render.images['menu'],
+            selected: this.editMode,
+            click: function (me) {
+                BSWG.ai.closeEditor();
+                self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
+            }
+        });
+
+        self.initHUD(scene);
+
         BSWG.render.resetl60();
 
     };
 
     this.shipTest = null;
+    this.emodeTint = 0.0;
 
     this.start = function ()
     {
@@ -732,6 +764,18 @@ BSWG.game = new function(){
         BSWG.input.emulateMouseWheel([BSWG.KEY['-'], BSWG.KEY['NUMPAD -']], [BSWG.KEY['='], BSWG.KEY['NUMPAD +']], 2);
 
         BSWG.render.startRenderer(function(dt, time){
+
+            if (self.editMode || !(self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2)) {
+                self.emodeTint += (1 - self.emodeTint) * dt * 3;
+            }
+            else {
+                self.emodeTint += (0 - self.emodeTint) * dt * 3;
+            }
+
+            if (self.hudObj) {
+                var t = self.emodeTint;
+                self.hudObj.set_clr([0.85+(1-t)*0.05, 0.85+(1-t)*0.05, 1.0+(t)*0.1, 1]);
+            }
 
             if (self.curSong) {
                 if (self.curSong.timeIndex() > (3 * 60 + 3)) {
@@ -898,6 +942,10 @@ BSWG.game = new function(){
 
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
+                    self.exitBtn.p.x = self.hudX(self.hudBtn[12][0]) + 2;
+                    self.exitBtn.p.y = self.hudY(self.hudBtn[12][1]) + 2;
+                    self.exitBtn.w = self.hudX(self.hudBtn[12][2]) - self.exitBtn.p.x - 4;
+                    self.exitBtn.h = self.hudY(self.hudBtn[12][3]) - self.exitBtn.p.y - 4;
                     break;
 
                 case BSWG.SCENE_GAME1:
@@ -945,11 +993,25 @@ BSWG.game = new function(){
                     self.exitBtn.h = self.hudY(self.hudBtn[12][3]) - self.exitBtn.p.y - 4;
 
                     //self.exitBtn.p.x = BSWG.render.viewport.w - self.exitBtn.w - 10;
-                    if (self.aiBtn) {
+                    if (self.scene === BSWG.SCENE_GAME2 && self.aiBtn) {
                         self.aiBtn.p.x = self.hudX(self.hudBtn[13][0]) + 1;
                         self.aiBtn.p.y = self.hudY(self.hudBtn[13][1]) + 1;
                         self.aiBtn.w = self.hudX(self.hudBtn[13][2]) - self.aiBtn.p.x - 2;
                         self.aiBtn.h = self.hudY(self.hudBtn[13][3]) - self.aiBtn.p.y - 2;
+                    }
+
+                    if (self.scene === BSWG.SCENE_GAME2 && self.loadBtn) {
+                        self.loadBtn.p.x = self.hudX(self.hudBtn[14][0]) + 1;
+                        self.loadBtn.p.y = self.hudY(self.hudBtn[14][1]) + 1;
+                        self.loadBtn.w = self.hudX(self.hudBtn[14][2]) - self.loadBtn.p.x - 2;
+                        self.loadBtn.h = self.hudY(self.hudBtn[14][3]) - self.loadBtn.p.y - 2;
+                    }
+
+                    if (self.scene === BSWG.SCENE_GAME2 && self.saveBtn) {
+                        self.saveBtn.p.x = self.hudX(self.hudBtn[15][0]) + 1;
+                        self.saveBtn.p.y = self.hudY(self.hudBtn[15][1]) + 1;
+                        self.saveBtn.w = self.hudX(self.hudBtn[15][2]) - self.saveBtn.p.x - 2;
+                        self.saveBtn.h = self.hudY(self.hudBtn[15][3]) - self.saveBtn.p.y - 2;
                     }
 
                 default:
@@ -958,16 +1020,16 @@ BSWG.game = new function(){
 
             if (self.ccblock && !self.ccblock.destroyed && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter())) {
                 if (!self.saveHealAdded) {
-                    self.saveBtn.add();
+                    //self.saveBtn.add();
                     self.healBtn.add();
                     self.saveHealAdded = true;
                 }
                 self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
-                self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
+                //self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
             }
             else {
                 if (self.saveHealAdded) {
-                    self.saveBtn.remove();
+                    //self.saveBtn.remove();
                     self.healBtn.remove();
                     self.saveHealAdded = false;
                 }
@@ -975,16 +1037,16 @@ BSWG.game = new function(){
 
             if (self.scene === BSWG.SCENE_GAME2) {
                 self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
-                self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
-                self.loadBtn.p.x = self.saveBtn.p.x + 10 + self.saveBtn.w;
+                //self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
+                //self.loadBtn.p.x = self.saveBtn.p.x + 10 + self.saveBtn.w;
                 if (BSWG.ai.runMode) {
                     self.saveBtn.p.y = -1000;
                     self.loadBtn.p.y = -1000;
                     self.aiBtn.p.y = -1000;
                 }
                 else {
-                    self.saveBtn.p.y = 10;
-                    self.loadBtn.p.y = 10;
+                    //self.saveBtn.p.y = 10;
+                    //self.loadBtn.p.y = 10;
                     self.aiBtn.p.y = self.hudY(self.hudBtn[13][1]) + 1;
                 }
             }
@@ -1092,12 +1154,15 @@ BSWG.game = new function(){
             BSWG.ai.update(ctx, dt);
 
             if (self.scene === BSWG.SCENE_GAME2 && !BSWG.ai.runMode) {
-                var x = self.loadBtn.p.x + 10 + self.loadBtn.w;
+                var x = self.hudX(self.hudBtn[16][0]),
+                    y = self.hudY(self.hudBtn[16][1]);
+                var w = self.hudX(self.hudBtn[16][2]) - x,
+                    h = self.hudY(self.hudBtn[16][3]) - y;
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
-                ctx.font = '10px Orbitron';
+                ctx.font = (~~(h*0.25)) + 'px Orbitron';
                 ctx.textAlign = 'left';
-                ctx.fillTextB(self.exportFN, x, self.loadBtn.p.y + self.loadBtn.h * 0.5 + 10/2, true);
+                ctx.fillTextB(self.exportFN, x + w * 0.05, y + h * 0.5 + (h*0.25*0.5), true);
             }
 
             if (self.mapImage) {

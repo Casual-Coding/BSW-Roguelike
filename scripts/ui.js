@@ -500,7 +500,7 @@ BSWG.control_Button = {
 
         ctx.strokeStyle = '#111';
         if (typeof this.text !== 'string') {
-            ctx.drawImage(this.text, 0, 0, this.text.width, this.text.height, this.p.x + this.w * 0.5 - this.h*0.3, this.p.y + this.h*0.2, this.h*0.6, this.h*0.6);
+            ctx.drawImage(this.text, 0, 0, this.text.width, this.text.height, this.p.x + this.w * 0.5 - this.h*0.4, this.p.y + this.h*0.1, this.h*0.8, this.h*0.8);
         }
         else {
             ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
@@ -710,6 +710,8 @@ BSWG.control_3DTextButton = {
         }
         this.added = true;
 
+        this.noDestroy = args.noDestroy || false;
+
     },
 
     render: function (ctx, viewport) {
@@ -743,8 +745,10 @@ BSWG.control_3DTextButton = {
                 BSWG.render.scene.remove(this.textObj.mesh);
                 this.added = false;
             }
-            this.textObj.destroy();
-            this.textObj = null;
+            if (!this.noDestroy) {
+                this.textObj.destroy();
+                this.textObj = null;
+            }
         }
     }
 
