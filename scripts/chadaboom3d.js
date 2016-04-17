@@ -134,7 +134,7 @@ chadaboom3D.prototype.init = function () {
         },
         damping: {
             type: 'f',
-            value: (1/(1 + 0.1))
+            value: (1/(1 + BSWG.physics.baseDamping))
         }
     };
 

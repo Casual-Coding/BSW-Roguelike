@@ -75,6 +75,8 @@ BSWG.component_CommandCenter = {
         BSWG.blockPolySmooth = null;
 
         this.aiStr = args.aiStr || null;
+
+        this.onCC = this;
     },
 
     destroy: function() {
@@ -111,7 +113,16 @@ BSWG.component_CommandCenter = {
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
     },
 
-    warpOut: function() {
+    warpOut: function(slow) {
+
+        if (slow && BSWG.game.ccblock && !(BSWG.game.ccblock.destroyed)) {
+            if (!this.escapeFrom) {
+                this.escapeFrom = BSWG.game.ccblock.obj.body.GetWorldCenter().clone();
+                this.escapeT = 0.0;
+            }
+            return;
+        }
+
         var len = BSWG.componentList.compList.length;
         for (var i=0; i<len; i++) {
             var C = BSWG.componentList.compList[i];
@@ -124,12 +135,44 @@ BSWG.component_CommandCenter = {
         }
     },
 
+    setVelAll: function(v) {
+        var len = BSWG.componentList.compList.length;
+        for (var i=0; i<len; i++) {
+            var C = BSWG.componentList.compList[i];
+            if (C && ((C.onCC && C.onCC.id === this.id) || (C.id === this.id))) {
+                if (C.obj && C.obj.body) {
+                    C.obj.body.SetLinearVelocity(v.clone());
+                }
+            }
+        }        
+    },
+
     update: function(dt) {
 
         this.dispKeys['left'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.LEFT);
         this.dispKeys['right'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.RIGHT);
         this.dispKeys['forward'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.UP);
         this.dispKeys['reverse'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.DOWN);
+
+        if (this.escapeFrom) {
+            this.escapeT += dt;
+            var v = this.obj.body.GetWorldCenter().clone();
+            v.x -= this.escapeFrom.x;
+            v.y -= this.escapeFrom.y;
+            var vlen = Math.sqrt(v.x*v.x+v.y*v.y);
+            v.x /= vlen;
+            v.y /= vlen;
+            v.x *= this.escapeT * 10.0;
+            v.y *= this.escapeT * 10.0;
+
+            var len = BSWG.componentList.compList.length;
+            for (var i=0; i<len; i++) {
+                var C = BSWG.componentList.compList[i];
+                if (C && ((C.onCC && C.onCC.id === this.id) || (C.id === this.id))) {
+                    C.obj.body.SetLinearVelocity(v.clone());
+                }
+            }            
+        }
 
     },
 
@@ -278,6 +321,7 @@ BSWG.component_CommandCenter = {
         }
         else {
             accel *= 2.5;
+            rot *= 1.5;
         }
 
         if (rot) {

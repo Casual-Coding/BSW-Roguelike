@@ -12,6 +12,7 @@ BSWG.physics = new function(){
     this.maxWeldForce       = 5000.0;
     this.welds              = [];
     this.objects            = [];
+    this.baseDamping        = 0.45;
 
     this.init = function (){
 
@@ -356,8 +357,8 @@ BSWG.physics = new function(){
         obj.bodyDef.position = pos;
         obj.bodyDef.angle = angle;
         obj.body = this.world.CreateBody( obj.bodyDef );
-        obj.body.SetLinearDamping(0.1);
-        obj.body.SetAngularDamping(0.1);
+        obj.body.SetLinearDamping(this.baseDamping);
+        obj.body.SetAngularDamping(this.baseDamping);
 
         obj.body.__mele = !!def.isMele;
 

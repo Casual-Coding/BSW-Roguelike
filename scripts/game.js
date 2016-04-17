@@ -4,6 +4,7 @@ BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 BSWG.camVelLookBfr         = 0.2; // * viewport.w
 BSWG.lookRange             = 45.0;
+BSWG.grabSpeed             = 2.25;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -17,6 +18,16 @@ BSWG.game = new function(){
     this.initHUD = function (scene) {
 
         if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2 || scene === BSWG.SCENE_TITLE) {
+
+            if (this.hudObj) {
+                this.hudObj.remove();
+                this.hudObj = null;
+            }
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+                this.hudNM = null;
+            }
 
             this.hudBtn = new Array();
             var self = this;
@@ -213,8 +224,8 @@ BSWG.game = new function(){
         }
 
         var p = this.ccblock.obj.body.GetWorldCenter().clone();
-        var arange = Math.PI/5.5;
-        var minr = 50, maxr = 100;
+        var arange = Math.PI;
+        var minr = 25, maxr = 40;
         var v = this.ccblock.obj.body.GetLinearVelocity().clone();
         var a = Math.atan2(v.y, v.x);
 
@@ -232,9 +243,15 @@ BSWG.game = new function(){
                 aiship = BSWG.componentList.load(list[i], {p: p2});
                 window.setTimeout(function(ais){
                     return function() {
+                        if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
+                            var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
+                            v.x *= 0.85;
+                            v.y *= 0.85;
+                            ais.setVelAll(v);
+                        }
                         ais.reloadAI();
                     };
-                }(aiship),10);
+                }(aiship), 250);
             }
         }
 
@@ -986,15 +1003,15 @@ BSWG.game = new function(){
                                 }
                                 else {
                                     grabbedLocal = grabbedBlock.getLocalPoint(mp);
-                                    BSWG.physics.startMouseDrag(grabbedBlock.obj.body, grabbedBlock.obj.body.GetMass()*1.75);
+                                    BSWG.physics.startMouseDrag(grabbedBlock.obj.body, grabbedBlock.obj.body.GetMass()*BSWG.grabSpeed);
                                     grabbedBlock.obj.body.SetLinearDamping(0.5);
                                     grabbedBlock.obj.body.SetAngularDamping(0.25);
                                 }
                             }
                         }
                         if (grabbedBlock && (BSWG.input.MOUSE_RELEASED('left') || grabbedBlock.distanceTo(self.ccblock) > BSWG.maxGrabDistance)) {
-                            grabbedBlock.obj.body.SetLinearDamping(0.1);
-                            grabbedBlock.obj.body.SetAngularDamping(0.1);
+                            grabbedBlock.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
+                            grabbedBlock.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
                             grabbedBlock = null;
                             grabbedLocal = null;
                             BSWG.physics.endMouseDrag();
@@ -1002,27 +1019,27 @@ BSWG.game = new function(){
                         }
 
                         if (grabbedBlock && BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT)) {
-                            grabbedBlock.obj.body.SetAngularDamping(1.0);
+                            grabbedBlock.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
                             grabbedBlock.obj.body.SetLinearDamping(10.0);
                         } else if (grabbedBlock) {
-                            grabbedBlock.obj.body.SetAngularDamping(0.1);
-                            grabbedBlock.obj.body.SetLinearDamping(0.1);
+                            grabbedBlock.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
+                            grabbedBlock.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
                             
                             var dist = Math.distVec2(grabbedBlock.getWorldPoint(grabbedLocal), BSWG.physics.mousePosWorld());
                             if (dist < BSWG.grabSlowdownDistStart) {
                                 var t = Math.pow(1.0 - Math.clamp((dist - BSWG.grabSlowdownDist) / (BSWG.grabSlowdownDistStart - BSWG.grabSlowdownDist), 0, 1), 2.0);
-                                BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75*(1.0+t*0.5));
-                                grabbedBlock.obj.body.SetLinearDamping(0.1 + 2.0*t);
-                                grabbedBlock.obj.body.SetAngularDamping(0.1 + 2.0*t);
+                                BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*BSWG.grabSpeed*(1.0+t*0.5));
+                                grabbedBlock.obj.body.SetLinearDamping(BSWG.physics.baseDamping + 2.0*t);
+                                grabbedBlock.obj.body.SetAngularDamping(BSWG.physics.baseDamping + 2.0*t);
                             }
                             else {
-                                BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*1.75);
+                                BSWG.physics.mouseDragSetMaxForce(grabbedBlock.obj.body.GetMass()*BSWG.grabSpeed);
                             }
                         }
                     }
                     else if (grabbedBlock) {
-                        grabbedBlock.obj.body.SetLinearDamping(0.1);
-                        grabbedBlock.obj.body.SetAngularDamping(0.1);
+                        grabbedBlock.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
+                        grabbedBlock.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
                         grabbedBlock = null;
                         grabbedLocal = null;
                         BSWG.physics.endMouseDrag();
@@ -1284,7 +1301,7 @@ BSWG.game = new function(){
                     var ccs = BSWG.componentList.allCCs();
                     for (var i=0; i<ccs.length; i++) {
                         if (self.ccblock && self.ccblock.id !== ccs[i].id) {
-                            ccs[i].warpOut();
+                            ccs[i].warpOut(true);
                         }
                     }
                 }

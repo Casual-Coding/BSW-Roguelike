@@ -30,7 +30,7 @@ void main() {
     float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 0.7);
     float l1d = pow(max(dot(normalize(tNormald), lightDir), 0.0), 0.7);
     float l2 = (pow(max(dot(normalize(vNormal), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
-    float l = min(l0 * ((l1*0.8-l1d*0.6*dmg+0.6) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.05 + 0.2, 0.75);
+    float l = min(l0 * ((l1*0.8-l1d*0.6*dmg+0.6) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(l, 1.5) + 0.2;
 
     if (extra.y <= 0.0) {

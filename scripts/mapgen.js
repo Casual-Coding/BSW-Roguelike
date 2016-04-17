@@ -322,7 +322,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         var zone = ret.getZone(p);
 
         if (BSWG.game.battleMode) {
+            distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
             lastBattleP = p.clone();
+            lastP = p.clone();
+            lastZone = zone;
             if (zone !== lastBattleZone) {
                 return 'escape';
             }

@@ -48,6 +48,12 @@ BSWG.compAnchored = function(self) {
 BSWG.updateOnCC = function (a, b) {
 
     var cc = a.onCC || (b && b.onCC ? b.onCC : null);
+    if (!cc && a.type === 'cc') {
+        cc = a;
+    }
+    else if (!cc && b.type === 'cc') {
+        cc = a;
+    }
 
     var scan = function(n, u) {
 
