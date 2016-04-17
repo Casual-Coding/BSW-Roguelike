@@ -47,7 +47,7 @@ BSWG.compAnchored = function(self) {
 
 BSWG.updateOnCC = function (a, b) {
 
-    var cc = a.onCC || (b && b.onCC);
+    var cc = a.onCC || (b && b.onCC ? b.onCC : null);
 
     var scan = function(n, u) {
 
@@ -218,8 +218,13 @@ BSWG.component = function (desc, args) {
 
     this.takeDamage = function (amt, fromC, noMin) {
 
-        if (fromC && fromC.onCC && this.onCC && fromC.onCC.id === this.onCC.id) {
-            amt *= BSWG.friendlyFactor;
+        if (fromC && fromC.onCC && this.onCC) {
+            if (fromC.onCC.id === this.onCC.id) {
+                amt *= BSWG.friendlyFactor;
+            }
+            else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
+                amt *= BSWG.friendlyFactor;
+            }
         }
 
         if (amt < 1 && !noMin) {
@@ -1129,6 +1134,17 @@ BSWG.componentList = new function () {
                     offset.y -= C.pos.y;
                     break;
                 }
+            }
+        }
+
+        for (var i=0; i<comps.length; i++) {
+            var C = comps[i];
+            if (shipOnly && C.onCC === null) {
+                continue;
+            }
+            var pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
+            if (this.withinRadius(pos, 6).length) {
+                return null;
             }
         }
 

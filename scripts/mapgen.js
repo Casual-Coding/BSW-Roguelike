@@ -311,6 +311,55 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         return this.zones[best];
     };
 
+    var lastP = null;
+    var lastBattleP = null;
+    var lastBattleZone = null;
+    var lastZone = null;
+    var distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+
+    ret.tickSpawner = function(dt, p) {
+
+        var zone = ret.getZone(p);
+
+        if (BSWG.game.battleMode) {
+            lastBattleP = p.clone();
+            if (zone !== lastBattleZone) {
+                return 'escape';
+            }
+            return null;
+        }
+
+        if (zone !== lastZone) {
+            distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+        }
+
+        if (lastP) {
+            distanceLeft -= Math.distVec2(lastP, p);
+        }
+
+        if (!lastBattleP || Math.distVec2(lastBattleP, p) > ret.gridSize) {
+
+            if (zone.hasPlanet && zone.boss) {
+
+            }
+            else if (zone.enemies && zone.enemies.length) {
+                if (distanceLeft <= 0) {
+                    ret.escapeDistance = ret.gridSize * 6.0;
+                    lastBattleZone = zone;
+                    distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+                    return zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
+                }
+            }
+
+        }
+
+        lastP = p.clone();
+        lastZone = zone;
+
+        return null;
+
+    };
+
     BSWG.genMap_EnemyPlacement(ret, eInfo);
 
     return ret;

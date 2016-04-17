@@ -1,4 +1,4 @@
-BSWG.blasterDmg = 7.0;
+BSWG.blasterDmg = 3.0;
 
 BSWG.blasterList = new function () {
 
@@ -21,7 +21,7 @@ BSWG.blasterList = new function () {
             if (B.t <= 0.0 || (comp=BSWG.componentList.atPoint(B.p))) {
                 if (B.t <= 0.0 || comp !== B.source) {
                     if (comp && comp !== B.source) {
-                        comp.takeDamage(BSWG.blasterDmg, comp, true);
+                        comp.takeDamage(BSWG.blasterDmg, B.source, true);
                     }
                     if (B.t > 0.0) {
                         BSWG.render.boom.palette = chadaboom3D.blue_bright;

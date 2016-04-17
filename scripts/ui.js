@@ -435,7 +435,7 @@ BSWG.control_Button = {
 
                 var H = BSWG.ui_HM(w, h, aw, ah);
                 H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
-                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
             }, true);
 
@@ -583,7 +583,7 @@ BSWG.control_Menu = {
 
                 var H = BSWG.ui_HM(w, h, aw, ah);
                 H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
-                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
             }, true);
 
@@ -704,7 +704,7 @@ BSWG.control_CompPalette = {
 
                 var H = BSWG.ui_HM(w, h, aw, ah);
                 H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
-                BSWG.render.hightMapToNormalMap(H.H, ctx, w, h);
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
             }, true);
 
@@ -746,7 +746,7 @@ BSWG.control_CompPalette = {
         for (var i=0; i<this.headers.length; i++) {
             var H = this.headers[i];
             ctx.textAlign = 'left';
-            ctx.fillStyle = '#ddd';
+            ctx.fillStyle = '#ddf';
             ctx.strokeStyle = '#111';
             ctx.fillTextB(H.text, this.p.x + H.x, this.p.y + H.y + 12);            
         }
@@ -760,10 +760,10 @@ BSWG.control_CompPalette = {
             ctx.lineWidth = 2.0;
 
             ctx.fillStyle = B.mouseDown ?
-                'rgba(16, 16, 16, 0.9)' :
+                'rgba(32, 32, 32, 0.9)' :
                 (B.mouseIn ?
-                    'rgba(64, 64, 64, 0.8)' :
-                    'rgba(64, 64, 64, 0.6)'
+                    'rgba(128, 128, 128, 0.8)' :
+                    'rgba(128, 128, 128, 0.5)'
                 );
             ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
 

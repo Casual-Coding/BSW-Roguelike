@@ -368,7 +368,7 @@ BSWG.render = new function() {
 
     };
 
-    this.hightMapToNormalMap = function (srcHm, dstCtx, w, h) {
+    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h) {
 
         var H = function(a, b) {
             if (a < 0 || b < 0 || a >= w || b >= h) {

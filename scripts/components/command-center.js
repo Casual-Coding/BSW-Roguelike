@@ -111,6 +111,19 @@ BSWG.component_CommandCenter = {
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
     },
 
+    warpOut: function() {
+        var len = BSWG.componentList.compList.length;
+        for (var i=0; i<len; i++) {
+            var C = BSWG.componentList.compList[i];
+            if (C && ((C.onCC && C.onCC.id === this.id) || (C.id === this.id))) {
+                C.onCC = null;
+                C.hp = 0;
+                C.destroyed = true;
+                C.removeSafe();
+            }
+        }
+    },
+
     update: function(dt) {
 
         this.dispKeys['left'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.LEFT);
