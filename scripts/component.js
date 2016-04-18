@@ -7,6 +7,9 @@ BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
 
+BSWG.archiveRange = 200.0;
+BSWG.arch_hashSize = 25.0;
+
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var chars2 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -690,6 +693,20 @@ BSWG.componentList = new function () {
 
     this.clear = function () {
 
+        for (var key in this.archHash) {
+            if (this.archHash[key] &&  this.archHash[key].length) {
+                var lst = this.archHash[key];
+                for (var i=0; i<lst.length; i++) {
+                    lst[i] = null;
+                }
+                lst.length = 0;
+            }
+            this.archHash[key] = null;
+            delete this.archHash[key];
+        }
+
+        this.archHash = {};
+
         this.typeMap = {
             'blaster':          BSWG.component_Blaster,
             'block':            BSWG.component_Block,
@@ -827,6 +844,19 @@ BSWG.componentList = new function () {
         return x + y * 10000000;
     };
 
+    this.aHashXY = function ( v ) {
+        return Math.floor(v/BSWG.arch_hashSize);
+    };
+    this.aHashKey = function ( x, y ) {
+        return Math.floor(x/BSWG.arch_hashSize) + Math.floor(y/BSWG.arch_hashSize) * 10000000;
+    };
+    this.aHashKey2 = function ( x, y ) {
+        return x + y * 10000000;
+    };
+
+    this.archHash = {};
+    this.archObjNextID = 1;
+
     this.update = function (dt) {
 
         for (var key in this.hash) {
@@ -884,6 +914,104 @@ BSWG.componentList = new function () {
         this.compRemove.length = 0;
         this.autoWelds = null;
 
+        len = this.compList.length;
+        for (var i=0; i<len; i++) {
+            var C = this.compList[i];
+            if (C.onCC === null && C.type !== 'cc') {
+                var list = this.shouldArc(C);
+                if (list && list.length) {
+                    var arch = this.serialize(null, null, list);
+                    arch.archived = true;
+                    arch.id = this.archObjNextID++;
+                    console.log('Archiving ' + list.length + ' objects');
+                    console.log('compList len before: ' + this.compList.length);
+                    for (var j=0; j<list.length; j++) {
+                        if (list[j].obj && list[j].obj.body) {
+                            var p = list[j].obj.body.GetWorldCenter();
+                            var key = this.aHashKey(p.x, p.y);
+                            if (!this.archHash[key]) {
+                                this.archHash[key] = new Array();
+                            }
+                            this.archHash[key].push(arch);
+                        }
+                        this.remove(list[j]);
+                    }
+                    console.log('compList len after: ' + this.compList.length);
+                    len = this.compList.length;
+                    i = -1;
+                    continue;
+                }
+            }
+        }
+
+        var _x1 = this.aHashXY(BSWG.game.cam.x - BSWG.archiveRange);
+        var _y1 = this.aHashXY(BSWG.game.cam.y - BSWG.archiveRange);
+        var _x2 = this.aHashXY(BSWG.game.cam.x + BSWG.archiveRange);
+        var _y2 = this.aHashXY(BSWG.game.cam.y + BSWG.archiveRange);
+
+        var x1 = Math.min(_x1, _x2) + 2;
+        var x2 = Math.max(_x1, _x2) - 2;
+        var y1 = Math.min(_y1, _y2) + 2;
+        var y2 = Math.max(_y1, _y2) - 2;
+
+        for (var x=x1; x<=x2; x++) {
+            for (var y=y1; y<=y2; y++) {
+                var key = this.aHashKey2(x, y);
+                if (this.archHash[key] && this.archHash[key].length) {
+                    var list = this.archHash[key];
+                    for (var i=0; i<list.length; i++) {
+                        if (!list[i].archived) {
+                            list.splice(i, 1);
+                            i -= 1;
+                            continue;
+                        }
+                        console.log(x1, y1, x2, y2);
+                        console.log('Unarchiving ' + list[i].list.length + ' objects');
+                        console.log('compList len before: ' + this.compList.length);
+                        if (this.load(list[i], null, true, true) === -1) {
+                            console.log('Unarchive failed (collision)');
+                        }
+                        else {
+                            list[i].archived = false;
+                            list.splice(i, 1);
+                            i -= 1;
+                            console.log('compList len after: ' + this.compList.length);
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+    };
+
+    this.shouldArc = function (C, u, o) {
+        if (!u) u = {};
+        if (!o) o = [];
+        if (u[C.id]) {
+            return o;
+        }
+        u[C.id] = true;
+
+        if (C.obj && C.obj.body) {
+            if (C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {
+                o.push(C);
+                if (C.welds) {
+                    for (var key in C.welds) {
+                        if (C.welds[key]) {
+                            if (!this.shouldArc(C.welds[key].other, u, o)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                return false;
+            }
+        }
+
+        return o;
     };
 
     this.render = function (ctx, cam, dt) {
@@ -1120,7 +1248,7 @@ BSWG.componentList = new function () {
     };
 
     this.autoWelds = null;
-    this.load = function(obj, spawn) {
+    this.load = function(obj, spawn, noArch, archRadCheck) {
 
         var comps = obj.list;
         var cc = null;
@@ -1149,8 +1277,20 @@ BSWG.componentList = new function () {
                 continue;
             }
             var pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
-            if (this.withinRadius(pos, 6).length) {
-                return null;
+            if (archRadCheck) {
+                var lst = this.withinRadius(pos, 4);
+                if (lst && lst.length) {
+                    for (var j=0; j<lst.length; j++) {
+                        if (lst[j].onCC) {
+                            return -1;
+                        }
+                    }
+                }
+            }
+            else {
+                if (this.withinRadius(pos, 6).length) {
+                    return null;
+                }               
             }
         }
 
@@ -1194,22 +1334,52 @@ BSWG.componentList = new function () {
             }
         }
 
+        if (obj.arch && !shipOnly && !noArch) {
+            this.archHash = deepcopy(obj.arch);
+            this.archObjNextID = obj.archObjNextID || 1;
+            if (BSWG.archiveRange !== obj.archiveRange || BSWG.arch_hashSize !== obj.arch_hashSize) {
+                console.log('Warning: Archive range and/or archive hash size don\'t match.');
+            }
+
+            // Turn duplicate stored objects into references to single object
+            var idMap = {};
+            for (var key in this.archHash) {
+                var L = this.archHash[key];
+                if (L && L.length) {
+                    for (var i=0; i<L.length; i++) {
+                        if (L[i] && L[i].id) {
+                            if (!idMap[L[i].id]) {
+                                idMap[L[i].id] = L[i];
+                            }
+                            else {
+                                L[i] = idMap[L[i].id];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return cc;
 
     };
 
     // returns JSON
-    this.serialize = function(onCC, everything) {
+    this.serialize = function(onCC, everything, fromList) {
 
-        var comps = new Array();
+        var comps = fromList || new Array();
 
-        // Filter list
-        for (var i=0; i<this.compList.length; i++) {
-            var C = this.compList[i];
+        if (!fromList) {
 
-            if (C.serialize && (everything || C.onCC === onCC)) {
-                comps.push(C);
+            // Filter list
+            for (var i=0; i<this.compList.length; i++) {
+                var C = this.compList[i];
+
+                if (C.serialize && (everything || C.onCC === onCC)) {
+                    comps.push(C);
+                }
             }
+
         }
 
         var out = new Array(comps.length);
@@ -1255,6 +1425,13 @@ BSWG.componentList = new function () {
 
         var ret = new Object();
         ret.list = out;
+
+        if (everything) {
+            ret.arch = deepcopy(this.archHash);
+            ret.archiveRange = BSWG.archiveRange;
+            ret.arch_hashSize = BSWG.arch_hashSize;
+            ret.archObjNextID = this.archObjNextID;
+        }
 
         return ret;
 
