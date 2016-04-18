@@ -511,6 +511,10 @@ BSWG.component = function (desc, args) {
 
     this.baseUpdate = function(dt) {
 
+        if (!BSWG.game.battleMode && this.onCC && BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
+            this.takeDamage(-dt*5.0, null, true);
+        }
+
         if (BSWG.compAnchored(this)) {
             if (this.obj && this.obj.body) {
                 this.obj.body.SetAngularDamping(5.0);
