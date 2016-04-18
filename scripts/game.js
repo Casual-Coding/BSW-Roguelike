@@ -241,6 +241,9 @@ BSWG.game = new function(){
                 );
 
                 aiship = BSWG.componentList.load(list[i], {p: p2});
+                if (aiship) {
+                    aiship.title = list[i].title;
+                }
                 window.setTimeout(function(ais){
                     return function() {
                         if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
@@ -258,6 +261,24 @@ BSWG.game = new function(){
     };
 
     var wheelStart = 0;
+
+    this.lastSave = -1000;
+
+    this.saveGame = function () {
+
+        if (this.scene === BSWG.SCENE_GAME1 && window.localStorage) {
+
+            // SAVE
+
+            this.lastSave = Date.timeStamp();
+
+        }
+
+    };
+
+    this.loadGame = function () {
+
+    };
 
     this.initScene = function (scene, args)
     {
@@ -533,21 +554,6 @@ BSWG.game = new function(){
                             }
                         }
                     });
-                    this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
-                        x: 10 + 65 + 10 + 65 + 10, y: 10,
-                        w: 65, h: 65,
-                        text: 'Export',
-                        selected: false,
-                        click: function (me) {
-                            if (self.scene === BSWG.SCENE_GAME2) {
-                                setExportFN();
-                                JSON.saveAs(
-                                    BSWG.componentList.serialize(null, true),
-                                    self.exportFN
-                                );
-                            }
-                        }
-                    });
                     this.loadBtn = new BSWG.uiControl(BSWG.control_Button, {
                         x: 10 + 50 + 10 + 50 + 10, y: 10,
                         w: 110, h: 65,
@@ -640,6 +646,25 @@ BSWG.game = new function(){
 
                     };
                 }
+
+                this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
+                    x: 10 + 65 + 10 + 65 + 10, y: 10,
+                    w: 65, h: 65,
+                    text: self.scene === BSWG.SCENE_GAME1 ? BSWG.render.images['save'] : 'Export',
+                    selected: false,
+                    click: function (me) {
+                        if (self.scene === BSWG.SCENE_GAME2) {
+                            setExportFN();
+                            JSON.saveAs(
+                                BSWG.componentList.serialize(null, true),
+                                self.exportFN
+                            );
+                        }
+                        else {
+                            self.saveGame();
+                        }
+                    }
+                });
 
                 this.saveHealAdded = false;
 
@@ -1143,14 +1168,20 @@ BSWG.game = new function(){
                         self.saveBtn.w = self.hudX(self.hudBtn[15][2]) - self.saveBtn.p.x - 2;
                         self.saveBtn.h = self.hudY(self.hudBtn[15][3]) - self.saveBtn.p.y - 2;
                     }
+                    else if (self.scene === BSWG.SCENE_GAME1 && self.saveBtn) {
+                        self.saveBtn.p.x = self.hudX(self.hudBtn[9][0]) + 1;
+                        self.saveBtn.p.y = self.hudY(self.hudBtn[9][1]) + 1;
+                        self.saveBtn.w = self.hudX(self.hudBtn[9][2]) - self.saveBtn.p.x - 2;
+                        self.saveBtn.h = self.hudY(self.hudBtn[9][3]) - self.saveBtn.p.y - 2;
+                    }
 
                 default:
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter())) {
+            if (self.ccblock && !self.ccblock.destroyed && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter()) && (Date.timeStamp()-self.lastSave) > 3) {
                 if (!self.saveHealAdded) {
-                    //self.saveBtn.add();
+                    self.saveBtn.add();
                     //self.healBtn.add();
                     self.saveHealAdded = true;
                 }
@@ -1159,7 +1190,7 @@ BSWG.game = new function(){
             }
             else {
                 if (self.saveHealAdded) {
-                    //self.saveBtn.remove();
+                    self.saveBtn.remove();
                     //self.healBtn.remove();
                     self.saveHealAdded = false;
                 }
@@ -1372,7 +1403,32 @@ BSWG.game = new function(){
                     ctx.strokeStyle = '#226';
                     ctx.font = '18px Orbitron';
                     ctx.textAlign = 'left';
-                    ctx.fillTextB(self.inZone.name + ' - L' + self.inZone.minLevel + '', x + 15, y + 10 + 18);
+                    if (self.battleMode) {
+                        var fs = (~~(h/6)) - 1;
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.fillStyle = '#f88';
+                        ctx.strokeStyle = '#622';
+                        var ccs = BSWG.componentList.allCCs();
+                        var idx = 0;
+                        for (var i=0; i<ccs.length; i++) {
+                            if (!self.ccblock || ccs[i].id !== self.ccblock.id) {
+                                if (idx >= 8) {
+                                    break;
+                                }
+                                var xx = idx % 2;
+                                var yy = (idx-xx) / 2;
+
+                                xx *= (w-15) / 2;
+                                yy *= fs + 1;
+
+                                ctx.fillTextB(ccs[i].title || 'Unkown Enemy', x + 15 + xx, y + 10 + fs + yy);
+                                idx ++;
+                            }
+                        }
+                    }
+                    else {
+                        ctx.fillTextB(self.inZone.name + ' - L' + self.inZone.minLevel + '', x + 15, y + 10 + 18);
+                    }
                 }
             }
 

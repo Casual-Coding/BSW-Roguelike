@@ -10,9 +10,40 @@ BSWG.getEnemy = function(type) {
         BSWG.enemyStats[type] = stats;
     }
 
+    var title = 'Unkown Enemy';
+
+    switch (type) {
+        case 'big-flail':       title = 'Big Flail'; break;
+        case 'big-spinner':     title = 'Big Spinner'; break;
+        case 'brute':           title = 'Brute'; break; 
+        case 'crippler':        title = 'Crippler'; break;
+        case 'cruncher-boss':   title = 'Crimson Cruncher'; break;
+        case 'fighter':         title = 'Fighter'; break;
+        case 'four-blaster':    title = '4x Blaster'; break;
+        case 'heavy-fighter':   title = 'Heavy Fighter'; break;
+        case 'laser-fighter':   title = 'Laser Fighter'; break;
+        case 'little-brute':    title = 'Little Brute'; break;
+        case 'little-charger-2':title = 'Little Charger X'; break;
+        case 'little-charger':  title = 'Little Charger Y'; break;
+        case 'little-cruncher': title = 'Little Cruncher'; break;
+        case 'mele-boss':       title = 'Mele Monster'; break;
+        case 'missile-boss':    title = 'Flail'; break;
+        case 'missile-spinner': title = 'Missile Spinner'; break;
+        case 'msl-fighter':     title = 'Missile Fighter'; break;
+        case 'scorpion':        title = 'Scorpion'; break;
+        case 'spinner':         title = 'Spinner'; break;
+        case 'uni-dir-fighter': title = 'Uni-Fighter'; break;
+        case 'uni-fight-msl':   title = 'Uni-Fighter II'; break;
+        case 'uni-laser':       title = 'Scanner'; break;
+        default: break;
+    }
+
+    eobj.title = title;
+
     return {
         obj: eobj,
         stats: stats,
+        title: title,
         compStats: function (ostats) {
             var ustats = {};
             for (var stat in stats) {

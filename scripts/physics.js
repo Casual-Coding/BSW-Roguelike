@@ -12,7 +12,7 @@ BSWG.physics = new function(){
     this.maxWeldForce       = 5000.0;
     this.welds              = [];
     this.objects            = [];
-    this.baseDamping        = 0.45;
+    this.baseDamping        = 0.225;
 
     this.init = function (){
 

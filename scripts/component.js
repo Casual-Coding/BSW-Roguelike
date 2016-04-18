@@ -523,8 +523,8 @@ BSWG.component = function (desc, args) {
         }
         else {
             if (this.obj && this.obj.body) {
-                this.obj.body.SetAngularDamping(0.1);
-                this.obj.body.SetLinearDamping(0.1);
+                this.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
+                this.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
             }
         }
 
