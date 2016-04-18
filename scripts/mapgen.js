@@ -89,151 +89,262 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
     var ret = new Object();
 
-    size       = size || 128;
-    numZones   = numZones || 20;
-    numPlanets = numPlanets || 5;
-    areaNo     = areaNo || 0;
+    if (typeof size === 'object') {
 
-    var eInfo = BSWG.enemySettings[areaNo];
+        var scan = function (obj) {
+        
+            ret = size;
 
-    ret.size     = size;
-    ret.zones    = new Array(numZones);
-    ret.gridSize = BSWG.map_gridSize;
-    ret.zoneMap  = new Array(size);
-    ret.edgeMap  = new Array(size);
-    ret.planets  = new Array(numPlanets);
+            if (typeof obj === 'object') {
+                for (var k in obj) {
+                    if (obj[k] && obj[k].__isVec) {
+                        obj[k] = new b2Vec2(obj[k].x, obj[k].y);
+                    }
+                    else if (obj[k] && obj[k].__isZone) {
+                        obj[k] = ret.zones[obj[k].index];
+                    }
+                    else {
+                        scan(obj[k]);
+                    }
+                }
+            }
 
-    for (var i=0; i<size; i++) {
-        ret.zoneMap[i] = new Array(size);
-        ret.edgeMap[i] = new Array(size);
-        for (var j=0; j<size; j++) {
-            ret.zoneMap[i][j] = -1;
-            ret.edgeMap[i][j] = -1;
+        };
+
+        scan(ret);
+
+        for (var i=0; i<ret.planets.length; i++) {
+            if (!ret.planet[i].pobj) {
+                console.log('Map load error: Couldn\'t load planet');
+            }
+            else {
+                ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
+            }
         }
+
+    }
+    else {
+
+        size       = size || 128;
+        numZones   = numZones || 20;
+        numPlanets = numPlanets || 5;
+        areaNo     = areaNo || 0;
+
+        ret.eInfo = BSWG.enemySettings[areaNo];
+
+        ret.size     = size;
+        ret.areaNo   = areaNo;
+        ret.zones    = new Array(numZones);
+        ret.gridSize = BSWG.map_gridSize;
+        ret.zoneMap  = new Array(size);
+        ret.edgeMap  = new Array(size);
+        ret.planets  = new Array(numPlanets);
+        ret.enemies_placed = false;
+
+        for (var i=0; i<size; i++) {
+            ret.zoneMap[i] = new Array(size);
+            ret.edgeMap[i] = new Array(size);
+            for (var j=0; j<size; j++) {
+                ret.zoneMap[i][j] = -1;
+                ret.edgeMap[i][j] = -1;
+            }
+        }
+
+        var randPoint = function() {
+            return new b2Vec2(Math.random()*(size-(BSWG.map_minZoneDist*2)) + BSWG.map_minZoneDist,
+                              Math.random()*(size-(BSWG.map_minZoneDist*2)) + BSWG.map_minZoneDist);
+        };
+
+        for (var i=0; i<numZones; i++) {
+            var k;
+            for (k=0; k<1000; k++) {
+                var p = randPoint();
+                var valid = true;
+                for (var j=0; j<i && valid; j++) {
+                    if (Math.distSqVec2(p, ret.zones[j].p) < BSWG.map_minZoneDist*BSWG.map_minZoneDist) {
+                        valid = false;
+                    }
+                }
+                if (valid) {
+                    ret.zones[i] = new Object();
+                    ret.zones[i].p = p;
+                    ret.zones[i].name = BSWG.randomName.get();
+                    ret.zones[i].discovered = false;
+                    break;
+                }
+            }
+            if (k >= 1000) {
+                numZones = i;
+                ret.zones.length = numZones;
+                if (i === 0) {
+                    console.log('Map generation error: Number of zones forced to 0');
+                }
+                if (i < numPlanets) {
+                    console.log('Map generator error: Number of zones forced to less than number of planets')
+                }
+                break;
+            }
+        }
+
+        var found = false;
+        for (var i=0; i<numZones && !found; i++) {
+            for (var j=i+1; j<numZones && !found; j++) {
+                if (Math.distVec2(ret.zones[i].p, ret.zones[j].p) > size*BSWG.map_flPlanetDist) {
+                    ret.planets[0] = new Object();
+                    ret.planets[1] = new Object();
+                    ret.planets[0].zone = ret.zones[i];
+                    ret.planets[1].zone = ret.zones[j];
+                    ret.planets[0].p = ret.zones[i].p;
+                    ret.planets[1].p = ret.zones[j].p;
+                    ret.planets[0].worldP = new b2Vec2(ret.planets[0].p.x * ret.gridSize, ret.planets[0].p.y * ret.gridSize);
+                    ret.planets[1].worldP = new b2Vec2(ret.planets[1].p.x * ret.gridSize, ret.planets[1].p.y * ret.gridSize);
+                    ret.zones[i].hasPlanet = true;
+                    ret.zones[j].hasPlanet = true;
+                    ret.zones[i].home = true;
+                    ret.zones[j].end = true;
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            return BSWG.genMap(size, numZones, numPlanets);
+        }
+
+        for (var i=2; i<numPlanets; i++) {
+            var k;
+            for (k=0; k<1000; k++) {
+                var z = ret.zones[~~(Math.random()*ret.zones.length)];
+                var valid = true;
+                for (var j=0; j<i && valid; j++) {
+                    if (Math.distVec2(z.p, ret.planets[j].p) < BSWG.map_minPlanetDist) {
+                        valid = false;
+                    }
+                }
+                if (valid) {
+                    ret.planets[i] = new Object();
+                    ret.planets[i].zone = z;
+                    ret.planets[i].p = z.p;
+                    ret.planets[i].worldP = new b2Vec2(ret.planets[i].p.x * ret.gridSize, ret.planets[i].p.y * ret.gridSize);
+                    z.hasPlanet = true;
+                    break;
+                }
+            }
+            if (k >= 1000) {
+                numPlanets = i;
+                ret.planets.length = numPlanets;
+            }
+        }
+
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                var p = new b2Vec2(x, y);
+                var best = 0;
+                for (var i=1; i<numZones; i++) {
+                    var dista = Math.distSqVec2(ret.zones[best].p, p);
+                    var distb = Math.distSqVec2(ret.zones[i].p, p)
+                    if (ret.zones[best].hasPlanet && dista > (BSWG.map_planetSafeDist*BSWG.map_planetSafeDist)) {
+                        dista *= 1000.0;
+                    }
+                    if (ret.zones[i].hasPlanet && distb > (BSWG.map_planetSafeDist*BSWG.map_planetSafeDist)) {
+                        distb *= 1000.0;
+                    }
+                    if (dista > distb) {
+                        best = i;
+                    }
+                }
+                ret.zoneMap[x][y] = best;
+            }
+        }
+
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                if (x === 0 || y === 0 || x === (size-1) || y === (size-1) ||
+                    ret.zoneMap[x-1][y] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x+1][y] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x][y-1] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x][y+1] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x-1][y-1] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x+1][y+1] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x+1][y-1] !== ret.zoneMap[x][y] ||
+                    ret.zoneMap[x-1][y+1] !== ret.zoneMap[x][y])
+                    ret.edgeMap[x][y] = ret.zoneMap[x][y];
+            }
+        }
+
     }
 
-    var randPoint = function() {
-        return new b2Vec2(Math.random()*(size-(BSWG.map_minZoneDist*2)) + BSWG.map_minZoneDist,
-                          Math.random()*(size-(BSWG.map_minZoneDist*2)) + BSWG.map_minZoneDist);
+    ret.serialize = function () {
+
+        var self = this;
+
+        for (var i=0; i<this.zones.length; i++) {
+            this.zones[i].__zoneIndex = (i+1);
+        }
+
+        var ZU = {};
+
+        var scan = function(obj) {
+            if (obj instanceof Array) {
+                var R = new Array(obj.length);
+                for (var i=0; i<obj.length; i++) {
+                    R[i] = scan(obj[i]);
+                }
+                return R;
+            }
+            else if (typeof obj === 'object' && obj) {
+                if (typeof obj.serialize === 'function' && obj !== self) {
+                    return obj.serialize();
+                }
+                else if (obj instanceof b2Vec2) {
+                    return {
+                        x: obj.x,
+                        y: obj.y,
+                        __isVec: true
+                    };
+                }
+                else if (obj instanceof BSWG.uiControl) {
+                    return null;
+                }
+                else if (obj instanceof BSWG.song) {
+                    return null;
+                }
+                else {
+                    if (obj.__zoneIndex) {
+                        if (ZU[obj.__zoneIndex]) {
+                            return {
+                                __isZone: true,
+                                index: (obj.__zoneIndex-1)
+                            };
+                        }
+                        else {
+                            ZU[obj.__zoneIndex] = true;
+                        }
+                    }
+                    var R = new Object();
+                    if (obj.zones) { // zones first
+                        R.zones = scan(obj.zones);
+                    }
+                    for (var key in obj) {
+                        if (key === 'zones') {
+                            continue;
+                        }
+                        R[key] = scan(obj[key]);
+                    }
+                    return R;
+                }
+            }
+            else if (typeof obj === 'function') {
+                return null;
+            }
+            else {
+                return obj;
+            }
+        };
+
+        return scan(this);
+
     };
-
-    for (var i=0; i<numZones; i++) {
-        var k;
-        for (k=0; k<1000; k++) {
-            var p = randPoint();
-            var valid = true;
-            for (var j=0; j<i && valid; j++) {
-                if (Math.distSqVec2(p, ret.zones[j].p) < BSWG.map_minZoneDist*BSWG.map_minZoneDist) {
-                    valid = false;
-                }
-            }
-            if (valid) {
-                ret.zones[i] = new Object();
-                ret.zones[i].p = p;
-                ret.zones[i].name = BSWG.randomName.get();
-                ret.zones[i].discovered = false;
-                break;
-            }
-        }
-        if (k >= 1000) {
-            numZones = i;
-            ret.zones.length = numZones;
-            if (i === 0) {
-                console.log('Map generation error: Number of zones forced to 0');
-            }
-            if (i < numPlanets) {
-                console.log('Map generator error: Number of zones forced to less than number of planets')
-            }
-            break;
-        }
-    }
-
-    var found = false;
-    for (var i=0; i<numZones && !found; i++) {
-        for (var j=i+1; j<numZones && !found; j++) {
-            if (Math.distVec2(ret.zones[i].p, ret.zones[j].p) > size*BSWG.map_flPlanetDist) {
-                ret.planets[0] = new Object();
-                ret.planets[1] = new Object();
-                ret.planets[0].zone = ret.zones[i];
-                ret.planets[1].zone = ret.zones[j];
-                ret.planets[0].p = ret.zones[i].p;
-                ret.planets[1].p = ret.zones[j].p;
-                ret.planets[0].worldP = new b2Vec2(ret.planets[0].p.x * ret.gridSize, ret.planets[0].p.y * ret.gridSize);
-                ret.planets[1].worldP = new b2Vec2(ret.planets[1].p.x * ret.gridSize, ret.planets[1].p.y * ret.gridSize);
-                ret.zones[i].hasPlanet = true;
-                ret.zones[j].hasPlanet = true;
-                ret.zones[i].home = true;
-                ret.zones[j].end = true;
-                found = true;
-            }
-        }
-    }
-
-    if (!found) {
-        return BSWG.genMap(size, numZones, numPlanets);
-    }
-
-    for (var i=2; i<numPlanets; i++) {
-        var k;
-        for (k=0; k<1000; k++) {
-            var z = ret.zones[~~(Math.random()*ret.zones.length)];
-            var valid = true;
-            for (var j=0; j<i && valid; j++) {
-                if (Math.distVec2(z.p, ret.planets[j].p) < BSWG.map_minPlanetDist) {
-                    valid = false;
-                }
-            }
-            if (valid) {
-                ret.planets[i] = new Object();
-                ret.planets[i].zone = z;
-                ret.planets[i].p = z.p;
-                ret.planets[i].worldP = new b2Vec2(ret.planets[i].p.x * ret.gridSize, ret.planets[i].p.y * ret.gridSize);
-                z.hasPlanet = true;
-                break;
-            }
-        }
-        if (k >= 1000) {
-            numPlanets = i;
-            ret.planets.length = numPlanets;
-        }
-    }
-
-
-    for (var x=0; x<size; x++) {
-        for (var y=0; y<size; y++) {
-            var p = new b2Vec2(x, y);
-            var best = 0;
-            for (var i=1; i<numZones; i++) {
-                var dista = Math.distSqVec2(ret.zones[best].p, p);
-                var distb = Math.distSqVec2(ret.zones[i].p, p)
-                if (ret.zones[best].hasPlanet && dista > (BSWG.map_planetSafeDist*BSWG.map_planetSafeDist)) {
-                    dista *= 1000.0;
-                }
-                if (ret.zones[i].hasPlanet && distb > (BSWG.map_planetSafeDist*BSWG.map_planetSafeDist)) {
-                    distb *= 1000.0;
-                }
-                if (dista > distb) {
-                    best = i;
-                }
-            }
-            ret.zoneMap[x][y] = best;
-        }
-    }
-
-    for (var x=0; x<size; x++) {
-        for (var y=0; y<size; y++) {
-            if (x === 0 || y === 0 || x === (size-1) || y === (size-1) ||
-                ret.zoneMap[x-1][y] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x+1][y] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x][y-1] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x][y+1] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x-1][y-1] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x+1][y+1] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x+1][y-1] !== ret.zoneMap[x][y] ||
-                ret.zoneMap[x-1][y+1] !== ret.zoneMap[x][y])
-                ret.edgeMap[x][y] = ret.zoneMap[x][y];
-        }
-    }
 
     ret.renderZoneMap = function (ctx, clr, flipY, scale, onlyDisc) {
 
@@ -244,11 +355,11 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         for (var x=0; x<this.size; x++) {
             for (var y=0; y<this.size; y++) {
-                var val = ret.zoneMap[x][y];
+                var val = this.zoneMap[x][y];
                 if (val > -1 && (!onlyDisc || this.zones[val].discovered)) {
-                    ctx.globalAlpha = alpha * (val+1) / ret.zones.length * 0.5;
+                    ctx.globalAlpha = alpha * (val+1) / this.zones.length * 0.5;
                     ctx.fillRect(x*scale, (flipY ? (this.size-1)-y : y) * scale, scale, scale);
-                    ctx.globalAlpha = alpha * (val+1) / ret.zones.length * 0.5;
+                    ctx.globalAlpha = alpha * (val+1) / this.zones.length * 0.5;
                     ctx.fillRect(x*scale-scale/2, (flipY ? (this.size-1)-y : y) * scale-scale/2, scale*2, scale*2);
                 }
             }
@@ -269,7 +380,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         for (var x=0; x<this.size; x++) {
             for (var y=0; y<this.size; y++) {
-                var val = ret.edgeMap[x][y];
+                var val = this.edgeMap[x][y];
                 if (val > -1 && (!onlyDisc || this.zones[val].discovered)) {
                     ctx.fillRect(x*scale+scale/4, (flipY ? (this.size-1)-y : y) * scale+scale/4, scale/2, scale/2);
                     ctx.fillRect(x*scale, (flipY ? (this.size-1)-y : y) * scale, scale, scale);
@@ -319,10 +430,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
     ret.tickSpawner = function(dt, p) {
 
-        var zone = ret.getZone(p);
+        var zone = this.getZone(p);
 
         if (BSWG.game.battleMode) {
-            distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+            distanceLeft = Math.random() * 10 * this.gridSize + 6 * this.gridSize;
             lastBattleP = p.clone();
             lastP = p.clone();
             lastZone = zone;
@@ -333,23 +444,23 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         }
 
         if (zone !== lastZone) {
-            distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+            distanceLeft = Math.random() * 10 * this.gridSize + 6 * this.gridSize;
         }
 
         if (lastP) {
             distanceLeft -= Math.distVec2(lastP, p);
         }
 
-        if (!lastBattleP || Math.distVec2(lastBattleP, p) > ret.gridSize) {
+        if (!lastBattleP || Math.distVec2(lastBattleP, p) > this.gridSize) {
 
             if (zone.hasPlanet && zone.boss) {
 
             }
             else if (zone.enemies && zone.enemies.length) {
                 if (distanceLeft <= 0) {
-                    ret.escapeDistance = ret.gridSize * 6.0;
+                    this.escapeDistance = this.gridSize * 6.0;
                     lastBattleZone = zone;
-                    distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+                    distanceLeft = Math.random() * 10 * this.gridSize + 6 * this.gridSize;
                     return zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
                 }
             }
@@ -363,7 +474,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
     };
 
-    BSWG.genMap_EnemyPlacement(ret, eInfo);
+    if (!ret.enemies_placed) {
+        BSWG.genMap_EnemyPlacement(ret, ret.eInfo);
+        ret.enemies_placed = true;
+    }
 
     return ret;
 
@@ -389,7 +503,7 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         zone.maxLevel = Math.ceil(Math.max(level1, level2));
         zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-2);
 
-        BSWG.getMap_MusicSettings_Zone(zone, eInfo);
+        BSWG.genMap_MusicSettings_Zone(zone, eInfo);
 
         if (!zone.hasPlanet) {
             BSWG.genMap_EnemyPlacement_Zone(zone, eInfo);
@@ -409,7 +523,7 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
 
 };
 
-BSWG.getMap_MusicSettings_Zone = function(zone, eInfo) {
+BSWG.genMap_MusicSettings_Zone = function(zone, eInfo) {
 
     var diff = Math.random() * (zone.maxLevel - zone.minLevel) + zone.minLevel;
     diff -= eInfo.minLevel * 0.5;
@@ -443,6 +557,34 @@ BSWG.getMap_MusicSettings_Zone = function(zone, eInfo) {
         capSettings.intense *= 0.5;
         zone.musicCapSettings = capSettings;
         zone.songCap = new BSWG.song(3, bpm, 0.0, capSettings);
+    }
+
+};
+
+BSWG.genMap_LoadMusicSettings_Zone = function(zone, eInfo) {
+
+    if (zone.musicBPM && zone.musicSettings) {
+
+        var settings = zone.musicSettings;
+        Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
+        zone.song = new BSWG.song(3, zone.musicBPM, 0.0, settings);
+
+        if (zone.hasPlanet) {
+            var capSettings = zone.musicCapSettings;
+            if (!capSettings) {
+                capSettings = {};
+                for (var key in settings) {
+                    capSettings[key] = settings[key];
+                }
+                capSettings.happy = Math.random()*0.4 + 0.6;
+                capSettings.intense *= 0.5;
+                zone.musicCapSettings = capSettings;
+            }
+            zone.songCap = new BSWG.song(3, zone.musicBPM, 0.0, capSettings);
+        }
+    }
+    else {
+        BSWG.genMap_MusicSettings_Zone(zone, eInfo);
     }
 
 };

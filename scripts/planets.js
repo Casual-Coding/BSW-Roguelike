@@ -47,7 +47,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             radius:    -1,
             type:      -1,
             seed:      Date.timeStamp(),
-            ringScale: -1
+            ringScale: -1,
+            captured:  false
         };
 
         var obj = new Object();
@@ -57,6 +58,9 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             obj[key] = def[key] || defaults[key];
             if (def[key] === 0) {
                 obj[key] = def[key];
+            }
+            if (key === 'pos' || key === 'rotVec') {
+                obj[key] = new THREE.Vector3(obj[key].x, obj[key].y, obj[key].z);
             }
         }
 
@@ -535,6 +539,20 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         };
 
+        obj.serialize = function() {
+            var ret = {};
+            for (var key in defaults) {
+                var value = obj[key];
+                if (key === 'pos' || key === 'rotVec') {
+                    ret[key] = { x: value.x, y: value.y, z: value.z };
+                }
+                else {
+                    ret[key] = value;
+                }
+            }
+            return ret;
+        };
+
         obj.update(BSWG.render.dt);
 
         BSWG.render.scene.add( obj.mesh );
@@ -543,6 +561,10 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         }
 
         this.planets.push(obj);
+
+        if (obj.captured) {
+            obj.capture(true);
+        }
 
         return obj;
 

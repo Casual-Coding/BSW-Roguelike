@@ -270,6 +270,12 @@ BSWG.game = new function(){
 
             // SAVE
 
+            var obj = new Object();
+            obj.map = this.map.serialize();
+            obj.comp = BSWG.componentList.serialize(null, true);
+
+            localStorage.game_save = JSON.stringify(obj);
+
             this.lastSave = Date.timeStamp();
 
         }
