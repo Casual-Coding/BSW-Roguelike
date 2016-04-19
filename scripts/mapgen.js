@@ -113,13 +113,18 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         scan(ret);
 
+        Math.seedrandom();
         for (var i=0; i<ret.planets.length; i++) {
-            if (!ret.planet[i].pobj) {
+            if (!ret.planets[i].pobj) {
                 console.log('Map load error: Couldn\'t load planet');
             }
             else {
                 ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
             }
+        }
+
+        for (var i=0; i<ret.zones.length; i++) {
+            BSWG.genMap_LoadMusicSettings_Zone(ret.zones[i], ret.eInfo);
         }
 
     }

@@ -549,9 +549,12 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
         return audioCtx.currentTime - startTime;
     };
 
+    this.started = false;
+
     this.start = function ( ) {
         var self = this;
         this.reset();
+        this.started = true;
         queue(BSWG.song_subBeat*8);
         this.setVolume(this.volume);
     };
@@ -559,6 +562,10 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
     this.setVolume = function (newVolume, time) {
 
         this.volume = newVolume;
+
+        if (!this.started) {
+            return;
+        }
 
         for (var i=0; i<this.channels.length; i++) {
             var C = this.channels[i];
@@ -574,6 +581,10 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
 
     this.stop = function (time) {
 
+        if (!this.started) {
+            return;
+        }
+
         patIndex = patternLength+1;
 
         for (var i=0; i<allBfrs.length; i++) {
@@ -583,6 +594,8 @@ BSWG.song = function(channels, bpm, initVolume, mood) {
             } catch (err) { }
         }
         allBfrs = null;
+
+        this.started = false;
 
     };
 
