@@ -1,6 +1,6 @@
 BSWG.planet_OwnRange = 30.0;
 
-BSWG.planet_SurfaceDetail = 4;
+BSWG.planet_SurfaceDetail = 5;
 BSWG.planet_CloudDetail = 3;
 
 BSWG.planet_TERRAN = 0;
@@ -24,6 +24,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             this.clear();
             return;
         }
+
+        this.baseGeom = new THREE.IcosahedronGeometry(0.9, surfaceRes);
 
         this.hasInit = true;
 
@@ -78,7 +80,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         var crators = false;
         var water = false;
         var hasRing = Math.random() < 0.5 ? true : false;
-        var smooth = 1;
+        var smooth = 4;
         var waterAnim = true;
         var waterScale = 1.0;
 
@@ -104,6 +106,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 break;
 
             case BSWG.planet_HELL:
+                water = true;
                 colors = [
                     new THREE.Vector4(0.7, 0.04, 0.04, 1.0),
                     new THREE.Vector4(0.55, 0.13, 0.13, 1.0),
@@ -144,6 +147,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 break;
 
             case BSWG.planet_DESERT:
+                water = true;
                 colors = [
                     new THREE.Vector4(0.25*2.25, 0.25*2.25, 0.15*2.25, 1.0),
                     new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.17*2.25, 1.0),
@@ -158,6 +162,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 break;
 
             case BSWG.planet_ICE:
+                water = true;
                 colors = [
                     new THREE.Vector4(0.8, 0.8, 1.0, 1.0),
                     new THREE.Vector4(0.6, 0.8, 1.0, 1.0),
@@ -192,7 +197,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         }
 
         if (obj.ringScale === -1) {
-            obj.ringScale = 0.9 + Math.random() * 0.55;
+            obj.ringScale = 1.0 + Math.random() * 0.45;
         }
 
         var ringcolors = new Array(4);
@@ -248,7 +253,7 @@ BSWG.planets = new function(surfaceRes, cloudRes){
 
         obj.rotVec.normalize();
 
-        obj.geom = new THREE.IcosahedronGeometry(0.9, surfaceRes);
+        obj.geom = this.baseGeom.clone();
         Math.seedrandom(obj.seed);
         var rand = new Math.random3dSlow();
         for (var i=0; i<obj.geom.vertices.length; i++) {

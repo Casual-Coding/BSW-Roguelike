@@ -28,9 +28,9 @@ void main() {
         clr = WATER;
         waterAmt = 1.0;
     }
-    else if (len < 0.9001 && extra.y > 0.5) {
-        waterAmt = 1.0 - (len-0.900) / 0.0001;
-        clr = mix(WATER, GRASS, (len-0.900) / 0.0001);
+    else if (len < 0.902 && extra.y > 0.5) {
+        waterAmt = 1.0 - (len-0.900) / 0.002;
+        clr = mix(WATER, GRASS, (len-0.900) / 0.002);
     }
     else if (len < 0.905 && extra.y < 0.5) {
         waterAmt = 1.0 - (len-0.900) / 0.005;
@@ -82,9 +82,9 @@ void main() {
     vec3 wNormal = normalize(clrw.xyz * 1.0 + vec3(0.25, 0.25, 0.25));
     vec3 lightDir = light.xyz - vPosition.xyz;
 
-    float l0 = clrn.a * 0.5 + 0.5;
-    float l1 = max(dot(normalize(vNormal+0.5*tNormal*dot(tNormal, vNormal)), normalize(lightDir)), 0.0);
-    float l1w = max(dot(normalize(vNormal+0.5*wNormal*dot(wNormal, vNormal)), normalize(lightDir)), 0.0);
+    float l0 = clrn.a * 0.75 + 0.25;
+    float l1 = pow(max(dot(normalize(vNormal+0.75*tNormal*dot(tNormal, vNormal)), normalize(lightDir)), 0.0), 2.0);
+    float l1w = max(dot(normalize(vNormal+0.75*wNormal*dot(wNormal, vNormal)), normalize(lightDir)), 0.0);
     l1 = waterAmt * l1w + (1.0 - waterAmt) * l1;
     l0 = l0 * (1.0-waterAmt) + waterAmt * ((clrw.a * 0.5) + 0.5);
     float l = 15.0 * ((min(l1, 1.0)*l0) / max(dot(lightDir/10.0, lightDir/10.0)*0.001 + 1.0, 10.0)) + 0.1;

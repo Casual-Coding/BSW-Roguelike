@@ -404,7 +404,7 @@ BSWG.game = new function(){
                         hoverColor: [0.95, 0.95, 0.95, 1.0],
                         noDestroy: true,
                         click: function (me) {
-                            self.changeScene(BSWG.SCENE_GAME1, {}, '#000', 0.75);
+                            self.changeScene(BSWG.SCENE_GAME1, {}, '#000');
                         }
                     });
                     this.loadGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
@@ -417,7 +417,7 @@ BSWG.game = new function(){
                         noDestroy: true,
                         click: function (me) {
                             if (localStorage.game_save) {
-                                self.changeScene(BSWG.SCENE_GAME1, {load: JSON.parse(localStorage.game_save)}, '#000');
+                                self.changeScene(BSWG.SCENE_GAME1, {load: JSON.parse(localStorage.game_save)}, '#000', 0.75);
                             }
                         }
                     });
