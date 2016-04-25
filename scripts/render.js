@@ -342,7 +342,7 @@ BSWG.render = new function() {
         }
     };
 
-    this.proceduralImage = function (w, h, cbk) {
+    this.proceduralImage = function (w, h, cbk, noTexture) {
 
         var canvas = document.createElement('canvas');
         canvas.width = w;
@@ -353,14 +353,35 @@ BSWG.render = new function() {
 
         cbk(ctx, w, h);
 
-        canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
-        canvas.texture.needsUpdate = true;
+        if (!noTexture) {
 
-        canvas.destroy = function () {
+            canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
+            canvas.texture.needsUpdate = true;
 
-            canvas.texture.dispose();
-            canvas.texture = null;
-            canvas = null;
+            canvas.destroy = function () {
+
+                canvas.texture.dispose();
+                canvas.texture = null;
+                canvas = null;
+
+            };
+
+        }
+        else {
+
+            canvas.destroy = function () {
+
+                canvas = null;
+
+            };
+
+        }
+
+        canvas.debug = function () {
+
+            this.style.position = 'fixed';
+            this.style.zIndex = '1000';
+            document.body.appendChild(this);
 
         };
 

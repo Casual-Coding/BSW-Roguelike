@@ -91,7 +91,7 @@ BSWG.game = new function(){
 
                 self.hudBtn = H.hudBtn;
 
-            }, true);
+            });
 
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,

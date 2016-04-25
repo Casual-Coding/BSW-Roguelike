@@ -59,7 +59,7 @@ BSWG.character = new function(num_desc, img_size) {
         [ .5, 0, 0,       0.0, 1.0 ],
         [ .5, .5, 0,      0.0, 1.0 ],        
         [ 0, .5, 0,       0.0, 1.0 ],
-        [ 0, 0, .5,       0.0, 1.0 ],
+        [ .2, .2, 1,       0.0, 1.0 ],
         [ .08, .08, .08,  0.1, 1.0 ],
         [ .5, .5, .1,     0.0, 1.0 ]
     ];
@@ -67,7 +67,7 @@ BSWG.character = new function(num_desc, img_size) {
     var shirtColors = [
         [ 1, 0, 0,      0.0, 1.0 ],
         [ 0, 1, 0,      0.0, 1.0 ],
-        [ 0, 0, 1,      0.0, 1.0 ],
+        [ .5, .5, 1,      0.0, 1.0 ],
         [ .2, .2, .2,   0.0, 1.0 ],
         [ 1, .5, 0,     0.0, 1.0 ],
         [ 1, 1, 1,      0.0, 1.0 ]
@@ -170,5 +170,116 @@ BSWG.character = new function(num_desc, img_size) {
     this.descs = descs;
 
     Math.seedrandom();
+
+    this.getImage = function(ctx, I) {
+
+        var img = BSWG.render.images[I.img];
+        var img2 = img;
+
+        if (I.color) {
+            img2 = BSWG.render.proceduralImage(img_size, img_size, function(ctx2, w, h) {
+
+                ctx2.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
+
+                var idat = ctx2.getImageData(0, 0, w, h);
+                var C = I.color;
+
+                for (var i=0; i<(w*h*4); i+=4) {
+                    var r = idat.data[i+0]/255;
+                    var g = idat.data[i+1]/255;
+                    var b = idat.data[i+2]/255;
+
+                    var l = Math.max(r, Math.max(g, b));
+
+                    r = (C[0] * C[4] + C[3]) * l;
+                    g = (C[1] * C[4] + C[3]) * l;
+                    b = (C[2] * C[4] + C[3]) * l;
+
+                    idat.data[i+0] = Math.clamp(~~(r*255), 0, 255);
+                    idat.data[i+1] = Math.clamp(~~(g*255), 0, 255);
+                    idat.data[i+2] = Math.clamp(~~(b*255), 0, 255);
+                }
+
+                ctx2.putImageData(idat, 0, 0);
+
+            }, true);
+        }
+
+        if (ctx) {
+            ctx.drawImage(img2, 0, 0, img2.width, img2.height, 0, 0, img_size, img_size);
+        }
+
+        return img2;
+
+    };
+
+    this.cache = {};
+
+    this.getPortrait = function(id, friend) {
+
+        var D = this.descs[(~~(id||0)) % this.descs.length];
+        var self = this;
+
+        return BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
+
+            if (friend) {
+                self.getImage(ctx, {img: 'char-friend-bg'});
+            }
+            else {
+                self.getImage(ctx, {img: 'char-enemy-bg'});
+            }
+
+            for (var i=0; i<D.length; i++) {
+                self.getImage(ctx, D[i]);
+            }
+
+        }, true);
+
+    };
+
+    this.getMom = function(friend) {
+
+        var self = this;
+
+        return BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
+
+            if (friend) {
+                self.getImage(ctx, {img: 'char-friend-bg'});
+            }
+            else {
+                self.getImage(ctx, {img: 'char-enemy-bg'});
+            }
+
+            self.getImage(ctx, {img: 'char-mom'});
+
+        }, true);
+
+    };
+
+    this.displayBunch = function () {
+
+        var self = this;
+        var img2 = BSWG.render.proceduralImage(1024, 1024, function(ctx, w, h) {
+
+            for (var i=0; i<8; i++) {
+                for (var j=0; j<8; j++) {
+                    var k = i + j*8;
+                    var img = null;
+                    if (k === 0) {
+                        img = self.getMom(true);
+                    }
+                    else {
+                        img = self.getPortrait(k-1, Math.random()>0.8);
+                    }
+                    ctx.drawImage(img, 0, 0, img_size, img_size, i*128, j*128, 128, 128);
+                }
+            }
+
+
+        }, true);
+
+        img2.debug();
+
+    };
 
 }(512, 192);

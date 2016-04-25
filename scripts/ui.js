@@ -437,7 +437,7 @@ BSWG.control_Button = {
                 H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
-            }, true);
+            });
 
             this.lastAW = aw;
             this.lastAH = ah;
@@ -585,7 +585,7 @@ BSWG.control_Menu = {
                 H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
-            }, true);
+            });
 
             this.lastAW = aw;
             this.lastAH = ah;
@@ -706,7 +706,7 @@ BSWG.control_CompPalette = {
                 H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
-            }, true);
+            });
 
             this.lastAW = aw;
             this.lastAH = ah;
