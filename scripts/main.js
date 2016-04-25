@@ -80,7 +80,23 @@ var BSWG = new function(){
         'save': 'save.png',
         'show-controls': 'show-controls.png',
         'repair': 'repair.png',
-        'menu': 'menu.png'
+        'menu': 'menu.png',
+        'char-beard': 'char-beard.png',
+        'char-beret': 'char-beret.png',
+        'char-burns-devil': 'char-burns-devil.png',
+        'char-burns-down': 'char-burns-down.png',
+        'char-demon-eyes': 'char-demon-eyes.png',
+        'char-enemy-bg': 'char-enemy-bg.png',
+        'char-face': 'char-face.png',
+        'char-fangs': 'char-fangs.png',
+        'char-friend-bg': 'char-friend-bg.png',
+        'char-hair-anime': 'char-hair-anime.png',
+        'char-hair-long': 'char-hair-long.png',
+        'char-hair-short': 'char-hair-short.png',
+        'char-mom': 'char-mom.png',
+        'char-outline': 'char-outline.png',
+        'char-pads': 'char-pads.png',
+        'char-spikes': 'char-spikes.png'
     };
     var shaders = {
         'vertex': [
