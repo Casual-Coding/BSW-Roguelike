@@ -96,7 +96,8 @@ var BSWG = new function(){
         'char-mom': 'char-mom.png',
         'char-outline': 'char-outline.png',
         'char-pads': 'char-pads.png',
-        'char-spikes': 'char-spikes.png'
+        'char-spikes': 'char-spikes.png',
+        'char-tattoo': 'char-tattoo.png'
     };
     var shaders = {
         'vertex': [
