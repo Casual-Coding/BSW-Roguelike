@@ -88,16 +88,17 @@ BSWG.planets = new function(surfaceRes, cloudRes){
         switch (obj.type) {
             case BSWG.planet_TERRAN:
                 water = true;
+                var grassy = Math.random() < 0.75;
                 colors = [
-                    new THREE.Vector4(0.06, 0.22, 0.67, 1.0),
+                    new THREE.Vector4(0.06, 0.32, 0.67, 1.0),
                     new THREE.Vector4(0.03, 0.3, 0.045, 1.0),
-                    new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
+                    grassy ? new THREE.Vector4(0.02, 0.2, 0.035, 1.0) : new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
                 ];
                 colors2 = [
-                    new THREE.Vector4(0.06, 0.52, 0.67, 1.0),
+                    new THREE.Vector4(0.06, 0.75, 0.67, 1.0),
                     new THREE.Vector4(0.5, 0.25, 0.045, 1.0),
-                    new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
+                    grassy ? new THREE.Vector4(0.4, 0.15, 0.035, 1.0) : new THREE.Vector4(0.3, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.5, 0.5, 0.5, 1.0)
                 ];
                 if (obj.radius === -1) {
@@ -109,6 +110,12 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                 water = true;
                 colors = [
                     new THREE.Vector4(0.7, 0.04, 0.04, 1.0),
+                    new THREE.Vector4(0.55, 0.13, 0.13, 1.0),
+                    new THREE.Vector4(0.5, 0.3, 0.3, 1.0),
+                    new THREE.Vector4(0.8, 0.5, 0.5, 1.0)
+                ];
+                colors2 = [
+                    new THREE.Vector4(0.04, 0.04, 0.04, 1.0),
                     new THREE.Vector4(0.55, 0.13, 0.13, 1.0),
                     new THREE.Vector4(0.5, 0.3, 0.3, 1.0),
                     new THREE.Vector4(0.8, 0.5, 0.5, 1.0)
@@ -127,9 +134,17 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     new THREE.Vector4(0.17*2.25, 0.15*2.25, 0.15*2.25, 1.0),
                     new THREE.Vector4(0.15*2.25, 0.125*2.25, 0.125*2.25, 1.0)
                 ];
+                colors2 = [
+                    new THREE.Vector4(0, 0, 0, 1.0),
+                    new THREE.Vector4(0.35*2.25, 0.1*2.25, 0.06*2.25, 1.0),
+                    new THREE.Vector4(0.17*2.25, 0.15*2.25, 0.15*2.25, 1.0),
+                    new THREE.Vector4(0.15*2.25, 0.125*2.25, 0.125*2.25, 1.0)
+                ];
                 if (obj.radius === -1) {
                     obj.radius = 17.5 + 5 * Math.random();
                 }
+                water = Math.random() < 0.25;
+                crators = !water;
                 break;
 
             case BSWG.planet_MOON:
@@ -154,6 +169,12 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     new THREE.Vector4(0.17*2.25, 0.17*2.25, 0.17*2.25, 1.0),
                     new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.20*2.25, 1.0)
                 ];
+                colors2 = [
+                    new THREE.Vector4(0.75*2.25, 0.25*2.25, 0.15*2.25, 1.0),
+                    new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.17*2.25, 1.0),
+                    new THREE.Vector4(0.17*2.25, 0.17*2.25, 0.17*2.25, 1.0),
+                    new THREE.Vector4(0.20*2.25, 0.20*2.25, 0.20*2.25, 1.0)
+                ];
                 waterAnim = false;
                 if (obj.radius === -1) {
                     obj.radius = 25 + 5 * Math.random();
@@ -164,7 +185,13 @@ BSWG.planets = new function(surfaceRes, cloudRes){
             case BSWG.planet_ICE:
                 water = true;
                 colors = [
-                    new THREE.Vector4(0.8, 0.8, 1.0, 1.0),
+                    new THREE.Vector4(0.2, 0.8, 1.0, 1.0),
+                    new THREE.Vector4(0.6, 0.8, 1.0, 1.0),
+                    new THREE.Vector4(0.4, 0.6, 1.0, 1.0),
+                    new THREE.Vector4(0.2, 0.4, 1.0, 1.0),
+                ];
+                colors2 = [
+                    new THREE.Vector4(0.4, 0.8, 1.0, 1.0),
                     new THREE.Vector4(0.6, 0.8, 1.0, 1.0),
                     new THREE.Vector4(0.4, 0.6, 1.0, 1.0),
                     new THREE.Vector4(0.2, 0.4, 1.0, 1.0),
@@ -174,6 +201,8 @@ BSWG.planets = new function(surfaceRes, cloudRes){
                     obj.radius = 25 + 5 * Math.random();
                 }
                 waterScale = 0.25;
+                water = Math.random() > 0.25;
+                crators = !water;
                 break;
 
             default:

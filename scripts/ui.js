@@ -398,6 +398,8 @@ BSWG.control_Button = {
 
     init: function (args) {
 
+        this.z = args.z || 0.1;
+
     },
 
     destroy: function () {
@@ -453,7 +455,7 @@ BSWG.control_Button = {
                 this.hudNM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
-                0.1, // z
+                this.z || 0.1, // z
                 [1,1,1,1], // color
                 false // split
             );
@@ -618,6 +620,231 @@ BSWG.control_Menu = {
     },
 
 };
+
+/*window.testCD = function () {
+
+    window.testCDC = new BSWG.uiControl(BSWG.control_Dialogue, {
+        x: 50, y: 50,
+        w: 600, h: 300,
+        portrait: 55,
+        title: "Zef #1748",
+        friend: false,
+        modal: false,
+        text: "This is a testing. Testing the dialogue system. This should automatically word wrap.\nForced newline.",
+        buttons: [
+            { 'text': 'Ok', width: 150, click: null },
+            { 'text': 'Cancel', width: 150, click: null }
+        ]
+    });
+
+};*/
+
+BSWG.control_Dialogue = {
+
+    init: function (args) {
+
+        this.portraitId = args.portrait;
+        this.friend = args.friend || false;
+        this.modal = args.modal || false;
+        this.text = args.text || "";
+        this.title = args.title || "";
+        this.buttons = args.buttons || [];
+
+        for (var i=0; i<this.buttons.length; i++) {
+            this.buttons[i].btn = new BSWG.uiControl(BSWG.control_Button, {
+                x: -1000, y: -1000,
+                w: 65, h: 65,
+                z: 0.175,
+                text: this.buttons[i].text,
+                click: this.buttons[i].click || function () {}
+            });
+        }
+
+        this.startTime = Date.timeStamp();
+
+    },
+
+    destroy: function () {
+        for (var i=0; i<this.buttons.length; i++) {
+            var B = this.buttons[i].btn;
+            if (B) {
+                B.remove();
+                B.destroy();
+            }
+        }
+        this.buttons = null;
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
+    onremove: function() {
+        this.destroy();
+    },
+
+    render: function (ctx, viewport) {
+
+        var aw = this.w, ah = this.h;
+
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+            }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            var self = this;
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var psize = 238, bheight = 48;
+                var H = BSWG.ui_HM(w, h, aw, ah);
+                H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+                H.plate(H.l(10), H.t(10+bheight+5), H.l(10 + psize) - H.l(10), H.t(10 + psize+bheight+5) - H.t(10+bheight+5), 0.3, 0.25);
+                H.plate(H.l(10 + psize + 5), H.t(10+bheight+5), H.r(10) - H.l(10 + psize + 5), H.b(20+bheight) - H.t(10+bheight+5), 0.3, 0.15);
+                H.plate(H.l(10), H.t(10), H.r(10) - H.l(10), H.t(10+bheight) - H.t(10), 0.3, 0.25);
+                var x = H.r(0);
+                for (var i=0; i<self.buttons.length; i++) {
+                    x -= (self.buttons[i].width || 100) + 10;
+                }
+                for (var i=0; i<self.buttons.length; i++) {
+                    var tw = (self.buttons[i].width || 100);
+                    H.plate(x, H.b(20+bheight-4), tw, bheight+5, 0.3, 0.15);
+                    x += tw + 10;
+                }
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
+
+                self.hudBtn = H.hudBtn;
+                self.hudHM = H;
+
+            });
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.15, // z
+                [1,1,1,1], // color
+                false // split
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+
+            if (this.hudBtn && this.hudHM) {
+                var self = this;
+                var hx = function(v) {
+                    var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));
+                    return self.w*t + self.p.x;
+                };
+                var hy = function(v) {
+                    var t = (v - self.hudHM.t(0)) / (self.hudHM.b(0) - self.hudHM.t(0));
+                    return self.h*t + self.p.y;
+                };
+
+                var img = BSWG.character.getPortrait(this.portraitId, this.friend);
+
+                var x = hx(this.hudBtn[0][0])+6,
+                    y = hy(this.hudBtn[0][1])+6;
+                var w = hx(this.hudBtn[0][2])-x-3,
+                    h = hy(this.hudBtn[0][3])-y-6;
+
+                ctx.drawImage(img, 0, 0, img.width, img.height, x, y, w, h);
+
+                var x = hx(this.hudBtn[1][0])+12,
+                    y = hy(this.hudBtn[1][1])+20;
+                var w = hx(this.hudBtn[1][2])-x-6,
+                    h = hy(this.hudBtn[1][3])-y-12;
+
+                var fs = Math.min(~~(h * 0.3), 12);
+
+                ctx.font = fs + 'px Orbitron';
+                ctx.textAlign = 'left';
+
+                if (this.friend) {
+                    ctx.fillStyle = '#88f';
+                    ctx.strokeStyle = '#226';
+                }
+                else {
+                    ctx.fillStyle = '#f88';
+                    ctx.strokeStyle = '#622';                   
+                }
+
+                var text = this.text.substring(0, Math.min((Date.timeStamp() - this.startTime) * 30, this.text.length));
+
+                var lines = text.split('\n');
+                var y1 = y;
+                for (var i=0; i<lines.length; i++) {
+                    var words = lines[i].split(' ');
+                    var csent = new Array();
+                    for (var j=0; j<words.length; j++) {
+                        var t2 = csent.join(' ');
+                        var t3 = t2 + ' ' + words[j];
+                        if (ctx.textWidthB(t3) >= w) {
+                            ctx.fillTextB(t2, x, y1);
+                            y1 += fs + 4;
+                            csent.length = 0;
+                        }
+                        csent.push(words[j]);
+                    }
+                    if (csent.length) {
+                        ctx.fillTextB(csent.join(' '), x, y1);
+                    }
+                    y1 += fs + 4;
+                }
+
+                var x = hx(this.hudBtn[2][0])+6,
+                    y = hy(this.hudBtn[2][1])+6;
+                var w = hx(this.hudBtn[2][2])-x-3,
+                    h = hy(this.hudBtn[2][3])-y-6;
+
+                var fs = Math.min(~~(h), 16);
+                ctx.font = fs + 'px Orbitron';
+                ctx.fillTextB(this.title, x + 10, y + h*0.5+7);
+
+                for (var i=0; i<this.buttons.length; i++) {
+                    var B = this.buttons[i].btn;
+                    if (B) {
+                        var x = hx(this.hudBtn[3+i][0])+3,
+                            y = hy(this.hudBtn[3+i][1])+3;
+                        var w = hx(this.hudBtn[3+i][2])-x-1,
+                            h = hy(this.hudBtn[3+i][3])-y-3;
+                        B.p.x = x; B.p.y = y;
+                        B.w = w; B.h = h;
+                    }
+                }
+            }
+        }
+
+    },
+
+    update: function () {
+
+    },
+
+};
+
 
 BSWG.control_CompPalette = {
 

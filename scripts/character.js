@@ -224,18 +224,31 @@ BSWG.character = new function(num_desc, img_size) {
 
     this.cache = {};
 
+    var friendClr = [.2,1,.2,-0.125,1.0];
+    var enemyClr  = [1,.15,.15,-0.125,1.0];
+
     this.getPortrait = function(id, friend) {
 
-        var D = this.descs[(~~(id||0)) % this.descs.length];
+        if (id < 0) {
+            return this.getMom(friend);
+        }
+
+        id = (~~(id||0)) % this.descs.length;
+        var key = id + ',' + (friend?1:0);
+        if (this.cache[key]) {
+            return this.cache[key];
+        }
+
+        var D = this.descs[id];
         var self = this;
 
-        return BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
+        return this.cache[key] = BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
 
             if (friend) {
-                self.getImage(ctx, {img: 'char-friend-bg'});
+                self.getImage(ctx, {img: 'char-friend-bg', color: friendClr});
             }
             else {
-                self.getImage(ctx, {img: 'char-enemy-bg'});
+                self.getImage(ctx, {img: 'char-enemy-bg', color: enemyClr});
             }
 
             for (var i=0; i<D.length; i++) {
@@ -250,13 +263,18 @@ BSWG.character = new function(num_desc, img_size) {
 
         var self = this;
 
-        return BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
+        var key = -1 + ',' + (friend?1:0);
+        if (this.cache[key]) {
+            return this.cache[key];
+        }
+
+        return this.cache[key] = BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
 
             if (friend) {
-                self.getImage(ctx, {img: 'char-friend-bg'});
+                self.getImage(ctx, {img: 'char-friend-bg', color: friendClr});
             }
             else {
-                self.getImage(ctx, {img: 'char-enemy-bg'});
+                self.getImage(ctx, {img: 'char-enemy-bg', color: enemyClr});
             }
 
             self.getImage(ctx, {img: 'char-mom'});
