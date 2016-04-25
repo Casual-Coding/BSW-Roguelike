@@ -46,17 +46,17 @@ BSWG.character = new function(num_desc, img_size) {
     var hairColors = [
         [ 1, 1, 1,     0.0, 1.0 ],
         [ 1, 0, 0,    -0.5, 1.0 ],
-        [ 0, 1, 0,    -0.5, 1.0 ],
-        [ 0, 0, 1,    -0.5, 1.0 ],
+        [ .4, 1, .4,  -0.5, 1.0 ],
+        [ .6, .6, 1,  -0.5, 1.0 ],
         [ .2, .2, .2,  0.0, 1.0 ],
         [ 0, 1, 0,     0.0, 1.0 ],
         [ 1, 1, .5,   -0.5, 1.0 ]
     ];
 
     var skinColors = [
-        [ .32, .04, .04,  0.5, 1.0 ],
-        [ .16, .02, .02,  0.5, 1.0 ],
-        [ .5, 0, 0,       0.0, 1.0 ],
+        [ .42, .14, .14,  0.75, 1.0 ],
+        [ .26, .12, .12,  0.75, 1.0 ],
+        [ .5, 0, .1,       0.0, 1.0 ],
         [ .5, .5, 0,      0.0, 1.0 ],        
         [ 0, .5, 0,       0.0, 1.0 ],
         [ .2, .2, 1,       0.0, 1.0 ],
@@ -67,7 +67,7 @@ BSWG.character = new function(num_desc, img_size) {
     var shirtColors = [
         [ 1, 0, 0,      0.0, 1.0 ],
         [ 0, 1, 0,      0.0, 1.0 ],
-        [ .5, .5, 1,      0.0, 1.0 ],
+        [ .5, .5, 1,    0.0, 1.0 ],
         [ .2, .2, .2,   0.0, 1.0 ],
         [ 1, .5, 0,     0.0, 1.0 ],
         [ 1, 1, 1,      0.0, 1.0 ]
@@ -78,6 +78,14 @@ BSWG.character = new function(num_desc, img_size) {
         [ 1, 0, 0,      0.0, 1.0 ],
         [ 0, 1, 0,      0.0, 1.0 ],
         [ 0, 0, 1,      0.0, 1.0 ],
+        [ 0, 0, 0,      0.0, 1.0 ]
+    ];
+
+    var tattColors = [
+        [ 1, 1, 1,      0.5, 1.0 ],
+        [ 1, 0, 0,      0.5, 1.0 ],
+        [ 0, 1, 0,      0.5, 1.0 ],
+        [ 0, 0, 1,      0.5, 1.0 ],
         [ 0, 0, 0,      0.0, 1.0 ]
     ];
 
@@ -95,7 +103,8 @@ BSWG.character = new function(num_desc, img_size) {
         'char-hair-long': hairColors,
         'char-hair-anime': hairColors,
         'char-face': skinColors,
-        'char-beret': shirtColors
+        'char-beret': shirtColors,
+        'char-tattoo': tattColors
     };
 
     var descs = new Array(num_desc);
@@ -189,11 +198,11 @@ BSWG.character = new function(num_desc, img_size) {
                     var g = idat.data[i+1]/255;
                     var b = idat.data[i+2]/255;
 
-                    var l = Math.max(r, Math.max(g, b));
+                    var l = Math.max(r, Math.max(g, b)) + C[3];
 
-                    r = (C[0] * C[4] + C[3]) * l;
-                    g = (C[1] * C[4] + C[3]) * l;
-                    b = (C[2] * C[4] + C[3]) * l;
+                    r = (C[0] * C[4]) * l;
+                    g = (C[1] * C[4]) * l;
+                    b = (C[2] * C[4]) * l;
 
                     idat.data[i+0] = Math.clamp(~~(r*255), 0, 255);
                     idat.data[i+1] = Math.clamp(~~(g*255), 0, 255);
