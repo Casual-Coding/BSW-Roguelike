@@ -51,6 +51,8 @@ BSWG.game = new function(){
                     var hh = bfr*2 + bsz*2;
 
                     self.hudBottomYT = h-(bfr*2 + bsz);
+                    self.hudDlgX1 = 256*sc;
+                    self.hudDlgX2 = w/2-(bfr+bsz*2);
 
                     H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr, (bfr*2+bsz*4)-bfr*2, bsz, 0.5, 0.25); // 1
@@ -282,12 +284,78 @@ BSWG.game = new function(){
 
     };
 
+    this.dialogObj = null;
+
+    this.openDialog = function (desc, start) {
+
+        if (!this.dialogObj) {
+            return;
+        }
+
+        this.closeDialog();
+        var tdesc = desc[start];
+
+        var title = tdesc.who < 0 ? 'Mom' : ((tdesc.friend ? 'Clerk ' : '') + 'Zef #' + (tdesc.who+1));
+        var buttons = new Array(tdesc.buttons.length);
+
+        var self = this;
+        var fns = new Object();
+        fns.current = start;
+        fns.desc = desc;
+        fns.change = function(name) {
+            self.openDialog(this.desc, name);
+        };
+        fns.close = function () {
+            self.closeDialog();
+        };
+
+        for (var i=0; i<tdesc.buttons.length; i++) {
+            var click = tdesc.buttons[i].click;
+            tdesc.buttons[i].click = null;
+            buttons[i] = deepcopy(tdesc.buttons[i]);
+            tdesc.buttons[i].click = click;
+            buttons[i].click = function(cbk) {
+                return function() {
+                    if (cbk) {
+                        cbk(fns);
+                    }
+                }
+            }(click);
+        }
+        
+        this.dialogObj.init({
+            portrait: tdesc.who,
+            title: title,
+            friend: tdesc.friend || false,
+            modal: tdesc.modal || false,
+            text: tdesc.text,
+            buttons: buttons
+        });
+
+        this.dialogObj.show();
+
+    };
+
+    this.closeDialog = function () {
+
+        if (!this.dialogObj) {
+            return;
+        }
+        this.dialogObj.hide();
+
+    };
+
     this.initScene = function (scene, args)
     {
         // Init game state
 
         args = args || {};
         this.scene = scene;
+
+        if (this.dialogObj) {
+            this.dialogObj.remove();
+            this.dialogObj = null;
+        }
 
         BSWG.physics.reset();
         BSWG.componentList.clear();
@@ -296,7 +364,7 @@ BSWG.game = new function(){
         BSWG.planets.init();
         BSWG.ui.clear();
         BSWG.ai.init();
-
+        
         this.aiBtn = null;
 
         this.removeHUD();
@@ -901,6 +969,13 @@ BSWG.game = new function(){
 
         self.initHUD(scene);
 
+        if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
+            this.dialogObj = new BSWG.uiControl(BSWG.control_Dialogue, {
+                x: -1000, y: -1000,
+                w: 600, h: 300
+            });
+        }
+
         BSWG.render.resetl60();
 
     };
@@ -1331,8 +1406,6 @@ BSWG.game = new function(){
                 self.healBtn.h = self.hudY(self.hudBtn[9][3]) - self.healBtn.p.y - 4;
             }*/
 
-            BSWG.ui.render(ctx, viewport);
-
             self.updateHUD(dt);
 
             BSWG.ai.update(ctx, dt);
@@ -1454,6 +1527,8 @@ BSWG.game = new function(){
                     }
                 }
             }
+
+            BSWG.ui.render(ctx, viewport);
 
             if (self.switchScene) {
 

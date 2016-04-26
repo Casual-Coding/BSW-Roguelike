@@ -207,6 +207,10 @@ BSWG.character = new function(num_desc, img_size) {
                     idat.data[i+0] = Math.clamp(~~(r*255), 0, 255);
                     idat.data[i+1] = Math.clamp(~~(g*255), 0, 255);
                     idat.data[i+2] = Math.clamp(~~(b*255), 0, 255);
+
+                    if (C[5]) {
+                        idat.data[i+3] = Math.clamp(~~(C[5]*255), 0, 255);
+                    }
                 }
 
                 ctx2.putImageData(idat, 0, 0);
@@ -224,8 +228,8 @@ BSWG.character = new function(num_desc, img_size) {
 
     this.cache = {};
 
-    var friendClr = [.2,1,.2,-0.125,1.0];
-    var enemyClr  = [1,.15,.15,-0.125,1.0];
+    var friendClr = [.2,1,.2,-0.125,1.0,0.5];
+    var enemyClr  = [1,.15,.15,-0.125,1.0,0.5];
 
     this.getPortrait = function(id, friend) {
 
@@ -243,6 +247,8 @@ BSWG.character = new function(num_desc, img_size) {
         var self = this;
 
         return this.cache[key] = BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
+
+            ctx.clearRect(0, 0, w, h);
 
             if (friend) {
                 self.getImage(ctx, {img: 'char-friend-bg', color: friendClr});
@@ -269,6 +275,8 @@ BSWG.character = new function(num_desc, img_size) {
         }
 
         return this.cache[key] = BSWG.render.proceduralImage(img_size, img_size, function(ctx, w, h) {
+
+            ctx.clearRect(0, 0, w, h);
 
             if (friend) {
                 self.getImage(ctx, {img: 'char-friend-bg', color: friendClr});

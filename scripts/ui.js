@@ -621,23 +621,38 @@ BSWG.control_Menu = {
 
 };
 
-/*window.testCD = function () {
+window.testCD = function () {
 
-    window.testCDC = new BSWG.uiControl(BSWG.control_Dialogue, {
-        x: 50, y: 50,
-        w: 600, h: 300,
-        portrait: 55,
-        title: "Zef #1748",
-        friend: false,
-        modal: false,
-        text: "This is a testing. Testing the dialogue system. This should automatically word wrap.\nForced newline.",
-        buttons: [
-            { 'text': 'Ok', width: 150, click: null },
-            { 'text': 'Cancel', width: 150, click: null }
-        ]
-    });
+    BSWG.game.openDialog({
+        'first': {
+            who: 54,
+            friend: false,
+            text: "Test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ",
+            buttons: [
+                {
+                    text: 'Ok',
+                    click: function(fns) {
+                        fns.change('second');
+                    }
+                }
+            ]
+        },
+        'second': {
+            who: -1,
+            friend: true,
+            text: "Bah bah bah bah bah bah bah bah bah bah bah bah bah bah bah bah bah bah bah\nBah bah bah bah bah bah bah bah bah bah bah bah bah bah bah bah!!!!!",
+            buttons: [
+                {
+                    text: 'Ok',
+                    click: function(fns) {
+                        fns.close();
+                    }
+                }
+            ]            
+        }
+    }, 'first');
 
-};*/
+};
 
 BSWG.control_Dialogue = {
 
@@ -648,18 +663,35 @@ BSWG.control_Dialogue = {
         this.modal = args.modal || false;
         this.text = args.text || "";
         this.title = args.title || "";
-        this.buttons = args.buttons || [];
 
-        for (var i=0; i<this.buttons.length; i++) {
-            this.buttons[i].btn = new BSWG.uiControl(BSWG.control_Button, {
-                x: -1000, y: -1000,
-                w: 65, h: 65,
-                z: 0.175,
-                text: this.buttons[i].text,
-                click: this.buttons[i].click || function () {}
-            });
+        if (this.buttons) {
+            for (var i=0; i<this.buttons.length; i++) {
+                var B = this.buttons[i];
+                if (B.btn) {
+                    B.btn.remove();
+                    B.btn.destroy();
+                }
+            }
         }
 
+        this.buttons = args.buttons || [];
+        
+        this.hidden = true;
+        this.hiddenTime = Date.timeStamp() - 3.0;
+        this.startTime = Date.timeStamp();
+
+    },
+
+    hide: function () {
+
+        this.hidden = true;
+        this.hiddenTime = Date.timeStamp();
+
+    },
+
+    show: function () {
+
+        this.hidden = false;
         this.startTime = Date.timeStamp();
 
     },
@@ -689,6 +721,23 @@ BSWG.control_Dialogue = {
 
     render: function (ctx, viewport) {
 
+        if (this.modal) {
+            this.p.x = BSWG.render.viewport.w / 2 - this.w / 2;
+            this.p.y = BSWG.render.viewport.h / 2 - this.h / 2;
+        }
+        else {
+            this.p.x = BSWG.game.hudX(BSWG.game.hudDlgX1);
+            this.p.y = BSWG.game.hudY(BSWG.game.hudBottomYT) - this.h;
+            this.w = BSWG.game.hudX(BSWG.game.hudDlgX2) - this.p.x;
+        }
+
+        if (this.hidden) {
+            this.p.y += (1.0 - Math.pow(Math.clamp(((0.5 - (Date.timeStamp() - this.hiddenTime)) / 0.5), 0.0, 1.0), 3.0)) * (BSWG.render.viewport.h - this.p.y);
+        }
+        else {
+            this.p.y += Math.pow(Math.clamp(((0.5 - (Date.timeStamp() - this.startTime)) / 0.5), 0.0, 1.0), 3.0) * (BSWG.render.viewport.h - this.p.y);
+        }
+
         var aw = this.w, ah = this.h;
 
         if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
@@ -699,7 +748,7 @@ BSWG.control_Dialogue = {
 
             var max = Math.max(this.w, this.h);
             var sz = 64;
-            while (sz < max && sz < 2048) {
+            while (sz < max && sz < 1024) {
                 sz *= 2;
             }
 
@@ -714,12 +763,12 @@ BSWG.control_Dialogue = {
                 H.plate(H.l(10 + psize + 5), H.t(10+bheight+5), H.r(10) - H.l(10 + psize + 5), H.b(20+bheight) - H.t(10+bheight+5), 0.3, 0.15);
                 H.plate(H.l(10), H.t(10), H.r(10) - H.l(10), H.t(10+bheight) - H.t(10), 0.3, 0.25);
                 var x = H.r(0);
-                for (var i=0; i<self.buttons.length; i++) {
-                    x -= (self.buttons[i].width || 100) + 10;
+                for (var i=0; i<3; i++) {
+                    x -= 150 + 10;
                 }
-                for (var i=0; i<self.buttons.length; i++) {
-                    var tw = (self.buttons[i].width || 100);
-                    H.plate(x, H.b(20+bheight-4), tw, bheight+5, 0.3, 0.15);
+                for (var i=0; i<3; i++) {
+                    var tw = 150;
+                    H.plate(x, H.b(20+bheight-4), tw, bheight+5, 0.3, 0.25);
                     x += tw + 10;
                 }
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
@@ -743,14 +792,19 @@ BSWG.control_Dialogue = {
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 0.15, // z
-                [1,1,1,1], // color
-                false // split
+                this.friend ? [.75, .75, 1, 1] : [1,.75,.75,1], // color
+                false, // split
+                true // moving
             );
         }
 
         if (this.hudObj) {
+
             this.hudObj.set_pos(this.p.x, this.p.y);
             this.hudObj.set_size(this.w, this.h);
+            this.hudObj.set_clr(this.friend ? [.75, .75, 1, 1] : [1,.75,.75,1]);
+
+            ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
 
             if (this.hudBtn && this.hudHM) {
                 var self = this;
@@ -778,10 +832,8 @@ BSWG.control_Dialogue = {
                     h = hy(this.hudBtn[1][3])-y-12;
 
                 var fs = Math.min(~~(h * 0.3), 12);
-
                 ctx.font = fs + 'px Orbitron';
                 ctx.textAlign = 'left';
-
                 if (this.friend) {
                     ctx.fillStyle = '#88f';
                     ctx.strokeStyle = '#226';
@@ -791,8 +843,7 @@ BSWG.control_Dialogue = {
                     ctx.strokeStyle = '#622';                   
                 }
 
-                var text = this.text.substring(0, Math.min((Date.timeStamp() - this.startTime) * 30, this.text.length));
-
+                var text = this.text.substring(0, Math.min(~~((Date.timeStamp() - this.startTime) * 30), this.text.length));
                 var lines = text.split('\n');
                 var y1 = y;
                 for (var i=0; i<lines.length; i++) {
@@ -826,12 +877,21 @@ BSWG.control_Dialogue = {
                 for (var i=0; i<this.buttons.length; i++) {
                     var B = this.buttons[i].btn;
                     if (B) {
-                        var x = hx(this.hudBtn[3+i][0])+3,
-                            y = hy(this.hudBtn[3+i][1])+3;
-                        var w = hx(this.hudBtn[3+i][2])-x-1,
-                            h = hy(this.hudBtn[3+i][3])-y-3;
+                        var x = hx(this.hudBtn[6-this.buttons.length+i][0])+3,
+                            y = hy(this.hudBtn[6-this.buttons.length+i][1]);
+                        var w = hx(this.hudBtn[6-this.buttons.length+i][2])-x-1,
+                            h = hy(this.hudBtn[6-this.buttons.length+i][3])-y;
                         B.p.x = x; B.p.y = y;
                         B.w = w; B.h = h;
+                    }
+                    else {
+                        this.buttons[i].btn = new BSWG.uiControl(BSWG.control_Button, {
+                            x: -1000, y: -1000,
+                            w: 65, h: 65,
+                            z: 0.175,
+                            text: this.buttons[i].text,
+                            click: this.buttons[i].click || function () {}
+                        });
                     }
                 }
             }
@@ -958,6 +1018,7 @@ BSWG.control_CompPalette = {
         if (this.hudObj) {
             this.hudObj.set_pos(this.p.x, this.p.y);
             this.hudObj.set_size(this.w, this.h);
+            ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
         }
 
         ctx.font = '16px Orbitron';
