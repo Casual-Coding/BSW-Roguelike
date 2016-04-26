@@ -654,15 +654,18 @@ window.testCD = function () {
 
 };
 
+BSWG.ui_DlgBlock = false;
+
 BSWG.control_Dialogue = {
 
     init: function (args) {
 
         this.portraitId = args.portrait;
         this.friend = args.friend || false;
-        this.modal = args.modal || false;
+        this.modal = true;//args.modal || false;
         this.text = args.text || "";
         this.title = args.title || "";
+        this.noEat = false;
 
         if (this.buttons) {
             for (var i=0; i<this.buttons.length; i++) {
@@ -680,6 +683,8 @@ BSWG.control_Dialogue = {
         this.hiddenTime = Date.timeStamp() - 3.0;
         this.startTime = Date.timeStamp();
 
+        BSWG.ui_DlgBlock = false;
+
     },
 
     hide: function () {
@@ -687,12 +692,16 @@ BSWG.control_Dialogue = {
         this.hidden = true;
         this.hiddenTime = Date.timeStamp();
 
+        BSWG.ui_DlgBlock = false;
+
     },
 
     show: function () {
 
         this.hidden = false;
         this.startTime = Date.timeStamp();
+
+        BSWG.ui_DlgBlock = true;
 
     },
 

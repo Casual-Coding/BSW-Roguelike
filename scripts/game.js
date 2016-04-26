@@ -327,7 +327,7 @@ BSWG.game = new function(){
             portrait: tdesc.who,
             title: title,
             friend: tdesc.friend || false,
-            modal: tdesc.modal || false,
+            modal: true,//tdesc.modal || false,
             text: tdesc.text,
             buttons: buttons
         });
@@ -1096,6 +1096,7 @@ BSWG.game = new function(){
 
                         self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));                       
                     }
+
                     break;
 
                 default:
@@ -1175,7 +1176,7 @@ BSWG.game = new function(){
 
                     self.grabbedBlock = grabbedBlock;
 
-                    if (!self.ccblock.ai) {
+                    if (!self.ccblock.ai && !BSWG.ui_DlgBlock) {
                         BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
                     }
                     break;
