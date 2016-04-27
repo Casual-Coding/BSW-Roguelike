@@ -52,7 +52,7 @@ Math.random3dSlow = function() {
     this.dispose = function() {
         this.map = null;
     }
-}
+};
 
 Math.random2d = function(x,y) {
     var x2 = 12.9898, y2 = 78.233;

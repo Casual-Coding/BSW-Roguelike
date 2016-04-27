@@ -203,7 +203,7 @@ BSWG.render = new function() {
     this.dlgOpen = false;
     this.resized = true;
 
-    var maxRes = { w: 1920, h: 1080 };
+    var maxRes = null; //{ w: 1920, h: 1080 };
 
     this.init = function(complete, images, shaders) {
 
@@ -435,13 +435,25 @@ BSWG.render = new function() {
 
         var lvp = this.viewport;
         this.viewport = {
-            w: Math.min(maxRes.w, window.innerWidth),
-            h: Math.min(maxRes.h, window.innerHeight)
+            w: window.innerWidth,
+            h: window.innerHeight
         };
+        if (maxRes) {
+            if (this.viewport.w > maxRes.w) {
+                var aspect = this.viewport.w / this.viewport.h;
+                this.viewport.w = maxRes.w;
+                this.viewport.h = ~~(maxRes.h / aspect);
+            }
+        }
         this.canvas.width = this.viewport.w;
         this.canvas.height = this.viewport.h;
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
+
+        this.canvas3D.width = this.viewport.w;
+        this.canvas3D.height = this.viewport.h;
+        this.canvas3D.style.width = '100%';
+        this.canvas3D.style.height = '100%';
 
         if (!lvp || lvp.w !== this.viewport.w || lvp.h !== this.viewport.h) {
             this.renderer.setSize( this.viewport.w, this.viewport.h );
