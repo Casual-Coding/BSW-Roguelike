@@ -447,13 +447,13 @@ BSWG.render = new function() {
         }
         this.canvas.width = this.viewport.w;
         this.canvas.height = this.viewport.h;
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
+        /*this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';*/
 
-        this.canvas3D.width = this.viewport.w;
+        /*this.canvas3D.width = this.viewport.w;
         this.canvas3D.height = this.viewport.h;
         this.canvas3D.style.width = '100%';
-        this.canvas3D.style.height = '100%';
+        this.canvas3D.style.height = '100%';*/
 
         if (!lvp || lvp.w !== this.viewport.w || lvp.h !== this.viewport.h) {
             this.renderer.setSize( this.viewport.w, this.viewport.h );
