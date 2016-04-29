@@ -625,77 +625,67 @@ BSWG.physics = new function(){
     };
 
     this.collisionCallbackPre = function(contact) {
-        if (contact.IsTouching()) {
-            var ba = contact.GetFixtureA().GetBody();
-            var bb = contact.GetFixtureB().GetBody();
-            var ta = ba.GetLinearVelocity();
-            var tb = bb.GetLinearVelocity();
-            if (!ba.__lastVel) {
-                ba.__lastVel = ta.clone();
-            }
-            else {
-                ba.__lastVel.x = ta.x;
-                ba.__lastVel.y = ta.y;
-            }
-            if (!bb.__lastVel) {
-                bb.__lastVel = tb.clone();
-            }
-            else {
-                bb.__lastVel.x = tb.x;
-                bb.__lastVel.y = tb.y;
-            }
-            ba.__lastForce = 0;
-            bb.__lastForce = 0;
-        }
+        var ba = contact.GetFixtureA().GetBody();
+        var bb = contact.GetFixtureB().GetBody();
+        var wm = new b2WorldManifold();
+        contact.GetWorldManifold(wm);
+        var p = wm.m_points[0];
+        contact._ta = ba.GetLinearVelocityFromWorldPoint(p);
+        contact._tb = bb.GetLinearVelocityFromWorldPoint(p);
+        ba.__lastForce = 0;
+        bb.__lastForce = 0;
     }
 
     var self = this;
 
     this.collisionCallback = function(contact, impulse) {
 
-        var ba = contact.GetFixtureA().GetBody();
-        var bb = contact.GetFixtureB().GetBody();
-        var ta = ba.GetLinearVelocity().clone();
-        var tb = bb.GetLinearVelocity().clone();
-
-        ta.x -= ba.__lastVel.x;
-        ta.y -= ba.__lastVel.y;
-        tb.x -= bb.__lastVel.x;
-        tb.y -= bb.__lastVel.y;
-
-        var forceA = (Math.lenVec2(ta) * ba.GetMass()) / self.lastDT;
-        var forceB = (Math.lenVec2(tb) * bb.GetMass()) / self.lastDT;
-        var tforce = forceA + forceB;
-
-        ba.__lastForce += forceA;
-        bb.__lastForce += forceB;
-        ba.__lastHit = bb;
-        bb.__lastHit = ba;
-
-        if (tforce > 1.0) {
-
-            if (ba.__comp && bb.__comp) {
-                ba.__comp.takeDamage(forceA * (ba.__mele ? 1/BSWG.meleDmg : 1)
-                                            * (bb.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, bb.__comp);
-                bb.__comp.takeDamage(forceA * (bb.__mele ? 1/BSWG.meleDmg : 1)
-                                            * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
-            }
-
+        if (contact._ta && contact._tb) {
+            var ba = contact.GetFixtureA().GetBody();
+            var bb = contact.GetFixtureB().GetBody();
             var wm = new b2WorldManifold();
             contact.GetWorldManifold(wm);
             var p = wm.m_points[0];
-            BSWG.render.boom.palette = chadaboom3D.fire_bright;
-            for (var i=0; i<2; i++) {
-                var a = Math.random() * Math.PI * 2.0;
-                var v = [ba, bb][i].GetLinearVelocityFromWorldPoint(p);
-                BSWG.render.boom.add(
-                    p.particleWrap(0.0),
-                    0.2*Math.pow(tforce, 0.125),
-                    32,
-                    0.1*Math.pow(tforce, 0.33),
-                    4.0,
-                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*3.0)
-                );
+            var ta = ba.GetLinearVelocityFromWorldPoint(p).clone();
+            var tb = bb.GetLinearVelocityFromWorldPoint(p).clone();
+
+            ta.x -= contact._ta.x;
+            ta.y -= contact._ta.y;
+            tb.x -= contact._tb.x;
+            tb.y -= contact._tb.y;
+
+            var forceA = (Math.lenVec2(ta) * ba.GetMass()) / self.lastDT;
+            var forceB = (Math.lenVec2(tb) * bb.GetMass()) / self.lastDT;
+
+            var tforce = forceA + forceB;
+
+            ba.__lastForce += forceA;
+            bb.__lastForce += forceB;
+            ba.__lastHit = bb;
+            bb.__lastHit = ba;
+
+            if (tforce > 1.0) {
+
+                if (ba.__comp && bb.__comp) {
+                    ba.__comp.takeDamage(forceA * (ba.__mele ? 1/BSWG.meleDmg : 1)
+                                                * (bb.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, bb.__comp);
+                    bb.__comp.takeDamage(forceA * (bb.__mele ? 1/BSWG.meleDmg : 1)
+                                                * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
+                }
+
+                BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                for (var i=0; i<2; i++) {
+                    var a = Math.random() * Math.PI * 2.0;
+                    var v = [ta, tb][i];
+                    BSWG.render.boom.add(
+                        p.particleWrap(0.0),
+                        0.2*Math.pow(tforce, 0.125),
+                        32,
+                        0.1*Math.pow(tforce, 0.33),
+                        4.0,
+                        new b2Vec2(Math.cos(a)*tforce*0.005-v.x, Math.sin(a)*tforce*0.005-v.y).THREE(Math.random()*3.0)
+                    );
+                }
             }
         }
 
