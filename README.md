@@ -1,5 +1,5 @@
 # BSW-Roguelike
-BlockShip Wars Roguelike
+BlockShip Wars Roguelike (Experiment X)
 
 # Links
  * Devblog: http://chadams77.tumblr.com/
