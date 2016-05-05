@@ -293,8 +293,10 @@ BSWG.render = new function() {
             img.src = 'images/' + images[key];
             img.onload = function() {
 
-                this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
-                this.texture.needsUpdate = true;
+                if (Math.isPow2(parseInt(this.width)) && Math.isPow2(parseInt(this.height))) {
+                    this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
+                    this.texture.needsUpdate = true;
+                }
 
                 toLoad -= 1;
                 if (toLoad === 0) {
@@ -389,9 +391,23 @@ BSWG.render = new function() {
 
     };
 
-    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h) {
+    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h, tileMask) {
+
+        tileMask = tileMask || 0;
 
         var H = function(a, b) {
+            while (a < 0 && (tileMask & 1)) {
+                a += w;
+            }
+            while (b < 0 && (tileMask & 4)) {
+                b += h;
+            }
+            while (a >= w && (tileMask & 2)) {
+                a -= w;
+            }
+            while (b >= h && (tileMask & 8)) {
+                b -= h;
+            }
             if (a < 0 || b < 0 || a >= w || b >= h) {
                 return 0.0;
             }

@@ -32,6 +32,11 @@ Math.random3d = function(x,y,z) {
     return res;
 };
 
+Math.isPow2 = function(v) {
+    var x = Math.log2(v);
+    return (~~x) === x;
+};
+
 Math.random3dSlow = function() {
     this.map = {};
     this.get = function(x,y,z) {

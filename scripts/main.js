@@ -17,6 +17,7 @@ var BSWG = new function(){
         'fg-nebulas.js',
         'random-name.js',
         'character.js',
+        'tile.js',
         'ai.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
@@ -100,7 +101,10 @@ var BSWG = new function(){
         'char-pads': 'char-pads.png',
         'char-shirt': 'char-shirt.png',
         'char-spikes': 'char-spikes.png',
-        'char-tattoo': 'char-tattoo.png'
+        'char-tattoo': 'char-tattoo.png',
+        'tileset-mountain': 'tileset-mountain-512.png',
+        'tileset-land': 'tileset-land-512.png',
+        'tileset-below': 'tileset-below-512.png'
     };
     var shaders = {
         'vertex': [
