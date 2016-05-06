@@ -161,6 +161,7 @@ chadaboom3D.prototype.init = function () {
     mesh = new THREE.Mesh( geom, this.mat );
     mesh.frustumCulled = false;
     mesh.position.z = 2.0;
+    mesh.renderOrder = 1500.0;
 
     geom.needsUpdate = true;
     this.mat.needsUpdate = true;

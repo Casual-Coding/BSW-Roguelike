@@ -1,6 +1,6 @@
 BSWG.tileSize = 512;
 BSWG.tileMeshSize = 64;
-BSWG.tileSizeWorld = 16.0;
+BSWG.tileSizeWorld = 24.0;
 BSWG.tileHeightWorld = 16.0;
 
 BSWG.tMask = {
@@ -32,6 +32,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
 
     var gSize = BSWG.tileSize / mSize;
     var sSize = BSWG.tileSizeWorld / (BSWG.tileSize-gSize);
+
+    if (water) {
+        sSize *= 10000.0;
+    }
 
     for (var iy = 0; iy < BSWG.tileSize; iy += gSize) {
         for (var ix = 0; ix < BSWG.tileSize; ix += gSize) {
@@ -140,20 +144,8 @@ BSWG.testMap = {
         isBelow: true
     },
     'water': {
-        map: [
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 0, 0, 0, 1 ],
-            [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
-        ],
-        color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 1.0],
-        level: 0.2,
+        color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.75],
+        level: 0.25,
         isWater: true
     }
 }
@@ -187,11 +179,11 @@ BSWG.tileMap = function (layers) {
             var visible = {};
             var map = layer.map;
             var M = function(X,Y) {
-                return !!(map[X] && map[X][Y]);
+                return !!(map && map[X] && map[X][Y]);
             };
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
-                    if (M(x,y)) {
+                    if (!layer.isWater && M(x,y)) {
                         var k = K(x,y);
                         visible[k] = true;
                         if (!cache[k]) {
@@ -210,6 +202,17 @@ BSWG.tileMap = function (layers) {
                             }
                         }
                     }
+                }
+            }
+
+            if (layer.isWater) {
+                var k = 1;
+                visible[k] = true;
+                if (!cache[k]) {
+                    cache[k] = new Array();
+                    var tobj = set.addTile(set.tiles[1][1], -5, -5);
+                    tobj.mesh.renderOrder = 1000.0;
+                    cache[k].push(tobj);
                 }
             }
             for (var k in cache) {

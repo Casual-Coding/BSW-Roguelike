@@ -158,6 +158,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
     this.hudMesh.position.set(-1.0, -1.0, 4.0 + this.z);
     this.hudMesh.scale.set(w/vp.w, h/vp.h, 1.0);
     this.hudMesh.updateMatrix();
+    this.hudMesh.renderOrder = 2000.0 + this.z;
     
     this.hudMesh.needsUpdate = true;
     this.hudMat.needsUpdate = true;

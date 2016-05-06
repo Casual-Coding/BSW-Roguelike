@@ -55,6 +55,7 @@ BSWG.laserList = new function () {
         ret.mesh.updateMatrix();
         ret.mat.needsUpdate = true;
         ret.mesh.needsUpdate = true;
+        ret.mesh.renderOrder = 1500.0;
 
         BSWG.render.scene.add(ret.mesh);
 
