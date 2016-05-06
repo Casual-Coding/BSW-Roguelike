@@ -377,6 +377,9 @@ BSWG.game = new function(){
         this.editMode = false;
         this.showControls = false;
 
+        // <- Delete tile map if set
+        this.tileMap = null;
+
         this.battleMode = false;
 
         this.exportFN = "";
@@ -758,7 +761,8 @@ BSWG.game = new function(){
                 if (!this.noDefault) {
 
                     if (scene === BSWG.SCENE_GAME2) {
-                        BSWG.planets.add({});
+                        //BSWG.planets.add({});
+                        this.tileMap = new BSWG.tileMap(BSWG.testMap);
                     }
 
                     var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 145+3;
@@ -1193,6 +1197,10 @@ BSWG.game = new function(){
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
             BSWG.laserList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
+
+            if (self.tileMap) {
+                self.tileMap.update(dt);
+            }
 
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:

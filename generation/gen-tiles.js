@@ -172,7 +172,7 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 3.0,
+        taperPower: 1.5,
         bleedF: 25.0,
         taperComb: function(a,b) {
             return a*b;
@@ -187,7 +187,7 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 3.0,
+        taperPower: 2.0,
         taperComb: function(a,b) {
             return a*b;
         },

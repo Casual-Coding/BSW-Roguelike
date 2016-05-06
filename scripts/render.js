@@ -396,17 +396,17 @@ BSWG.render = new function() {
         tileMask = tileMask || 0;
 
         var H = function(a, b) {
-            while (a < 0 && (tileMask & 1)) {
-                a += w;
+            if (a < 0 && (tileMask & 1)) {
+                a = 0;
             }
-            while (b < 0 && (tileMask & 4)) {
-                b += h;
+            if (b < 0 && (tileMask & 4)) {
+                b = 0;
             }
-            while (a >= w && (tileMask & 2)) {
-                a -= w;
+            if (a >= w && (tileMask & 2)) {
+                a = w-1;
             }
-            while (b >= h && (tileMask & 8)) {
-                b -= h;
+            if (b >= h && (tileMask & 8)) {
+                b = h-1;
             }
             if (a < 0 || b < 0 || a >= w || b >= h) {
                 return 0.0;
