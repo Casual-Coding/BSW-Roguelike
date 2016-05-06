@@ -411,7 +411,7 @@ BSWG.game = new function(){
         }
 
         if (!this.stars) {
-            this.stars = new BSWG.starfield();
+            //this.stars = new BSWG.starfield();
         }
 
         if (this.nebulas) {
@@ -1189,7 +1189,7 @@ BSWG.game = new function(){
                     break;
             }
 
-            self.stars.render(ctx, self.cam, viewport);
+            //self.stars.render(ctx, self.cam, viewport);
             if (self.nebulas) {
                 self.nebulas.render(ctx, self.cam, viewport);
             }

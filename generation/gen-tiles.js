@@ -167,7 +167,7 @@ var genPerlin = function(sz, min, max, k, off, exSmooth, bleedF) {
 
 var tileTypes = {
     'mountain': {
-        minHeight: 0.35,
+        minHeight: 0.45,
         maxHeight: 1.0,
         transitionTo: 0.0,
         downTransition: true,
@@ -182,8 +182,8 @@ var tileTypes = {
         }
     },
     'land': {
-        minHeight: 0.2,
-        maxHeight: 0.3,
+        minHeight: 0.28,
+        maxHeight: 0.35,
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
@@ -197,10 +197,10 @@ var tileTypes = {
         smooth: 4
     },
     'below': {
-        minHeight: 0.05,
-        maxHeight: 0.15,
+        minHeight: 0.01,
+        maxHeight: 0.25,
         insideVariations: 4,
-        taperPower: 3.0,
+        taperPower: 1.5,
         taperComb: function(a,b) {
             return a*b;
         },
