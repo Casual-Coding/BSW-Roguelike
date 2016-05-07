@@ -349,11 +349,14 @@ BSWG.physics = new function(){
             radius:     0,
             type:       type,
             welds:      [],
-            id:         this.objID ++
+            id:         this.objID ++,
+            static:     def && def.static
         };
 
         obj.bodyDef = new b2BodyDef();
-        obj.bodyDef.type = b2Body.b2_dynamicBody;
+        if (!obj.static) {
+            obj.bodyDef.type = b2Body.b2_dynamicBody;
+        }
         obj.bodyDef.position = pos;
         obj.bodyDef.angle = angle;
         obj.body = this.world.CreateBody( obj.bodyDef );

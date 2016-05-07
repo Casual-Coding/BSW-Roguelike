@@ -284,6 +284,17 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
         this.mat.needsUpdate = true;
     };
 
+    this.destroy = function() {
+        this.geom.dispose();
+        this.geom = null;
+        this.mat.dispose();
+        this.mat = null;
+        this.heightMap.length = 0;
+        this.heightMap = null;
+        this.normalMap.destroy();
+        this.normalMap = null;
+    };
+
 };
 
 BSWG.testMap = {
@@ -300,6 +311,7 @@ BSWG.testMap = {
             [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 ],
             [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
         ],
+        collision: true,
         color: [1.0, 1.0, 1.0]
     },
     'tileset-land': {
@@ -348,6 +360,42 @@ BSWG.tileMap = function (layers) {
         this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null);
     }
 
+    var fcID = 10000000;
+
+    this.clear = function() {
+        for (var setk in layers) {
+            var set = this.sets[setk];
+            var layer = layers[setk];
+            var cache = layer.cache;
+            if (cache) {
+                for (var k in cache) {
+                    for (var i=0; i<cache[k].length; i++)
+                    {
+                        if (cache[k][i].fakeComp) {
+                            BSWG.componentList.removeQueryable(cache[k][i].fakeComp, cache[k][i].collisionMesh);
+                            BSWG.componentList.removeStatic(cache[k][i].fakeComp);
+                        }
+                        set.removeTile(cache[k][i]);
+                        cache[k][i] = null;
+                    }
+                    cache[k].length = 0;
+                    cache[k] = null;
+                }
+            }
+            cache = null;
+            layer.cache = null;
+        }
+    };
+
+    this.destroy = function() {
+        this.clear();
+        for (var set in layers) {
+            this.sets[set].destroy();
+            this.sets[set] = null;
+        }
+        layers = null;
+    };
+
     this.update = function(dt) {
 
         var p1 = BSWG.render.unproject3D(new b2Vec2(0.0, 0.0), 0.0);
@@ -368,9 +416,15 @@ BSWG.tileMap = function (layers) {
             var cache = layer.cache = layer.cache || {};
             var visible = {};
             var map = layer.map;
-            var M = function(X,Y) {
-                return !!(map && map[X] && map[X][Y]);
-            };
+            var M;
+            if (typeof map === 'function') {
+                M = map;
+            }
+            else {
+                M = function(X,Y) {
+                    return !!(map && map[X] && map[X][Y]);
+                };                
+            }
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
                     if (!layer.isWater && M(x,y)) {
@@ -378,7 +432,22 @@ BSWG.tileMap = function (layers) {
                         visible[k] = true;
                         if (!cache[k]) {
                             cache[k] = new Array();
-                            cache[k].push(set.addTile(set.tiles[1][1], x, y));
+                            cache[k].push(set.addTile(set.tiles[1][1], x, y, !!layer.collision));
+                            if (layer.collision) {
+                                var tile = cache[k][0];
+                                if (BSWG.componentList) {
+                                    var fakeComp = {
+                                        id: fcID++,
+                                        isStatic: true,
+                                        center: new b2Vec2((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld),
+                                        radius: BSWG.tileSizeWorld * 0.5,
+                                        takeDamage: function() {}
+                                    };
+                                    tile.fakeComp = fakeComp;
+                                    BSWG.componentList.addStatic(fakeComp);
+                                    BSWG.componentList.makeQueryable(fakeComp, tile.collisionMesh);
+                                }
+                            }
                             if (!layer.isWater) {
                                 for (var ox=-1; ox<=1; ox++) {
                                     for (var oy=-1; oy<=1; oy++) {
@@ -409,6 +478,10 @@ BSWG.tileMap = function (layers) {
                 if (!visible[k] && cache[k]) {
                     for (var i=0; i<cache[k].length; i++)
                     {
+                        if (cache[k][i].fakeComp) {
+                            BSWG.componentList.removeQueryable(cache[k][i].fakeComp, cache[k][i].collisionMesh);
+                            BSWG.componentList.removeStatic(cache[k][i].fakeComp);
+                        }
                         set.removeTile(cache[k][i]);
                         cache[k][i] = null;
                     }
@@ -471,6 +544,21 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
         ]
     ];
 
+    this.destroy = function () {
+        this.image.destroy();
+        for (var i=0; i<this.tiles.length; i++) {
+            for (var j=0; j<this.tiles[i].length; j++) {
+                if (this.tiles[i][j]) {
+                    this.tiles[i][j].destroy();
+                }
+            }
+            this.tiles[i].length = 0;
+            this.tiles[i] = null;
+        }
+        this.tiles.length = 0;
+        this.tiles = null;
+    };
+
     this.update = function (dt) {
         for (var i=0; i<this.tiles.length; i++) {
             for (var j=0; j<this.tiles[i].length; j++) {
@@ -497,13 +585,26 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
 
     };
 
-    this.addTile = function(tile, x, y) {
+    this.collisionGeom = new THREE.BoxGeometry( BSWG.tileSizeWorld, BSWG.tileSizeWorld, BSWG.tileSizeWorld );
+
+    this.addTile = function(tile, x, y, coln) {
 
         var ret = new Object();
         ret.mesh = new THREE.Mesh( tile.geom, tile.mat );
-        ret.mesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -8.0);
+        ret.mesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0);
         ret.mesh.rotation.z = Math.PI/2;
         ret.mesh.updateMatrix();
+
+        if (coln) {
+            ret.collisionMesh = new THREE.Mesh( this.collisionGeom, tile.mat );
+            ret.collisionMesh.position.set((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld, -10.0);
+            ret.collisionMesh.rotation.z = Math.PI/2;
+            ret.collisionMesh.updateMatrix();
+            ret.collisionMesh.updateMatrixWorld();
+            //ret.collisionMesh.visible = false;
+            //BSWG.render.scene.add(ret.collisionMesh);
+        }
+
         BSWG.render.scene.add(ret.mesh);
         return ret;
 
@@ -513,6 +614,12 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
 
         if (!tile.mesh) {
             return;
+        }
+        if (tile.collisionMesh) {
+            //BSWG.render.scene.remove(tile.collisionMesh);
+            tile.collisionMesh.geometry = null;
+            tile.collisionMesh.material = null;
+            tile.collisionMesh = null;
         }
         BSWG.render.scene.remove(tile.mesh);
         tile.mesh.geometry = null;

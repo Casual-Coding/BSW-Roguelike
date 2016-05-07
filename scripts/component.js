@@ -694,6 +694,7 @@ BSWG.componentList = new function () {
 
     this.compList = new Array();
     this.compRemove = new Array();
+    this.staticList = new Array();
 
     this.clear = function () {
 
@@ -710,6 +711,7 @@ BSWG.componentList = new function () {
         }
 
         this.archHash = {};
+        this.hash = {};
 
         this.typeMap = {
             'blaster':          BSWG.component_Blaster,
@@ -872,6 +874,25 @@ BSWG.componentList = new function () {
             list = null;
             this.hash[key] = null;
             delete this.hash[key];
+        }
+
+        var len = this.staticList.length;
+        for (var i=0; i<len; i++) {
+            var C = this.staticList[i];
+            var p = C.obj.body.GetWorldCenter();
+            var r = C.obj.radius * 1.25;
+            var x1 = this.hashXY(p.x - r), y1 = this.hashXY(p.y - r),
+                x2 = this.hashXY(p.x + r), y2 = this.hashXY(p.y + r);
+
+            for (var x=x1; x<=x2; x++) {
+                for (var y=y1; y<=y2; y++) {
+                    var key = this.hashKey2(x,y);
+                    if (!this.hash[key]) {
+                        this.hash[key] = [];
+                    }
+                    this.hash[key].push(C);
+                }
+            }            
         }
 
         var len = this.compList.length;
@@ -1157,6 +1178,39 @@ BSWG.componentList = new function () {
             };
         }
         return null;
+
+    };
+
+    this.addStatic = function (comp) {
+
+        this.removeStatic(comp);
+        
+        comp.obj = BSWG.physics.createObject('box', comp.center, 0, {
+            width:    comp.radius*2,
+            height:   comp.radius*2,
+            smooth:   0.1,
+            static:   true
+        });
+
+        this.staticList.push(comp);
+
+    };
+
+    this.removeStatic = function (comp) {
+
+        if (comp.obj) {
+            BSWG.physics.removeObject(comp.obj);
+            comp.obj = null;
+        };
+
+        var len = this.staticList.length;
+        for (var i=0; i<len; i++) {
+            if (this.staticList[i].id === comp.id) {
+                this.staticList.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
 
     };
 

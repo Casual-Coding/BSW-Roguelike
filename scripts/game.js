@@ -377,7 +377,9 @@ BSWG.game = new function(){
         this.editMode = false;
         this.showControls = false;
 
-        // <- Delete tile map if set
+        if (this.tileMap) {
+            this.tileMap.destroy();
+        }
         this.tileMap = null;
 
         this.battleMode = false;
@@ -667,6 +669,9 @@ BSWG.game = new function(){
                             self.ccblock = null;
                             self.exportFN = data.filename;
                             var obj = JSON.parse(data.data);
+                            if (self.tileMap) {
+                                self.tileMap.clear();
+                            }
                             BSWG.componentList.clear();
                             self.ccblock = BSWG.componentList.load(obj);
                             if (!self.ccblock) {
@@ -676,6 +681,9 @@ BSWG.game = new function(){
                             self.cam.x = p.x;
                             self.cam.y = p.y;
                         } catch (err) {
+                            if (self.tileMap) {
+                                self.tileMap.clear();
+                            }
                             BSWG.componentList.clear();
                             self.ccblock = BSWG.componentList.load(backup);
                         }
@@ -1055,7 +1063,7 @@ BSWG.game = new function(){
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
-                    if (!self.ccblock.destroyed) {
+                    if (self.ccblock && !self.ccblock.destroyed) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
 
@@ -1180,7 +1188,7 @@ BSWG.game = new function(){
 
                     self.grabbedBlock = grabbedBlock;
 
-                    if (!self.ccblock.ai && !BSWG.ui_DlgBlock) {
+                    if (self.ccblock && !self.ccblock.ai && !BSWG.ui_DlgBlock) {
                         BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
                     }
                     break;
