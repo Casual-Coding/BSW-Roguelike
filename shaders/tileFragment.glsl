@@ -40,6 +40,7 @@ void main() {
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(l, 1.5) + 0.2;
 
+    gl_FragColor = vec4(clr.rgb*l*0.75, 1.0);
 
     float depth = 1.0 - texture2D(shadowMap, (vPosition.xy - cam.xy) * cam.z / 3.0 * 2.0 + vec2(0.5, 0.5)).a;
     gl_FragColor.rgb *= depth * 0.5 + 0.5;
