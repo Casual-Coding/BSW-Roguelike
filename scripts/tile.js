@@ -40,8 +40,8 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
     for (var iy = 0; iy < BSWG.tileSize; iy += gSize) {
         for (var ix = 0; ix < BSWG.tileSize; ix += gSize) {
 
-            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 2 / BSWG.tileSize));
-            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 2 / BSWG.tileSize));
+            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 1.01 / BSWG.tileSize));
+            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.01 / BSWG.tileSize));
 
             var x2 = ix;
             var y2 = iy;
@@ -74,6 +74,30 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
             clr: {
                 type: 'v4',
                 value: new THREE.Vector4(color[0], color[1], color[2], color[3])
+            },
+            exMap: {
+                type: 't',
+                value: BSWG.render.images['water_nm'].texture
+            },
+            shadowMap: {
+                type: 't',
+                value: BSWG.render.shadowMap
+            },
+            extra: {
+                type: 'v4',
+                value: new THREE.Vector4(BSWG.render.time, 1., 0., 0.)
+            },
+            light: {
+                type: 'v4',
+                value: new THREE.Vector4(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0)
+            },
+            viewport: {
+                type: 'v2',
+                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+            },
+            cam: {
+                type: 'v3',
+                value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
             }
         });
     }
@@ -87,12 +111,42 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
                 type: 'v4',
                 value: new THREE.Vector4(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0)
             },
+            exMap: {
+                type: 't',
+                value: BSWG.render.images['grass_nm'].texture
+            },
             map: {
                 type: 't',
                 value: this.normalMap.texture
+            },
+            shadowMap: {
+                type: 't',
+                value: BSWG.render.shadowMap
+            },
+            extra: {
+                type: 'v4',
+                value: new THREE.Vector4(BSWG.render.time, 0., 0., 0.)
+            },
+            viewport: {
+                type: 'v2',
+                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+            },
+            cam: {
+                type: 'v3',
+                value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
             }
         });
     }
+
+    this.update = function(dt) {
+        var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
+
+        this.mat.uniforms.light.value.set(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0);
+        this.mat.uniforms.extra.value.x = BSWG.render.time;
+        this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+        this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+        this.mat.needsUpdate = true;
+    };
 
 };
 
@@ -227,6 +281,8 @@ BSWG.tileMap = function (layers) {
                     delete cache[k];
                 }
             }
+
+            set.update(dt);
         }
 
     };
@@ -277,6 +333,16 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
             new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.U, color, !!waterLevel)
         ]
     ];
+
+    this.update = function (dt) {
+        for (var i=0; i<this.tiles.length; i++) {
+            for (var j=0; j<this.tiles[i].length; j++) {
+                if (this.tiles[i][j]) {
+                    this.tiles[i][j].update(dt);
+                }
+            }
+        }
+    };
 
     this.test = function () {
 

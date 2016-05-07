@@ -133,7 +133,8 @@ var BSWG = new function(){
             'laserFragment',
             'hudFragment',
             'tileFragment',
-            'tileWaterFragment'
+            'tileWaterFragment',
+            'shadowFragment'
         ]
     };
     var ai = [

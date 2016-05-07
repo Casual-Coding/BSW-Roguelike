@@ -181,6 +181,8 @@ BSWG.initCanvasContext = function(ctx) {
 
 };
 
+BSWG.shadowMapSize = 2048;
+
 BSWG.render = new function() {
 
     var win = BSWG.nwg ? BSWG.nwg.Window.get() : null;
@@ -233,6 +235,20 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
+        this.cam3DS = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
+        this.cam3DS.aspect = 1.0;
+        this.cam3DS.updateProjectionMatrix();
+        this.cam3DS.position.z = 10.0;
+        this.sceneS = new THREE.Scene();
+
+        this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize);
+        this.shadowMap.texture.format = THREE.RGBAFormat;
+        this.shadowMap.texture.minFilter = THREE.NearestFilter;
+        this.shadowMap.texture.magFilter = THREE.NearestFilter;
+        this.shadowMap.texture.generateMipmaps = false;
+        this.shadowMap.stencilBuffer = false;
+        this.shadowMap.depthTexture = new THREE.DepthTexture();
+
         this.sizeViewport();
 
         BSWG.initCanvasContext(this.ctx);
@@ -585,6 +601,8 @@ BSWG.render = new function() {
             }
 
             self.renderer.clear();
+            self.renderer.render( self.sceneS, self.cam3DS, self.shadowMap, true);
+            self.renderer.setViewport(0, 0, self.viewport.w, self.viewport.h);
             self.renderer.render( self.scene, self.cam3D );
 
             if (self.customCursor && !self.dlgOpen) {
@@ -630,7 +648,12 @@ BSWG.render = new function() {
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld();
-        }       
+            this.cam3DS.position.set(cam.x+offset.x+1.5, cam.y+offset.y, f/cam.z*2.5);
+            this.cam3DS.lookAt(new THREE.Vector3(cam.x+1.5, cam.y, 0.0));
+            this.cam3DS.updateProjectionMatrix();
+            this.cam3DS.updateMatrix();
+            this.cam3DS.updateMatrixWorld();
+        }
     };
 
     this.project3D = function ( p, z ) {
