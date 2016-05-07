@@ -17,8 +17,12 @@ BSWG.blasterList = new function () {
             B.p.y += B.v.y * dt;
             B.t -= dt;
 
-            var comp = null;
-            if (B.t <= 0.0 || (comp=BSWG.componentList.atPoint(B.p))) {
+            var ret = BSWG.componentList.withRay(new b2Vec2(ox, oy).THREE(0.0), new b2Vec2(B.p.x+B.v.x/2, B.p.y+B.v.y/2).THREE(0.0));
+            var comp = ret ? ret.comp : null;
+            if (ret && ret.d > Math.sqrt(B.v.x*B.v.x+B.v.y*B.v.y)*dt) {
+                comp = null;
+            }
+            if (B.t <= 0.0 || comp) {
                 if (B.t <= 0.0 || comp !== B.source) {
                     if (comp && comp !== B.source) {
                         comp.takeDamage(BSWG.blasterDmg, B.source, true);

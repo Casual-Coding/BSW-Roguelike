@@ -1163,7 +1163,7 @@ BSWG.control_3DTextButton = {
                 H,
                 H * 0.5,
                 this.textColor,
-                BSWG.ui_3dScreen(this.p),
+                BSWG.ui_3dScreen(this.p, 5.0),
                 this.lowDetail,
                 0.35
             );
@@ -1178,7 +1178,7 @@ BSWG.control_3DTextButton = {
 
         var H = BSWG.ui_3dSizeH(this.h, this.p);
         this.textObj.size = H*0.5;
-        this.textObj.pos = BSWG.ui_3dScreen(this.p);
+        this.textObj.pos = BSWG.ui_3dScreen(this.p, 5.0);
         this.textObj.pos.y -= H*0.75;
         this.textObj.clr = this.mouseIn ? this.hoverColor : this.textColor;
         if (this.textObj.clr[3] <= 0.001) {

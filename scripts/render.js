@@ -845,7 +845,11 @@ BSWG.render = new function() {
             }
         });
 
+        shadowMat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
+        shadowMesh = new THREE.Mesh( geom, shadowMat );
+
         mesh = new THREE.Mesh( geom, material );
+        mesh.renderOrder = 1450.0;
 
         pos = pos || new THREE.Vector3(0, 0, 0);
 
@@ -858,6 +862,11 @@ BSWG.render = new function() {
         mesh.rotation.x = 0;
         mesh.rotation.y = Math.PI * 2;
 
+        shadowMesh.scale.set(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+        shadowMesh.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
+        shadowMesh.updateMatrix();
+        this.sceneS.add(shadowMesh);
+
         this.scene.add(mesh);
 
         var self = this;
@@ -869,8 +878,11 @@ BSWG.render = new function() {
             clr: clr,
             pos: pos,
             size: size,
+            shadowMesh: shadowMesh,
+            shadowMat: shadowMat,
             destroy: function() {
                 BSWG.render.scene.remove(this.mesh);
+                BSWG.render.sceneS.remove(this.shadowMesh);
 
                 this.mesh.geometry.dispose();
                 this.mesh.material.dispose();
@@ -879,6 +891,11 @@ BSWG.render = new function() {
                 this.mesh = null;
                 this.mat = null;
                 this.geom = null;
+                this.shadowMesh.geometry = null;
+                this.shadowMesh.material = null;
+                this.shadowMat.dispose();
+                this.shadowMat = null;
+                this.shadowMesh = null;
 
                 for (var i=0; i<self.textObjs.length; i++) {
                     if (self.textObjs[i] === this) {
@@ -896,6 +913,10 @@ BSWG.render = new function() {
                     this.mesh.position.set(this.pos.x + xOffset*this.size/4, this.pos.y, this.pos.z);
                     this.mesh.updateMatrix();
                 }
+
+                this.shadowMesh.scale.set(this.mesh.scale.x, this.mesh.scale.y, this.mesh.scale.z);
+                this.shadowMesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+                this.shadowMesh.updateMatrix();
 
                 this.mat.uniforms.light.value.x = lp.x;
                 this.mat.uniforms.light.value.y = lp.y;

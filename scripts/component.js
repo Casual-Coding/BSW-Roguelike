@@ -194,7 +194,7 @@ BSWG.compImplied = function (a, b) {
 
 };
 
-BSWG.comp_hashSize = 2.0;
+BSWG.comp_hashSize = 8.0;
 
 BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
@@ -879,8 +879,8 @@ BSWG.componentList = new function () {
         var len = this.staticList.length;
         for (var i=0; i<len; i++) {
             var C = this.staticList[i];
-            var p = C.obj.body.GetWorldCenter();
-            var r = C.obj.radius * 1.25;
+            var p = C.center;
+            var r = C.radius * 1.25;
             var x1 = this.hashXY(p.x - r), y1 = this.hashXY(p.y - r),
                 x2 = this.hashXY(p.x + r), y2 = this.hashXY(p.y + r);
 
@@ -1188,7 +1188,7 @@ BSWG.componentList = new function () {
         comp.obj = BSWG.physics.createObject('box', comp.center, 0, {
             width:    comp.radius*2,
             height:   comp.radius*2,
-            smooth:   0.1,
+            smooth:   0.01,
             static:   true
         });
 

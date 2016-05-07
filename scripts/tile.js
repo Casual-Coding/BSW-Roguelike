@@ -24,7 +24,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
         BSWG.render.heightMapToNormalMap(self.heightMap, ctx, w, h, tileMask);
     });
 
-    var mSize = BSWG.tileMeshSize; //water ? 4 : BSWG.tileMeshSize;
+    var mSize = water ? 2 : BSWG.tileMeshSize;
     this.geom = new THREE.PlaneBufferGeometry(BSWG.tileSizeWorld, BSWG.tileSizeWorld, mSize, mSize);
     var verts = this.geom.attributes.position;
     var norms = this.geom.attributes.normal;
@@ -33,7 +33,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
     var sSize = BSWG.tileSizeWorld / BSWG.tileSize;
 
     if (water) {
-        sSize *= 10000.0;
+        sSize *= 10.0;
     }
 
     var offset = 0;
@@ -401,11 +401,6 @@ BSWG.tileMap = function (layers) {
         var p1 = BSWG.render.unproject3D(new b2Vec2(0.0, 0.0), 0.0);
         var p2 = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w, BSWG.render.viewport.h), 0.0);
 
-        var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 2,
-            ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
-            tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
-            ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;
-
         var K = function(x, y) {
             return x+y*1024;
         };
@@ -423,7 +418,17 @@ BSWG.tileMap = function (layers) {
             else {
                 M = function(X,Y) {
                     return !!(map && map[X] && map[X][Y]);
-                };                
+                };
+            }
+            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3,
+                ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
+                tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
+                ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;
+            if (layer.isWater) {
+                tx1 = (~~(Math.min(p1.x, p2.x) / (BSWG.tileSizeWorld * 10))) - 3;
+                ty1 = (~~(Math.min(p1.y, p2.y) / (BSWG.tileSizeWorld * 10))) - 2;
+                tx2 = (~~(Math.max(p1.x, p2.x) / (BSWG.tileSizeWorld * 10))) + 2;
+                ty2 = (~~(Math.max(p1.y, p2.y) / (BSWG.tileSizeWorld * 10))) + 2;                
             }
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
@@ -465,13 +470,17 @@ BSWG.tileMap = function (layers) {
             }
 
             if (layer.isWater) {
-                var k = 1;
-                visible[k] = true;
-                if (!cache[k]) {
-                    cache[k] = new Array();
-                    var tobj = set.addTile(set.tiles[1][1], -5, -5);
-                    tobj.mesh.renderOrder = 1000.0;
-                    cache[k].push(tobj);
+                for (var x=tx1; x<=tx2; x++) {
+                    for (var y=ty1; y<=ty2; y++) {
+                        var k = K(x,y);
+                        visible[k] = true;
+                        if (!cache[k]) {
+                            cache[k] = new Array();
+                            var tobj = set.addTile(set.tiles[1][1], x*10, y*10);
+                            tobj.mesh.renderOrder = 1000.0;
+                            cache[k].push(tobj);
+                        }
+                    }
                 }
             }
             for (var k in cache) {
@@ -628,4 +637,21 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
 
     };
     
+};
+
+BSWG.mapPerlin = function (x, y) {
+    x += 100;
+    y += 50;
+    var h = Math.random2d(~~(x/2), ~~(y/2)) * 0.5 +
+            Math.random2d(~~(x/1.5), ~~(y/1.5)) * 0.25 +
+            Math.random2d(~~(x/1.1), ~~(y/1.1)) * 0.125;
+    return h > 0.475;
+};
+BSWG.mapPerlinSparse = function (x, y) {
+    x += 100;
+    y += 50;
+    var h = Math.random2d(~~(x/2), ~~(y/2)) * 0.5 +
+            Math.random2d(~~(x/1.5), ~~(y/1.5)) * 0.25 +
+            Math.random2d(~~(x/1.1), ~~(y/1.1)) * 0.125;
+    return h > 0.6;
 };

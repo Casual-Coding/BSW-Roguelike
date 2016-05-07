@@ -433,7 +433,7 @@ BSWG.game = new function(){
         switch (scene) {
             case BSWG.SCENE_TITLE:
 
-                this.cam.z *= 1.5;
+                this.cam.z /= 1.25;
 
                 Math.seedrandom();
 
@@ -446,30 +446,30 @@ BSWG.game = new function(){
                 }
                 else {
                     this.title1 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 80+42,
+                        x: BSWG.render.viewport.w*0.5, y: 80+42+42,
                         w: 800, h: 100,
                         vpXCenter: true,
                         text: "BlockShip Wars",
-                        color: [0.85, 0.85, 0.85, 1],
-                        hoverColor: [0.85, 0.85, 0.85, 1],
+                        color: [1, 1, 1, 1],
+                        hoverColor: [1, 1, 1, 1],
                         noDestroy: true,
                         click: function (me) {
                         }
                     });
                     this.title2 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 145+42,
+                        x: BSWG.render.viewport.w*0.5, y: 145+42+42,
                         w: 800, h: 100,
                         vpXCenter: true,
                         text: "r o g u e l i k e",
-                        color: [0.85, 0.2, 0.2, 1.0],
-                        hoverColor: [0.85, 0.2, 0.2, 1.0],
+                        color: [1, 0.2, 0.2, 1.0],
+                        hoverColor: [1, 0.2, 0.2, 1.0],
                         noDestroy: true,
                         click: function (me) {
                         }
                     });
 
                     this.newGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350,
+                        x: BSWG.render.viewport.w*0.5, y: 350+42,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "New Game",
@@ -481,7 +481,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.loadGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+70,
+                        x: BSWG.render.viewport.w*0.5, y: 350+70+42,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Load Game",
@@ -495,7 +495,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.sandBoxBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+140,
+                        x: BSWG.render.viewport.w*0.5, y: 350+140+42,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Sandbox",
@@ -519,10 +519,37 @@ BSWG.game = new function(){
                     }
                     var pos = new THREE.Vector3(Math.cos(a)*r, Math.sin(a)*r, 0.0);
                     this.panPositions.push(pos);
-                    BSWG.planets.add({pos: pos, type: t});
+                    //BSWG.planets.add({pos: pos, type: t});
                 }
                 this.curPanPos = 0;
                 this.panPosTime = this.panPosStartTime = 20.0;
+
+                var desc = {
+                    'tileset-mountain': {
+                        map: function(x,y) {
+                            return BSWG.mapPerlinSparse(x+100,y+414);
+                        },
+                        collision: true,
+                        color: [0.5*2, 0.5*2, 0.75*2]
+                    },
+                    'tileset-land': {
+                        map: BSWG.mapPerlin,
+                        color: [0.2, 0.5, 1.0]
+                    },
+                    'tileset-below': {
+                        map: function(x,y) {
+                            return true
+                        },
+                        color: [0.20, 0.20, 0.75],
+                        isBelow: true
+                    },
+                    'water': {
+                        color: [0, 0, 0.4*0.5, 0.6],
+                        level: 0.45,
+                        isWater: true
+                    }
+                };
+                this.tileMap = new BSWG.tileMap(desc);
 
                 this.setSong(134, {
                     seed1: 48,
@@ -769,8 +796,34 @@ BSWG.game = new function(){
                 if (!this.noDefault) {
 
                     if (scene === BSWG.SCENE_GAME2) {
-                        //BSWG.planets.add({});
-                        this.tileMap = new BSWG.tileMap(BSWG.testMap);
+                        var desc = {
+                            'tileset-mountain': {
+                                map: function(x,y) {
+                                    var d = ~~(Math.sqrt(x*x+y*y));
+                                    return (Math.max(Math.abs(x), Math.abs(y)) > 12) ||
+                                           (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1);
+                                },
+                                collision: true,
+                                color: [1.0, 1.0, 1.0]
+                            },
+                            'tileset-land': {
+                                map: BSWG.mapPerlin,
+                                color: [0.2, 0.75, 0.2]
+                            },
+                            'tileset-below': {
+                                map: function(x,y) {
+                                    return true
+                                },
+                                color: [0.75, 0.75, 0.20],
+                                isBelow: true
+                            },
+                            'water': {
+                                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+                                level: 0.25,
+                                isWater: true
+                            }
+                        };
+                        this.tileMap = new BSWG.tileMap(desc);
                     }
 
                     var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 145+3;
