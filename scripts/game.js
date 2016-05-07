@@ -433,7 +433,7 @@ BSWG.game = new function(){
         switch (scene) {
             case BSWG.SCENE_TITLE:
 
-                this.cam.z /= 1.25;
+                this.cam.z /= 2.0;
 
                 Math.seedrandom();
 
@@ -529,7 +529,6 @@ BSWG.game = new function(){
                         map: function(x,y) {
                             return BSWG.mapPerlinSparse(x+100,y+414);
                         },
-                        collision: true,
                         color: [0.5*2, 0.5*2, 0.75*2]
                     },
                     'tileset-land': {
@@ -545,7 +544,7 @@ BSWG.game = new function(){
                     },
                     'water': {
                         color: [0, 0, 0.4*0.5, 0.6],
-                        level: 0.45,
+                        level: 0.15,
                         isWater: true
                     }
                 };

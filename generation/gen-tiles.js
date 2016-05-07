@@ -183,7 +183,7 @@ var tileTypes = {
     },
     'land': {
         minHeight: 0.28,
-        maxHeight: 0.35,
+        maxHeight: 0.4,
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
@@ -192,9 +192,9 @@ var tileTypes = {
             return a*b;
         },
         perlinFilter: function(v) {
-            return Math.pow(v, 1.75);
+            return Math.pow(v, 2.1);
         },
-        smooth: 4
+        smooth: 2
     },
     'below': {
         minHeight: 0.01,
