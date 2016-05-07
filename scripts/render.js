@@ -235,7 +235,7 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
+        this.cam3DS = new THREE.PerspectiveCamera(90, 1.5, 1.0, 1000);
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
         this.cam3DS.position.z = 10.0;
@@ -407,7 +407,7 @@ BSWG.render = new function() {
 
     };
 
-    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h, tileMask) {
+    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h, tileMask, normalBfr) {
 
         tileMask = tileMask || 0;
 
@@ -451,6 +451,12 @@ BSWG.render = new function() {
             }
             else {
                 dx /= len; dy /= len; dz /= len;
+            }
+
+            if (normalBfr) {
+                normalBfr.push(dx);
+                normalBfr.push(dy);
+                normalBfr.push(dz);
             }
 
             imgData.data[i]   = O((dx + 1.0) * 0.5);

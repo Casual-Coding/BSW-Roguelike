@@ -25,46 +25,182 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
     });
 
     var mSize = BSWG.tileMeshSize; //water ? 4 : BSWG.tileMeshSize;
-    this.geom = new THREE.PlaneBufferGeometry(BSWG.tileSizeWorld, BSWG.tileSizeWorld, mSize-1, mSize-1);
+    this.geom = new THREE.PlaneBufferGeometry(BSWG.tileSizeWorld, BSWG.tileSizeWorld, mSize, mSize);
     var verts = this.geom.attributes.position;
-
-    var offset = 0;
+    var norms = this.geom.attributes.normal;
 
     var gSize = BSWG.tileSize / mSize;
-    var sSize = BSWG.tileSizeWorld / (BSWG.tileSize-gSize);
+    var sSize = BSWG.tileSizeWorld / BSWG.tileSize;
 
     if (water) {
         sSize *= 10000.0;
     }
 
-    for (var iy = 0; iy < BSWG.tileSize; iy += gSize) {
-        for (var ix = 0; ix < BSWG.tileSize; ix += gSize) {
+    var offset = 0;
 
-            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 1.01 / BSWG.tileSize));
-            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.01 / BSWG.tileSize));
+    for (var iy = 0; iy <= BSWG.tileSize; iy += gSize) {
+        for (var ix = 0; ix <= BSWG.tileSize; ix += gSize) {
 
-            var x2 = ix;
-            var y2 = iy;
-            if ((ix + gSize) === BSWG.tileSize) {
-                x2 = BSWG.tileSize - 1;
-            }
-            if ((iy + gSize) === BSWG.tileSize) {
-                y2 = BSWG.tileSize - 1;
-            }
+            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
+            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
+
+            var x2 = ~~(ix / (BSWG.tileSize) * (BSWG.tileSize-0.001));
+            var y2 = ~~(iy / (BSWG.tileSize) * (BSWG.tileSize-0.001));
 
             var z = BSWG.tileHeightWorld * self.heightMap[x2 + y2*BSWG.tileSize]/255;
 
             verts.array[offset+0] = x;
             verts.array[offset+1] = y;
             verts.array[offset+2] = z;
-            
+          
             offset += 3;
         }
     }
-    //verts.dynamic = true;
+
+    this.geom.computeVertexNormalsTile = function () {
+
+        var index = this.index;
+        var attributes = this.attributes;
+        var groups = this.groups;
+
+        if ( attributes.position ) {
+
+            var positions = attributes.position.array;
+
+            if ( attributes.normal === undefined ) {
+
+                this.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( positions.length ), 3 ) );
+
+            } else {
+
+                // reset existing normals to zero
+
+                var array = attributes.normal.array;
+
+                for ( var i = 0, il = array.length; i < il; i ++ ) {
+
+                    array[ i ] = 0;
+
+                }
+
+            }
+
+            var normals = attributes.normal.array;
+
+            var vA, vB, vC,
+
+            pA = new THREE.Vector3(),
+            pB = new THREE.Vector3(),
+            pC = new THREE.Vector3(),
+
+            cb = new THREE.Vector3(),
+            ab = new THREE.Vector3();
+
+            var indices = index.array;
+
+            if ( groups.length === 0 ) {
+
+                this.addGroup( 0, indices.length );
+
+            }
+
+            for ( var j = 0, jl = groups.length; j < jl; ++ j ) {
+
+                var group = groups[ j ];
+
+                var start = group.start;
+                var count = group.count;
+
+                var mask = tileMask;
+
+                var V = function(X, Y) {
+
+                    X *= gSize;
+                    Y *= gSize;
+
+                    var _x = (X * sSize - sSize*0.5) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
+                    var _y = (-(Y * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
+
+                    if ((mask & 1) && (mask & 2) && X<0) {
+                        X = (((X/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
+                    }
+                    else if (X<0) {
+                        X = 0;
+                    }
+                    if ((mask & 2) && (mask & 1) && (X/gSize)>mSize) {
+                        X = (((X/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
+                    }
+                    else if ((X/gSize)>mSize) {
+                        X = mSize*gSize;
+                    }
+
+                    if ((mask & 4) && (mask & 8) && Y<0) {
+                        Y = (((Y/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
+                    }
+                    else if (Y<0) {
+                        Y = 0;
+                    }
+                    if ((mask & 8) && (mask & 4) && (Y/gSize)>mSize) {
+                        Y = (((Y/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
+                    }
+                    else if ((Y/gSize)>mSize) {
+                        Y = mSize*gSize;
+                    }
+
+                    var x2 = ~~(X / (BSWG.tileSize) * (BSWG.tileSize-0.001));
+                    var y2 = ~~(Y / (BSWG.tileSize) * (BSWG.tileSize-0.001));
+                    var _z = BSWG.tileHeightWorld * self.heightMap[x2 + y2*BSWG.tileSize]/255;
+
+                    return new THREE.Vector3(_x, _y, _z);
+
+                };
+
+                var off = [
+                    [  1,  0 ],
+                    [  1, -1 ],
+                    [  0, -1 ],
+                    [ -1, -1 ],
+                    [ -1,  0 ],
+                    [ -1,  1 ],
+                    [  0,  1 ],
+                    [  1,  1 ]
+                ]
+
+                var idx = 0;
+                for (var y = 0; y <= mSize; y++) {
+                    for (var x = 0; x <= mSize; x++) {
+
+                        for (var i=0; i<off.length; i++) {
+                            var j = (i+1)%off.length;
+                            pA = V(x, y);
+                            pB = V(x + off[i][0], y + off[i][1]);
+                            pC = V(x + off[j][0], y + off[j][1]);
+
+                            cb.subVectors( pC, pB );
+                            ab.subVectors( pA, pB );
+                            cb.cross( ab );
+
+                            normals[ idx + 0 ] += cb.x;
+                            normals[ idx + 1 ] += cb.y;
+                            normals[ idx + 2 ] += cb.z;
+                        }
+
+                        idx += 3;
+                    }
+                }
+
+            }
+
+            this.normalizeNormals();
+
+            attributes.normal.needsUpdate = true;
+
+        }
+
+    };
 
     this.geom.computeFaceNormals();
-    this.geom.computeVertexNormals();
+    this.geom.computeVertexNormalsTile();
     this.geom.computeBoundingBox();
 
     var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
@@ -198,7 +334,7 @@ BSWG.testMap = {
         isBelow: true
     },
     'water': {
-        color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.75],
+        color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
         level: 0.25,
         isWater: true
     }
@@ -308,11 +444,12 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
             ctx.fillRect(0, 0, w, h);
         }
         else {
+            var ovr = 1;
             ctx.drawImage(image, 0, 0);
-            ctx.drawImage(image, BSWG.tileSize-1, 0,    1, h,   BSWG.tileSize-1, 0,     3, h);
-            ctx.drawImage(image, BSWG.tileSize*2-1, 0,  1, h,   BSWG.tileSize*2-1, 0,   3, h);
-            ctx.drawImage(image, 0, BSWG.tileSize-1,    w, 1,   0, BSWG.tileSize-1,     w, 3);
-            ctx.drawImage(image, 0, BSWG.tileSize*2-1,  w, 1,   0, BSWG.tileSize*2-1,   w, 3);
+            ctx.drawImage(image, BSWG.tileSize-1, 0,    1, h,   BSWG.tileSize-ovr, 0,     ovr*2, h);
+            ctx.drawImage(image, BSWG.tileSize*2-1, 0,  1, h,   BSWG.tileSize*2-ovr, 0,   ovr*2, h);
+            ctx.drawImage(image, 0, BSWG.tileSize-1,    w, 1,   0, BSWG.tileSize-ovr,     w, ovr*2);
+            ctx.drawImage(image, 0, BSWG.tileSize*2-1,  w, 1,   0, BSWG.tileSize*2-ovr,   w, ovr*2);
         }
     }, true);
 
