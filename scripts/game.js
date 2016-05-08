@@ -445,8 +445,9 @@ BSWG.game = new function(){
                     this.sandBoxBtn.add();
                 }
                 else {
+                    var yoff = 42/(BSWG.render.viewport.h/1080);
                     this.title1 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 80+42+42,
+                        x: BSWG.render.viewport.w*0.5, y: 80+42+yoff,
                         w: 800, h: 100,
                         vpXCenter: true,
                         text: "BlockShip Wars",
@@ -457,7 +458,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.title2 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 145+42+42,
+                        x: BSWG.render.viewport.w*0.5, y: 145+42+yoff,
                         w: 800, h: 100,
                         vpXCenter: true,
                         text: "r o g u e l i k e",
@@ -469,7 +470,7 @@ BSWG.game = new function(){
                     });
 
                     this.newGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+42,
+                        x: BSWG.render.viewport.w*0.5, y: 350+yoff,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "New Game",
@@ -481,7 +482,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.loadGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+70+42,
+                        x: BSWG.render.viewport.w*0.5, y: 350+70+yoff,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Load Game",
@@ -495,7 +496,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.sandBoxBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+140+42,
+                        x: BSWG.render.viewport.w*0.5, y: 350+140+yoff,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Sandbox",
@@ -1114,6 +1115,19 @@ BSWG.game = new function(){
                         self.panPosTime = self.panPosStartTime;
                     }
                     self.cam.panTo(dt*0.5, self.panPositions[self.curPanPos]);
+
+                    var h = (350+140+80) - 42;
+                    var yoff = BSWG.render.viewport.h*0.5 - h*0.5;
+                    self.title1.p.x = BSWG.render.viewport.w*0.5;
+                    self.title1.p.y = 80+42+yoff-80;
+                    self.title2.p.x = BSWG.render.viewport.w*0.5;
+                    self.title2.p.y = 145+42+yoff-80;
+                    self.newGameBtn.p.x = BSWG.render.viewport.w*0.5;
+                    self.newGameBtn.p.y = 350+yoff-80;
+                    self.loadGameBtn.p.x = BSWG.render.viewport.w*0.5
+                    self.loadGameBtn.p.y = 350+70+yoff-80;
+                    self.sandBoxBtn.p.x = BSWG.render.viewport.w*0.5;
+                    self.sandBoxBtn.p.y = 350+140+yoff-80;
                     break;
 
                 case BSWG.SCENE_GAME1:
