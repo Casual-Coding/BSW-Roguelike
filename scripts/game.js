@@ -529,7 +529,7 @@ BSWG.game = new function(){
                         map: function(x,y) {
                             return BSWG.mapPerlinSparse(x+100,y+414);
                         },
-                        color: [0.5*2, 0.5*2, 0.75*2]
+                        color: [0.75*2, 0.75*2, 1*2]
                     },
                     'tileset-land': {
                         map: BSWG.mapPerlin,
@@ -742,6 +742,7 @@ BSWG.game = new function(){
                             this.backup = BSWG.componentList.serialize(null, true);
                             try {
                                 self.ccblock = null;
+                                self.tileMap.clear();
                                 BSWG.componentList.clear();
                                 BSWG.blasterList.clear();
                                 BSWG.laserList.clear();
@@ -755,11 +756,13 @@ BSWG.game = new function(){
                                 }
                                 self.battleMode = true;
                             } catch (err) {
+                                self.tileMap.clear();
                                 BSWG.componentList.clear();
                                 self.ccblock = BSWG.componentList.load(backup);
                             }
                         }
                         else {
+                            self.tileMap.clear();
                             BSWG.componentList.clear();
                             BSWG.blasterList.clear();
                             BSWG.laserList.clear();
@@ -807,7 +810,7 @@ BSWG.game = new function(){
                             },
                             'tileset-land': {
                                 map: BSWG.mapPerlin,
-                                color: [0.2, 0.75, 0.2]
+                                color: [0.4, 0.75, 0.2]
                             },
                             'tileset-below': {
                                 map: function(x,y) {
@@ -818,7 +821,7 @@ BSWG.game = new function(){
                             },
                             'water': {
                                 color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
-                                level: 0.25,
+                                level: 0.20,
                                 isWater: true
                             }
                         };

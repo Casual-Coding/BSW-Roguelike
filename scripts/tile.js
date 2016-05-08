@@ -653,5 +653,5 @@ BSWG.mapPerlinSparse = function (x, y) {
     var h = Math.random2d(~~(x/2), ~~(y/2)) * 0.5 +
             Math.random2d(~~(x/1.5), ~~(y/1.5)) * 0.25 +
             Math.random2d(~~(x/1.1), ~~(y/1.1)) * 0.125;
-    return h > 0.75;
+    return h > 0.7;
 };
