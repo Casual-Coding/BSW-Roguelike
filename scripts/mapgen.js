@@ -1,9 +1,9 @@
-BSWG.map_minZoneDist     = 10; // Minimum distance allowed between two zones
-BSWG.map_minZoneEdgeDist = 10; // Minimum distance allowed from a zone center to edge of map
-BSWG.map_gridSize        = 50.0;
+BSWG.map_minZoneDist     = 20; // Minimum distance allowed between two zones
+BSWG.map_minZoneEdgeDist = 20; // Minimum distance allowed from a zone center to edge of map
+BSWG.map_gridSize        = 24.0; // overwritte as BSWG.tileSizeWorld
 BSWG.map_flPlanetDist    = 0.9; // * size
-BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
-BSWG.map_planetSafeDist  = 6.5; // Size of zone surrounding planet
+BSWG.map_minPlanetDist   = 60; // Minimum distance allowed between planets
+BSWG.map_planetSafeDist  = 13; // Size of zone surrounding planet
 
 BSWG.enemySettings_compToStr = function (obj) {
     var str = obj.type;
@@ -87,6 +87,8 @@ BSWG.enemySettings = [
 
 BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
+    BSWG.map_gridSize = BSWG.tileSizeWorld;
+
     var ret = new Object();
 
     if (typeof size === 'object') {
@@ -119,7 +121,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 console.log('Map load error: Couldn\'t load planet');
             }
             else {
-                ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
+                //ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
             }
         }
 
@@ -143,15 +145,18 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         ret.gridSize = BSWG.map_gridSize;
         ret.zoneMap  = new Array(size);
         ret.edgeMap  = new Array(size);
+        ret.colMap   = new Array(size);
         ret.planets  = new Array(numPlanets);
         ret.enemies_placed = false;
 
         for (var i=0; i<size; i++) {
             ret.zoneMap[i] = new Array(size);
             ret.edgeMap[i] = new Array(size);
+            ret.colMap[i]  = new Array(size);
             for (var j=0; j<size; j++) {
                 ret.zoneMap[i][j] = -1;
                 ret.edgeMap[i][j] = -1;
+                ret.colMap[i][j]  = -1;
             }
         }
 
@@ -175,6 +180,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     ret.zones[i].p = p;
                     ret.zones[i].name = BSWG.randomName.get();
                     ret.zones[i].discovered = false;
+                    ret.zones[i].id = i;
                     break;
                 }
             }
@@ -277,6 +283,70 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                ret.colMap[x][y] = ret.edgeMap[x][y] > -1;
+                var zone = ret.zones[ret.zoneMap[x][y]];
+                if (!zone.hasPlanet && Math.random() < 0.05) {
+                    ret.colMap[x][y] = true;
+                }
+            }
+        }
+
+        var start = ret.planets[0].zone;
+        var visited = {};
+        var vcount = 0;
+        while (vcount < (ret.zones.length-1)) {
+            visited[start.id] = true;
+            vcount += 1;
+
+            var best = null, bestD = null;
+            for (var i=0; i<ret.zones.length; i++) {
+                if (!visited[i]) {
+                    var d = Math.distSqVec2(ret.zones[i].p, start.p);
+                    if (best === null || d < bestD) {
+                        best = ret.zones[i];
+                        bestD = d;
+                    }
+                }
+            }
+
+            for (var x=0; x<size; x++) {
+                for (var y=0; y<size; y++) {
+                    if (Math.pointLineDistance(start.p, best.p, new b2Vec2(x, y)) < 2) {
+                        ret.colMap[x][y] = false;
+                    }
+                }
+            }
+
+            start = best;
+        }
+
+        ret.tm_desc = {
+            'tileset-mountain': {
+                map: function(x,y) {
+                    return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
+                },
+                collision: true,
+                color: [1.0, 1.0, 1.0]
+            },
+            'tileset-land': {
+                map: BSWG.mapPerlin,
+                color: [0.4, 0.75, 0.2]
+            },
+            'tileset-below': {
+                map: function(x,y) {
+                    return true
+                },
+                color: [0.75, 0.75, 0.20],
+                isBelow: true
+            },
+            'water': {
+                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+                level: 0.20,
+                isWater: true
+            }
+        };
     }
 
     ret.serialize = function () {

@@ -570,6 +570,7 @@ BSWG.game = new function(){
 
                 if (args.load) {
                     this.map = BSWG.genMap(args.load.map);
+                    this.tileMap = new BSWG.tileMap(map.tm_desc);
                     this.ccblock = BSWG.componentList.load(args.load.comp);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
@@ -578,18 +579,20 @@ BSWG.game = new function(){
                 }
                 else {
                     this.noDefault = false;
-                    this.map = BSWG.genMap(128, 30, 8);
-                    Math.seedrandom();
-                    for (var i=0; i<this.map.planets.length; i++) {
-                        var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
-                        this.map.planets[i].pobj = planet;
-                    }
+                    this.map = BSWG.genMap(256, 30, 8);
+                    this.tileMap = new BSWG.tileMap(this.map.tm_desc);
+                    //Math.seedrandom();
+                    //for (var i=0; i<this.map.planets.length; i++) {
+                    //    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
+                    //    this.map.planets[i].pobj = planet;
+                    //}
                     startPos = this.map.planets[0].worldP.clone();
-                    this.map.planets[0].pobj.capture();
+                    //this.map.planets[0].pobj.capture();
+                    //startPos = this.map.startPos;
                 }
                 this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
                 });
-                this.nebulas = new BSWG.nebulas(this.map);
+                //this.nebulas = new BSWG.nebulas(this.map);
 
             case BSWG.SCENE_GAME2:
 
@@ -1401,12 +1404,12 @@ BSWG.game = new function(){
                             w: 800, h: 100,
                             vpXCenter: true,
                             text: zones[i].name,
-                            color: [1, 1, 1.5, 0],
-                            hoverColor: [1, 1, 1.5, 0],
+                            color: [1, 1, 1.5, 1],
+                            hoverColor: [1, 1, 1.5, 1],
                             lowDetail: true,
                             click: function (me) {}
                         });
-                        //zones[i].zoneTitle.remove();
+                        zones[i].zoneTitle.hide();
                     }
                 }
                 self.inZone = self.map.getZone(self.ccblock.obj.body.GetWorldCenter());
@@ -1417,10 +1420,12 @@ BSWG.game = new function(){
                     self.zSwitchTime = Date.timeStamp();
                     if (self.lastZone) {
                         //self.lastZone.zoneTitle.remove();
-                        self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
+                        //self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
+                        self.lastZone.zoneTitle.hide();
                     }
-                    self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
+                    //self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
                     //self.inZone.zoneTitle.add();
+                    self.inZone.zoneTitle.show();
                     self.lastZone = self.inZone;
                     self.zoneChangeT = 6.0;
 
@@ -1435,7 +1440,7 @@ BSWG.game = new function(){
                         if (self.map.planets[i].zone.discovered) {
                             var p = self.map.worldToMap(self.map.planets[i].worldP);
                             ctx2.fillStyle = '#0f0';
-                            ctx2.fillRect(p.x/self.map.size * 128*4-6, p.y/self.map.size * 128*4-6, 12, 12);
+                            ctx2.fillRect(p.x*4-6, p.y*4-6, 12, 12);
                         }
                     }
 
@@ -1455,7 +1460,7 @@ BSWG.game = new function(){
                     self.zoneChangeT -= dt;
                     if (self.zoneChangeT < 0.0) {
                         self.zoneChangeT = 0.0;
-                        //self.inZone.zoneTitle.remove();
+                        self.inZone.zoneTitle.hide();
                     }
                 }
             }

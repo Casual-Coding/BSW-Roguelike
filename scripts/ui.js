@@ -1174,6 +1174,20 @@ BSWG.control_3DTextButton = {
 
     },
 
+    hide: function () {
+        if (this.textObj) {
+            BSWG.render.scene.remove(this.textObj.mesh);
+            BSWG.render.sceneS.remove(this.textObj.shadowMesh);
+        }
+    },
+
+    show: function () {
+        if (this.textObj) {
+            BSWG.render.scene.add(this.textObj.mesh);
+            BSWG.render.sceneS.add(this.textObj.shadowMesh);
+        }
+    },
+
     render: function (ctx, viewport) {
 
         var H = BSWG.ui_3dSizeH(this.h, this.p);
