@@ -1110,11 +1110,7 @@ BSWG.game = new function(){
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
                     self.panPosTime -= dt;
-                    if (self.panPosTime < 0.0) {
-                        self.curPanPos = (self.curPanPos + 1) % self.panPositions.length;
-                        self.panPosTime = self.panPosStartTime;
-                    }
-                    self.cam.panTo(dt*0.5, self.panPositions[self.curPanPos]);
+                    self.cam.panTo(dt*0.5, new b2Vec2(self.cam.x + 25, self.cam.y + 25));
 
                     var h = (350+140+80) - 42;
                     var yoff = BSWG.render.viewport.h*0.5 - h*0.5;

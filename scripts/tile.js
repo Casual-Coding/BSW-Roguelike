@@ -205,6 +205,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
 
     var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
 
+    if (!water) {
+        this.shadowMat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
+    }
+
     if (water) {
         this.mat = BSWG.render.newMaterial("basicVertex", "tileWaterFragment", {
             clr: {
@@ -589,6 +593,13 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
                 mesh.updateMatrix();
                 BSWG.render.scene.add(mesh);
                 tile.mesh = mesh;
+                /*if (tile.shadowMat) {
+                    var smesh = new THREE.Mesh( tile.geom, tile.shadowMat );
+                    smesh.position.set((x-1) * BSWG.tileSizeWorld, (y-1) * BSWG.tileSizeWorld, -16.0);
+                    smesh.rotation.z = Math.PI/2;
+                    smesh.updateMatrix();
+                    tile.smesh = smesh;
+                }*/
             }
         }
 
@@ -603,6 +614,13 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
         ret.mesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0);
         ret.mesh.rotation.z = Math.PI/2;
         ret.mesh.updateMatrix();
+        if (tile.shadowMat) {
+            ret.smesh = new THREE.Mesh( tile.geom, tile.shadowMat );
+            ret.smesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0);
+            ret.smesh.rotation.z = Math.PI/2;
+            ret.smesh.updateMatrix();
+            BSWG.render.sceneS.add(ret.smesh);
+        }
 
         if (coln) {
             ret.collisionMesh = new THREE.Mesh( this.collisionGeom, tile.mat );
@@ -634,7 +652,12 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
         tile.mesh.geometry = null;
         tile.mesh.material = null;
         tile.mesh = null;
-
+        if (tile.smesh) {
+            BSWG.render.sceneS.remove(tile.smesh);
+            tile.smesh.geometry = null;
+            tile.smesh.material = null;
+            tile.smesh = null;            
+        }
     };
     
 };

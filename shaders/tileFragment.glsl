@@ -42,7 +42,13 @@ void main() {
 
     gl_FragColor = vec4(clr.rgb*l*0.75, 1.0);
 
-    float depth = 1.0 - texture2D(shadowMap, (vPosition.xy - cam.xy) * cam.z / 3.0 * 2.0 + vec2(0.5, 0.5)).a;
-    gl_FragColor.rgb *= depth * 0.5 + 0.5;
+    vec4 svec = texture2D(shadowMap, (vPosition.xy - cam.xy) * cam.z / 3.0 * 2.0 + vec2(0.5, 0.5));
+    float zval = (svec.r * 65536.0 + svec.g * 256.0 + svec.b) / 256.0 - 256.0;
+    if (zval > vPosition.z) {
+        gl_FragColor.rgb *= (1.0 - svec.a) * 0.5 + 0.5;
+    }
+    else {
+        gl_FragColor.rgb *= (1.0 - svec.a / ((vPosition.z-zval)*7.5+1.0)) * 0.5 + 0.5;
+    }
 
 }
