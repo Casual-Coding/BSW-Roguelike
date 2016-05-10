@@ -360,6 +360,11 @@ BSWG.tileMap = function (layers) {
 
     this.layers = layers;
     this.sets = {};
+    this.minimap = layers.minimap || null;
+    if (this.minimap) {
+        layers.minimap = null;
+        delete layers['minimap'];
+    }
     for (var set in layers) {
         this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null);
     }
@@ -400,6 +405,32 @@ BSWG.tileMap = function (layers) {
         layers = null;
     };
 
+    this.renderMinimap = function (x1, y1, x2, y2) {
+        if (!this.minimap) {
+            return;
+        }
+        var W = this.minimap.bounds[2] - this.minimap.bounds[0];
+        var H = this.minimap.bounds[3] - this.minimap.bounds[1];
+        if (!this.minimap.image) {
+            this.minimap.image = BSWG.render.proceduralImage(W, H, function(ctx, w, h){
+                ctx.clearRect(0, 0, W, H);
+            }, true);
+        }
+        var ctx = this.minimap.image.getContext('2d');
+        var ox = -this.minimap.bounds[0], oy = -this.minimap.bounds[1];
+        ctx.clearRect(x1, y1, x2-x1, y2-y1);
+        for (var x=x1; x<=x2; x++) {
+            for (var y=y1; y<=y2; y++) {
+                ctx.fillStyle = this.minimap.getColor(x, y);
+                ctx.fillRect(x+ox, (H-1) - (y+oy), 1, 1);
+            }
+        }
+    };
+
+    if (this.minimap) {
+        this.renderMinimap(this.minimap.bounds[0], this.minimap.bounds[1], this.minimap.bounds[2], this.minimap.bounds[3]);
+    }
+
     this.update = function(dt) {
 
         var p1 = BSWG.render.unproject3D(new b2Vec2(0.0, 0.0), 0.0);
@@ -408,6 +439,26 @@ BSWG.tileMap = function (layers) {
         var K = function(x, y) {
             return x+y*1024;
         };
+
+        if (this.minimap) {
+            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3,
+                ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
+                tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
+                ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;
+            var change = false;
+            for (var x=tx1; x<=tx2; x++) {
+                for (var y=ty1; y<=ty2; y++) {
+                    var disc = this.minimap.getDiscovered(x, y);
+                    this.minimap.setDiscovered(x, y);
+                    if (disc !== this.minimap.getDiscovered(x, y)) {
+                        change = true;
+                    }
+                }
+            }
+            if (change) {
+                this.renderMinimap(tx1, ty1, tx2, ty2);
+            }
+        }
 
         for (var setk in layers) {
             var set = this.sets[setk];
@@ -434,6 +485,7 @@ BSWG.tileMap = function (layers) {
                 tx2 = (~~(Math.max(p1.x, p2.x) / (BSWG.tileSizeWorld * 10))) + 2;
                 ty2 = (~~(Math.max(p1.y, p2.y) / (BSWG.tileSizeWorld * 10))) + 2;                
             }
+
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
                     if (!layer.isWater && M(x,y)) {

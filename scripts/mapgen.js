@@ -147,6 +147,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         ret.edgeMap  = new Array(size);
         ret.colMap   = new Array(size);
         ret.terMap   = new Array(size);
+        ret.disMap   = new Array(size);
         ret.planets  = new Array(numPlanets);
         ret.enemies_placed = false;
 
@@ -155,11 +156,13 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             ret.edgeMap[i] = new Array(size);
             ret.colMap[i]  = new Array(size);
             ret.terMap[i]  = new Array(size);
+            ret.disMap[i]  = new Array(size);
             for (var j=0; j<size; j++) {
                 ret.zoneMap[i][j] = -1;
                 ret.edgeMap[i][j] = -1;
                 ret.colMap[i][j]  = -1;
                 ret.terMap[i][j]  = -1;
+                ret.disMap[i][j]  = 0;
             }
         }
 
@@ -282,8 +285,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     ret.zoneMap[x-1][y-1] !== ret.zoneMap[x][y] ||
                     ret.zoneMap[x+1][y+1] !== ret.zoneMap[x][y] ||
                     ret.zoneMap[x+1][y-1] !== ret.zoneMap[x][y] ||
-                    ret.zoneMap[x-1][y+1] !== ret.zoneMap[x][y])
+                    ret.zoneMap[x-1][y+1] !== ret.zoneMap[x][y]) {
                     ret.edgeMap[x][y] = ret.zoneMap[x][y];
+                }
             }
         }
 
@@ -406,6 +410,47 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
                 level: 0.20,
                 isWater: true
+            },
+            'minimap': {
+                bounds: [ 0, 0, size, size ],
+                getColor: function(x, y) {
+                    if (this.getDiscovered(x, y)) {
+                        if (ret.colMap[x][y]) {
+                            return 'rgba(32, 32, 32, 1)';
+                        }
+                        else if (ret.terMap[x][y] === 0) {
+                            return 'rgba(16, 127, 200, 0.65)';
+                        }
+                        else if (ret.terMap[x][y] === 1) {
+                            return 'rgba(100, 200, 50, 0.65)';
+                        }
+                        else if (ret.terMap[x][y] === 2) {
+                            return 'rgba(240, 180, 120, 0.65)';
+                        }
+                        else if (ret.terMap[x][y] === 3) {
+                            return 'rgba(200, 120, 120, 0.65)';
+                        }
+                        else if (ret.terMap[x][y] === 4) {
+                            return 'rgba(192, 192, 192, 0.65)';
+                        }
+                    }
+                    else {
+                        return 'rgba(0, 0, 0, 0.0)';
+                    }
+                },
+                setDiscovered: function(x, y, undis) {
+                    if (x >= 0 && y >= 0 && x < size && y < size) {
+                        ret.disMap[x][y] = (!undis) ? 1 : 0;
+                    }
+                },
+                getDiscovered: function(x, y) {
+                    if (x >= 0 && y >= 0 && x < size && y < size) {
+                        return ret.disMap[x][y] ? true : false;
+                    }
+                    else {
+                        return false;
+                    }
+                }
             }
         };
     }

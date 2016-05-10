@@ -60,6 +60,12 @@ BSWG.jpointRenderer = new function() {
 
     };
 
+    this.readd = function () {
+
+        BSWG.render.scene.add( mesh );
+
+    };
+
     this.render = function () {
 
         if (!hasInit) {

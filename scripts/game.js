@@ -362,6 +362,7 @@ BSWG.game = new function(){
         }
 
         BSWG.render.clearScene();
+        BSWG.jpointRenderer.readd();
         BSWG.physics.reset();
         BSWG.componentList.clear();
         BSWG.blasterList.clear();
@@ -596,8 +597,9 @@ BSWG.game = new function(){
                     //this.map.planets[0].pobj.capture();
                     //startPos = this.map.startPos;
                 }
-                this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
-                });
+                //this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
+                //});
+                this.mapImage = this.tileMap.minimap.image;
                 //this.nebulas = new BSWG.nebulas(this.map);
 
             case BSWG.SCENE_GAME2:
@@ -1444,7 +1446,7 @@ BSWG.game = new function(){
                     self.zoneChangeT = 6.0;
 
                     self.inZone.discovered = true;
-                    var ctx2 = self.mapImage.getContext('2d');
+                    /*var ctx2 = self.mapImage.getContext('2d');
 
                     ctx2.globalAlpha = 1.0;
                     self.map.renderZoneMap(ctx2, '#002', true, 4, true);
@@ -1456,7 +1458,7 @@ BSWG.game = new function(){
                             ctx2.fillStyle = '#0f0';
                             ctx2.fillRect(p.x*4-6, p.y*4-6, 12, 12);
                         }
-                    }
+                    }*/
 
                     /*var bpm = self.inZone.musicBPM;
                     var settings = self.inZone.musicSettings;*/
@@ -1583,12 +1585,14 @@ BSWG.game = new function(){
                     h = self.hudY(self.hudBtn[0][3])-y-2;
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.fillRect(x, y, w, h);
-                ctx.drawImage(self.mapImage, 0, 0, self.map.size*4, self.map.size*4, x, y, w, h);
+                ctx.drawImage(self.mapImage, 0, 0, self.mapImage.width, self.mapImage.height, x, y, w, h);
 
                 if (self.ccblock && !self.ccblock.destroyed) {
                     var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
-                    ctx.fillStyle = '#fff';
+                    ctx.fillStyle = '#00ff00';
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.25 + 0.75;
                     ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                    ctx.globalAlpha = 1.0;
                 }
 
                 if (self.inZone) {
