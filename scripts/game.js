@@ -261,7 +261,7 @@ BSWG.game = new function(){
                         }
                     }
                 };
-            }(_i), 67);
+            }(_i), 67*_i);
         }
 
     };
