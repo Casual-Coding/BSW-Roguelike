@@ -418,7 +418,7 @@ BSWG.tileMap = function (layers) {
         }
         var ctx = this.minimap.image.getContext('2d');
         var ox = -this.minimap.bounds[0], oy = -this.minimap.bounds[1];
-        ctx.clearRect(x1, y1, x2-x1, y2-y1);
+        //ctx.clearRect(x1+ox, H - (y2+oy), x2-x1, y2-y1);
         for (var x=x1; x<=x2; x++) {
             for (var y=y1; y<=y2; y++) {
                 ctx.fillStyle = this.minimap.getColor(x, y);

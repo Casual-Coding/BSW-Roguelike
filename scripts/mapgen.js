@@ -419,26 +419,26 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 getColor: function(x, y) {
                     if (this.getDiscovered(x, y)) {
                         if (ret.colMap[x][y]) {
-                            return 'rgba(255, 255, 255, 1)';
+                            return 'rgba(192, 192, 192, 1)';
                         }
                         else if (ret.terMap[x][y] === 0) {
-                            return 'rgba(16, 127, 200, 0.65)';
+                            return 'rgba(6, 50, 80, 1)';
                         }
                         else if (ret.terMap[x][y] === 1) {
-                            return 'rgba(100, 200, 50, 0.65)';
+                            return 'rgba(40, 80, 20, 1)';
                         }
                         else if (ret.terMap[x][y] === 2) {
-                            return 'rgba(240, 180, 120, 0.65)';
+                            return 'rgba(96, 72, 48, 1)';
                         }
                         else if (ret.terMap[x][y] === 3) {
-                            return 'rgba(140, 100, 100, 0.65)';
+                            return 'rgba(56, 40, 40, 1)';
                         }
                         else if (ret.terMap[x][y] === 4) {
-                            return 'rgba(180, 180, 180, 0.65)';
+                            return 'rgba(130, 130, 130, 1)';
                         }
                     }
                     else {
-                        return 'rgba(0, 0, 0, 0.2)';
+                        return 'rgba(0, 0, 0, 1)';
                     }
                 },
                 setDiscovered: function(x, y, undis) {

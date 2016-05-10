@@ -260,7 +260,7 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 0.5,
+        taperPower: 0.75,
         texType: 'perlin',
         taperComb: function(a,b) {
             return a*b;
@@ -276,7 +276,7 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 0.25,
+        taperPower: 0.5,
         texType: 'ripples',
         taperComb: function(a,b) {
             return a*b;
@@ -292,7 +292,7 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 0.25,
+        taperPower: 0.5,
         texType: 'ripples',
         taperComb: function(a,b) {
             return a*b;

@@ -36,7 +36,8 @@ BSWG.game = new function(){
 
                 var H = BSWG.ui_HM(w, h);
 
-                var off = scene === BSWG.SCENE_GAME1 ? 0 : 256;
+                var mmsize = 384;
+                var off = scene === BSWG.SCENE_GAME1 ? 0 : mmsize;
                 var bsz = 92;
                 var sc = bsz/96;
                 off *= sc;
@@ -44,14 +45,14 @@ BSWG.game = new function(){
 
                 if (scene !== BSWG.SCENE_TITLE) {
 
-                    H.plate(256*sc-off, h-(bfr*2 + bsz), w-256*sc+off, bfr*2 + bsz, 0.25, 0.5);
-                    H.plate(0-off, h-256*sc, 256*sc, 256*sc, 0.15, 0.5);
-                    H.plate(7-off, h-256*sc+7, 256*sc-14, 256*sc-14, 0.5, 0.15); // 0
+                    H.plate(mmsize*sc-off, h-(bfr*2 + bsz), w-mmsize*sc+off, bfr*2 + bsz, 0.25, 0.5);
+                    H.plate(0-off, h-mmsize*sc, mmsize*sc, mmsize*sc, 0.15, 0.5);
+                    H.plate(7-off, h-mmsize*sc+7, mmsize*sc-14, mmsize*sc-14, 0.5, 0.15); // 0
 
                     var hh = bfr*2 + bsz*2;
 
                     self.hudBottomYT = h-(bfr*2 + bsz);
-                    self.hudDlgX1 = 256*sc;
+                    self.hudDlgX1 = mmsize*sc;
                     self.hudDlgX2 = w/2-(bfr+bsz*2);
 
                     H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
@@ -68,7 +69,7 @@ BSWG.game = new function(){
                     H.plate(w/2+(bfr+bsz*2)+bfr+bsz*3, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 9
                     H.plate(w/2+(bfr+bsz*2)+bfr+bsz*4, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 10
 
-                    H.plate(256*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-256*sc-bfr*2, bsz, 0.5, 0.15); // 11
+                    H.plate(mmsize*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-mmsize*sc-bfr*2, bsz, 0.5, 0.15); // 11
 
                 }
                 else {
