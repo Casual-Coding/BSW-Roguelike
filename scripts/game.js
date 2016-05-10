@@ -826,12 +826,17 @@ BSWG.game = new function(){
                             },
                             'tileset-below': {
                                 map: function(x,y) {
-                                    return true
+                                    var d = ~~(Math.sqrt(x*x+y*y));
+                                    return !((Math.max(Math.abs(x), Math.abs(y)) > 12) ||
+                                            (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1));
                                 },
                                 color: [0.75, 0.75, 0.20],
                                 isBelow: true
                             },
                             'water': {
+                                map: function(x,y) {
+                                    return true
+                                },
                                 color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
                                 level: 0.20,
                                 isWater: true
@@ -1124,7 +1129,7 @@ BSWG.game = new function(){
                     self.cam.panTo(dt*0.5, new b2Vec2(self.cam.x + 25, self.cam.y + 25));
 
                     var h = (350+140+80) - 42;
-                    var yoff = BSWG.render.viewport.h*0.5 - h*0.5;
+                    var yoff = BSWG.render.viewport.h*0.125;//BSWG.render.viewport.h*0.5 - h*0.5;
                     self.title1.p.x = BSWG.render.viewport.w*0.5;
                     self.title1.p.y = 80+42+yoff-80;
                     self.title2.p.x = BSWG.render.viewport.w*0.5;
@@ -1583,14 +1588,17 @@ BSWG.game = new function(){
                     y = self.hudY(self.hudBtn[0][1])+1;
                 var w = self.hudX(self.hudBtn[0][2])-x-2,
                     h = self.hudY(self.hudBtn[0][3])-y-2;
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillStyle = 'rgba(0,0,0,0.0)';
                 ctx.fillRect(x, y, w, h);
                 ctx.drawImage(self.mapImage, 0, 0, self.mapImage.width, self.mapImage.height, x, y, w, h);
 
                 if (self.ccblock && !self.ccblock.destroyed) {
                     var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
-                    ctx.fillStyle = '#00ff00';
-                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.25 + 0.75;
+                    ctx.fillStyle = '#000';
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
+                    ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                    ctx.fillStyle = '#fff';
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
                     ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
                     ctx.globalAlpha = 1.0;
                 }

@@ -33,7 +33,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
     var sSize = BSWG.tileSizeWorld / BSWG.tileSize;
 
     if (water) {
-        sSize *= 10.0;
+        //sSize *= 10.0;
     }
 
     var offset = 0;
@@ -441,10 +441,10 @@ BSWG.tileMap = function (layers) {
         };
 
         if (this.minimap) {
-            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3,
-                ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
-                tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
-                ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;
+            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3 - 2,
+                ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2 - 4,
+                tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2 + 2,
+                ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2 + 4;
             var change = false;
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
@@ -460,31 +460,41 @@ BSWG.tileMap = function (layers) {
             }
         }
 
+        var self = this;
         for (var setk in layers) {
             var set = this.sets[setk];
             var layer = layers[setk];
             var cache = layer.cache = layer.cache || {};
             var visible = {};
             var map = layer.map;
-            var M;
+            var _M;
             if (typeof map === 'function') {
-                M = map;
+                _M = map;
             }
             else {
-                M = function(X,Y) {
+                _M = function(X,Y) {
                     return !!(map && map[X] && map[X][Y]);
                 };
             }
+            var M = _M;/* function(X,Y) {
+                if (!self.minimap || self.minimap.getDiscovered(X,Y)) {
+                    return _M(X,Y);
+                }
+                else {
+                    return false;
+                }
+            }*/
+
             var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3,
                 ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
                 tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
                 ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;
-            if (layer.isWater) {
+            /*if (layer.isWater) {
                 tx1 = (~~(Math.min(p1.x, p2.x) / (BSWG.tileSizeWorld * 10))) - 3;
                 ty1 = (~~(Math.min(p1.y, p2.y) / (BSWG.tileSizeWorld * 10))) - 2;
                 tx2 = (~~(Math.max(p1.x, p2.x) / (BSWG.tileSizeWorld * 10))) + 2;
                 ty2 = (~~(Math.max(p1.y, p2.y) / (BSWG.tileSizeWorld * 10))) + 2;                
-            }
+            }*/
 
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
@@ -528,13 +538,15 @@ BSWG.tileMap = function (layers) {
             if (layer.isWater) {
                 for (var x=tx1; x<=tx2; x++) {
                     for (var y=ty1; y<=ty2; y++) {
-                        var k = K(x,y);
-                        visible[k] = true;
-                        if (!cache[k]) {
-                            cache[k] = new Array();
-                            var tobj = set.addTile(set.tiles[1][1], x*10, y*10);
-                            tobj.mesh.renderOrder = 1000.0;
-                            cache[k].push(tobj);
+                        if (M(x,y)) {
+                            var k = K(x,y);
+                            visible[k] = true;
+                            if (!cache[k]) {
+                                cache[k] = new Array();
+                                var tobj = set.addTile(set.tiles[1][1], x/**10*/, y/**10*/);
+                                tobj.mesh.renderOrder = 1000.0;
+                                cache[k].push(tobj);
+                            }
                         }
                     }
                 }

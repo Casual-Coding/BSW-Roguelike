@@ -401,7 +401,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             },
             'tileset-below': {
                 map: function(x,y) {
-                    return true
+                    return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
                 },
                 color: [0.75, 0.75, 0.20],
                 isBelow: true
@@ -409,6 +409,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             'water': {
                 color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
                 level: 0.20,
+                map: function(x,y) {
+                    return true
+                },
                 isWater: true
             },
             'minimap': {
@@ -416,7 +419,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 getColor: function(x, y) {
                     if (this.getDiscovered(x, y)) {
                         if (ret.colMap[x][y]) {
-                            return 'rgba(32, 32, 32, 1)';
+                            return 'rgba(255, 255, 255, 1)';
                         }
                         else if (ret.terMap[x][y] === 0) {
                             return 'rgba(16, 127, 200, 0.65)';
@@ -428,18 +431,22 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                             return 'rgba(240, 180, 120, 0.65)';
                         }
                         else if (ret.terMap[x][y] === 3) {
-                            return 'rgba(200, 120, 120, 0.65)';
+                            return 'rgba(140, 100, 100, 0.65)';
                         }
                         else if (ret.terMap[x][y] === 4) {
-                            return 'rgba(192, 192, 192, 0.65)';
+                            return 'rgba(180, 180, 180, 0.65)';
                         }
                     }
                     else {
-                        return 'rgba(0, 0, 0, 0.0)';
+                        return 'rgba(0, 0, 0, 0.2)';
                     }
                 },
                 setDiscovered: function(x, y, undis) {
                     if (x >= 0 && y >= 0 && x < size && y < size) {
+                        var zone = ret.zones[ret.zoneMap[x][y]];
+                        if (!zone.discovered) {
+                            undis = true;
+                        }
                         ret.disMap[x][y] = (!undis) ? 1 : 0;
                     }
                 },
