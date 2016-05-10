@@ -247,7 +247,6 @@ BSWG.render = new function() {
         this.shadowMap.texture.magFilter = THREE.NearestFilter;
         this.shadowMap.texture.generateMipmaps = false;
         this.shadowMap.stencilBuffer = false;
-        this.shadowMap.depthTexture = new THREE.DepthTexture();
 
         this.sizeViewport();
 

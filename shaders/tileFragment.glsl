@@ -55,5 +55,6 @@ void main() {
     else {
         gl_FragColor.rgb *= (1.0 - svec.a / ((vPosition.z-zval)*7.5+1.0)) * 0.5 + 0.5;
     }
+    gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
 
 }

@@ -227,37 +227,41 @@ BSWG.game = new function(){
 
         var p = this.ccblock.obj.body.GetWorldCenter().clone();
         var arange = Math.PI;
-        var minr = 25, maxr = 40;
+        var minr = 27.5, maxr = 42.5;
         var v = this.ccblock.obj.body.GetLinearVelocity().clone();
         var a = Math.atan2(v.y, v.x);
 
-        for (var i=0; i<list.length; i++) {
-            var aiship = null;
-            while (!aiship) {
+        for (var _i=0; _i<list.length; _i++) {
+            window.setTimeout(function(i){
+                return function () {
+                    var aiship = null;
+                    while (!aiship) {
 
-                var ta = Math.random() * 2 - 1;
-                var tr = Math.random();
-                var p2 = new b2Vec2(
-                    p.x + Math.cos(a + arange * ta) * ((maxr-minr)*tr + minr),
-                    p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
-                );
+                        var ta = Math.random() * 2 - 1;
+                        var tr = Math.random();
+                        var p2 = new b2Vec2(
+                            p.x + Math.cos(a + arange * ta) * ((maxr-minr)*tr + minr),
+                            p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
+                        );
 
-                aiship = BSWG.componentList.load(list[i], {p: p2});
-                if (aiship) {
-                    aiship.title = list[i].title;
-                    window.setTimeout(function(ais){
-                        return function() {
-                            if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                                var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                                v.x *= 0.85;
-                                v.y *= 0.85;
-                                ais.setVelAll(v);
-                            }
-                            ais.reloadAI();
-                        };
-                    }(aiship), 250);
-                }
-            }
+                        aiship = BSWG.componentList.load(list[i], {p: p2});
+                        if (aiship) {
+                            aiship.title = list[i].title;
+                            window.setTimeout(function(ais){
+                                return function() {
+                                    if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
+                                        var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
+                                        v.x *= 0.85;
+                                        v.y *= 0.85;
+                                        ais.setVelAll(v);
+                                    }
+                                    ais.reloadAI();
+                                };
+                            }(aiship), 111);
+                        }
+                    }
+                };
+            }(_i), 67);
         }
 
     };

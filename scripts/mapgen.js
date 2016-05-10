@@ -294,37 +294,6 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 if (!zone.hasPlanet && Math.random() < 0.05) {
                     ret.colMap[x][y] = true;
                 }
-
-                var B = zone.biome;
-                //var h = Math.pow(BSWG.mapPerlinF(x, y), 2.0);
-                if (BSWG.mapPerlin(x, y)) {
-                    ret.terMap[x][y] = 0;
-                }
-                else {
-                    var L = new Array();
-                    L.push([B.grass, 1, 1541, 14]);
-                    L.push([B.sand, 2, 454, 515]);
-                    L.push([B.rock, 3, 5981, 1567]);
-                    L.push([B.snow, 4, 145, 8701]);
-                    L.sort(function(a,b){
-                        if (a[0] < b[0]) {
-                            return -1;
-                        }
-                        else if (a[0] === b[0]) {
-                            return 0;
-                        }
-                        else {
-                            return 1;
-                        }
-                    });
-                    ret.terMap[x][y] = L[0][1];
-                    for (var i=1; i<L.length; i++) {
-                        if (Math.pow(BSWG.mapPerlinF(x+L[i][2], y+L[i][3]), 3.0) < L[i][0]) {
-                            ret.terMap[x][y] = L[i][1];
-                            break;
-                        }
-                    }
-                }
             }
         }
 
@@ -355,6 +324,43 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
 
             start = best;
+        }
+
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {            
+                if (!ret.colMap[x][y]) {
+                    var zone = ret.zones[ret.zoneMap[x][y]];
+                    var B = zone.biome;
+                    if (BSWG.mapPerlin(x, y)) {
+                        ret.terMap[x][y] = 0;
+                    }
+                    else {
+                        var L = new Array();
+                        L.push([B.grass, 1, 1541, 14]);
+                        L.push([B.sand, 2, 454, 515]);
+                        L.push([B.rock, 3, 5981, 1567]);
+                        L.push([B.snow, 4, 145, 8701]);
+                        L.sort(function(a,b){
+                            if (a[0] < b[0]) {
+                                return -1;
+                            }
+                            else if (a[0] === b[0]) {
+                                return 0;
+                            }
+                            else {
+                                return 1;
+                            }
+                        });
+                        ret.terMap[x][y] = L[0][1];
+                        for (var i=1; i<L.length; i++) {
+                            if (Math.pow(BSWG.mapPerlinF(x+L[i][2], y+L[i][3]), 3.0) < L[i][0]) {
+                                ret.terMap[x][y] = L[i][1];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         ret.tm_desc = {
