@@ -207,6 +207,20 @@ BSWG.render = new function() {
 
     var maxRes = null; //{ w: 1920, h: 1080 };
 
+    this.clearScene = function() {
+
+        while (this.scene && this.scene.children.length) {
+            this.scene.remove(this.scene.children[0]);
+        }
+        while (this.sceneS && this.sceneS.children.length) {
+            this.sceneS.remove(this.sceneS.children[0]);
+        }
+        if (this.boom) {
+            this.boom.readd();
+        }
+
+    };
+
     this.init = function(complete, images, shaders) {
 
         if (!Detector.webgl) {

@@ -183,6 +183,12 @@ chadaboom3D.prototype.init = function () {
 
 };
 
+chadaboom3D.prototype.readd = function () {
+
+    BSWG.render.scene.add(this.mesh);
+
+};
+
 chadaboom3D.prototype.render = function(dt) {
 
     if (!this.hasInit) {
