@@ -92,6 +92,62 @@ Math.random2d = function(x,y) {
     return whole - Math.floor(whole);
 };
 
+var genRipples = function(sz, min, max, exSmooth) {
+
+    var ret = newArr(sz, 0.0);
+
+    var lst = new Array(16);
+    for (var i=0; i<lst.length; i++) {
+        lst[i] = {
+            str: Math.pow(Math.random(), 0.3) * 2.0,
+            x: Math.random()*sz,
+            y: Math.random()*sz
+        };
+    }
+    for (var x=-sz/2; x<sz*1.5; x++) {
+        for (var y=-sz/2; y<sz*1.5; y++) {
+            var xx = (x + sz) % sz,
+                yy = (y + sz) % sz;
+            var v = 0;
+            for (var i=0; i<lst.length; i++) {
+                var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                var d = Math.sqrt(dx*dx+dy*dy);
+                v += (Math.sin((d/lst[i].str)/12) * 0.5 + 0.5) * lst[i].str * 0.2;
+            }
+            ret.setRot(x, y, v);
+        }
+    }
+
+    for (var j=0; j<(exSmooth||0); j++) {
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                ret.setRot(x, y,
+                    (ret.getRot(x, y) + 
+                    ret.getRot(x-1, y) + 
+                    ret.getRot(x, y-1) + 
+                    ret.getRot(x+1, y) + 
+                    ret.getRot(x, y+1)) / 5.0
+                );
+            }
+        }
+    }
+
+    var maxv = 0.0;
+    for (var x=0; x<sz; x++) {
+        for (var y=0; y<sz; y++) {
+            maxv = Math.max(maxv, ret.get(x, y));
+        }
+    }
+    for (var x=0; x<sz; x++) {
+        for (var y=0; y<sz; y++) {
+            ret.set(x, y, (ret.get(x, y)/maxv) * (max-min) + min);
+        }
+    }
+
+    return ret;
+
+};
+
 var genPerlin = function(sz, min, max, k, off, exSmooth, bleedF) {
     var ret = newArr(sz, 0.0);
     var h = max - min;
@@ -174,6 +230,7 @@ var tileTypes = {
         insideVariations: 4,
         taperPower: 1.5,
         bleedF: 25.0,
+        texType: 'perlin',
         taperComb: function(a,b) {
             return a*b;
         },
@@ -188,6 +245,7 @@ var tileTypes = {
         downTransition: true,
         insideVariations: 4,
         taperPower: 2.0,
+        texType: 'perlin',
         taperComb: function(a,b) {
             return a*b;
         },
@@ -196,11 +254,60 @@ var tileTypes = {
         },
         smooth: 2
     },
+    'rockland': {
+        minHeight: 0.28,
+        maxHeight: 0.475,
+        transitionTo: 0.0,
+        downTransition: true,
+        insideVariations: 4,
+        taperPower: 0.5,
+        texType: 'perlin',
+        taperComb: function(a,b) {
+            return a*b;
+        },
+        perlinFilter: function(v) {
+            return Math.pow(v, 1.1);
+        },
+        smooth: 0
+    },
+    'sand': {
+        minHeight: 0.28,
+        maxHeight: 0.45,
+        transitionTo: 0.0,
+        downTransition: true,
+        insideVariations: 4,
+        taperPower: 0.25,
+        texType: 'ripples',
+        taperComb: function(a,b) {
+            return a*b;
+        },
+        perlinFilter: function(v) {
+            return Math.pow(v, 0.5);
+        },
+        smooth: 8
+    },
+    'snow': {
+        minHeight: 0.28,
+        maxHeight: 0.45,
+        transitionTo: 0.0,
+        downTransition: true,
+        insideVariations: 4,
+        taperPower: 0.25,
+        texType: 'ripples',
+        taperComb: function(a,b) {
+            return a*b;
+        },
+        perlinFilter: function(v) {
+            return Math.pow(v, 0.5);
+        },
+        smooth: 5
+    },
     'below': {
         minHeight: 0.01,
         maxHeight: 0.25,
         insideVariations: 4,
         taperPower: 1.5,
+        texType: 'perlin',
         taperComb: function(a,b) {
             return a*b;
         },
@@ -459,7 +566,12 @@ else if (tileSize === 124) {
 else if (tileSize === 64) {
     k = 6;
 }
-var P = genPerlin(tileSize, 0.0, 1.0, k, Math.random()*100000.0, tInfo.smooth||0, tInfo.bleedF||0);
+var P = null;
+if (tInfo.texType == 'ripples') {
+    P = genRipples(tileSize, 0.0, 1.0, tInfo.smooth||0);
+} else { // 'perlin'
+    P = genPerlin(tileSize, 0.0, 1.0, k, Math.random()*100000.0, tInfo.smooth||0, tInfo.bleedF||0);
+}
 for (var x=0; x<tileSize; x++) {
     for (var y=0; y<tileSize; y++) {
         var dx = Math.abs(x-tileSize*0.5) / (tileSize*0.5),

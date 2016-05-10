@@ -245,18 +245,18 @@ BSWG.game = new function(){
                 aiship = BSWG.componentList.load(list[i], {p: p2});
                 if (aiship) {
                     aiship.title = list[i].title;
+                    window.setTimeout(function(ais){
+                        return function() {
+                            if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
+                                var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
+                                v.x *= 0.85;
+                                v.y *= 0.85;
+                                ais.setVelAll(v);
+                            }
+                            ais.reloadAI();
+                        };
+                    }(aiship), 250);
                 }
-                window.setTimeout(function(ais){
-                    return function() {
-                        if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                            var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                            v.x *= 0.85;
-                            v.y *= 0.85;
-                            ais.setVelAll(v);
-                        }
-                        ais.reloadAI();
-                    };
-                }(aiship), 250);
             }
         }
 
@@ -427,7 +427,7 @@ BSWG.game = new function(){
         var startPos = new b2Vec2(0, 0);
 
         wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
-        BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
+        BSWG.input.wheelLimits(wheelStart-10, wheelStart-6.768170884076580509750342780728);
         BSWG.input.CLEAR_GFILE();
 
         switch (scene) {
@@ -578,8 +578,9 @@ BSWG.game = new function(){
                     this.noDefault = true;
                 }
                 else {
+                    Math.seedrandom();
                     this.noDefault = false;
-                    this.map = BSWG.genMap(256, 30, 8);
+                    this.map = BSWG.genMap(256, 40, 8);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc);
                     //Math.seedrandom();
                     //for (var i=0; i<this.map.planets.length; i++) {

@@ -104,7 +104,10 @@ var BSWG = new function(){
         'char-tattoo': 'char-tattoo.png',
         'tileset-mountain': 'tileset-mountain-512.png',
         'tileset-land': 'tileset-land-512.png',
-        'tileset-below': 'tileset-below-512.png'
+        'tileset-below': 'tileset-below-512.png',
+        'tileset-sand': 'tileset-sand-512.png',
+        'tileset-snow': 'tileset-snow-512.png',
+        'tileset-rockland': 'tileset-rockland-512.png'
     };
     var shaders = {
         'vertex': [

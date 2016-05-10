@@ -670,6 +670,16 @@ BSWG.mapPerlin = function (x, y) {
             Math.random2d(~~(x/1.1), ~~(y/1.1)) * 0.125;
     return h > 0.475;
 };
+BSWG.mapPerlinF = function (x, y) {
+    x += 100;
+    y += 50;
+    var h = Math.random2d(~~(x/4), ~~(y/4)) * 0.5 +
+            Math.random2d(~~(x/3), ~~(y/3)) * 0.25 +
+            Math.random2d(~~(x/2), ~~(y/2)) * 0.125 +
+            Math.random2d(~~(x/1.5), ~~(y/1.5)) * 0.125/2 + 
+            Math.random2d(~~(x/1), ~~(y/1)) * 0.125/4;
+    return h;
+};
 BSWG.mapPerlinSparse = function (x, y) {
     x += 100;
     y += 50;
