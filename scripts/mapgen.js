@@ -335,7 +335,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 if (!ret.colMap[x][y]) {
                     var zone = ret.zones[ret.zoneMap[x][y]];
                     var B = zone.biome;
-                    if (BSWG.mapPerlin(x, y)) {
+                    if (BSWG.mapPerlin(x, y) || (B.water > 0.75 && BSWG.mapPerlin(x+141, y+341))) {
                         ret.terMap[x][y] = 0;
                     }
                     else {
@@ -679,14 +679,14 @@ BSWG.map_genBiome = function() {
     ret.water = Math.random();
     ret.grass = Math.random();
     ret.sand = Math.random();
-    ret.rock = Math.random();
+    ret.rock = Math.pow(Math.random(), 0.5);
     ret.snow = Math.random();
 
     if (ret.sand > ret.snow) {
-        ret.snow /= 5;
+        ret.snow /= 10;
     }
     else {
-        ret.sand /= 5;
+        ret.sand /= 10;
     }
 
     if (ret.grass > ret.sand) {
@@ -697,10 +697,10 @@ BSWG.map_genBiome = function() {
     }
 
     if (ret.grass > ret.snow) {
-        ret.snow /= 3;
+        ret.snow /= 10;
     }
     else {
-        ret.grass /= 3;
+        ret.grass /= 10;
     }
 
     if (ret.sand > ret.water) {
@@ -711,8 +711,6 @@ BSWG.map_genBiome = function() {
     }
 
     var sum = (ret.grass + ret.sand + ret.rock + ret.snow) / 4.0;
-    ret.water = Math.pow(ret.water / ((sum*4 + ret.water)/5.0), 1.5);
-    ret.water = 0.15 + 0.4 * ret.water;
     ret.grass /= sum;
     ret.sand /= sum;
     ret.rock /= sum;

@@ -36,7 +36,7 @@ BSWG.game = new function(){
 
                 var H = BSWG.ui_HM(w, h);
 
-                var mmsize = 384;
+                var mmsize = 256;
                 var off = scene === BSWG.SCENE_GAME1 ? 0 : mmsize;
                 var bsz = 92;
                 var sc = bsz/96;
@@ -366,6 +366,7 @@ BSWG.game = new function(){
         BSWG.jpointRenderer.readd();
         BSWG.physics.reset();
         BSWG.componentList.clear();
+        BSWG.componentList.clearStatic();
         BSWG.blasterList.clear();
         BSWG.laserList.clear();
         BSWG.planets.init();
@@ -587,7 +588,7 @@ BSWG.game = new function(){
                 else {
                     Math.seedrandom();
                     this.noDefault = false;
-                    this.map = BSWG.genMap(256, 40, 8);
+                    this.map = BSWG.genMap(162, 35, 8);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc);
                     //Math.seedrandom();
                     //for (var i=0; i<this.map.planets.length; i++) {
@@ -601,6 +602,7 @@ BSWG.game = new function(){
                 //this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
                 //});
                 this.mapImage = this.tileMap.minimap.image;
+                this.tileMap.addCollision(0, 0, this.map.size, this.map.size);
                 //this.nebulas = new BSWG.nebulas(this.map);
 
             case BSWG.SCENE_GAME2:
@@ -844,6 +846,7 @@ BSWG.game = new function(){
                             }
                         };
                         this.tileMap = new BSWG.tileMap(desc);
+                        this.tileMap.addCollision(-14, -14, 28, 28);
                     }
 
                     var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 145+3;

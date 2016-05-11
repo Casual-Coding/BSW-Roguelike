@@ -194,7 +194,8 @@ BSWG.compImplied = function (a, b) {
 
 };
 
-BSWG.comp_hashSize = 8.0;
+BSWG.comp_hashSize = 2.0;
+BSWG.comp_staticHashSize = 32.0;
 
 BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
@@ -696,6 +697,28 @@ BSWG.componentList = new function () {
     this.compRemove = new Array();
     this.staticList = new Array();
 
+    this.clearStatic = function () {
+
+        while (this.staticList.length) {
+            this.removeStatic(this.staticList[0]);
+        }
+
+        for (var key in this.staticHash) {
+            if (this.staticHash[key] &&  this.staticHash[key].length) {
+                var lst = this.staticHash[key];
+                for (var i=0; i<lst.length; i++) {
+                    lst[i] = null;
+                }
+                lst.length = 0;
+            }
+            this.staticHash[key] = null;
+            delete this.staticHash[key];
+        }
+
+        this.staticHash = {};
+
+    };
+
     this.clear = function () {
 
         for (var key in this.archHash) {
@@ -850,6 +873,17 @@ BSWG.componentList = new function () {
         return x + y * 10000000;
     };
 
+    this.staticHash = {};
+    this.sHashXY = function ( v ) {
+        return Math.floor(v/BSWG.comp_staticHashSize);
+    };
+    this.sHashKey = function ( x, y ) {
+        return Math.floor(x/BSWG.comp_staticHashSize) + Math.floor(y/BSWG.comp_staticHashSize) * 10000000;
+    };
+    this.sHashKey2 = function ( x, y ) {
+        return x + y * 10000000;
+    };
+
     this.aHashXY = function ( v ) {
         return Math.floor(v/BSWG.arch_hashSize);
     };
@@ -858,6 +892,40 @@ BSWG.componentList = new function () {
     };
     this.aHashKey2 = function ( x, y ) {
         return x + y * 10000000;
+    };
+
+    this.updateStaticHash = function ( ) {
+
+        for (var key in this.staticHash) {
+            var list = this.staticHash[key];
+            for (var i=0; i<list.length; i++) {
+                list[i] = null;
+            }
+            list.length = 0;
+            list = null;
+            this.staticHash[key] = null;
+            delete this.staticHash[key];
+        }
+
+        var len = this.staticList.length;
+        for (var i=0; i<len; i++) {
+            var C = this.staticList[i];
+            var p = C.center;
+            var r = C.radius * 1.25;
+            var x1 = this.sHashXY(p.x - r), y1 = this.sHashXY(p.y - r),
+                x2 = this.sHashXY(p.x + r), y2 = this.sHashXY(p.y + r);
+
+            for (var x=x1; x<=x2; x++) {
+                for (var y=y1; y<=y2; y++) {
+                    var key = this.sHashKey2(x,y);
+                    if (!this.staticHash[key]) {
+                        this.staticHash[key] = [];
+                    }
+                    this.staticHash[key].push(C);
+                }
+            }            
+        }
+
     };
 
     this.archHash = {};
@@ -874,25 +942,6 @@ BSWG.componentList = new function () {
             list = null;
             this.hash[key] = null;
             delete this.hash[key];
-        }
-
-        var len = this.staticList.length;
-        for (var i=0; i<len; i++) {
-            var C = this.staticList[i];
-            var p = C.center;
-            var r = C.radius * 1.25;
-            var x1 = this.hashXY(p.x - r), y1 = this.hashXY(p.y - r),
-                x2 = this.hashXY(p.x + r), y2 = this.hashXY(p.y + r);
-
-            for (var x=x1; x<=x2; x++) {
-                for (var y=y1; y<=y2; y++) {
-                    var key = this.hashKey2(x,y);
-                    if (!this.hash[key]) {
-                        this.hash[key] = [];
-                    }
-                    this.hash[key].push(C);
-                }
-            }            
         }
 
         var len = this.compList.length;
@@ -948,8 +997,8 @@ BSWG.componentList = new function () {
                     var arch = this.serialize(null, null, list);
                     arch.archived = true;
                     arch.id = this.archObjNextID++;
-                    console.log('Archiving ' + list.length + ' objects');
-                    console.log('compList len before: ' + this.compList.length);
+                    //console.log('Archiving ' + list.length + ' objects');
+                    //console.log('compList len before: ' + this.compList.length);
                     for (var j=0; j<list.length; j++) {
                         if (list[j].obj && list[j].obj.body) {
                             var p = list[j].obj.body.GetWorldCenter();
@@ -961,7 +1010,7 @@ BSWG.componentList = new function () {
                         }
                         this.remove(list[j]);
                     }
-                    console.log('compList len after: ' + this.compList.length);
+                    //console.log('compList len after: ' + this.compList.length);
                     len = this.compList.length;
                     i = -1;
                     continue;
@@ -990,9 +1039,9 @@ BSWG.componentList = new function () {
                             i -= 1;
                             continue;
                         }
-                        console.log(x1, y1, x2, y2);
-                        console.log('Unarchiving ' + list[i].list.length + ' objects');
-                        console.log('compList len before: ' + this.compList.length);
+                        //console.log(x1, y1, x2, y2);
+                        //console.log('Unarchiving ' + list[i].list.length + ' objects');
+                        //console.log('compList len before: ' + this.compList.length);
                         if (this.load(list[i], null, true, true) === -1) {
                             console.log('Unarchive failed (collision)');
                         }
@@ -1000,7 +1049,7 @@ BSWG.componentList = new function () {
                             list[i].archived = false;
                             list.splice(i, 1);
                             i -= 1;
-                            console.log('compList len after: ' + this.compList.length);
+                            //console.log('compList len after: ' + this.compList.length);
                             continue;
                         }
                     }
@@ -1144,6 +1193,37 @@ BSWG.componentList = new function () {
             }
         }
 
+        var x1 = this.sHashXY(_x1), y1 = this.sHashXY(_y1),
+            x2 = this.sHashXY(_x2), y2 = this.sHashXY(_y2);
+
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var len = Math.sqrt(dx*dx+dy*dy);
+        dx /= len;
+        dy /= len;
+
+        for (var t=0; t<=len; t+=1.0) {
+            var ox = Math.floor(x1 + dx * t),
+                oy = Math.floor(y1 + dy * t);
+            for (var _x=-1; _x<=1; _x++) {
+                for (var _y=-1; _y<=1; _y++) {
+                    if (_x && _y) {
+                        continue;
+                    }
+                    var key = this.sHashKey2(ox + _x, oy + _y);
+                    var list = this.staticHash[key];
+                    if (list) {
+                        for (var i=0; i<list.length; i++) {
+                            if (!found[list[i].id] && !list[i].removed) {
+                                found[list[i].id] = true;
+                                fn(list[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         found = null;
     };
 
@@ -1248,6 +1328,24 @@ BSWG.componentList = new function () {
             for (var y=y1; y<=y2; y++) {
                 var key = this.hashKey2(x,y);
                 var list = this.hash[key];
+                if (list) {
+                    for (var i=0; i<list.length; i++) {
+                        if (!found[list[i].id] && !list[i].removed) {
+                            found[list[i].id] = true;
+                            fn(list[i]);
+                        }
+                    }
+                }
+            }
+        }
+
+        var x1 = this.sHashXY(_x1), y1 = this.sHashXY(_y1),
+            x2 = this.sHashXY(_x2), y2 = this.sHashXY(_y2);
+
+        for (var x=x1; x<=x2; x++) {
+            for (var y=y1; y<=y2; y++) {
+                var key = this.sHashKey2(x,y);
+                var list = this.staticHash[key];
                 if (list) {
                     for (var i=0; i<list.length; i++) {
                         if (!found[list[i].id] && !list[i].removed) {

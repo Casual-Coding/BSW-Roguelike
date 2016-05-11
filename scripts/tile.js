@@ -1,6 +1,6 @@
 BSWG.tileSize = 512;
 BSWG.tileMeshSize = 64;
-BSWG.tileSizeWorld = 24.0;
+BSWG.tileSizeWorld = 32.0;
 BSWG.tileHeightWorld = 16.0;
 
 BSWG.tMask = {
@@ -380,9 +380,14 @@ BSWG.tileMap = function (layers) {
                 for (var k in cache) {
                     for (var i=0; i<cache[k].length; i++)
                     {
-                        if (cache[k][i].fakeComp) {
-                            BSWG.componentList.removeQueryable(cache[k][i].fakeComp, cache[k][i].collisionMesh);
-                            BSWG.componentList.removeStatic(cache[k][i].fakeComp);
+                        if (colCache[k]) {
+                            BSWG.componentList.removeQueryable(colCache[k], colCache[k].collisionMesh);
+                            BSWG.componentList.removeStatic(colCache[k]);
+                            if (colCache[k].collisionMesh) {
+                                colCache[k].collisionMesh.geometry = null;
+                                colCache[k].collisionMesh.material = null;
+                                colCache[k].collisionMesh = null;
+                            }
                         }
                         set.removeTile(cache[k][i]);
                         cache[k][i] = null;
@@ -430,6 +435,61 @@ BSWG.tileMap = function (layers) {
     if (this.minimap) {
         this.renderMinimap(this.minimap.bounds[0], this.minimap.bounds[1], this.minimap.bounds[2], this.minimap.bounds[3]);
     }
+
+    var colCache = {};
+
+    this.addCollision = function(x1, y1, w, h) {
+
+        var K = function(_x, _y) {
+            return _x+_y*1024;
+        };
+
+        var mat = new THREE.MeshBasicMaterial({});
+        var geom = new THREE.BoxGeometry( BSWG.tileSizeWorld, BSWG.tileSizeWorld, BSWG.tileSizeWorld );
+
+        var self = this;
+        for (var setk in layers) {
+            var set = this.sets[setk];
+            var layer = layers[setk];
+
+            if (layer.collision) {
+                var map = layer.map;
+                var M;
+                if (typeof map === 'function') {
+                    M = map;
+                }
+                else {
+                    M = function(X,Y) {
+                        return !!(map && map[X] && map[X][Y]);
+                    };
+                }
+
+                for (var x=x1; x<(x1+w); x++) {
+                    for (var y=y1; y<(y1+h); y++) {
+                        if (M(x,y)) {
+                            var k = K(x, y);
+                            var fakeComp = {
+                                id: fcID++,
+                                isStatic: true,
+                                center: new b2Vec2((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld),
+                                radius: BSWG.tileSizeWorld * 0.5,
+                                takeDamage: function() {}
+                            };
+                            fakeComp.collisionMesh = new THREE.Mesh( geom, mat );
+                            fakeComp.collisionMesh.position.set((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld, -10.0);
+                            fakeComp.collisionMesh.rotation.z = Math.PI/2;
+                            fakeComp.collisionMesh.updateMatrix();
+                            fakeComp.collisionMesh.updateMatrixWorld();
+                            BSWG.componentList.addStatic(fakeComp);
+                            colCache[k] = fakeComp;
+                        }
+                    }
+                }
+            }
+        }
+
+        BSWG.componentList.updateStaticHash();
+    };
 
     this.update = function(dt) {
 
@@ -506,17 +566,8 @@ BSWG.tileMap = function (layers) {
                             cache[k].push(set.addTile(set.tiles[1][1], x, y, !!layer.collision));
                             if (layer.collision) {
                                 var tile = cache[k][0];
-                                if (BSWG.componentList) {
-                                    var fakeComp = {
-                                        id: fcID++,
-                                        isStatic: true,
-                                        center: new b2Vec2((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld),
-                                        radius: BSWG.tileSizeWorld * 0.5,
-                                        takeDamage: function() {}
-                                    };
-                                    tile.fakeComp = fakeComp;
-                                    BSWG.componentList.addStatic(fakeComp);
-                                    BSWG.componentList.makeQueryable(fakeComp, tile.collisionMesh);
+                                if (BSWG.componentList && colCache[k]) {
+                                    BSWG.componentList.makeQueryable(colCache[k], colCache[k].collisionMesh);
                                 }
                             }
                             if (!layer.isWater) {
@@ -555,10 +606,6 @@ BSWG.tileMap = function (layers) {
                 if (!visible[k] && cache[k]) {
                     for (var i=0; i<cache[k].length; i++)
                     {
-                        if (cache[k][i].fakeComp) {
-                            BSWG.componentList.removeQueryable(cache[k][i].fakeComp, cache[k][i].collisionMesh);
-                            BSWG.componentList.removeStatic(cache[k][i].fakeComp);
-                        }
                         set.removeTile(cache[k][i]);
                         cache[k][i] = null;
                     }
@@ -669,8 +716,6 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
 
     };
 
-    this.collisionGeom = new THREE.BoxGeometry( BSWG.tileSizeWorld, BSWG.tileSizeWorld, BSWG.tileSizeWorld );
-
     this.addTile = function(tile, x, y, coln) {
 
         var ret = new Object();
@@ -687,11 +732,6 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
         }
 
         if (coln) {
-            ret.collisionMesh = new THREE.Mesh( this.collisionGeom, tile.mat );
-            ret.collisionMesh.position.set((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld, -10.0);
-            ret.collisionMesh.rotation.z = Math.PI/2;
-            ret.collisionMesh.updateMatrix();
-            ret.collisionMesh.updateMatrixWorld();
             //ret.collisionMesh.visible = false;
             //BSWG.render.scene.add(ret.collisionMesh);
         }
@@ -706,12 +746,7 @@ BSWG.tileSet = function (imageName, color, waterLevel) {
         if (!tile.mesh) {
             return;
         }
-        if (tile.collisionMesh) {
-            //BSWG.render.scene.remove(tile.collisionMesh);
-            tile.collisionMesh.geometry = null;
-            tile.collisionMesh.material = null;
-            tile.collisionMesh = null;
-        }
+
         BSWG.render.scene.remove(tile.mesh);
         tile.mesh.geometry = null;
         tile.mesh.material = null;

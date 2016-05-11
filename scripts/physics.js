@@ -601,7 +601,13 @@ BSWG.physics = new function(){
             var f = this.welds[i].joint.GetReactionForce(1.0/dt);
             var tn = Math.abs(t);
             var fn = Math.sqrt(f.x*f.x + f.y*f.y);
-            if (Math.max(tn, fn) > this.maxWeldForce) {
+            var mwf = this.maxWeldForce;
+            var compA = this.welds[i].objA ? this.welds[i].objA.comp : null;
+            var compB = this.welds[i].objB ? this.welds[i].objB.comp : null;
+            var minHealth = Math.min(compA ? compA.hp / compA.maxHP : 1.0,
+                                     compB ? compB.hp / compB.maxHP : 1.0);
+            mwf *= (minHealth-0.1);
+            if (Math.max(tn, fn) > mwf) {
                 this.welds[i].broken = true;
             }
             if (this.welds[i].age > 10 && this.welds[i].age < 20 && !this.welds[i].revolute) {
