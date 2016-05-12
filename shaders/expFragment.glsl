@@ -62,7 +62,7 @@ void main() {
         ).r * frame.z;
     }
 
-    amp = pow(amp, 1.0-amp*0.9);
+    amp = pow(max(amp, 0.), 1.0-amp*0.9);
     vec3 clr = vec3(0., 0., 0.);
 
     if (amp < pal1.a) {
@@ -79,6 +79,7 @@ void main() {
         clr = mix(pal3.rgb, pal4.rgb, (amp-pal3.a) / (1.0 - pal3.a));
     }
 
+    clr = clamp(clr, 0.0, 1.0);
     gl_FragColor = vec4(pow(clr.r, 4.0), pow(clr.g, 4.0), pow(clr.b, 4.0), amp);
 
 }

@@ -553,6 +553,9 @@ BSWG.game = new function(){
                     },
                     'water': {
                         color: [0, 0, 0.4*0.5, 0.6],
+                        map: function(x,y) {
+                            return true;
+                        },
                         level: 0.15,
                         isWater: true
                     }
@@ -817,9 +820,10 @@ BSWG.game = new function(){
                             'tileset-mountain': {
                                 map: function(x,y) {
                                     return false;
+                                    /*
                                     var d = ~~(Math.sqrt(x*x+y*y));
                                     return (Math.max(Math.abs(x), Math.abs(y)) > 12) ||
-                                           (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1);
+                                           (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1);*/
                                 },
                                 collision: true,
                                 color: [1.0, 1.0, 1.0]
@@ -888,7 +892,7 @@ BSWG.game = new function(){
 
                                     pos: p,
                                     angle: Math.random()*Math.PI*2.0,
-                                    size: Math.floor(Math.floor(i/2)%2)+1,
+                                    size: 1,
                                     motor: Math.floor(i%2) === 0,
 
                                 });

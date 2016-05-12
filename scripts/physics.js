@@ -686,13 +686,13 @@ BSWG.physics = new function(){
                                                 * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
                 }
 
-                BSWG.render.boom.palette = chadaboom3D.fire_bright;
-                for (var i=0; i<2; i++) {
+                if (Math.random() < 1/2) {
                     var a = Math.random() * Math.PI * 2.0;
-                    var v = [ta, tb][i];
+                    var v = [ta, tb][Math.floor(Math.random()*10000) % 2];
+                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
                     BSWG.render.boom.add(
                         p.particleWrap(0.0),
-                        0.2*Math.pow(tforce, 0.125),
+                        0.35*Math.pow(tforce, 0.125),
                         32,
                         0.1*Math.pow(tforce, 0.33),
                         4.0,

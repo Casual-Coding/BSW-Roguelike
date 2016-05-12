@@ -27,6 +27,7 @@ void main() {
     vec4 clrw = texture2D(exMap, texCoord.xy) * blending.z * 2.0 +
                 texture2D(exMap, texCoord.xz) * blending.y * 0.5 + 
                 texture2D(exMap, texCoord.yz) * blending.x * 0.5;
+    clrw = clamp(clrw, 0.0, 1.0);
     clrw = vec4(pow(clrw.r, 2.0), pow(clrw.g, 2.0), pow(clrw.b, 2.0), pow(clrw.a, 2.0));
 
     //vec4 clrn = texture2D(map, vUv);
@@ -41,7 +42,7 @@ void main() {
     float l1 = pow(max(dot(normalize((normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7);
     float l2 = (pow(max(dot(normalize(vNormal), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
-    l = pow(l, 1.5) + 0.2;
+    l = pow(max(l, 0.0), 1.5) + 0.2;
 
     gl_FragColor = vec4(clr.rgb*l*0.75, 1.0);
 

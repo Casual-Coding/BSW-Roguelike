@@ -50,9 +50,9 @@ void main() {
     float l0 = (nm.a * 0.75 + nm2.a * 0.25) * 0.25 + 0.75;
     float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 0.7);
     float l = min(l0 * (l1*0.8+0.6) * 1.0, 1.0) + 0.2;
-    l = (pow(l, 1.5) + 0.2) * nm.a * 0.5;
+    l = (pow(max(l, 0.0), 1.5) + 0.2) * nm.a * 0.5;
 
-    nm2.a = pow(nm2.a, 6.0);
+    nm2.a = pow(max(nm2.a, 0.0), 6.0);
 
     gl_FragColor = vec4(l+nm2.a * l * 0.1, l-nm2.a * l * 0.31, l-nm2.a * l * 0.4, min(nm.a*16.0, 1.0));
     gl_FragColor *= clr;

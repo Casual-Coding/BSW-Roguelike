@@ -421,7 +421,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     this.first = null;
                     this.list.length = 0;
 
-                    var CL = BSWG.componentList.compList;
+                    BSWG.componentList
+                    var CL = BSWG.componentList.withinRadius(this.cWorld, this.maxDist);
                     for (var i=0; i<CL.length; i++) {
                         if (!CL[i] || !CL[i].obj) {
                             continue;
@@ -434,8 +435,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                             (neutral && this.neutral)) {
                             var radius = CL[i].obj.radius || 0.0;
                             var dist = Math.distSqVec2(this.cWorld, CL[i].obj.body.GetWorldCenter());
-                            if (dist > Math.pow(this.minDist-radius, 2.0) &&
-                                dist < Math.pow(this.maxDist+radius, 2.0)) {
+                            if (dist > Math.pow(this.minDist-radius, 2.0)) {
                                 if (this.fullRange || Math.pointBetween(this.cWorld, this.minAngle, this.maxAngle, CL[i].obj.body.GetWorldCenter())) {
                                     this.list.push([CL[i], dist, enemy, friendly, neutral]);
                                 }

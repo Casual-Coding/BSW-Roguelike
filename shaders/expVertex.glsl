@@ -21,7 +21,7 @@ void main() {
     float T = (time - attr1.w) / attr2.z;
     if (T > 0.0 && T < 1.0) {       
         // Position
-        float t = (pow(damping, max(time - attr1.w, 0.0)) - 1.0) / log(damping);
+        float t = (pow(max(damping, 0.0), max(time - attr1.w, 0.0)) - 1.0) / log(damping);
         float ca = cos(attr2.w), sa = sin(attr2.w);
         float tsc = min((1.0-T)*2.0, 1.0);
         vec3 pos2 = position + vec3((attr3.x * ca - attr3.y * sa) * tsc, (attr3.y * ca + attr3.x * sa) * tsc, -2.0/attr3.z) * attr3.z
@@ -29,8 +29,8 @@ void main() {
         gl_Position = projectionMatrix * modelViewMatrix * vec4( pos2, 1.0 );
 
         // Animation frame
-        float cframe = floor(pow(T, 1.0/attr2.y) * 45.0);
-        frame = vec3(mod(cframe, 8.0)/8.0, 1.0 - floor(cframe/8.0)/8.0, 1.0-pow(T, 3.0));
+        float cframe = floor(pow(max(T, 0.0), 1.0/attr2.y) * 45.0);
+        frame = vec3(mod(cframe, 8.0)/8.0, 1.0 - floor(cframe/8.0)/8.0, 1.0-pow(max(T, 0.0), 3.0));
         tex = floor(attr2.x / 10.0) + 0.5;
         
         // UV
