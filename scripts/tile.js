@@ -21,8 +21,8 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
         for (var i=0; i<imgData.data.length; i+=4) {
             self.heightMap[~~(i/4)] = imgData.data[i+0];
         }
-        BSWG.render.heightMapToNormalMap(self.heightMap, ctx, w, h, tileMask);
-    });
+        //BSWG.render.heightMapToNormalMap(self.heightMap, ctx, w, h, tileMask);
+    }, true);
 
     var mSize = water ? 2 : BSWG.tileMeshSize;
     this.geom = new THREE.PlaneBufferGeometry(BSWG.tileSizeWorld, BSWG.tileSizeWorld, mSize, mSize);
@@ -255,10 +255,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water) {
                 type: 't',
                 value: BSWG.render.images['grass_nm'].texture
             },
-            map: {
+            /*map: {
                 type: 't',
                 value: this.normalMap.texture
-            },
+            },*/
             shadowMap: {
                 type: 't',
                 value: BSWG.render.shadowMap

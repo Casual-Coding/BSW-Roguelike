@@ -5,7 +5,8 @@ varying vec4 vSPosition;
 varying vec3 vLocal;
 varying mat3 vNormalMatrix;
 
-uniform sampler2D map, exMap;
+//uniform sampler2D map;
+uniform sampler2D exMap;
 uniform vec4 light, clr, extra;
 
 uniform sampler2D shadowMap;
@@ -28,14 +29,16 @@ void main() {
                 texture2D(exMap, texCoord.yz) * blending.x * 0.5;
     clrw = vec4(pow(clrw.r, 2.0), pow(clrw.g, 2.0), pow(clrw.b, 2.0), pow(clrw.a, 2.0));
 
-    vec4 clrn = texture2D(map, vUv);
-    vec3 tNormal = vNormalMatrix * (normalize(clrn.xyz) * 2.0 - vec3(1.0, 1.0, 1.0));
+    //vec4 clrn = texture2D(map, vUv);
+    //vec3 tNormal = vNormalMatrix * (normalize(clrn.xyz) * 2.0 - vec3(1.0, 1.0, 1.0));
     vec3 lightDir = normalize(light.xyz - vPosition.xyz);
+
+    vec4 clrn = vec4(0.5, 0.5, 0.5, 0.5);
 
     clrn.w = clrn.w * 0.5 + 0.5;
 
     float l0 = clrn.a * 0.5 + 0.5 * pow(clrw.a, 2.0);
-    float l1 = pow(max(dot(normalize(tNormal*(normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7);
+    float l1 = pow(max(dot(normalize((normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7);
     float l2 = (pow(max(dot(normalize(vNormal), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(l, 1.5) + 0.2;

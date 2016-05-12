@@ -13,6 +13,8 @@ BSWG.component_Spikes = {
         'pike'
     ],
 
+    attStrength: 2.0,
+
     sbadd: [
         { title: 'Spikes 1', size: 1, pike: false },
         { title: 'Spikes 2', size: 2, pike: false },

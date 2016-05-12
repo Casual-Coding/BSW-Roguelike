@@ -816,6 +816,7 @@ BSWG.game = new function(){
                         var desc = {
                             'tileset-mountain': {
                                 map: function(x,y) {
+                                    return false;
                                     var d = ~~(Math.sqrt(x*x+y*y));
                                     return (Math.max(Math.abs(x), Math.abs(y)) > 12) ||
                                            (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1);
@@ -846,7 +847,7 @@ BSWG.game = new function(){
                             }
                         };
                         this.tileMap = new BSWG.tileMap(desc);
-                        this.tileMap.addCollision(-14, -14, 28, 28);
+                        //this.tileMap.addCollision(-14, -14, 28, 28);
                     }
 
                     var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 145+3;

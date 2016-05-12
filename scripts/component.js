@@ -512,7 +512,7 @@ BSWG.component = function (desc, args) {
 
     this.baseUpdate = function(dt) {
 
-        if (!BSWG.game.battleMode && this.onCC && BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
+        if (!BSWG.game.battleMode && BSWG.game.ccblock) {
             this.takeDamage(-dt*5.0, null, true);
         }
 
