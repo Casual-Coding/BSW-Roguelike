@@ -80,7 +80,12 @@ BSWG.enemySettings = [
             { type: 'uni-fight-msl',    levels: [2,3] },
             { type: 'uni-fight-msl',    levels: [4,5], max: 2 },
             { type: 'uni-laser',        levels: [5,6,7], max: 2 },
-            { type: 'uni-laser',        levels: [8,9,10], max: 4 }
+            { type: 'uni-laser',        levels: [8,9,10], max: 4 },
+            { type: 'little-tough-guy', levels: [0,1] },
+            { type: 'little-tough-guy', levels: [2,3], max: 2 },
+            { type: 'tough-guy',        levels: [5,6,7], max: 2 },
+            { type: 'stinger',          levels: [2,3] },
+            { type: 'stinger',          levels: [4,5,6], max: 2 }
         ]
     }
 ];

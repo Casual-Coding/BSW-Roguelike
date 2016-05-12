@@ -35,6 +35,9 @@ BSWG.getEnemy = function(type) {
         case 'uni-dir-fighter': title = 'Uni-Fighter'; break;
         case 'uni-fight-msl':   title = 'Uni-Fighter II'; break;
         case 'uni-laser':       title = 'Scanner'; break;
+        case 'little-tough-guy':title = 'Lil\' Tough Guy'; break;
+        case 'tough-guy':       title = 'Tough Guy'; break;
+        case 'stinger':         title = 'Stinger'; break;
         default: break;
     }
 
@@ -380,89 +383,93 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                 obj.first = null;
                 obj.found = false;
 
-                obj.updateRender = function (ctx, dt) {
+                obj.updateRender = function (ctx, dt, noUpdate) {
 
                     // update
 
-                    var refBlock = this.refObject || aiobj.ccblock;
-                    var refOffset = this.refOffset || new b2Vec2(0, 0);
+                    if (!noUpdate) {
 
-                    if (!refBlock || !refBlock.obj || !refBlock.obj.body) {
-                        refBlock = aiobj.ccblock;
+                        var refBlock = this.refObject || aiobj.ccblock;
+                        var refOffset = this.refOffset || new b2Vec2(0, 0);
+
                         if (!refBlock || !refBlock.obj || !refBlock.obj.body) {
-                            this.found = false;
-                            this.first = null;
-                            this.list.length = 0;
-                            return;
+                            refBlock = aiobj.ccblock;
+                            if (!refBlock || !refBlock.obj || !refBlock.obj.body) {
+                                this.found = false;
+                                this.first = null;
+                                this.list.length = 0;
+                                return;
+                            }
                         }
-                    }
 
-                    this.minDist = this.distance && this.distance[0] ? this.distance[0] : 0.0;
-                    this.maxDist = this.distance && this.distance[1] ? this.distance[1] : 10.0;
-                    this.fullRange = false;
-                    if (!this.angle) {
-                        this.fullRange = true;
-                    }
-                    else {
-                        this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
-                        this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
-                        this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
-                        this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
-                        this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
-                        this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
-                    }
-
-                    this.cWorld = aiobj.world(refBlock, refOffset);
-                    this.cScreen = BSWG.game.cam.toScreen(BSWG.render.viewport, this.cWorld);
-                    this.minDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.minDist);
-                    this.maxDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.maxDist);
-
-                    this.found = false;
-                    this.first = null;
-                    this.list.length = 0;
-
-                    BSWG.componentList
-                    var CL = BSWG.componentList.withinRadius(this.cWorld, this.maxDist);
-                    for (var i=0; i<CL.length; i++) {
-                        if (!CL[i] || !CL[i].obj) {
-                            continue;
+                        this.minDist = this.distance && this.distance[0] ? this.distance[0] : 0.0;
+                        this.maxDist = this.distance && this.distance[1] ? this.distance[1] : 10.0;
+                        this.fullRange = false;
+                        if (!this.angle) {
+                            this.fullRange = true;
                         }
-                        var enemy = CL[i].onCC === BSWG.game.ccblock && BSWG.game.ccblock !== self;
-                        var friendly = CL[i].onCC && !enemy;
-                        var neutral = !enemy && !friendly;
-                        if ((enemy && this.enemy) ||
-                            (friendly && this.friendly) ||
-                            (neutral && this.neutral)) {
-                            var radius = CL[i].obj.radius || 0.0;
-                            var dist = Math.distSqVec2(this.cWorld, CL[i].obj.body.GetWorldCenter());
-                            if (dist > Math.pow(this.minDist-radius, 2.0)) {
-                                if (this.fullRange || Math.pointBetween(this.cWorld, this.minAngle, this.maxAngle, CL[i].obj.body.GetWorldCenter())) {
-                                    this.list.push([CL[i], dist, enemy, friendly, neutral]);
+                        else {
+                            this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
+                            this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
+                            this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
+                            this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
+                            this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
+                            this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
+                        }
+
+                        this.cWorld = aiobj.world(refBlock, refOffset);
+                        this.cScreen = BSWG.game.cam.toScreen(BSWG.render.viewport, this.cWorld);
+                        this.minDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.minDist);
+                        this.maxDistScreen = BSWG.game.cam.toScreenSize(BSWG.render.viewport, this.maxDist);
+
+                        this.found = false;
+                        this.first = null;
+                        this.list.length = 0;
+
+                        BSWG.componentList
+                        var CL = BSWG.componentList.withinRadius(this.cWorld, this.maxDist);
+                        for (var i=0; i<CL.length; i++) {
+                            if (!CL[i] || !CL[i].obj) {
+                                continue;
+                            }
+                            var enemy = CL[i].onCC === BSWG.game.ccblock && BSWG.game.ccblock !== self;
+                            var friendly = CL[i].onCC && !enemy;
+                            var neutral = !enemy && !friendly;
+                            if ((enemy && this.enemy) ||
+                                (friendly && this.friendly) ||
+                                (neutral && this.neutral)) {
+                                var radius = CL[i].obj.radius || 0.0;
+                                var dist = Math.distSqVec2(this.cWorld, CL[i].obj.body.GetWorldCenter());
+                                if (dist > Math.pow(this.minDist-radius, 2.0)) {
+                                    if (this.fullRange || Math.pointBetween(this.cWorld, this.minAngle, this.maxAngle, CL[i].obj.body.GetWorldCenter())) {
+                                        this.list.push([CL[i], dist, enemy, friendly, neutral]);
+                                    }
                                 }
                             }
                         }
+
+                        this.list.sort(function(a,b){
+                            return a[1] - b[1];
+                        });
+                        for (var i=0; i<this.list.length; i++) {
+                            this.list[i] = {
+                                comp: this.list[i][0],
+                                distance: this.list[i][1],
+                                angle: Math.angleBetween(this.cWorld, this.list[i][0].p()),
+                                enemy: this.list[i][2],
+                                friendly: this.list[i][3],
+                                neutral: this.list[i][4]
+                            };
+                        }
+
+                        if (this.list.length > 0) {
+                            this.first = this.list[0];
+                            this.found = true;
+                        }
+
                     }
 
-                    this.list.sort(function(a,b){
-                        return a[1] - b[1];
-                    });
-                    for (var i=0; i<this.list.length; i++) {
-                        this.list[i] = {
-                            comp: this.list[i][0],
-                            distance: this.list[i][1],
-                            angle: Math.angleBetween(this.cWorld, this.list[i][0].p()),
-                            enemy: this.list[i][2],
-                            friendly: this.list[i][3],
-                            neutral: this.list[i][4]
-                        };
-                    }
-
-                    if (this.list.length > 0) {
-                        this.first = this.list[0];
-                        this.found = true;
-                    }
-
-                    if (ctx) { // render
+                    if (ctx && this.cScreen) { // render
 
                         var minAngle = this.minAngle || 0;
                         if (minAngle < 0.0) {
@@ -505,14 +512,18 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
     obj.make_controller = obj.make_sensor;
 
+    var frameIdx = 0;
+
     obj.__update_sensors = function (ctx, dt) {
 
         for (var i=0; i<sensors.length; i++) {
             var S = sensors[i];
             if (S.updateRender) {
-                S.updateRender(ctx, dt);
+                S.updateRender(ctx, dt, (frameIdx % sensors.length) !== i);
             }
         }
+
+        frameIdx += 1;
 
     };
 

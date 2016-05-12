@@ -162,7 +162,10 @@ var BSWG = new function(){
         'spinner',
         'uni-dir-fighter',
         'uni-fight-msl',
-        'uni-laser'
+        'uni-laser',
+        'little-tough-guy',
+        'tough-guy',
+        'stinger'
     ];
     for (var i=0; i<ai.length; i++) {
         scripts.push([
