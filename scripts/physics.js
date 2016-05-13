@@ -651,12 +651,17 @@ BSWG.physics = new function(){
 
     var self = this;
 
+    var wm = null;
+
     this.collisionCallback = function(contact, impulse) {
+
+        if (!wm) {
+             wm = new b2WorldManifold();
+        }
 
         if (contact._ta && contact._tb) {
             var ba = contact.GetFixtureA().GetBody();
             var bb = contact.GetFixtureB().GetBody();
-            var wm = new b2WorldManifold();
             contact.GetWorldManifold(wm);
             var p = wm.m_points[0];
             var ta = ba.GetLinearVelocityFromWorldPoint(p).clone();

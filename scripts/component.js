@@ -1170,6 +1170,7 @@ BSWG.componentList = new function () {
         dy /= len;
 
         var found = {};
+        var ku = {};
 
         for (var t=0; t<=len; t+=1.0) {
             var ox = Math.floor(x1 + dx * t),
@@ -1180,6 +1181,10 @@ BSWG.componentList = new function () {
                         continue;
                     }
                     var key = this.hashKey2(ox + _x, oy + _y);
+                    if (ku[key]) {
+                        continue;
+                    }
+                    ku[key] = true;
                     var list = this.hash[key];
                     if (list) {
                         for (var i=0; i<list.length; i++) {
@@ -1202,6 +1207,8 @@ BSWG.componentList = new function () {
         dx /= len;
         dy /= len;
 
+        ku = {};
+
         for (var t=0; t<=len; t+=1.0) {
             var ox = Math.floor(x1 + dx * t),
                 oy = Math.floor(y1 + dy * t);
@@ -1211,6 +1218,10 @@ BSWG.componentList = new function () {
                         continue;
                     }
                     var key = this.sHashKey2(ox + _x, oy + _y);
+                    if (ku[key]) {
+                        continue;
+                    }
+                    ku[key] = true;
                     var list = this.staticHash[key];
                     if (list) {
                         for (var i=0; i<list.length; i++) {
