@@ -12,7 +12,7 @@ BSWG.component_Missile = {
 
     serialize: false,
 
-    maxHP: 10,
+    maxHP: 3,
 
     init: function(args) {
 

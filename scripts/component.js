@@ -6,6 +6,7 @@ BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
+BSWG.playerBuffFactor = 0.7;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
@@ -51,10 +52,10 @@ BSWG.compAnchored = function(self) {
 BSWG.updateOnCC = function (a, b) {
 
     var cc = a.onCC || (b && b.onCC ? b.onCC : null);
-    if (!cc && a.type === 'cc') {
+    if (!cc && a.type == 'cc') {
         cc = a;
     }
-    else if (!cc && b.type === 'cc') {
+    else if (!cc && b.type == 'cc') {
         cc = a;
     }
 
@@ -227,6 +228,16 @@ BSWG.component = function (desc, args) {
     this.destroyed = false;
 
     this.takeDamage = function (amt, fromC, noMin) {
+
+        if (this.onCC) {
+            amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 5;
+            if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
+                amt *= BSWG.playerBuffFactor;
+            }
+            else if (this.onCC && BSWG.game.ccblock) {
+                amt /= BSWG.playerBuffFactor;
+            }
+        }
 
         if (fromC && fromC.onCC && this.onCC) {
             if (fromC.onCC.id === this.onCC.id) {
@@ -989,9 +1000,21 @@ BSWG.componentList = new function () {
         this.autoWelds = null;
 
         len = this.compList.length;
+        var CL = this.compList;
+        for (var i=0; i<len; i++) {
+            if (CL[i].onCC && CL[i].type == 'cc') {
+                CL[i].totalMass = (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;;
+            }
+        }
+        for (var i=0; i<len; i++) {
+            if (CL[i].onCC && CL[i].type != 'cc') {
+                CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;;
+            }
+        }       
+
         for (var i=0; i<len; i++) {
             var C = this.compList[i];
-            if (C.onCC === null && C.type !== 'cc') {
+            if (C.onCC === null && C.type != 'cc') {
                 var list = this.shouldArc(C);
                 if (list && list.length) {
                     var arch = this.serialize(null, null, list);

@@ -36,6 +36,8 @@ BSWG.component_CommandCenter = {
             smooth: 0.02
         });
 
+        this.totalMass = this.obj.body.GetMass();
+
         this.dispKeys = {
             'left': [ 'Left', new b2Vec2(-0.3 * this.width, 0.0) ],
             'right': [ 'Right', new b2Vec2(0.3 * this.width, 0.0) ],
