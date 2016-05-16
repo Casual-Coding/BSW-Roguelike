@@ -19,6 +19,7 @@ var BSWG = new function(){
         'character.js',
         'tile.js',
         'ai.js',
+        'player-stats.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
