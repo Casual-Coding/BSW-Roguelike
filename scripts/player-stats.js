@@ -8,19 +8,19 @@ BSWG.xpInfo = {
         pointsi: 1
     },
     2: {
-        xpi: 400,
+        xpi: 375,
         pointsi: 1
     },
     3: {
-        xpi: 900,
+        xpi: 800,
         pointsi: 1
     },
     4: {
-        xpi: 2000,
+        xpi: 1900,
         pointsi: 2
     },
     5: {
-        xpi: 4000,
+        xpi: 3950,
         pointsi: 1
     },
     6: {
@@ -56,12 +56,215 @@ BSWG.xpInfo = {
 
 BSWG.xpUnlockInfo = {
     'attack': {
+        'title': 'Weapons'
+        'levels': [
+
+            [ // Level 0
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'blaster' } ],
+                    'text': 'Unlock blasters'
+                }
+            ],
+
+            [ // Level 1
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'blaster' } ],
+                    'value': { type: 'damage', value: 1.2 },
+                    'text': '+20% damage from blasters'
+                }
+            ],
+
+            [ // Level 2
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'missile-launcher' } ],
+                    'text': 'Unlock missile launchers'
+                }
+            ],
+
+            [ // Level 3
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'blaster' } ],
+                    'value': { type: 'rate', value: 1.2 },
+                    'text': '+20% firing rate from blasters'
+                }
+            ],
+
+            [ // Level 4
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'missile-laucher' } ],
+                    'value': { type: 'damage', value: 1.15 },
+                    'text': '+15% damage from missiles'
+                }
+            ],
+
+            [ // Level 5
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'laser' } ],
+                    'text': 'Unlock lasers'
+                }
+            ],
+
+            [ // Level 6
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'missile-laucher' } ],
+                    'value': { type: 'damage', value: 1.15 },
+                    'text': '+15% damage from missiles'
+                }
+            ],
+
+            [ // Level 7
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'missile-laucher' } ],
+                    'value': { type: 'damage', value: 1.2 },
+                    'text': '+20% fire rate from missile launchers'
+                }
+            ],
+
+            [ // Level 8
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'missile-laucher' } ],
+                    'value': { type: 'damage', value: 1.1 },
+                    'text': '+10% damage from lasers'
+                }
+            ],
+
+            [ // Level 9
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'blaster' } ],
+                    'value': { type: 'damage', value: 1.35 },
+                    'text': '+35% damage from blasters'
+                }
+            ],
+
+            [ // Level 10
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'missile-laucher' } ],
+                    'value': { type: 'damage', value: 1.20 },
+                    'text': '+20% damage from lasers'
+                }
+            ],
+
+        ]
     },
     'mele': {
+        'title': 'Mele Weapons'
     },
     'defend': {
+        'title': 'Defense'
     },
     'speed': {
+        'title': 'Mobility',
+        'levels': [
+            
+            [ // Level 0
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'thruster', size: 1 } ],
+                    'text': 'Unlock small thrusters'
+                }
+            ],
+
+            [ // Level 1
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 1 } ],
+                    'value': { type: 'speed', value: 1.1 },
+                    'text': '+10% speed to small thrusters'
+                }
+            ],
+
+            [ // Level 2
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 1 } ],
+                    'value': { type: 'speed', value: 1.1 },
+                    'text': '+10% speed to small thrusters'
+                }
+            ],
+
+            [ // Level 3
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'cc', size: 1 } ],
+                    'value': { type: 'speed', value: 1.25 },
+                    'text': '+25% command centre speed'
+                }
+            ],
+
+            [ // Level 4
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'thruster', size: 2 } ],
+                    'text': 'Unlock large thrusters'
+                }
+            ],
+
+            [ // Level 5
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 2 } ],
+                    'value': { type: 'speed', value: 1.1 },
+                    'text': '+10% speed to large thrusters'
+                }
+            ],
+
+            [ // Level 6
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 2 } ],
+                    'value': { type: 'speed', value: 1.1 },
+                    'text': '+10% speed to large thrusters'
+                }
+            ],
+
+            [ // Level 7
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'cc', size: 1 } ],
+                    'value': { type: 'speed', value: 1.25 },
+                    'text': '+25% command centre speed'
+                }
+            ],
+
+            [ // Level 8
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 1 } ],
+                    'value': { type: 'speed', value: 1.1 },
+                    'text': '+10% speed to small thrusters'
+                }
+            ],
+
+            [ // Level 9
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 1 } ],
+                    'value': { type: 'speed', value: 1.1 },
+                    'text': '+10% speed to small thrusters'
+                }
+            ],
+
+            [ // Level 10
+                {
+                    'type': 'buff',
+                    'comp': [ { type: 'thruster', size: 2 } ],
+                    'value': { type: 'speed', value: 1.2 },
+                    'text': '+20% speed to large thrusters'
+                }
+            ]
+
+        ]
     }
 };
 
@@ -126,7 +329,7 @@ BSWG.playerStats = function(load) {
             return {
                 t: 0.0,
                 next: 0,
-                current: Math.max(0, this.xp - xpi0.xp),
+                current: Math.max(0, (this.xp - xpi0.xp) || 0),
                 total: this.xp
             };
         }
