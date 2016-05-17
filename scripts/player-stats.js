@@ -64,6 +64,11 @@ BSWG.xpUnlockInfo = {
                     'type': 'unlock',
                     'comp': [ { type: 'blaster' } ],
                     'text': 'Unlock blasters'
+                },
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'hingehalf', size: 1, motor: true }, { type: 'hingehalf', size: 1, motor: false } ],
+                    'text': 'Unlock powered hinges size 1'
                 }
             ],
 
@@ -99,6 +104,11 @@ BSWG.xpUnlockInfo = {
                     'comp': [ { type: 'missile-laucher' } ],
                     'value': { type: 'damage', value: 1.15 },
                     'text': '+15% damage from missiles'
+                },
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'hingehalf', size: 2, motor: true }, { type: 'hingehalf', size: 2, motor: false } ],
+                    'text': 'Unlock powered hinges size 2'
                 }
             ],
 
@@ -158,7 +168,22 @@ BSWG.xpUnlockInfo = {
         ]
     },
     'mele': {
-        'title': 'Mele Weapons'
+        'title': 'Mele Weapons',
+        'levels': [
+         
+            [ // Level 0
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'spikes', size: 1, pike: false }, { type: 'spikes', size: 1, pike: true } ],
+                    'text': 'Unlock spikes & pikes size 1'
+                },
+                {
+                    'type': 'unlock',
+                    'comp': [ { type: 'chainlink' } ],
+                    'text': 'Unlock chains'
+                },
+            ],
+        ]
     },
     'defend': {
         'title': 'Defense'

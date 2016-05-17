@@ -901,8 +901,8 @@ BSWG.game = new function(){
 
                                     pos: p,
                                     angle: Math.random()*Math.PI*2.0,
-                                    size: Math.floor(i%2)+1,
-                                    pike: true
+                                    size: 1,
+                                    pike: !!Math.floor(i%2)
 
                                 });
                             }
