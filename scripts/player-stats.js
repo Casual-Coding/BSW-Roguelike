@@ -131,7 +131,7 @@ BSWG.xpUnlockInfo = {
             [ // Level 8
                 {
                     'type': 'buff',
-                    'comp': [ { type: 'missile-laucher' } ],
+                    'comp': [ { type: 'laser' } ],
                     'value': { type: 'damage', value: 1.1 },
                     'text': '+10% damage from lasers'
                 }
@@ -149,7 +149,7 @@ BSWG.xpUnlockInfo = {
             [ // Level 10
                 {
                     'type': 'buff',
-                    'comp': [ { type: 'missile-laucher' } ],
+                    'comp': [ { type: 'laser' } ],
                     'value': { type: 'damage', value: 1.20 },
                     'text': '+20% damage from lasers'
                 }
