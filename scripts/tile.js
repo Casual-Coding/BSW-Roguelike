@@ -366,7 +366,12 @@ BSWG.tileMap = function (layers) {
         delete layers['minimap'];
     }
     for (var set in layers) {
-        this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null);
+        if (layers[set].decals) {
+            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null);
+        }
+        else {
+            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null);
+        }
     }
 
     var fcID = 10000000;
@@ -558,19 +563,24 @@ BSWG.tileMap = function (layers) {
 
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
-                    if (!layer.isWater && M(x,y)) {
+                    var V = M(x, y);
+                    if (!layer.isWater && V) {
                         var k = K(x,y);
                         visible[k] = true;
                         if (!cache[k]) {
                             cache[k] = new Array();
-                            cache[k].push(set.addTile(set.tiles[1][1], x, y, !!layer.collision));
+                            var itile = set.tiles[1][1];
+                            if (layer.decals) {
+                                itile = set.tiles[(V-1)%3][~~((V-1)/3)];
+                            }
+                            cache[k].push(set.addTile(itile, x, y, !!layer.collision));
                             if (layer.collision) {
                                 var tile = cache[k][0];
                                 if (BSWG.componentList && colCache[k]) {
                                     BSWG.componentList.makeQueryable(colCache[k], colCache[k].collisionMesh);
                                 }
                             }
-                            if (!layer.isWater) {
+                            if (!layer.isWater && !layer.decals) {
                                 for (var ox=-1; ox<=1; ox++) {
                                     for (var oy=-1; oy<=1; oy++) {
                                         if (ox || oy) {
@@ -619,6 +629,84 @@ BSWG.tileMap = function (layers) {
         }
 
     };
+
+};
+
+BSWG.makeCityTiles = function (seed) {
+
+    Math.seedrandom(seed);
+
+    var image = BSWG.render.proceduralImage(BSWG.tileSize*3, BSWG.tileSize*3, function(ctx, w, h){
+
+        var W = BSWG.tileSize,
+            H = BSWG.tileSize;
+
+        var l = ~~(0.35 * 255);
+        ctx.fillStyle = 'rgba(' + l + ',' + l + ',' + l + ', 1.0)';
+        ctx.fillRect(0, 0, w, h);
+
+        for (var cn=0; cn<9; cn++) {
+            var x1 = (cn%3) * W, y1 = ((cn-(cn%3))/3) * H;
+
+            var minh = 0.4, maxh = 0.5;
+            if (cn === 0) {
+                maxh = minh;
+            }
+
+            var hist = [];
+            var k = 0;
+            for (var i=0; i<Math.min(cn*2+1, 6); i++) {
+                var sz = (~~(Math.random()*12) + 12) * 4;
+                var it = {
+                    sz: sz,
+                    x: ~~(Math.cwRandom(12.0) * (W - sz - 4)) + sz/2 + 2,
+                    y: ~~(Math.cwRandom(12.0) * (H - sz - 4)) + sz/2 + 2,
+                    h: Math.random() * (maxh - minh) + minh
+                };
+                var valid = true;
+                for (var j=0; j<hist.length; j++) {
+                    var dx = Math.abs(hist[j].x - it.x),
+                        dy = Math.abs(hist[j].y - it.y);
+                    if (dx < (it.sz*0.25 + hist[j].sz*0.25 + 2) ||
+                        dy < (it.sz*0.25 + hist[j].sz*0.25 + 2)) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (!valid) {
+                    i --;
+                    k++;
+                    if (k>1000) {
+                        var l = ~~(0.35 * 255);
+                        ctx.fillStyle = 'rgba(' + l + ',' + l + ',' + l + ', 1.0)';
+                        ctx.fillRect(x1, y1, W, H);
+                        hist.length = 0;
+                        i = -1;
+                    }
+                    continue;
+                }
+                k = 0;
+
+                var l = ~~(it.h * 255);
+                var sz = it.sz/2;
+                while (sz > 0) {
+                    ctx.fillStyle = 'rgba(' + l + ',' + l + ',' + l + ', 1.0)';
+                    ctx.fillRect(x1+it.x-sz, y1+it.y-sz, sz*2, sz*2);
+                    sz -= 1;
+                    l += 1;
+                }
+                hist.push(it);
+            }
+            var l = ~~(0.0 * 255);
+            ctx.fillStyle = 'rgba(' + l + ',' + l + ',' + l + ', 1.0)';
+            ctx.strokeRect(x1, y1, W, H);
+        }
+
+    }, true);
+
+    Math.seedrandom();
+
+    return image;
 
 };
 

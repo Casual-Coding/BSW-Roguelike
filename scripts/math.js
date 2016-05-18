@@ -32,6 +32,10 @@ Math.random3d = function(x,y,z) {
     return res;
 };
 
+Math.cwRandom = function(power) {
+    return Math.pow(Math.random(), power) * (Math.random() > 0.5 ? 0.5 : -0.5) + 0.5;
+};
+
 Math.isPow2 = function(v) {
     var x = Math.log2(v);
     return (~~x) === x;

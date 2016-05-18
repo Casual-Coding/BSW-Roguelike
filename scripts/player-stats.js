@@ -56,7 +56,7 @@ BSWG.xpInfo = {
 
 BSWG.xpUnlockInfo = {
     'attack': {
-        'title': 'Weapons'
+        'title': 'Weapons',
         'levels': [
 
             [ // Level 0
