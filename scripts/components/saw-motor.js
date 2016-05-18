@@ -20,6 +20,8 @@ BSWG.component_SawMotor = {
         { title: 'Size 3', size: 3 }
     ],
 
+    attStrength: 2.0,
+
     frontOffset: 0.0,
 
     init: function(args) {

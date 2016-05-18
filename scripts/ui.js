@@ -158,6 +158,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
     this.hudMesh.position.set(-1.0, -1.0, 4.0 + this.z);
     this.hudMesh.scale.set(w/vp.w, h/vp.h, 1.0);
     this.hudMesh.updateMatrix();
+    this.hudMesh.renderOrder = 2000.0 + this.z;
     
     this.hudMesh.needsUpdate = true;
     this.hudMat.needsUpdate = true;
@@ -1162,7 +1163,7 @@ BSWG.control_3DTextButton = {
                 H,
                 H * 0.5,
                 this.textColor,
-                BSWG.ui_3dScreen(this.p),
+                BSWG.ui_3dScreen(this.p, 5.0),
                 this.lowDetail,
                 0.35
             );
@@ -1173,11 +1174,25 @@ BSWG.control_3DTextButton = {
 
     },
 
+    hide: function () {
+        if (this.textObj) {
+            BSWG.render.scene.remove(this.textObj.mesh);
+            BSWG.render.sceneS.remove(this.textObj.shadowMesh);
+        }
+    },
+
+    show: function () {
+        if (this.textObj) {
+            BSWG.render.scene.add(this.textObj.mesh);
+            BSWG.render.sceneS.add(this.textObj.shadowMesh);
+        }
+    },
+
     render: function (ctx, viewport) {
 
         var H = BSWG.ui_3dSizeH(this.h, this.p);
         this.textObj.size = H*0.5;
-        this.textObj.pos = BSWG.ui_3dScreen(this.p);
+        this.textObj.pos = BSWG.ui_3dScreen(this.p, 5.0);
         this.textObj.pos.y -= H*0.75;
         this.textObj.clr = this.mouseIn ? this.hoverColor : this.textColor;
         if (this.textObj.clr[3] <= 0.001) {

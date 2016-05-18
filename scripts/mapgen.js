@@ -1,9 +1,9 @@
-BSWG.map_minZoneDist     = 10; // Minimum distance allowed between two zones
-BSWG.map_minZoneEdgeDist = 10; // Minimum distance allowed from a zone center to edge of map
-BSWG.map_gridSize        = 50.0;
+BSWG.map_minZoneDist     = 20; // Minimum distance allowed between two zones
+BSWG.map_minZoneEdgeDist = 20; // Minimum distance allowed from a zone center to edge of map
+BSWG.map_gridSize        = 24.0; // overwritte as BSWG.tileSizeWorld
 BSWG.map_flPlanetDist    = 0.9; // * size
-BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
-BSWG.map_planetSafeDist  = 6.5; // Size of zone surrounding planet
+BSWG.map_minPlanetDist   = 60; // Minimum distance allowed between planets
+BSWG.map_planetSafeDist  = 9; // Size of zone surrounding planet
 
 BSWG.enemySettings_compToStr = function (obj) {
     var str = obj.type;
@@ -80,12 +80,19 @@ BSWG.enemySettings = [
             { type: 'uni-fight-msl',    levels: [2,3] },
             { type: 'uni-fight-msl',    levels: [4,5], max: 2 },
             { type: 'uni-laser',        levels: [5,6,7], max: 2 },
-            { type: 'uni-laser',        levels: [8,9,10], max: 4 }
+            { type: 'uni-laser',        levels: [8,9,10], max: 4 },
+            { type: 'little-tough-guy', levels: [0,1] },
+            { type: 'little-tough-guy', levels: [2,3], max: 2 },
+            { type: 'tough-guy',        levels: [5,6,7], max: 2 },
+            { type: 'stinger',          levels: [2,3] },
+            { type: 'stinger',          levels: [4,5,6], max: 2 }
         ]
     }
 ];
 
 BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
+
+    BSWG.map_gridSize = BSWG.tileSizeWorld;
 
     var ret = new Object();
 
@@ -119,7 +126,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 console.log('Map load error: Couldn\'t load planet');
             }
             else {
-                ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
+                //ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
             }
         }
 
@@ -143,15 +150,27 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         ret.gridSize = BSWG.map_gridSize;
         ret.zoneMap  = new Array(size);
         ret.edgeMap  = new Array(size);
+        ret.colMap   = new Array(size);
+        ret.terMap   = new Array(size);
+        ret.obMap    = new Array(size);
+        ret.disMap   = new Array(size);
         ret.planets  = new Array(numPlanets);
         ret.enemies_placed = false;
 
         for (var i=0; i<size; i++) {
             ret.zoneMap[i] = new Array(size);
             ret.edgeMap[i] = new Array(size);
+            ret.colMap[i]  = new Array(size);
+            ret.terMap[i]  = new Array(size);
+            ret.obMap[i]   = new Array(size);
+            ret.disMap[i]  = new Array(size);
             for (var j=0; j<size; j++) {
                 ret.zoneMap[i][j] = -1;
                 ret.edgeMap[i][j] = -1;
+                ret.colMap[i][j]  = -1;
+                ret.terMap[i][j]  = -1;
+                ret.obMap[i][j]   = 0;
+                ret.disMap[i][j]  = 0;
             }
         }
 
@@ -175,6 +194,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     ret.zones[i].p = p;
                     ret.zones[i].name = BSWG.randomName.get();
                     ret.zones[i].discovered = false;
+                    ret.zones[i].id = i;
+                    ret.zones[i].biome = BSWG.map_genBiome();
                     break;
                 }
             }
@@ -241,6 +262,14 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
+        for (var i=0; i<numPlanets; i++) {
+            var p = ret.planets[i];
+            ret.obMap[~~(p.p.x)][~~(p.p.y)] = Math.min(i+1, 9);
+            ret.obMap[~~(p.p.x)+1][~~(p.p.y)] = Math.min(i+1, 9);
+            ret.obMap[~~(p.p.x)][~~(p.p.y)+1] = Math.min(i+1, 9);
+            ret.obMap[~~(p.p.x)+1][~~(p.p.y)+1] = Math.min(i+1, 9);
+        }
+
         for (var x=0; x<size; x++) {
             for (var y=0; y<size; y++) {
                 var p = new b2Vec2(x, y);
@@ -272,11 +301,208 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     ret.zoneMap[x-1][y-1] !== ret.zoneMap[x][y] ||
                     ret.zoneMap[x+1][y+1] !== ret.zoneMap[x][y] ||
                     ret.zoneMap[x+1][y-1] !== ret.zoneMap[x][y] ||
-                    ret.zoneMap[x-1][y+1] !== ret.zoneMap[x][y])
+                    ret.zoneMap[x-1][y+1] !== ret.zoneMap[x][y]) {
                     ret.edgeMap[x][y] = ret.zoneMap[x][y];
+                }
             }
         }
 
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                ret.colMap[x][y] = ret.edgeMap[x][y] > -1;
+                var zone = ret.zones[ret.zoneMap[x][y]];
+                if (!zone.hasPlanet && Math.random() < 0.05) {
+                    ret.colMap[x][y] = true;
+                }
+            }
+        }
+
+        var start = ret.planets[0].zone;
+        var visited = {};
+        var vcount = 0;
+        while (vcount < (ret.zones.length-1)) {
+            visited[start.id] = true;
+            vcount += 1;
+
+            var best = null, bestD = null;
+            for (var i=0; i<ret.zones.length; i++) {
+                if (!visited[i]) {
+                    var d = Math.distSqVec2(ret.zones[i].p, start.p);
+                    if (best === null || d < bestD) {
+                        best = ret.zones[i];
+                        bestD = d;
+                    }
+                }
+            }
+
+            for (var x=0; x<size; x++) {
+                for (var y=0; y<size; y++) {
+                    if (Math.pointLineDistance(start.p, best.p, new b2Vec2(x, y)) < 2) {
+                        ret.colMap[x][y] = false;
+                    }
+                }
+            }
+
+            start = best;
+        }
+
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {            
+                if (!ret.colMap[x][y]) {
+                    var zone = ret.zones[ret.zoneMap[x][y]];
+                    var B = zone.biome;
+                    if (BSWG.mapPerlin(x, y) || (B.water > 0.75 && BSWG.mapPerlin(x+141, y+341))) {
+                        ret.terMap[x][y] = 0;
+                    }
+                    else {
+                        var L = new Array();
+                        L.push([B.grass, 1, 1541, 14]);
+                        L.push([B.sand, 2, 454, 515]);
+                        L.push([B.rock, 3, 5981, 1567]);
+                        L.push([B.snow, 4, 145, 8701]);
+                        L.sort(function(a,b){
+                            if (a[0] < b[0]) {
+                                return -1;
+                            }
+                            else if (a[0] === b[0]) {
+                                return 0;
+                            }
+                            else {
+                                return 1;
+                            }
+                        });
+                        ret.terMap[x][y] = L[0][1];
+                        for (var i=1; i<L.length; i++) {
+                            if (Math.pow(BSWG.mapPerlinF(x+L[i][2], y+L[i][3]), 3.0) < L[i][0]) {
+                                ret.terMap[x][y] = L[i][1];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (var x=1; x<(size-1); x++) {
+            for (var y=1; y<(size-1); y++) {
+                if (ret.obMap[x][y]) {
+                    ret.terMap[x][y] = 0;
+                    ret.terMap[x-1][y] = 0;
+                    ret.terMap[x+1][y] = 0;
+                    ret.terMap[x][y-1] = 0;
+                    ret.terMap[x][y+1] = 0;
+                }
+            }
+        }
+
+        ret.tm_desc = {
+            'city-tiles': {
+                decals: BSWG.makeCityTiles(1),
+                normalMap: BSWG.render.images['test_nm'].texture,
+                normalMapScale: 24.0,
+                normalMapAmp: 5.0,
+                map: function(x, y) {
+                    if (x >= 0 && y >= 0 && x < size && y < size) {
+                        return ret.obMap[x][y];
+                    }
+                    else {
+                        return 0;
+                    }
+                },
+                color: [0.5, 0.5, 0.5]
+            },
+            'tileset-mountain': {
+                map: function(x,y) {
+                    return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
+                },
+                collision: true,
+                color: [1.0, 1.0, 1.0]
+            },
+            'tileset-land': {
+                map: function(x,y) {
+                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
+                },
+                color: [0.4, 0.75, 0.2]
+            },
+            'tileset-sand': {
+                map: function(x,y) {
+                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
+                },
+                color: [1.5, 1.0, 0.5]
+            },
+            'tileset-rockland': {
+                map: function(x,y) {
+                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
+                },
+                color: [0.75, 0.5, 0.5]
+            },
+            'tileset-snow': {
+                map: function(x,y) {
+                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
+                },
+                color: [2.25, 2.25, 2.25]
+            },
+            'tileset-below': {
+                map: function(x,y) {
+                    return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
+                },
+                color: [0.75, 0.75, 0.20],
+                isBelow: true
+            },
+            'water': {
+                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+                level: 0.20,
+                map: function(x,y) {
+                    return true
+                },
+                isWater: true
+            },
+            'minimap': {
+                bounds: [ 0, 0, size, size ],
+                getColor: function(x, y) {
+                    if (this.getDiscovered(x, y)) {
+                        if (ret.colMap[x][y]) {
+                            return 'rgba(192, 192, 192, 1)';
+                        }
+                        else if (ret.terMap[x][y] === 0) {
+                            return 'rgba(6, 50, 80, 1)';
+                        }
+                        else if (ret.terMap[x][y] === 1) {
+                            return 'rgba(40, 80, 20, 1)';
+                        }
+                        else if (ret.terMap[x][y] === 2) {
+                            return 'rgba(96, 72, 48, 1)';
+                        }
+                        else if (ret.terMap[x][y] === 3) {
+                            return 'rgba(56, 40, 40, 1)';
+                        }
+                        else if (ret.terMap[x][y] === 4) {
+                            return 'rgba(130, 130, 130, 1)';
+                        }
+                    }
+                    else {
+                        return 'rgba(0, 0, 0, 1)';
+                    }
+                },
+                setDiscovered: function(x, y, undis) {
+                    if (x >= 0 && y >= 0 && x < size && y < size) {
+                        var zone = ret.zones[ret.zoneMap[x][y]];
+                        if (!zone.discovered) {
+                            undis = true;
+                        }
+                        ret.disMap[x][y] = (!undis) ? 1 : 0;
+                    }
+                },
+                getDiscovered: function(x, y) {
+                    if (x >= 0 && y >= 0 && x < size && y < size) {
+                        return ret.disMap[x][y] ? true : false;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+        };
     }
 
     ret.serialize = function () {
@@ -486,6 +712,60 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
     return ret;
 
+};
+
+BSWG.map_genBiome = function() {
+
+    Math.seedrandom();
+
+    var ret = new Object();
+    ret.water = Math.random();
+    ret.grass = Math.random();
+    ret.sand = Math.random();
+    ret.rock = Math.pow(Math.random(), 0.5);
+    ret.snow = Math.random();
+
+    if (ret.sand > ret.snow) {
+        ret.snow /= 10;
+    }
+    else {
+        ret.sand /= 10;
+    }
+
+    if (ret.grass > ret.sand) {
+        ret.sand /= 3;
+    }
+    else {
+        ret.grass /= 3;
+    }
+
+    if (ret.grass > ret.snow) {
+        ret.snow /= 10;
+    }
+    else {
+        ret.grass /= 10;
+    }
+
+    if (ret.sand > ret.water) {
+        ret.water /= 3;
+    }
+    else {
+        ret.sand /= 3;
+    }
+
+    var sum = (ret.grass + ret.sand + ret.rock + ret.snow) / 4.0;
+    ret.grass /= sum;
+    ret.sand /= sum;
+    ret.rock /= sum;
+    ret.snow /= sum;
+
+    ret.waterF = ret.water;
+    ret.grassF = ret.grass;
+    ret.sandF = ret.sand + ret.grassF;
+    ret.rockF = ret.rock + ret.sandF;
+    ret.snowF = ret.snow + ret.rockF;
+
+    return ret;
 };
 
 BSWG.genMap_EnemyPlacement = function(ret, eInfo) {

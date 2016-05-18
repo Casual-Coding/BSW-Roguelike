@@ -125,6 +125,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     });
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
 
+    ret.matS = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
+    ret.meshS = new THREE.Mesh(ret.geom, ret.matS);
+    
+    BSWG.render.sceneS.add( ret.meshS );
+
     ret.geom.needsUpdate = true;
     ret.mat.needsUpdate = true;
     ret.mesh.needsUpdate = true;
@@ -159,10 +164,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         self.mesh.position.x = center.x + (offset?offset.x:0);
         self.mesh.position.y = center.y + (offset?offset.y:0);
         self.mesh.position.z = zoffset;
-
         self.mesh.rotation.z = angle;
-
         self.mesh.updateMatrix();
+
+        self.meshS.position.x = center.x + (offset?offset.x:0);
+        self.meshS.position.y = center.y + (offset?offset.y:0);
+        self.meshS.position.z = zoffset;
+        self.meshS.rotation.z = angle;
+        self.meshS.updateMatrix();
 
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
 
@@ -230,6 +239,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     ret.destroy = function() {
 
         BSWG.render.scene.remove( self.mesh );
+        BSWG.render.sceneS.remove( self.meshS );
 
         self.mesh.geometry.dispose();
         self.mesh.material.dispose();
@@ -238,6 +248,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         self.mesh = null;
         self.mat = null;
         self.geom = null;
+
+        self.meshS.material.dispose();
+        self.meshS.material = null;
+        self.meshS.geometry = null;
+        self.meshS = null;
 
     };
 
@@ -329,6 +344,7 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
     ret.geom.needsUpdate = true;
     ret.mat.needsUpdate = true;
     ret.mesh.needsUpdate = true;
+    ret.mesh.renderOrder = 1400.0;
 
     BSWG.render.scene.add( ret.mesh );
 

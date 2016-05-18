@@ -36,7 +36,8 @@ BSWG.game = new function(){
 
                 var H = BSWG.ui_HM(w, h);
 
-                var off = scene === BSWG.SCENE_GAME1 ? 0 : 256;
+                var mmsize = 256;
+                var off = scene === BSWG.SCENE_GAME1 ? 0 : mmsize;
                 var bsz = 92;
                 var sc = bsz/96;
                 off *= sc;
@@ -44,14 +45,14 @@ BSWG.game = new function(){
 
                 if (scene !== BSWG.SCENE_TITLE) {
 
-                    H.plate(256*sc-off, h-(bfr*2 + bsz), w-256*sc+off, bfr*2 + bsz, 0.25, 0.5);
-                    H.plate(0-off, h-256*sc, 256*sc, 256*sc, 0.15, 0.5);
-                    H.plate(7-off, h-256*sc+7, 256*sc-14, 256*sc-14, 0.5, 0.15); // 0
+                    H.plate(mmsize*sc-off, h-(bfr*2 + bsz), w-mmsize*sc+off, bfr*2 + bsz, 0.25, 0.5);
+                    H.plate(0-off, h-mmsize*sc, mmsize*sc, mmsize*sc, 0.15, 0.5);
+                    H.plate(7-off, h-mmsize*sc+7, mmsize*sc-14, mmsize*sc-14, 0.5, 0.15); // 0
 
                     var hh = bfr*2 + bsz*2;
 
                     self.hudBottomYT = h-(bfr*2 + bsz);
-                    self.hudDlgX1 = 256*sc;
+                    self.hudDlgX1 = mmsize*sc;
                     self.hudDlgX2 = w/2-(bfr+bsz*2);
 
                     H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
@@ -68,7 +69,7 @@ BSWG.game = new function(){
                     H.plate(w/2+(bfr+bsz*2)+bfr+bsz*3, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 9
                     H.plate(w/2+(bfr+bsz*2)+bfr+bsz*4, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 10
 
-                    H.plate(256*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-256*sc-bfr*2, bsz, 0.5, 0.15); // 11
+                    H.plate(mmsize*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-mmsize*sc-bfr*2, bsz, 0.5, 0.15); // 11
 
                 }
                 else {
@@ -227,37 +228,41 @@ BSWG.game = new function(){
 
         var p = this.ccblock.obj.body.GetWorldCenter().clone();
         var arange = Math.PI;
-        var minr = 25, maxr = 40;
+        var minr = 27.5, maxr = 42.5;
         var v = this.ccblock.obj.body.GetLinearVelocity().clone();
         var a = Math.atan2(v.y, v.x);
 
-        for (var i=0; i<list.length; i++) {
-            var aiship = null;
-            while (!aiship) {
+        for (var _i=0; _i<list.length; _i++) {
+            window.setTimeout(function(i){
+                return function () {
+                    var aiship = null;
+                    while (!aiship) {
 
-                var ta = Math.random() * 2 - 1;
-                var tr = Math.random();
-                var p2 = new b2Vec2(
-                    p.x + Math.cos(a + arange * ta) * ((maxr-minr)*tr + minr),
-                    p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
-                );
+                        var ta = Math.random() * 2 - 1;
+                        var tr = Math.random();
+                        var p2 = new b2Vec2(
+                            p.x + Math.cos(a + arange * ta) * ((maxr-minr)*tr + minr),
+                            p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
+                        );
 
-                aiship = BSWG.componentList.load(list[i], {p: p2});
-                if (aiship) {
-                    aiship.title = list[i].title;
-                }
-                window.setTimeout(function(ais){
-                    return function() {
-                        if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                            var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                            v.x *= 0.85;
-                            v.y *= 0.85;
-                            ais.setVelAll(v);
+                        aiship = BSWG.componentList.load(list[i], {p: p2});
+                        if (aiship) {
+                            aiship.title = list[i].title;
+                            window.setTimeout(function(ais){
+                                return function() {
+                                    if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
+                                        var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
+                                        v.x *= 0.85;
+                                        v.y *= 0.85;
+                                        ais.setVelAll(v);
+                                    }
+                                    ais.reloadAI();
+                                };
+                            }(aiship), 111);
                         }
-                        ais.reloadAI();
-                    };
-                }(aiship), 250);
-            }
+                    }
+                };
+            }(_i), 67*_i);
         }
 
     };
@@ -357,8 +362,11 @@ BSWG.game = new function(){
             this.dialogObj = null;
         }
 
+        BSWG.render.clearScene();
+        BSWG.jpointRenderer.readd();
         BSWG.physics.reset();
         BSWG.componentList.clear();
+        BSWG.componentList.clearStatic();
         BSWG.blasterList.clear();
         BSWG.laserList.clear();
         BSWG.planets.init();
@@ -376,6 +384,11 @@ BSWG.game = new function(){
         BSWG.render.updateCam3D(this.cam);
         this.editMode = false;
         this.showControls = false;
+
+        if (this.tileMap) {
+            this.tileMap.destroy();
+        }
+        this.tileMap = null;
 
         this.battleMode = false;
 
@@ -408,7 +421,7 @@ BSWG.game = new function(){
         }
 
         if (!this.stars) {
-            this.stars = new BSWG.starfield();
+            //this.stars = new BSWG.starfield();
         }
 
         if (this.nebulas) {
@@ -422,13 +435,13 @@ BSWG.game = new function(){
         var startPos = new b2Vec2(0, 0);
 
         wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
-        BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
+        BSWG.input.wheelLimits(wheelStart-10, wheelStart-6.768170884076580509750342780728);
         BSWG.input.CLEAR_GFILE();
 
         switch (scene) {
             case BSWG.SCENE_TITLE:
 
-                this.cam.z *= 1.5;
+                this.cam.z /= 2.0;
 
                 Math.seedrandom();
 
@@ -440,31 +453,32 @@ BSWG.game = new function(){
                     this.sandBoxBtn.add();
                 }
                 else {
+                    var yoff = 42/(BSWG.render.viewport.h/1080);
                     this.title1 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 80+42,
+                        x: BSWG.render.viewport.w*0.5, y: 80+42+yoff,
                         w: 800, h: 100,
                         vpXCenter: true,
                         text: "BlockShip Wars",
-                        color: [0.85, 0.85, 0.85, 1],
-                        hoverColor: [0.85, 0.85, 0.85, 1],
+                        color: [1, 1, 1, 1],
+                        hoverColor: [1, 1, 1, 1],
                         noDestroy: true,
                         click: function (me) {
                         }
                     });
                     this.title2 = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 145+42,
+                        x: BSWG.render.viewport.w*0.5, y: 145+42+yoff,
                         w: 800, h: 100,
                         vpXCenter: true,
                         text: "r o g u e l i k e",
-                        color: [0.85, 0.2, 0.2, 1.0],
-                        hoverColor: [0.85, 0.2, 0.2, 1.0],
+                        color: [1, 0.2, 0.2, 1.0],
+                        hoverColor: [1, 0.2, 0.2, 1.0],
                         noDestroy: true,
                         click: function (me) {
                         }
                     });
 
                     this.newGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350,
+                        x: BSWG.render.viewport.w*0.5, y: 350+yoff,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "New Game",
@@ -476,7 +490,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.loadGameBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+70,
+                        x: BSWG.render.viewport.w*0.5, y: 350+70+yoff,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Load Game",
@@ -490,7 +504,7 @@ BSWG.game = new function(){
                         }
                     });
                     this.sandBoxBtn = new BSWG.uiControl(BSWG.control_3DTextButton, {
-                        x: BSWG.render.viewport.w*0.5, y: 350+140,
+                        x: BSWG.render.viewport.w*0.5, y: 350+140+yoff,
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Sandbox",
@@ -514,10 +528,55 @@ BSWG.game = new function(){
                     }
                     var pos = new THREE.Vector3(Math.cos(a)*r, Math.sin(a)*r, 0.0);
                     this.panPositions.push(pos);
-                    BSWG.planets.add({pos: pos, type: t});
+                    //BSWG.planets.add({pos: pos, type: t});
                 }
                 this.curPanPos = 0;
                 this.panPosTime = this.panPosStartTime = 20.0;
+
+                var desc = {
+                    'tileset-mountain': {
+                        map: function(x,y) {
+                            return BSWG.mapPerlinSparse(x+100,y+414);
+                        },
+                        color: [0.75*2, 0.75*2, 1*2]
+                    },
+                    'city-tiles': {
+                        decals: BSWG.makeCityTiles(1),
+                        normalMap: BSWG.render.images['test_nm'].texture,
+                        normalMapScale: 24.0,
+                        normalMapAmp: 5.0,
+                        map: function(x, y) {
+                            if (!BSWG.mapPerlinSparse(x+100,y+414) &&
+                                BSWG.mapPerlinSparse(x-100,y-414)) {
+                                return ~~(Math.random2d(x, y) * 9) + 1;
+                            }
+                            else {
+                                return 0;
+                            }
+                        },
+                        color: [0.5, 0.5, 0.5]
+                    },
+                    'tileset-land': {
+                        map: BSWG.mapPerlin,
+                        color: [0.2, 0.5, 1.0]
+                    },
+                    'tileset-below': {
+                        map: function(x,y) {
+                            return true
+                        },
+                        color: [0.20, 0.20, 0.75],
+                        isBelow: true
+                    },
+                    'water': {
+                        color: [0, 0, 0.4*0.5, 0.6],
+                        map: function(x,y) {
+                            return true;
+                        },
+                        level: 0.15,
+                        isWater: true
+                    }
+                };
+                this.tileMap = new BSWG.tileMap(desc);
 
                 this.setSong(134, {
                     seed1: 48,
@@ -538,6 +597,7 @@ BSWG.game = new function(){
 
                 if (args.load) {
                     this.map = BSWG.genMap(args.load.map);
+                    this.tileMap = new BSWG.tileMap(map.tm_desc);
                     this.ccblock = BSWG.componentList.load(args.load.comp);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
@@ -545,19 +605,24 @@ BSWG.game = new function(){
                     this.noDefault = true;
                 }
                 else {
-                    this.noDefault = false;
-                    this.map = BSWG.genMap(128, 30, 8);
                     Math.seedrandom();
-                    for (var i=0; i<this.map.planets.length; i++) {
-                        var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
-                        this.map.planets[i].pobj = planet;
-                    }
+                    this.noDefault = false;
+                    this.map = BSWG.genMap(162, 35, 8);
+                    this.tileMap = new BSWG.tileMap(this.map.tm_desc);
+                    //Math.seedrandom();
+                    //for (var i=0; i<this.map.planets.length; i++) {
+                    //    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
+                    //    this.map.planets[i].pobj = planet;
+                    //}
                     startPos = this.map.planets[0].worldP.clone();
-                    this.map.planets[0].pobj.capture();
+                    //this.map.planets[0].pobj.capture();
+                    //startPos = this.map.startPos;
                 }
-                this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
-                });
-                this.nebulas = new BSWG.nebulas(this.map);
+                //this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
+                //});
+                this.mapImage = this.tileMap.minimap.image;
+                this.tileMap.addCollision(0, 0, this.map.size, this.map.size);
+                //this.nebulas = new BSWG.nebulas(this.map);
 
             case BSWG.SCENE_GAME2:
 
@@ -664,6 +729,9 @@ BSWG.game = new function(){
                             self.ccblock = null;
                             self.exportFN = data.filename;
                             var obj = JSON.parse(data.data);
+                            if (self.tileMap) {
+                                self.tileMap.clear();
+                            }
                             BSWG.componentList.clear();
                             self.ccblock = BSWG.componentList.load(obj);
                             if (!self.ccblock) {
@@ -673,6 +741,9 @@ BSWG.game = new function(){
                             self.cam.x = p.x;
                             self.cam.y = p.y;
                         } catch (err) {
+                            if (self.tileMap) {
+                                self.tileMap.clear();
+                            }
                             BSWG.componentList.clear();
                             self.ccblock = BSWG.componentList.load(backup);
                         }
@@ -705,6 +776,7 @@ BSWG.game = new function(){
                             this.backup = BSWG.componentList.serialize(null, true);
                             try {
                                 self.ccblock = null;
+                                self.tileMap.clear();
                                 BSWG.componentList.clear();
                                 BSWG.blasterList.clear();
                                 BSWG.laserList.clear();
@@ -718,11 +790,13 @@ BSWG.game = new function(){
                                 }
                                 self.battleMode = true;
                             } catch (err) {
+                                self.tileMap.clear();
                                 BSWG.componentList.clear();
                                 self.ccblock = BSWG.componentList.load(backup);
                             }
                         }
                         else {
+                            self.tileMap.clear();
                             BSWG.componentList.clear();
                             BSWG.blasterList.clear();
                             BSWG.laserList.clear();
@@ -758,7 +832,57 @@ BSWG.game = new function(){
                 if (!this.noDefault) {
 
                     if (scene === BSWG.SCENE_GAME2) {
-                        BSWG.planets.add({});
+                        var desc = {
+                            'tileset-mountain': {
+                                map: function(x,y) {
+                                    return false;
+                                    /*
+                                    var d = ~~(Math.sqrt(x*x+y*y));
+                                    return (Math.max(Math.abs(x), Math.abs(y)) > 12) ||
+                                           (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1);*/
+                                },
+                                collision: true,
+                                color: [1.0, 1.0, 1.0]
+                            },
+                            'tileset-land': {
+                                map: function(x,y) { return (Math.abs(x) > 1 || Math.abs(y) > 1) && BSWG.mapPerlin(x,y); },
+                                color: [0.4, 0.75, 0.2]
+                            },
+                            'tileset-below': {
+                                map: function(x,y) {
+                                    var d = ~~(Math.sqrt(x*x+y*y));
+                                    return !((Math.max(Math.abs(x), Math.abs(y)) > 12) ||
+                                            (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1));
+                                },
+                                color: [0.75, 0.75, 0.20],
+                                isBelow: true
+                            },
+                            'city-tiles': {
+                                decals: BSWG.makeCityTiles(1),
+                                normalMap: BSWG.render.images['test_nm'].texture,
+                                normalMapScale: 24.0,
+                                normalMapAmp: 5.0,
+                                map: function(x, y) {
+                                    if (!x && !y) {
+                                        return 9;
+                                    }
+                                    else {
+                                        return 0;
+                                    }
+                                },
+                                color: [0.5, 0.5, 0.5]
+                            },
+                            'water': {
+                                map: function(x,y) {
+                                    return true
+                                },
+                                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+                                level: 0.20,
+                                isWater: true
+                            }
+                        };
+                        this.tileMap = new BSWG.tileMap(desc);
+                        //this.tileMap.addCollision(-14, -14, 28, 28);
                     }
 
                     var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 145+3;
@@ -799,7 +923,7 @@ BSWG.game = new function(){
 
                                     pos: p,
                                     angle: Math.random()*Math.PI*2.0,
-                                    size: Math.floor(Math.floor(i/2)%2)+1,
+                                    size: 1,
                                     motor: Math.floor(i%2) === 0,
 
                                 });
@@ -808,8 +932,8 @@ BSWG.game = new function(){
 
                                     pos: p,
                                     angle: Math.random()*Math.PI*2.0,
-                                    size: Math.floor(i%2)+1,
-                                    pike: true
+                                    size: 1,
+                                    pike: !!Math.floor(i%2)
 
                                 });
                             }
@@ -1042,59 +1166,76 @@ BSWG.game = new function(){
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
                     self.panPosTime -= dt;
-                    if (self.panPosTime < 0.0) {
-                        self.curPanPos = (self.curPanPos + 1) % self.panPositions.length;
-                        self.panPosTime = self.panPosStartTime;
-                    }
-                    self.cam.panTo(dt*0.5, self.panPositions[self.curPanPos]);
+                    self.cam.panTo(dt*0.5, new b2Vec2(self.cam.x + 25, self.cam.y + 25));
+
+                    var h = (350+140+80) - 42;
+                    var yoff = BSWG.render.viewport.h*0.125;//BSWG.render.viewport.h*0.5 - h*0.5;
+                    self.title1.p.x = BSWG.render.viewport.w*0.5;
+                    self.title1.p.y = 80+42+yoff-80;
+                    self.title2.p.x = BSWG.render.viewport.w*0.5;
+                    self.title2.p.y = 145+42+yoff-80;
+                    self.newGameBtn.p.x = BSWG.render.viewport.w*0.5;
+                    self.newGameBtn.p.y = 350+yoff-80;
+                    self.loadGameBtn.p.x = BSWG.render.viewport.w*0.5
+                    self.loadGameBtn.p.y = 350+70+yoff-80;
+                    self.sandBoxBtn.p.x = BSWG.render.viewport.w*0.5;
+                    self.sandBoxBtn.p.y = 350+140+yoff-80;
                     break;
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
-                    if (!self.ccblock.destroyed) {
+                    if (self.ccblock && !self.ccblock.destroyed) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
-                        var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25) / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
+                        var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
 
-                        var ccs = BSWG.componentList.allCCs();
-                        var avgDist = 0.0;
-                        var avgP = self.ccblock.p().clone();
-                        var w = 1;
-                        avgP.x *= w;
-                        avgP.y *= w;
-                        for (var i=0; i<ccs.length; i++) {
-                            var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
-                            avgDist += dist;
-                            var tw = 1;
-                            if (dist > 20) {
-                                tw = 1 / (1+(dist-20)/10);
+                        if (!self.editMode) {
+                            toZ /= Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
+
+                            var ccs = BSWG.componentList.allCCs();
+                            var avgDist = 0.0;
+                            var avgP = self.ccblock.p().clone();
+                            var w = 1;
+                            avgP.x *= w;
+                            avgP.y *= w;
+                            for (var i=0; i<ccs.length; i++) {
+                                var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
+                                avgDist += dist;
+                                var tw = 1;
+                                if (dist > 20) {
+                                    tw = 1 / (1+(dist-20)/10);
+                                }
+                                avgP.x += ccs[i].p().x * tw;
+                                avgP.y += ccs[i].p().y * tw;
+                                w += tw;
                             }
-                            avgP.x += ccs[i].p().x * tw;
-                            avgP.y += ccs[i].p().y * tw;
-                            w += tw;
+                            avgP.x /= w;
+                            avgP.y /= w;
+                            avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
+                            toZ /= Math.max(Math.log(avgDist), 1.0);
+                            toZ = Math.max(toZ, 0.007);
+
+                            self.cam.zoomTo(dt*2.5, toZ);
+                            var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
+                            var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
+                            p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
+                            p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
+
+                            var bfr = BSWG.camVelLookBfr * viewport.w;
+                            var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
+                            var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
+                            var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
+                            var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
+                            var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
+
+                            p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
+                            p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
+
+                            self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
                         }
-                        avgP.x /= w;
-                        avgP.y /= w;
-                        avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
-                        toZ /= Math.max(Math.log(avgDist), 1.0);
-                        toZ = Math.max(toZ, 0.007);
-
-                        self.cam.zoomTo(dt*2.5, toZ);
-                        var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-                        var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
-                        p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
-                        p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
-
-                        var bfr = BSWG.camVelLookBfr * viewport.w;
-                        var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
-                        var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
-                        var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
-                        var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
-                        var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
-
-                        p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
-                        p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
-
-                        self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));                       
+                        else {
+                            self.cam.zoomTo(dt*2.5, toZ);
+                            self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, self.ccblock.p().clone(), 1.0-BSWG.mouseLookFactor));
+                        }
                     }
 
                     break;
@@ -1176,7 +1317,7 @@ BSWG.game = new function(){
 
                     self.grabbedBlock = grabbedBlock;
 
-                    if (!self.ccblock.ai && !BSWG.ui_DlgBlock) {
+                    if (self.ccblock && !self.ccblock.ai && !BSWG.ui_DlgBlock) {
                         BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
                     }
                     break;
@@ -1185,7 +1326,7 @@ BSWG.game = new function(){
                     break;
             }
 
-            self.stars.render(ctx, self.cam, viewport);
+            //self.stars.render(ctx, self.cam, viewport);
             if (self.nebulas) {
                 self.nebulas.render(ctx, self.cam, viewport);
             }
@@ -1193,6 +1334,10 @@ BSWG.game = new function(){
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
             BSWG.laserList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
+
+            if (self.tileMap) {
+                self.tileMap.update(dt);
+            }
 
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
@@ -1320,12 +1465,12 @@ BSWG.game = new function(){
                             w: 800, h: 100,
                             vpXCenter: true,
                             text: zones[i].name,
-                            color: [1, 1, 1.5, 0],
-                            hoverColor: [1, 1, 1.5, 0],
+                            color: [1, 1, 1.5, 1],
+                            hoverColor: [1, 1, 1.5, 1],
                             lowDetail: true,
                             click: function (me) {}
                         });
-                        //zones[i].zoneTitle.remove();
+                        zones[i].zoneTitle.hide();
                     }
                 }
                 self.inZone = self.map.getZone(self.ccblock.obj.body.GetWorldCenter());
@@ -1336,15 +1481,17 @@ BSWG.game = new function(){
                     self.zSwitchTime = Date.timeStamp();
                     if (self.lastZone) {
                         //self.lastZone.zoneTitle.remove();
-                        self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
+                        //self.lastZone.zoneTitle.hoverColor[3] = self.lastZone.zoneTitle.textColor[3] = 0.0;
+                        self.lastZone.zoneTitle.hide();
                     }
-                    self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
+                    //self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
                     //self.inZone.zoneTitle.add();
+                    self.inZone.zoneTitle.show();
                     self.lastZone = self.inZone;
                     self.zoneChangeT = 6.0;
 
                     self.inZone.discovered = true;
-                    var ctx2 = self.mapImage.getContext('2d');
+                    /*var ctx2 = self.mapImage.getContext('2d');
 
                     ctx2.globalAlpha = 1.0;
                     self.map.renderZoneMap(ctx2, '#002', true, 4, true);
@@ -1354,9 +1501,9 @@ BSWG.game = new function(){
                         if (self.map.planets[i].zone.discovered) {
                             var p = self.map.worldToMap(self.map.planets[i].worldP);
                             ctx2.fillStyle = '#0f0';
-                            ctx2.fillRect(p.x/self.map.size * 128*4-6, p.y/self.map.size * 128*4-6, 12, 12);
+                            ctx2.fillRect(p.x*4-6, p.y*4-6, 12, 12);
                         }
-                    }
+                    }*/
 
                     /*var bpm = self.inZone.musicBPM;
                     var settings = self.inZone.musicSettings;*/
@@ -1374,7 +1521,7 @@ BSWG.game = new function(){
                     self.zoneChangeT -= dt;
                     if (self.zoneChangeT < 0.0) {
                         self.zoneChangeT = 0.0;
-                        //self.inZone.zoneTitle.remove();
+                        self.inZone.zoneTitle.hide();
                     }
                 }
             }
@@ -1481,14 +1628,19 @@ BSWG.game = new function(){
                     y = self.hudY(self.hudBtn[0][1])+1;
                 var w = self.hudX(self.hudBtn[0][2])-x-2,
                     h = self.hudY(self.hudBtn[0][3])-y-2;
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillStyle = 'rgba(0,0,0,0.0)';
                 ctx.fillRect(x, y, w, h);
-                ctx.drawImage(self.mapImage, 0, 0, self.map.size*4, self.map.size*4, x, y, w, h);
+                ctx.drawImage(self.mapImage, 0, 0, self.mapImage.width, self.mapImage.height, x, y, w, h);
 
                 if (self.ccblock && !self.ccblock.destroyed) {
                     var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
-                    ctx.fillStyle = '#fff';
+                    ctx.fillStyle = '#000';
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
                     ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                    ctx.fillStyle = '#fff';
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
+                    ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                    ctx.globalAlpha = 1.0;
                 }
 
                 if (self.inZone) {

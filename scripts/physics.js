@@ -349,11 +349,14 @@ BSWG.physics = new function(){
             radius:     0,
             type:       type,
             welds:      [],
-            id:         this.objID ++
+            id:         this.objID ++,
+            static:     def && def.static
         };
 
         obj.bodyDef = new b2BodyDef();
-        obj.bodyDef.type = b2Body.b2_dynamicBody;
+        if (!obj.static) {
+            obj.bodyDef.type = b2Body.b2_dynamicBody;
+        }
         obj.bodyDef.position = pos;
         obj.bodyDef.angle = angle;
         obj.body = this.world.CreateBody( obj.bodyDef );
@@ -598,7 +601,17 @@ BSWG.physics = new function(){
             var f = this.welds[i].joint.GetReactionForce(1.0/dt);
             var tn = Math.abs(t);
             var fn = Math.sqrt(f.x*f.x + f.y*f.y);
-            if (Math.max(tn, fn) > this.maxWeldForce) {
+            var mwf = this.maxWeldForce;
+            var compA = this.welds[i].objA ? this.welds[i].objA.comp : null;
+            var compB = this.welds[i].objB ? this.welds[i].objB.comp : null;
+            var atts = Math.max(
+                (compA && compA.attStrength) ? compA.attStrength : 1.0,
+                (compB && compB.attStrength) ? compB.attStrength : 1.0
+            );
+            var minHealth = Math.min(compA ? compA.hp / compA.maxHP : 1.0,
+                                     compB ? compB.hp / compB.maxHP : 1.0);
+            mwf *= (Math.pow(minHealth, 1/atts)-0.1);
+            if (Math.max(tn, fn) > mwf) {
                 this.welds[i].broken = true;
             }
             if (this.welds[i].age > 10 && this.welds[i].age < 20 && !this.welds[i].revolute) {
@@ -638,12 +651,17 @@ BSWG.physics = new function(){
 
     var self = this;
 
+    var wm = null;
+
     this.collisionCallback = function(contact, impulse) {
+
+        if (!wm) {
+             wm = new b2WorldManifold();
+        }
 
         if (contact._ta && contact._tb) {
             var ba = contact.GetFixtureA().GetBody();
             var bb = contact.GetFixtureB().GetBody();
-            var wm = new b2WorldManifold();
             contact.GetWorldManifold(wm);
             var p = wm.m_points[0];
             var ta = ba.GetLinearVelocityFromWorldPoint(p).clone();
@@ -673,13 +691,13 @@ BSWG.physics = new function(){
                                                 * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
                 }
 
-                BSWG.render.boom.palette = chadaboom3D.fire_bright;
-                for (var i=0; i<2; i++) {
+                if (Math.random() < 1/2) {
                     var a = Math.random() * Math.PI * 2.0;
-                    var v = [ta, tb][i];
+                    var v = [ta, tb][Math.floor(Math.random()*10000) % 2];
+                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
                     BSWG.render.boom.add(
                         p.particleWrap(0.0),
-                        0.2*Math.pow(tforce, 0.125),
+                        0.35*Math.pow(tforce, 0.125),
                         32,
                         0.1*Math.pow(tforce, 0.33),
                         4.0,

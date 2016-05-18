@@ -161,6 +161,7 @@ chadaboom3D.prototype.init = function () {
     mesh = new THREE.Mesh( geom, this.mat );
     mesh.frustumCulled = false;
     mesh.position.z = 2.0;
+    mesh.renderOrder = 1500.0;
 
     geom.needsUpdate = true;
     this.mat.needsUpdate = true;
@@ -179,6 +180,12 @@ chadaboom3D.prototype.init = function () {
     this.particleUpdate = false;
     this.pOffset = 0;
     this.pCount = 0;
+
+};
+
+chadaboom3D.prototype.readd = function () {
+
+    BSWG.render.scene.add(this.mesh);
 
 };
 

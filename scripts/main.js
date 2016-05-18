@@ -17,7 +17,9 @@ var BSWG = new function(){
         'fg-nebulas.js',
         'random-name.js',
         'character.js',
+        'tile.js',
         'ai.js',
+        'player-stats.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
@@ -100,7 +102,13 @@ var BSWG = new function(){
         'char-pads': 'char-pads.png',
         'char-shirt': 'char-shirt.png',
         'char-spikes': 'char-spikes.png',
-        'char-tattoo': 'char-tattoo.png'
+        'char-tattoo': 'char-tattoo.png',
+        'tileset-mountain': 'tileset-mountain-512.png',
+        'tileset-land': 'tileset-land-512.png',
+        'tileset-below': 'tileset-below-512.png',
+        'tileset-sand': 'tileset-sand-512.png',
+        'tileset-snow': 'tileset-snow-512.png',
+        'tileset-rockland': 'tileset-rockland-512.png'
     };
     var shaders = {
         'vertex': [
@@ -127,7 +135,10 @@ var BSWG = new function(){
             'pRangeFragment',
             'textFragment',
             'laserFragment',
-            'hudFragment'
+            'hudFragment',
+            'tileFragment',
+            'tileWaterFragment',
+            'shadowFragment'
         ]
     };
     var ai = [
@@ -152,7 +163,10 @@ var BSWG = new function(){
         'spinner',
         'uni-dir-fighter',
         'uni-fight-msl',
-        'uni-laser'
+        'uni-laser',
+        'little-tough-guy',
+        'tough-guy',
+        'stinger'
     ];
     for (var i=0; i<ai.length; i++) {
         scripts.push([

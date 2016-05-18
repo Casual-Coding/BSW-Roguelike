@@ -26,10 +26,10 @@ BSWG.component_Blaster = {
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = [
-            Math.rotVec2(new b2Vec2(-0.225,  -0.3), offsetAngle),
-            Math.rotVec2(new b2Vec2(-0.1,  1.0), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.1,  1.0), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.225,  -0.3), offsetAngle)
+            Math.rotVec2(new b2Vec2(-0.2495,  -0.3), offsetAngle),
+            Math.rotVec2(new b2Vec2(-0.1,  0.3), offsetAngle),
+            Math.rotVec2(new b2Vec2( 0.1,  0.3), offsetAngle),
+            Math.rotVec2(new b2Vec2( 0.2495,  -0.3), offsetAngle)
         ].reverse();
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
@@ -125,7 +125,7 @@ BSWG.component_Blaster = {
 
         if (keys[this.fireKey] && !this.fireT) {
 
-            var pl = new b2Vec2(0.0,  1.05);
+            var pl = new b2Vec2(0.0,  0.35);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
             var p = BSWG.physics.localToWorld([pl], this.obj.body);
