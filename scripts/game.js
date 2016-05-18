@@ -554,7 +554,7 @@ BSWG.game = new function(){
                                 return 0;
                             }
                         },
-                        color: [0.5, 0.5, 0.5]
+                        color: [0.5, 0.5, 1.5]
                     },
                     'tileset-land': {
                         map: BSWG.mapPerlin,
@@ -870,7 +870,7 @@ BSWG.game = new function(){
                                         return 0;
                                     }
                                 },
-                                color: [0.5, 0.5, 0.5]
+                                color: [0.5, 0.5, 1.5]
                             },
                             'water': {
                                 map: function(x,y) {

@@ -409,7 +409,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                         return 0;
                     }
                 },
-                color: [0.5, 0.5, 0.5]
+                color: [0.5, 0.5, 1.5]
             },
             'tileset-mountain': {
                 map: function(x,y) {

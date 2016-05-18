@@ -64,7 +64,7 @@ BSWG.randomName = new function() {
 
     var end2 = [
         '',
-        '',
+        /*'',
         '',
         '',
         'Alpha',
@@ -80,7 +80,7 @@ BSWG.randomName = new function() {
         'VII',
         'VIII',
         'IX',
-        'X'
+        'X'*/
     ];
 
     var randList = function(list) {

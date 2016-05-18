@@ -302,7 +302,8 @@ BSWG.playerStats = function(load) {
         mele:       0,
         defend:     0,
         speed:      0,
-        levelUp:    false
+        levelUp:    false,
+        money:      100
     };
 
     for (var key in load) {
@@ -336,6 +337,21 @@ BSWG.playerStats = function(load) {
         }
         else {
             return false;
+        }
+    };
+
+    this.giveMoney = function (money) {
+        this.money += Math.min(Math.ceil(money), 1);
+    };
+
+    this.spendMoney = function (money) {
+        var amt = Math.min(Math.ceil(money), 1);
+        if (amt > this.money) {
+            return false;
+        }
+        else {
+            this.money -= amt;
+            return true;
         }
     };
 
