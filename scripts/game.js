@@ -540,6 +540,22 @@ BSWG.game = new function(){
                         },
                         color: [0.75*2, 0.75*2, 1*2]
                     },
+                    'city-tiles': {
+                        decals: BSWG.makeCityTiles(1),
+                        normalMap: BSWG.render.images['test_nm'].texture,
+                        normalMapScale: 24.0,
+                        normalMapAmp: 5.0,
+                        map: function(x, y) {
+                            if (!BSWG.mapPerlinSparse(x+100,y+414) &&
+                                BSWG.mapPerlinSparse(x-100,y-414)) {
+                                return ~~(Math.random2d(x, y) * 9) + 1;
+                            }
+                            else {
+                                return 0;
+                            }
+                        },
+                        color: [0.5, 0.5, 0.5]
+                    },
                     'tileset-land': {
                         map: BSWG.mapPerlin,
                         color: [0.2, 0.5, 1.0]
@@ -829,7 +845,7 @@ BSWG.game = new function(){
                                 color: [1.0, 1.0, 1.0]
                             },
                             'tileset-land': {
-                                map: function(x,y) { return (Math.abs(x) > 0 || Math.abs(y) > 0) && BSWG.mapPerlin(x,y); },
+                                map: function(x,y) { return (Math.abs(x) > 1 || Math.abs(y) > 1) && BSWG.mapPerlin(x,y); },
                                 color: [0.4, 0.75, 0.2]
                             },
                             'tileset-below': {
@@ -843,15 +859,18 @@ BSWG.game = new function(){
                             },
                             'city-tiles': {
                                 decals: BSWG.makeCityTiles(1),
+                                normalMap: BSWG.render.images['test_nm'].texture,
+                                normalMapScale: 24.0,
+                                normalMapAmp: 5.0,
                                 map: function(x, y) {
                                     if (!x && !y) {
-                                        return 6;
+                                        return 9;
                                     }
                                     else {
                                         return 0;
                                     }
                                 },
-                                color: [1.5, 1.5, 1.5]
+                                color: [0.5, 0.5, 0.5]
                             },
                             'water': {
                                 map: function(x,y) {
