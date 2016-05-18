@@ -152,6 +152,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         ret.edgeMap  = new Array(size);
         ret.colMap   = new Array(size);
         ret.terMap   = new Array(size);
+        ret.obMap    = new Array(size);
         ret.disMap   = new Array(size);
         ret.planets  = new Array(numPlanets);
         ret.enemies_placed = false;
@@ -161,12 +162,14 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             ret.edgeMap[i] = new Array(size);
             ret.colMap[i]  = new Array(size);
             ret.terMap[i]  = new Array(size);
+            ret.obMap[i]   = new Array(size);
             ret.disMap[i]  = new Array(size);
             for (var j=0; j<size; j++) {
                 ret.zoneMap[i][j] = -1;
                 ret.edgeMap[i][j] = -1;
                 ret.colMap[i][j]  = -1;
                 ret.terMap[i][j]  = -1;
+                ret.obMap[i][j]   = 0;
                 ret.disMap[i][j]  = 0;
             }
         }
@@ -257,6 +260,14 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 numPlanets = i;
                 ret.planets.length = numPlanets;
             }
+        }
+
+        for (var i=0; i<numPlanets; i++) {
+            var p = ret.planets[i];
+            ret.obMap[~~(p.p.x)][~~(p.p.y)] = Math.min(i+1, 9);
+            ret.obMap[~~(p.p.x)+1][~~(p.p.y)] = Math.min(i+1, 9);
+            ret.obMap[~~(p.p.x)][~~(p.p.y)+1] = Math.min(i+1, 9);
+            ret.obMap[~~(p.p.x)+1][~~(p.p.y)+1] = Math.min(i+1, 9);
         }
 
         for (var x=0; x<size; x++) {
@@ -372,7 +383,34 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
+        for (var x=1; x<(size-1); x++) {
+            for (var y=1; y<(size-1); y++) {
+                if (ret.obMap[x][y]) {
+                    ret.terMap[x][y] = 0;
+                    ret.terMap[x-1][y] = 0;
+                    ret.terMap[x+1][y] = 0;
+                    ret.terMap[x][y-1] = 0;
+                    ret.terMap[x][y+1] = 0;
+                }
+            }
+        }
+
         ret.tm_desc = {
+            'city-tiles': {
+                decals: BSWG.makeCityTiles(1),
+                normalMap: BSWG.render.images['test_nm'].texture,
+                normalMapScale: 24.0,
+                normalMapAmp: 5.0,
+                map: function(x, y) {
+                    if (x >= 0 && y >= 0 && x < size && y < size) {
+                        return ret.obMap[x][y];
+                    }
+                    else {
+                        return 0;
+                    }
+                },
+                color: [0.5, 0.5, 0.5]
+            },
             'tileset-mountain': {
                 map: function(x,y) {
                     return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];

@@ -655,7 +655,7 @@ BSWG.makeCityTiles = function (seed) {
 
             var hist = [];
             var k = 0;
-            for (var i=0; i<Math.min(cn*2+1, 6); i++) {
+            for (var i=0; i<6; i++) {
                 var sz = (~~(Math.random()*12) + 12) * 4;
                 var it = {
                     sz: sz,
