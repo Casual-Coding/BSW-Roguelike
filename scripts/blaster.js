@@ -1,4 +1,4 @@
-BSWG.blasterDmg = 6.0;
+BSWG.blasterDmg = 3.0;
 
 BSWG.blasterList = new function () {
 

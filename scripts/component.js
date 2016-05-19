@@ -6,7 +6,7 @@ BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
-BSWG.playerBuffFactor = 0.7;
+BSWG.playerBuffFactor = 0.35;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;

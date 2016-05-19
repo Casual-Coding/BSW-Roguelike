@@ -142,7 +142,7 @@ BSWG.component_MissileLauncher = {
 
             accel = 1;
 
-            this.fireT = 1.5;
+            this.fireT = 1.5/2;
             this.kickBack = 1.5;
         }
         
