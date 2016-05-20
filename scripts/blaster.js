@@ -31,9 +31,9 @@ BSWG.blasterList = new function () {
                         BSWG.render.boom.palette = chadaboom3D.blue_bright;
                         BSWG.render.boom.add(
                             new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
-                            3.0,
+                            2.0,
                             32,
-                            1.0,
+                            0.5,
                             1.5,
                             comp.obj.body.GetLinearVelocity().clone().THREE(0.0)
                         );
