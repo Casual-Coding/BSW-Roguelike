@@ -6,7 +6,16 @@ BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
-BSWG.playerBuffFactor = 0.35;
+// attack/defense bias to level difference
+BSWG.adBias = function(e, p) { // (e)nemy (p)layer
+    var diff = e-p;
+    if (diff >= 2) {
+        return diff;
+    }
+    else {
+        return 0.8074061526 * Math.pow(1.5255481, diff);
+    }
+};
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
@@ -232,10 +241,10 @@ BSWG.component = function (desc, args) {
         if (this.onCC) {
             amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
             if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
-                amt *= BSWG.playerBuffFactor;
+                amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
             }
             else if (this.onCC && BSWG.game.ccblock) {
-                amt /= BSWG.playerBuffFactor;
+                amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
             }
         }
 

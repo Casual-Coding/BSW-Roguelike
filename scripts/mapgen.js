@@ -323,6 +323,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         while (vcount < (ret.zones.length-1)) {
             visited[start.id] = true;
             vcount += 1;
+            start.order = vcount;
 
             var best = null, bestD = null;
             for (var i=0; i<ret.zones.length; i++) {
@@ -345,6 +346,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
             start = best;
         }
+        start.order = vcount+1;
 
         for (var x=0; x<size; x++) {
             for (var y=0; y<size; y++) {            
@@ -776,17 +778,31 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
 
     var withBoss = new Array();
 
+    var order = new Array();
     for (var i=0; i<ret.zones.length; i++) {
-        var zone = ret.zones[i];
+        order.push(ret.zones[i]);
+    }
+    order.sort(function(a,b){
+        return a.order - b.order;
+    });
+
+    for (var i=0; i<order.length; i++) {
+        var zone = order[i];
         var startDist = Math.distSqVec2(zone.p, startZone.p);
         var endDist = Math.distSqVec2(zone.p, endZone.p);
 
         var level1 = (startDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
         var level2 = (1.0 - endDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
 
+        var level = Math.floor(((zone.order - 1) / (ret.zones.length-1)) * (eInfo.maxLevel - eInfo.minLevel)) + eInfo.minLevel;
+
         zone.minLevel = Math.floor(Math.min(level1, level2));
         zone.maxLevel = Math.ceil(Math.max(level1, level2));
         zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-2);
+
+        var range = zone.maxLevel - zone.minLevel;
+        zone.minLevel = level;
+        zone.maxLevel = level + range;
 
         BSWG.genMap_MusicSettings_Zone(zone, eInfo);
 
@@ -799,7 +815,7 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
     }
 
     withBoss.sort(function(a,b){
-        return (a.minLevel + a.maxLevel) * 0.5 < (b.minLevel + b.maxLevel) * 0.5;
+        return ((a.minLevel + a.maxLevel) * 0.5) - ((b.minLevel + b.maxLevel) * 0.5);
     });
 
     for (var i=0; i<withBoss.length && i<eInfo.bosses.length; i++) {
@@ -872,6 +888,22 @@ BSWG.genMap_LoadMusicSettings_Zone = function(zone, eInfo) {
         BSWG.genMap_MusicSettings_Zone(zone, eInfo);
     }
 
+};
+
+BSWG.pickEnemyLevel = function(zone, E) {
+    var possible = new Array();
+    for (var j=0; j<E.levels.length; j++) {
+        if (E.levels[j] >= zone.minLevel && E.levels[j] <= zone.maxLevel) {
+            possible.push(E.levels[j]);
+        }
+    }
+    if (possible.length === 0) {
+        console.log('BSWG.pickEnemyLevel error');
+        return zone.minLevel;
+    }
+    else {
+        return possible[(~~(Math.random()*1000000)) % possible.length];
+    }
 };
 
 BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {

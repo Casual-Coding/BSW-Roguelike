@@ -245,9 +245,12 @@ BSWG.game = new function(){
                             p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
                         );
 
-                        aiship = BSWG.componentList.load(list[i], {p: p2});
+                        console.log(list[i]);
+
+                        aiship = BSWG.componentList.load(list[i][0], {p: p2});
                         if (aiship) {
-                            aiship.title = list[i].title;
+                            aiship.enemyLevel = list[i][1];
+                            aiship.title = list[i][0].title;
                             window.setTimeout(function(ais){
                                 return function() {
                                     if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
@@ -603,12 +606,14 @@ BSWG.game = new function(){
                     this.cam.x = p.x;
                     this.cam.y = p.y;
                     this.noDefault = true;
+                    this.xpInfo = new BSWG.playerStats(args.load.xpi);
                 }
                 else {
                     Math.seedrandom();
                     this.noDefault = false;
                     this.map = BSWG.genMap(162, 35, 8);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc);
+                    this.xpInfo = new BSWG.playerStats();
                     //Math.seedrandom();
                     //for (var i=0; i<this.map.planets.length; i++) {
                     //    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
@@ -1589,11 +1594,11 @@ BSWG.game = new function(){
                     var enemies = [];
                     var e = BSWG.getEnemy(ret.type);
                     if (e && e.obj) {
-                        enemies.push(e.obj);
+                        enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
                         if (ret.max && ret.max > 0) {
                             for (var i=0; i<ret.max; i++) {
                                 if (Math.random() < 0.5) {
-                                    enemies.push(e.obj);
+                                    enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
                                 }
                             }
                         }
@@ -1601,7 +1606,7 @@ BSWG.game = new function(){
                             for (var i=0; i<ret.with.length; i++) {
                                 var ew = BSWG.getEnemy(ret.with[i]);
                                 if (ew && ew.obj) {
-                                    enemies.push(ew.obj);
+                                    enemies.push([ew.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
                                 }
                             }
                         }
@@ -1670,7 +1675,7 @@ BSWG.game = new function(){
                                 xx *= (w-15) / 2;
                                 yy *= fs + 1;
 
-                                ctx.fillTextB(ccs[i].title || 'Unkown Enemy', x + 15 + xx, y + 10 + fs + yy);
+                                ctx.fillTextB((ccs[i].title || 'Unkown Enemy') + ' - L' + (ccs[i].enemyLevel||0), x + 15 + xx, y + 10 + fs + yy);
                                 idx ++;
                             }
                         }

@@ -81,6 +81,40 @@ BSWG.component_CommandCenter = {
         this.onCC = this;
     },
 
+    level: function() {
+        if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
+            if (BSWG.game.xpInfo) {
+                return BSWG.game.xpInfo.level;
+            }
+            else {
+                return 0;
+            }
+        }
+        else {
+            return this.enemyLevel || 0;
+        }
+    },
+
+    buff: function() {
+        if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
+            if (BSWG.game.xpInfo) {
+                return BSWG.game.xpInfo.buff();
+            }
+            else {
+                return 0;
+            }
+        }
+        else {
+            var eli = BSWG.enemyLevelInfo[this.enemyLevel || 0];
+            if (eli) {
+                return eli.buff || 0;
+            }
+            else {
+                return 0;
+            }
+        }
+    },
+
     destroy: function() {
 
         this.meshObj.destroy();

@@ -1,47 +1,118 @@
+BSWG.enemyLevelInfo = {
+    0: {
+        buffi: -2
+    },
+    1: {
+        buffi: -1.25
+    },
+    2: {
+        buffi: -0.5
+    },
+    3: {
+        buffi: 0
+    },
+    4: {
+        buffi: 0.5
+    },
+    5: {
+        buffi: 1.0
+    },
+    6: {
+        buffi: 1.0
+    },
+    7: {
+        buffi: 1.5
+    },
+    8: {
+        buffi: 1.75
+    },
+    9: {
+        buffi: 2.0
+    },
+    10: {
+        buffi: 2.5
+    },
+    11: {
+        buffi: 2.5
+    },
+    12: {
+        buffi: 3.0
+    },
+    13: {
+        buffi: 4.0
+    }
+};
+
 BSWG.xpInfo = {
     0: {
         xpi: 0,
-        pointsi: 0
+        pointsi: 0,
+        buff: 0
     },
     1: {
         xpi: 150,
-        pointsi: 1
+        pointsi: 1,
+        buff: 1
     },
     2: {
         xpi: 375,
-        pointsi: 1
+        pointsi: 1,
+        buff: 2
     },
     3: {
         xpi: 800,
-        pointsi: 1
+        pointsi: 1,
+        buff: 3
     },
     4: {
         xpi: 1900,
-        pointsi: 2
+        pointsi: 2,
+        buff: 5
     },
     5: {
         xpi: 3950,
-        pointsi: 1
+        pointsi: 1,
+        buff: 6
     },
     6: {
         xpi: 8000,
-        pointsi: 1
+        pointsi: 1,
+        buff: 7
     },
     7: {
         xpi: 16000,
-        pointsi: 1
+        pointsi: 1,
+        buff: 9
     },
     8: {
         xpi: 32000,
-        pointsi: 2
+        pointsi: 2,
+        buff: 10
     },
     9: {
         xpi: 64000,
-        pointsi: 1
+        pointsi: 1,
+        buff: 11
     },
     10: {
         xpi: 128000,
-        pointsi: 2
+        pointsi: 2,
+        buff: 12
+    },
+    11: {
+        xpi: 230000,
+        pointsi: 1,
+        buff: 13
+    },
+    12: {
+        xpi: 400000,
+        pointsi: 1,
+        buff: 15
+    },
+    13: {
+        xpi: 750000,
+        pointsi: 2,
+        buff: 17
     }
 };
 
@@ -50,6 +121,7 @@ BSWG.xpInfo = {
         if (BSWG.xpInfo[i]) {
             BSWG.xpInfo[i].xp = (BSWG.xpInfo[i-1] ? BSWG.xpInfo[i-1].xp : 0) + BSWG.xpInfo[i].xpi;
             BSWG.xpInfo[i].points = (BSWG.xpInfo[i-1] ? BSWG.xpInfo[i-1].points : 0) + BSWG.xpInfo[i].pointsi;
+            BSWG.enemyLevelInfo[i].buff = BSWG.xpInfo[i].buff + (BSWG.enemyLevelInfo[i].buffi || 0);
         }
     }
 })();
@@ -325,6 +397,11 @@ BSWG.playerStats = function(load) {
     this.points = function () {
         var xpi = BSWG.xpInfo[this.level];
         return xpi.points;
+    };
+
+    this.buff = function() {
+        var xpi = BSWG.xpInfo[this.level];
+        return xpi.buff;
     };
 
     this.usePoint = function (on) {
