@@ -7,14 +7,9 @@ BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
 // attack/defense bias to level difference
-BSWG.adBias = function(e, p) { // (e)nemy (p)layer
-    var diff = e-p;
-    if (diff >= 2) {
-        return diff;
-    }
-    else {
-        return 0.8074061526 * Math.pow(1.5255481, diff);
-    }
+BSWG.adBias = function(p, e) { // (p)layer (e)nemy
+    var diff = Math.min(e-p, 10);
+    return 0.8074061526 * Math.pow(1.5255481, diff) * 0.5;
 };
 
 BSWG.archiveRange = 200.0;
@@ -804,11 +799,11 @@ BSWG.componentList = new function () {
     this.add = function (comp) {
 
         this.compList.push(comp);
-        this.compList.sort(function(a,b){
+        /*this.compList.sort(function(a,b){
 
             return a.sortOrder - b.sortOrder;
 
-        });
+        });*/
         return true;
 
     };

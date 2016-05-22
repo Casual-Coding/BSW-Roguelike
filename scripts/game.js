@@ -1675,13 +1675,13 @@ BSWG.game = new function(){
                                 xx *= (w-15) / 2;
                                 yy *= fs + 1;
 
-                                ctx.fillTextB((ccs[i].title || 'Unkown Enemy') + ' - L' + (ccs[i].enemyLevel||0), x + 15 + xx, y + 10 + fs + yy);
+                                ctx.fillTextB((ccs[i].title || 'Unkown Enemy') + ' - Lvl. ' + (ccs[i].enemyLevel||0), x + 15 + xx, y + 10 + fs + yy);
                                 idx ++;
                             }
                         }
                     }
                     else {
-                        ctx.fillTextB(self.inZone.name + ' - L' + self.inZone.minLevel + '', x + 15, y + 10 + 18);
+                        ctx.fillTextB(self.inZone.name + ' - Lvl. ' + self.inZone.minLevel + '-' + self.inZone.maxLevel, x + 15, y + 10 + 18);
                     }
                 }
             }

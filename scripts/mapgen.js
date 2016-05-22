@@ -794,6 +794,10 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         var level1 = (startDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
         var level2 = (1.0 - endDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
 
+        if (i <= 3) {
+            level2 = level1;
+        }
+
         var level = Math.floor(((zone.order - 1) / (ret.zones.length-1)) * (eInfo.maxLevel - eInfo.minLevel)) + eInfo.minLevel;
 
         zone.minLevel = Math.floor(Math.min(level1, level2));
