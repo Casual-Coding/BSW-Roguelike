@@ -734,6 +734,8 @@ BSWG.componentList = new function () {
 
     };
 
+    this.compCached = false;
+
     this.clear = function () {
 
         for (var key in this.archHash) {
@@ -776,6 +778,25 @@ BSWG.componentList = new function () {
         this.sbTypes.sort(function(a, b){
             return a.name.localeCompare(b.name);
         });
+
+        if (!this.compCached) {
+            for (var i=0; i<this.sbTypes.length; i++) {
+                var sbadd = this.sbTypes[i].sbadd;
+                for (var j=0; j<sbadd.length; j++) {
+                    var args = {};
+                    for (var key in sbadd[j]) {
+                        if (key !== 'title') {
+                            args[key] = sbadd[j][key];
+                        }
+                    }
+                    args.pos = new b2Vec2(0, 0);
+                    args.angle = 0;
+                    comp = new BSWG.component(this.sbTypes[i], args);
+                    comp.remove();
+                }
+            }
+            this.compCached = true;
+        }
 
         while (this.compList.length) {
             this.compList[0].remove();

@@ -363,6 +363,8 @@ BSWG.game = new function(){
             this.dialogObj = null;
         }
 
+        this.cam = new BSWG.camera();
+
         BSWG.render.clearScene();
         BSWG.jpointRenderer.readd();
         BSWG.physics.reset();
