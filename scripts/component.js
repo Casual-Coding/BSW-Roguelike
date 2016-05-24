@@ -11,6 +11,7 @@ BSWG.adBias = function(p, e) { // (p)layer (e)nemy
     var diff = Math.min(e-p, 10);
     return 0.8074061526 * Math.pow(1.5255481, diff) * 0.5;
 };
+BSWG.defenceBias = 2.0;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
@@ -236,7 +237,7 @@ BSWG.component = function (desc, args) {
         if (this.onCC) {
             amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
             if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
-                amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
+                amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) * BSWG.defenceBias;
             }
             else if (this.onCC && BSWG.game.ccblock) {
                 amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
