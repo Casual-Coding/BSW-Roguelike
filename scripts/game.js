@@ -541,7 +541,7 @@ BSWG.game = new function(){
                         map: function(x,y) {
                             return BSWG.mapPerlinSparse(x+100,y+414);
                         },
-                        color: [0.75*2, 0.75*2, 1*2]
+                        color: [1.0, 1.0, 1.0]
                     },
                     'city-tiles': {
                         decals: BSWG.makeCityTiles(1),
@@ -561,17 +561,17 @@ BSWG.game = new function(){
                     },
                     'tileset-land': {
                         map: BSWG.mapPerlin,
-                        color: [0.2, 0.5, 1.0]
+                        color: [0.75, 0.2, 0.1]
                     },
                     'tileset-below': {
                         map: function(x,y) {
                             return true
                         },
-                        color: [0.20, 0.20, 0.75],
+                        color: [1, 0.0, 0.0],
                         isBelow: true
                     },
                     'water': {
-                        color: [0, 0, 0.4*0.5, 0.6],
+                        color: [0.2, 0, 0, 0.6],
                         map: function(x,y) {
                             return true;
                         },
