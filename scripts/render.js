@@ -667,7 +667,7 @@ BSWG.render = new function() {
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld();
-            this.cam3DS.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z*2.5);
+            this.cam3DS.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z*2.5*(1/0.5));
             this.cam3DS.lookAt(new THREE.Vector3(cam.x+1.5, cam.y, 0.0));
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();

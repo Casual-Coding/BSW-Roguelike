@@ -1,140 +1,228 @@
 BSWG.polyMesh_baseHeight = 0.5;
 BSWG.blockPolySmooth     = null;
 
+BSWG.bpmMatCache = null;
+BSWG.bpmMatCacheIdx = 0;
+BSWG.bpmMatCacheISize = 256;
+
+BSWG.bpmGeomCache = {};
+
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
+
+    if (!BSWG.bpmMatCache) {
+        BSWG.bpmMatCache = new Array(BSWG.bpmMatCacheISize);
+        for (var i=0; i<BSWG.bpmMatCache.length; i++) {
+            BSWG.bpmMatCache[i] = {
+                mat: BSWG.render.newMaterial("basicVertex", "basicFragment", {
+                    clr: {
+                        type: 'v4',
+                        value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
+                    },
+                    light: {
+                        type: 'v4',
+                        value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
+                    },
+                    map: {
+                        type: 't',
+                        value: BSWG.render.images['test_nm'].texture
+                    },
+                    dmgMap: {
+                        type: 't',
+                        value: BSWG.render.images['damage_nm'].texture
+                    },
+                    extra: {
+                        type: 'v4',
+                        value: new THREE.Vector4(1,0,0,0)
+                    },
+                    warpIn: {
+                        type: 'f',
+                        value: 1.0
+                    }
+                }),
+                matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
+                used: false
+            };
+        }
+    }
 
     var ret = new Object();
 
     var body  = obj.body,
         verts = obj.verts;
 
-    if (BSWG.blockPolySmooth) {
-        verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
-    }
+    var K = function(v) { return ',' + Math.floor(v*1000); };
+    var key = 'M';
+    if (zcenter) { key += 'z' + K(zcenter.x) + K(zcenter.y); }
+    else { key += 'z,0,0'; }
+    key += 'l' + K(body.GetLocalCenter().x) + K(body.GetLocalCenter().y);
+    if (zoffset) { key += 'o' + K(zoffset); }
+    if (depth) { key += 'd' + K(depth); }
+    if (iscale) { key += 'i' + K(iscale); }
+    if (BSWG.blockPolySmooth) { key += 'x' + K(BSWG.blockPolySmooth||-1); }
+    for (var i=0; i<verts.length; i++) { key += K(verts[i].x) + K(verts[i].y); }
 
-    var len = verts.length;
+    var cacheGeom = BSWG.bpmGeomCache[key];
 
-    var offset = null;
+    if (!cacheGeom) {
 
-    if (!zcenter) {
-        zcenter = body.GetLocalCenter();
-    }
-    else {
-        var bc = body.GetLocalCenter()
-        offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
-    }
-
-    if (!zoffset) {
-        zoffset = 0.0;
-    }
-
-    zoffset *= BSWG.polyMesh_baseHeight;
-
-    if (!depth) {
-        var total = 1000.0;
-        for (var i=0; i<len; i++) {
-            total = Math.min(total, Math.distVec2(verts[i], zcenter));
+        if (BSWG.blockPolySmooth) {
+            verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
         }
-        depth = total * 0.3;
-    }
 
-    depth *= BSWG.polyMesh_baseHeight;
+        var len = verts.length;
 
-    var overts = new Array(len),
-        iverts = new Array(len),
-        mverts = new Array(len);
-    for (var i=0; i<len; i++) {
-        overts[i] = new THREE.Vector3(
-            verts[i].x - zcenter.x + (offset?offset.x:0),
-            verts[i].y - zcenter.y + (offset?offset.y:0),
-            0.0
-        );
-        mverts[i] = new THREE.Vector3(
-            (verts[i].x - zcenter.x) * (iscale*0.1+0.9) + (offset?offset.x:0),
-            (verts[i].y - zcenter.y) * (iscale*0.1+0.9) + (offset?offset.y:0),
-            depth*0.35
-        );
-        iverts[i] = new THREE.Vector3(
-            (verts[i].x - zcenter.x) * iscale + (offset?offset.x:0),
-            (verts[i].y - zcenter.y) * iscale + (offset?offset.y:0),
+        var offset = null;
+
+        if (!zcenter) {
+            zcenter = body.GetLocalCenter();
+        }
+        else {
+            var bc = body.GetLocalCenter()
+            offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
+        }
+
+        if (!zoffset) {
+            zoffset = 0.0;
+        }
+
+        zoffset *= BSWG.polyMesh_baseHeight;
+
+        if (!depth) {
+            var total = 1000.0;
+            for (var i=0; i<len; i++) {
+                total = Math.min(total, Math.distVec2(verts[i], zcenter));
+            }
+            depth = total * 0.3;
+        }
+
+        depth *= BSWG.polyMesh_baseHeight;
+
+        var overts = new Array(len),
+            iverts = new Array(len),
+            mverts = new Array(len);
+        for (var i=0; i<len; i++) {
+            overts[i] = new THREE.Vector3(
+                verts[i].x - zcenter.x + (offset?offset.x:0),
+                verts[i].y - zcenter.y + (offset?offset.y:0),
+                0.0
+            );
+            mverts[i] = new THREE.Vector3(
+                (verts[i].x - zcenter.x) * (iscale*0.1+0.9) + (offset?offset.x:0),
+                (verts[i].y - zcenter.y) * (iscale*0.1+0.9) + (offset?offset.y:0),
+                depth*0.35
+            );
+            iverts[i] = new THREE.Vector3(
+                (verts[i].x - zcenter.x) * iscale + (offset?offset.x:0),
+                (verts[i].y - zcenter.y) * iscale + (offset?offset.y:0),
+                depth
+            );
+        }
+        var cvert = new THREE.Vector3(
+            (offset?offset.x:0),
+            (offset?offset.y:0),
             depth
         );
-    }
-    var cvert = new THREE.Vector3(
-        (offset?offset.x:0),
-        (offset?offset.y:0),
-        depth
-    );
 
-    var INNER = function(idx) { return idx+len*2+1; };
-    var MIDDLE = function(idx) { return idx+len+1; };
-    var OUTER = function(idx) { return idx+1; };
+        var INNER = function(idx) { return idx+len*2+1; };
+        var MIDDLE = function(idx) { return idx+len+1; };
+        var OUTER = function(idx) { return idx+1; };
 
-    ret.geom = new THREE.Geometry();
+        ret.geom = new THREE.Geometry();
 
-    var vertices = ret.geom.vertices;
-    vertices.length = len*3 + 1;
-    vertices[0] = cvert;
-    for (var i=0; i<len; i++) {
-        vertices[OUTER(i)] = overts[i];
-        vertices[MIDDLE(i)] = mverts[i];
-        vertices[INNER(i)] = iverts[i];
-    }
-
-    var faces = ret.geom.faces;
-    var cf = 0;
-    faces.length = len*5;
-    for (var i=0; i<len; i++) {
-        var j = (i+1) % len;
-        faces[cf++] = new THREE.Face3(INNER(i), INNER(j), 0);
-        faces[cf++] = new THREE.Face3(MIDDLE(i), MIDDLE(j), INNER(j));
-        faces[cf++] = new THREE.Face3(MIDDLE(i), INNER(j), INNER(i));
-        faces[cf++] = new THREE.Face3(OUTER(i), OUTER(j), MIDDLE(j));
-        faces[cf++] = new THREE.Face3(OUTER(i), MIDDLE(j), MIDDLE(i));
-    }
-
-    ret.geom.computeFaceNormals();
-    //ret.geom.computeVertexNormals();
-    ret.geom.computeBoundingSphere();
-
-    ret.mat = BSWG.render.newMaterial("basicVertex", "basicFragment", {
-        clr: {
-            type: 'v4',
-            value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
-        },
-        light: {
-            type: 'v4',
-            value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
-        },
-        map: {
-            type: 't',
-            value: BSWG.render.images['test_nm'].texture
-        },
-        dmgMap: {
-            type: 't',
-            value: BSWG.render.images['damage_nm'].texture
-        },
-        extra: {
-            type: 'v4',
-            value: new THREE.Vector4(1,0,0,0)
-        },
-        warpIn: {
-            type: 'f',
-            value: 1.0
+        var vertices = ret.geom.vertices;
+        vertices.length = len*3 + 1;
+        vertices[0] = cvert;
+        for (var i=0; i<len; i++) {
+            vertices[OUTER(i)] = overts[i];
+            vertices[MIDDLE(i)] = mverts[i];
+            vertices[INNER(i)] = iverts[i];
         }
-    });
-    ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
 
-    ret.matS = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
+        var faces = ret.geom.faces;
+        var cf = 0;
+        faces.length = len*5;
+        for (var i=0; i<len; i++) {
+            var j = (i+1) % len;
+            faces[cf++] = new THREE.Face3(INNER(i), INNER(j), 0);
+            faces[cf++] = new THREE.Face3(MIDDLE(i), MIDDLE(j), INNER(j));
+            faces[cf++] = new THREE.Face3(MIDDLE(i), INNER(j), INNER(i));
+            faces[cf++] = new THREE.Face3(OUTER(i), OUTER(j), MIDDLE(j));
+            faces[cf++] = new THREE.Face3(OUTER(i), MIDDLE(j), MIDDLE(i));
+        }
+
+        ret.geom.computeFaceNormals();
+        ret.geom.computeBoundingSphere();
+        ret.geom.needsUpdate = true;
+        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
+        ret.geom.__zoffset = zoffset;
+        BSWG.bpmGeomCache[key] = ret.geom;
+    }
+    else {
+        ret.geom = cacheGeom;
+        zoffset = ret.geom.__zoffset;
+    }
+
+    var matIdx = -1;
+    for (var i=0; i<BSWG.bpmMatCache.length; i++) {
+        if (!BSWG.bpmMatCache[i].used) {
+            matIdx = i;
+            break;
+        }
+    }
+    if (matIdx < 0) {
+        BSWG.bpmMatCache.push({
+            mat: BSWG.render.newMaterial("basicVertex", "basicFragment", {
+                clr: {
+                    type: 'v4',
+                    value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
+                },
+                light: {
+                    type: 'v4',
+                    value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
+                },
+                map: {
+                    type: 't',
+                    value: BSWG.render.images['test_nm'].texture
+                },
+                dmgMap: {
+                    type: 't',
+                    value: BSWG.render.images['damage_nm'].texture
+                },
+                extra: {
+                    type: 'v4',
+                    value: new THREE.Vector4(1,0,0,0)
+                },
+                warpIn: {
+                    type: 'f',
+                    value: 1.0
+                }
+            }),
+            matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
+            used: false
+        });
+        matIdx = BSWG.bpmMatCache.length - 1;
+    }
+
+    ret.mat = BSWG.bpmMatCache[matIdx].mat;
+    ret.mesh = new THREE.Mesh(ret.geom, ret.mat);
+
+    ret.matS = BSWG.bpmMatCache[matIdx].matS;
     ret.meshS = new THREE.Mesh(ret.geom, ret.matS);
-    
+
     BSWG.render.sceneS.add( ret.meshS );
 
-    ret.geom.needsUpdate = true;
+    ret.mat.uniforms.warpIn.value = 1.0;
+    ret.mat.uniforms.clr.value.set(0.2, 0.2, 0.2, 1.0);
+    ret.mat.uniforms.extra.value.set(1,0,0,0);
+    ret.mat.uniforms.light.value.set(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0);
+
     ret.mat.needsUpdate = true;
     ret.mesh.needsUpdate = true;
 
     BSWG.render.scene.add( ret.mesh );
+
+    BSWG.bpmMatCache[matIdx].used = true;
+    ret.matIdx = matIdx;
 
     var self = ret;
 
@@ -238,18 +326,20 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     ret.destroy = function() {
 
+        BSWG.bpmMatCache[self.matIdx].used = false;
+
         BSWG.render.scene.remove( self.mesh );
         BSWG.render.sceneS.remove( self.meshS );
 
-        self.mesh.geometry.dispose();
-        self.mesh.material.dispose();
+        //self.mesh.geometry.dispose();
+        //self.mesh.material.dispose();
         self.mesh.geometry = null;
         self.mesh.material = null;
         self.mesh = null;
         self.mat = null;
         self.geom = null;
 
-        self.meshS.material.dispose();
+        //self.meshS.material.dispose();
         self.meshS.material = null;
         self.meshS.geometry = null;
         self.meshS = null;
@@ -275,63 +365,81 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
         verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
     }*/
 
-    var len = verts.length;
+    var K = function(v) { return ',' + Math.floor(v*1000); };
+    var key = '';
+    if (zcenter) { key += 'a' + K(zcenter.x) + K(zcenter.y); }
+    key += 'l' + K(body.GetLocalCenter().x) + K(body.GetLocalCenter().y);
+    if (oscale) { key += 'b' + K(oscale); }
+    if (BSWG.blockPolySmooth) { key += 'x' + K(BSWG.blockPolySmooth); }
+    for (var i=0; i<verts.length; i++) { key += K(verts[i].x) + K(verts[i].y); }
 
-    var offset = null;
+    var cacheGeom = BSWG.bpmGeomCache[key];
 
-    if (!zcenter) {
-        zcenter = body.GetLocalCenter();
+    if (!cacheGeom) {
+        var len = verts.length;
+
+        var offset = null;
+
+        if (!zcenter) {
+            zcenter = body.GetLocalCenter();
+        }
+        else {
+            var bc = body.GetLocalCenter();
+            offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
+        }
+
+        var overts = new Array(len*2),
+            cf = 0;
+        for (var i=0; i<len; i++) {
+            var j = (i+1) % len;
+            var edgeLen = Math.distVec2(verts[i], verts[j]);
+            var dx = (verts[j].x - verts[i].x) / edgeLen;
+            var dy = (verts[j].y - verts[i].y) / edgeLen;
+            overts[cf++] = new THREE.Vector3(
+                verts[i].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
+                verts[i].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
+                0.001
+            );
+            overts[cf++] = new THREE.Vector3(
+                verts[j].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
+                verts[j].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
+                0.001
+            );
+        }
+        var cvert = new THREE.Vector3(
+            (offset?offset.x:0),
+            (offset?offset.y:0),
+            -0.001
+        );
+        len *= 2;
+
+        var OUTER = function(idx) { return idx+1; };
+
+        ret.geom = new THREE.Geometry();
+
+        var vertices = ret.geom.vertices;
+        vertices.length = len + 1;
+        vertices[0] = cvert;
+        for (var i=0; i<len; i++) {
+            vertices[OUTER(i)] = overts[i];
+        }
+
+        var faces = ret.geom.faces;
+        faces.length = len;
+        for (var i=0; i<len; i++) {
+            var j = (i+1) % len;
+            faces[i] = new THREE.Face3(OUTER(i), OUTER(j), 0);
+        }
+
+        ret.geom.computeFaceNormals();
+        ret.geom.computeBoundingSphere();
+        ret.geom.needsUpdate = true;
+        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
+        BSWG.bpmGeomCache[key] = ret.geom;
     }
     else {
-        var bc = body.GetLocalCenter();
-        offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
+        ret.geom = cacheGeom;
     }
-
-    var overts = new Array(len*2),
-        cf = 0;
-    for (var i=0; i<len; i++) {
-        var j = (i+1) % len;
-        var edgeLen = Math.distVec2(verts[i], verts[j]);
-        var dx = (verts[j].x - verts[i].x) / edgeLen;
-        var dy = (verts[j].y - verts[i].y) / edgeLen;
-        overts[cf++] = new THREE.Vector3(
-            verts[i].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
-            verts[i].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
-            0.001
-        );
-        overts[cf++] = new THREE.Vector3(
-            verts[j].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
-            verts[j].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
-            0.001
-        );
-    }
-    var cvert = new THREE.Vector3(
-        (offset?offset.x:0),
-        (offset?offset.y:0),
-        -0.001
-    );
-    len *= 2;
-
-    var OUTER = function(idx) { return idx+1; };
-
-    ret.geom = new THREE.Geometry();
-
-    var vertices = ret.geom.vertices;
-    vertices.length = len + 1;
-    vertices[0] = cvert;
-    for (var i=0; i<len; i++) {
-        vertices[OUTER(i)] = overts[i];
-    }
-
-    var faces = ret.geom.faces;
-    faces.length = len;
-    for (var i=0; i<len; i++) {
-        var j = (i+1) % len;
-        faces[i] = new THREE.Face3(OUTER(i), OUTER(j), 0);
-    }
-
-    ret.geom.computeFaceNormals();
-    ret.geom.computeBoundingSphere();
 
     ret.mat = BSWG.render.newMaterial("basicVertex", "selectionFragment", {
         clr: {
@@ -341,7 +449,6 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
     }, THREE.NormalBlending, false);
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
 
-    ret.geom.needsUpdate = true;
     ret.mat.needsUpdate = true;
     ret.mesh.needsUpdate = true;
     ret.mesh.renderOrder = 1400.0;
@@ -384,7 +491,7 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
 
         BSWG.render.scene.remove( self.mesh );
 
-        self.mesh.geometry.dispose();
+        //self.mesh.geometry.dispose();
         self.mesh.material.dispose();
         self.mesh.geometry = null;
         self.mesh.material = null;

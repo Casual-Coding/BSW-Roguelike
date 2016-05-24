@@ -4,7 +4,7 @@ BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 BSWG.camVelLookBfr         = 0.2; // * viewport.w
 BSWG.lookRange             = 45.0;
-BSWG.grabSpeed             = 2.25;
+BSWG.grabSpeed             = 4.0;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -245,8 +245,6 @@ BSWG.game = new function(){
                             p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
                         );
 
-                        console.log(list[i]);
-
                         aiship = BSWG.componentList.load(list[i][0], {p: p2});
                         if (aiship) {
                             aiship.enemyLevel = list[i][1];
@@ -438,7 +436,7 @@ BSWG.game = new function(){
         var startPos = new b2Vec2(0, 0);
 
         wheelStart = BSWG.input.MOUSE_WHEEL_ABS() + 10;
-        BSWG.input.wheelLimits(wheelStart-10, wheelStart-6.768170884076580509750342780728);
+        BSWG.input.wheelLimits(wheelStart-10, wheelStart-2);
         BSWG.input.CLEAR_GFILE();
 
         switch (scene) {

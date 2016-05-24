@@ -46,7 +46,7 @@ void main() {
 
     gl_FragColor = vec4(clr.rgb*l*0.75, 1.0);
 
-    vec2 svp = (vPosition.xy - cam.xy) * cam.z / 3.0 * 2.0 + vec2(0.5, 0.5);
+    vec2 svp = (vPosition.xy - cam.xy) * cam.z / 3.0 * 2.0 * 0.5 + vec2(0.5, 0.5);
     vec4 svec = vec4(0., 0., 0., 1.);
     float zval = vPosition.z-0.175;
     if (svp.x > 0. && svp.y > 0. && svp.x < 1. && svp.y < 1.) {

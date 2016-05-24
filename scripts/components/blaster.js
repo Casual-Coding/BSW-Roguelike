@@ -26,10 +26,10 @@ BSWG.component_Blaster = {
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = [
-            Math.rotVec2(new b2Vec2(-0.2495,  -0.3), offsetAngle),
+            Math.rotVec2(new b2Vec2(-0.245,  -0.3), offsetAngle),
             Math.rotVec2(new b2Vec2(-0.1,  0.3), offsetAngle),
             Math.rotVec2(new b2Vec2( 0.1,  0.3), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.2495,  -0.3), offsetAngle)
+            Math.rotVec2(new b2Vec2( 0.245,  -0.3), offsetAngle)
         ].reverse();
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
