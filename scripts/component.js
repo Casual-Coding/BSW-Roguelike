@@ -234,6 +234,10 @@ BSWG.component = function (desc, args) {
 
     this.takeDamage = function (amt, fromC, noMin) {
 
+        if (BSWG.game.scene === BSWG.SCENE_TITLE) {
+            return;
+        }
+
         if (this.onCC) {
             amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
             if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {

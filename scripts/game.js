@@ -222,15 +222,20 @@ BSWG.game = new function(){
 
     this.spawnEnemies = function (list) {
 
-        if (!this.ccblock || this.ccblock.destroyed) {
+        if (this.scene !== BSWG.SCENE_TITLE && (!this.ccblock || this.ccblock.destroyed)) {
             return;
         }
 
-        var p = this.ccblock.obj.body.GetWorldCenter().clone();
+        var p = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetWorldCenter().clone() : new b2Vec2(0, 0);
         var arange = Math.PI;
         var minr = 27.5, maxr = 42.5;
-        var v = this.ccblock.obj.body.GetLinearVelocity().clone();
+        if (this.scene === BSWG.SCENE_TITLE) {
+            minr = maxr = 0;
+        }
+        var v = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetLinearVelocity().clone() : new b2Vec2(0, 0);
         var a = Math.atan2(v.y, v.x);
+
+        var self = this;
 
         for (var _i=0; _i<list.length; _i++) {
             window.setTimeout(function(i){
@@ -244,6 +249,11 @@ BSWG.game = new function(){
                             p.x + Math.cos(a + arange * ta) * ((maxr-minr)*tr + minr),
                             p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
                         );
+
+                        if (self.scene === BSWG.SCENE_TITLE) {
+                            var a = (i/3) * Math.PI;
+                            p2 = new b2Vec2(Math.cos(a) * 32, Math.sin(a) * 32);
+                        }
 
                         aiship = BSWG.componentList.load(list[i][0], {p: p2});
                         if (aiship) {
@@ -444,7 +454,7 @@ BSWG.game = new function(){
         switch (scene) {
             case BSWG.SCENE_TITLE:
 
-                this.cam.z /= 2.0;
+                this.cam.z *= 1.0;
 
                 Math.seedrandom();
 
@@ -537,12 +547,12 @@ BSWG.game = new function(){
                 this.panPosTime = this.panPosStartTime = 20.0;
 
                 var desc = {
-                    'tileset-mountain': {
+                    /*'tileset-mountain': {
                         map: function(x,y) {
                             return BSWG.mapPerlinSparse(x+100,y+414);
                         },
                         color: [1.0, 1.0, 1.0]
-                    },
+                    },*/
                     'city-tiles': {
                         decals: BSWG.makeCityTiles(1),
                         normalMap: BSWG.render.images['test_nm'].texture,
@@ -1170,8 +1180,24 @@ BSWG.game = new function(){
 
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
+
+                    if (BSWG.componentList.allCCs().length === 0) {
+                        var e = BSWG.getEnemy("heavy-fighter");
+                        if (e && e.obj) {
+                            self.spawnEnemies([[e.obj, 8], [e.obj, 8], [e.obj, 8]]);
+                        }
+                    }
+
                     self.panPosTime -= dt;
-                    self.cam.panTo(dt*0.5, new b2Vec2(self.cam.x + 25, self.cam.y + 25));
+                    var ret = BSWG.componentList.allCCs();
+                    if (ret.length === 3) {
+                        var p = ret[0].p().clone();
+                        p.x += ret[1].p().x + ret[2].p().x;
+                        p.y += ret[1].p().y + ret[2].p().y;
+                        p.x /= 3.0;
+                        p.y /= 3.0;
+                        self.cam.panTo(dt*10.0, p);
+                    }
 
                     var h = (350+140+80) - 42;
                     var yoff = BSWG.render.viewport.h*0.125;//BSWG.render.viewport.h*0.5 - h*0.5;

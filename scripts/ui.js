@@ -152,6 +152,10 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             value: new THREE.Vector4(w/vp.w, h/vp.h, this.x/vp.w, this.y/vp.h)
         }
     });
+    var oldGeom = this.hudGeom;
+    this.hudGeom = new THREE.BufferGeometry().fromGeometry(this.hudGeom);
+    oldGeom.dispose();
+    oldGeom = null;
 
     this.hudMesh = new THREE.Mesh( this.hudGeom, this.hudMat );
     this.hudMesh.frustumCulled = false;
