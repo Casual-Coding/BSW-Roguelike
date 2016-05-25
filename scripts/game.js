@@ -8,6 +8,7 @@ BSWG.grabSpeed             = 4.0;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
+BSWG.SCENE_GAME2 = 3;
 
 BSWG.game = new function(){
 
@@ -251,8 +252,8 @@ BSWG.game = new function(){
                         );
 
                         if (self.scene === BSWG.SCENE_TITLE) {
-                            var a = (i/3) * Math.PI;
-                            p2 = new b2Vec2(Math.cos(a) * 32, Math.sin(a) * 32);
+                            var _a = (i/3) * Math.PI;
+                            p2 = new b2Vec2(Math.cos(_a) * 32, Math.sin(_a) * 32);
                         }
 
                         aiship = BSWG.componentList.load(list[i][0], {p: p2});

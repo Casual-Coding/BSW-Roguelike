@@ -316,9 +316,9 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         }
 
         if (self.lclr) {
-            var t = self.enemyT * 0.25;
+            var t = self.enemyT * 0.5;
             var clr2 = self.mat.uniforms.clr.value;
-            clr2.set(self.lclr[0] * (1-t) + t * 2, self.lclr[1] * (1-t), self.lclr[2] * (1-t), self.lclr[3]);
+            clr2.set(self.lclr[0] * (1-t) + t * 1, self.lclr[1] * (1-t), self.lclr[2] * (1-t), self.lclr[3]);
         }
 
         self.mat.needsUpdate = true;
