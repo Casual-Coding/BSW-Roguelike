@@ -249,7 +249,7 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.PerspectiveCamera(90, 1.5, 1.0, 1000);
+        this.cam3DS = new THREE.PerspectiveCamera(120, 1.0, 1.0, 1000);
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
         this.cam3DS.position.z = 10.0;
@@ -667,8 +667,8 @@ BSWG.render = new function() {
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld();
-            this.cam3DS.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z*2.5*(1/0.5));
-            this.cam3DS.lookAt(new THREE.Vector3(cam.x+1.5, cam.y, 0.0));
+            this.cam3DS.position.set(cam.x+offset.x+2.0, cam.y+offset.y, f/cam.z*3.0);
+            this.cam3DS.lookAt(new THREE.Vector3(cam.x+1.0, cam.y, 0.0));
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();
             this.cam3DS.updateMatrixWorld();

@@ -252,7 +252,7 @@ BSWG.game = new function(){
                         );
 
                         if (self.scene === BSWG.SCENE_TITLE) {
-                            var _a = (i/3) * Math.PI;
+                            var _a = (i/1) * Math.PI;
                             p2 = new b2Vec2(Math.cos(_a) * 32, Math.sin(_a) * 32);
                         }
 
@@ -1185,18 +1185,18 @@ BSWG.game = new function(){
                     if (BSWG.componentList.allCCs().length === 0) {
                         var e = BSWG.getEnemy("heavy-fighter");
                         if (e && e.obj) {
-                            self.spawnEnemies([[e.obj, 8], [e.obj, 8], [e.obj, 8]]);
+                            self.spawnEnemies([[e.obj, 8], [e.obj, 8]]);
                         }
                     }
 
                     self.panPosTime -= dt;
                     var ret = BSWG.componentList.allCCs();
-                    if (ret.length === 3) {
+                    if (ret.length === 2) {
                         var p = ret[0].p().clone();
-                        p.x += ret[1].p().x + ret[2].p().x;
-                        p.y += ret[1].p().y + ret[2].p().y;
-                        p.x /= 3.0;
-                        p.y /= 3.0;
+                        p.x += ret[1].p().x;// + ret[2].p().x;
+                        p.y += ret[1].p().y;// + ret[2].p().y;
+                        p.x /= 2;//3.0;
+                        p.y /= 2;//3.0;
                         self.cam.panTo(dt*10.0, p);
                     }
 
