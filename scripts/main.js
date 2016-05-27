@@ -123,6 +123,7 @@ var BSWG = new function(){
         ],
         'fragment': [
             'basicFragment',
+            'basicFragment2',
             'bgFragment',
             'bgFragment2',
             'fgFragment',

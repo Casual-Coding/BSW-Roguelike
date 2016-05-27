@@ -181,7 +181,7 @@ BSWG.initCanvasContext = function(ctx) {
 
 };
 
-BSWG.shadowMapSize = 2048;
+BSWG.shadowMapSize = 4096;
 
 BSWG.render = new function() {
 
@@ -246,6 +246,7 @@ BSWG.render = new function() {
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
+        this.renderer.setClearColor( 0x000000, 0x00 );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
@@ -260,9 +261,9 @@ BSWG.render = new function() {
 
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize);
         this.shadowMap.texture.format = THREE.RGBAFormat;
-        this.shadowMap.texture.minFilter = THREE.NearestFilter;
-        this.shadowMap.texture.magFilter = THREE.NearestFilter;
-        this.shadowMap.texture.generateMipmaps = false;
+        this.shadowMap.texture.minFilter = THREE.LinearFilter;
+        this.shadowMap.texture.magFilter = THREE.LinearMipMapLinearFilter;
+        this.shadowMap.texture.generateMipmaps = true;
         this.shadowMap.stencilBuffer = false;
 
         this.sizeViewport();

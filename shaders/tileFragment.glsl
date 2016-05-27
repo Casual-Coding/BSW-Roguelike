@@ -49,9 +49,13 @@ void main() {
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
-    float zval = vPosition.z-0.15;
+    float zval = vPosition.z-0.01;
     if (svp.x > 0. && svp.y > 0. && svp.x < 1. && svp.y < 1.) {
-        svec = texture2D(shadowMap, svp);
+        svec = (texture2D(shadowMap, svp)
+             + texture2D(shadowMap, svp - vec2(1./2048., 0.))
+             + texture2D(shadowMap, svp + vec2(1./2048., 0.))
+             + texture2D(shadowMap, svp - vec2(0., 1./2048.))
+             + texture2D(shadowMap, svp + vec2(0., 1./2048.))) / 5.;
         zval = (svec.r * 65536.0 + svec.g * 256.0 + svec.b) / 256.0 - 256.0;
     }
     if (zval > (vPosition.z-0.01)) {

@@ -13,7 +13,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         BSWG.bpmMatCache = new Array(BSWG.bpmMatCacheISize);
         for (var i=0; i<BSWG.bpmMatCache.length; i++) {
             BSWG.bpmMatCache[i] = {
-                mat: BSWG.render.newMaterial("basicVertex", "basicFragment", {
+                mat: BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
                     clr: {
                         type: 'v4',
                         value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
@@ -33,6 +33,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     extra: {
                         type: 'v4',
                         value: new THREE.Vector4(1,0,0,0)
+                    },
+                    shadowMatrix: {
+                        type: 'm4',
+                        value: BSWG.render.shadowMatrix
+                    },
+                    shadowMap: {
+                        type: 't',
+                        value: BSWG.render.shadowMap
                     },
                     warpIn: {
                         type: 'f',
@@ -171,7 +179,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     }
     if (matIdx < 0) {
         BSWG.bpmMatCache.push({
-            mat: BSWG.render.newMaterial("basicVertex", "basicFragment", {
+            mat: BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
                 clr: {
                     type: 'v4',
                     value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
@@ -191,6 +199,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                 extra: {
                     type: 'v4',
                     value: new THREE.Vector4(1,0,0,0)
+                },
+                shadowMatrix: {
+                    type: 'm4',
+                    value: BSWG.render.shadowMatrix
+                },
+                shadowMap: {
+                    type: 't',
+                    value: BSWG.render.shadowMap
                 },
                 warpIn: {
                     type: 'f',
