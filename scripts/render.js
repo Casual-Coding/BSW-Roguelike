@@ -626,7 +626,6 @@ BSWG.render = new function() {
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
 
             self.renderer.clear();
-            self.renderer.clearTarget(self.shadowMap, true, true, true);
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
             self.renderer.setViewport(0, 0, self.viewport.w, self.viewport.h);
             self.renderer.render(self.scene, self.cam3D);
@@ -668,10 +667,6 @@ BSWG.render = new function() {
             offset = new b2Vec2(0, 0);
         }
 
-        if (cam.z < 0.008801935321022901) {
-            cam.z = 0.008801935321022901;
-        }
-
         if (cam) {
             var f = Math.min(this.viewport.h / this.viewport.w, this.viewport.w / this.viewport.h) * 0.54;
             this.cam3D.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z);
@@ -680,7 +675,7 @@ BSWG.render = new function() {
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld(true);
 
-            var p1 = this.unproject3D(new b2Vec2(-this.viewport.w*0.5, -this.viewport.h*0.5));
+            var p1 = this.unproject3D(new b2Vec2(-this.viewport.w*1.0, -this.viewport.h*0.5));
             var p2 = this.unproject3D(new b2Vec2(this.viewport.w*1.5, this.viewport.h*1.5));
             var x2 = Math.max(p2.x, p1.x), x1 = Math.min(p2.x, p1.x);
             var y2 = Math.max(p2.y, p1.y), y1 = Math.min(p2.y, p1.y);
@@ -688,8 +683,11 @@ BSWG.render = new function() {
             var f = 1.0;
             var _f = 1.0;
             if (cam.z > 0.020971520000002256) {
-                f = 1.0 + (cam.z/0.020971520000002256)/3.0;
+                f = cam.z/0.020971520000002256;
             }
+            /*else if (cam.z < 0.008801935321022901) {
+                _f = 0.008801935321022901/cam.z;
+            }*/
 
             this.cam3DS.left = (x1 - cam.x) * f;
             this.cam3DS.right = (x2 - cam.x) * f;
@@ -698,8 +696,8 @@ BSWG.render = new function() {
             this.cam3DS.zoom = 1.0;
             this.cam3DS.updateProjectionMatrix();
 
-            this.cam3DS.position.set(cam.x + 50.0*_f, cam.y, 20.0);
-            this.cam3DS.lookAt(new THREE.Vector3(cam.x + 50.0*_f-2.5, cam.y, 17.5));
+            this.cam3DS.position.set(cam.x + 75.0, cam.y, 20.0);
+            this.cam3DS.lookAt(new THREE.Vector3(cam.x + 75.0 - 2.5, cam.y, 17.5));
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();
             this.cam3DS.updateMatrixWorld(true);

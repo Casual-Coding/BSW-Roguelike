@@ -2,7 +2,7 @@ BSWG.grabSlowdownDist      = 0.5;
 BSWG.grabSlowdownDistStart = 3.0;
 BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
-BSWG.camVelLookBfr         = 0.2; // * viewport.w
+BSWG.camVelLookBfr         = 0.3; // * viewport.w
 BSWG.lookRange             = 45.0;
 BSWG.grabSpeed             = 4.0;
 
@@ -866,9 +866,7 @@ BSWG.game = new function(){
                             },
                             'tileset-below': {
                                 map: function(x,y) {
-                                    var d = ~~(Math.sqrt(x*x+y*y));
-                                    return !((Math.max(Math.abs(x), Math.abs(y)) > 12) ||
-                                            (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1));
+                                    return true;
                                 },
                                 color: [0.75, 0.75, 0.20],
                                 isBelow: true

@@ -941,8 +941,8 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
     }
 
     zone.enemies = new Array();
-    var k = 5;
-    while (zone.enemies.length < 4 && k-- > 0) {
+    var k = 10;
+    while (zone.enemies.length < 8 && k-- > 0) {
         for (var i=0; i<eInfo.enemies.length; i++) {
             var E = eInfo.enemies[i];
             var found = false;
