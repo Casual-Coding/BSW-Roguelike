@@ -242,6 +242,7 @@ BSWG.render = new function() {
         this.canvas3D.oncontextmenu = function(){ return false; };
 
         this.cam3D = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
+        this.cam3D.matrixAutoUpdate = true;
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
@@ -249,10 +250,12 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.PerspectiveCamera(120, 1.0, 1.0, 1000);
+        this.cam3DS = new THREE.OrthographicCamera( -50, 50, 50, -50, 1, 1000 );
+        this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
         this.cam3DS.position.z = 10.0;
+        this.shadowMatrix = new THREE.Matrix4();
         this.sceneS = new THREE.Scene();
 
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize);
@@ -619,10 +622,14 @@ BSWG.render = new function() {
                 }
             }
 
+            self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
+            self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
+
             self.renderer.clear();
-            self.renderer.render( self.sceneS, self.cam3DS, self.shadowMap, true);
+            self.renderer.clearTarget(self.shadowMap, true, true, true);
+            self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
             self.renderer.setViewport(0, 0, self.viewport.w, self.viewport.h);
-            self.renderer.render( self.scene, self.cam3D );
+            self.renderer.render(self.scene, self.cam3D);
 
             if (self.customCursor && !self.dlgOpen) {
                 document.body.style.cursor = 'none';
@@ -658,20 +665,44 @@ BSWG.render = new function() {
 
     this.updateCam3D = function ( cam, offset ) {
         if (!offset) {
-            offset = new THREE.Vector3(0,0,0);
+            offset = new b2Vec2(0, 0);
         }
+
+        if (cam.z < 0.008801935321022901) {
+            cam.z = 0.008801935321022901;
+        }
+
         if (cam) {
             var f = Math.min(this.viewport.h / this.viewport.w, this.viewport.w / this.viewport.h) * 0.54;
             this.cam3D.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z);
             this.cam3D.lookAt(new THREE.Vector3(cam.x, cam.y, 0.0));
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();
-            this.cam3D.updateMatrixWorld();
-            this.cam3DS.position.set(cam.x+offset.x+2.0, cam.y+offset.y, f/cam.z*3.0);
-            this.cam3DS.lookAt(new THREE.Vector3(cam.x+1.0, cam.y, 0.0));
+            this.cam3D.updateMatrixWorld(true);
+
+            var p1 = this.unproject3D(new b2Vec2(-this.viewport.w*0.5, -this.viewport.h*0.5));
+            var p2 = this.unproject3D(new b2Vec2(this.viewport.w*1.5, this.viewport.h*1.5));
+            var x2 = Math.max(p2.x, p1.x), x1 = Math.min(p2.x, p1.x);
+            var y2 = Math.max(p2.y, p1.y), y1 = Math.min(p2.y, p1.y);
+
+            var f = 1.0;
+            var _f = 1.0;
+            if (cam.z > 0.020971520000002256) {
+                f = 1.0 + (cam.z/0.020971520000002256)/3.0;
+            }
+
+            this.cam3DS.left = (x1 - cam.x) * f;
+            this.cam3DS.right = (x2 - cam.x) * f;
+            this.cam3DS.top = (y2 - cam.y) * f;
+            this.cam3DS.bottom = (y1 - cam.y) * f;
+            this.cam3DS.zoom = 1.0;
+            this.cam3DS.updateProjectionMatrix();
+
+            this.cam3DS.position.set(cam.x + 50.0*_f, cam.y, 20.0);
+            this.cam3DS.lookAt(new THREE.Vector3(cam.x + 50.0*_f-2.5, cam.y, 17.5));
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();
-            this.cam3DS.updateMatrixWorld();
+            this.cam3DS.updateMatrixWorld(true);
         }
     };
 
@@ -858,8 +889,8 @@ BSWG.render = new function() {
             }
         });
 
-        shadowMat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
-        shadowMesh = new THREE.Mesh( geom, shadowMat );
+        //shadowMat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
+        //shadowMesh = new THREE.Mesh( geom, shadowMat );
 
         mesh = new THREE.Mesh( geom, material );
         mesh.renderOrder = 1450.0;
@@ -875,10 +906,10 @@ BSWG.render = new function() {
         mesh.rotation.x = 0;
         mesh.rotation.y = Math.PI * 2;
 
-        shadowMesh.scale.set(mesh.scale.x, mesh.scale.y, mesh.scale.z);
-        shadowMesh.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
-        shadowMesh.updateMatrix();
-        this.sceneS.add(shadowMesh);
+        //shadowMesh.scale.set(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+        //shadowMesh.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
+        //shadowMesh.updateMatrix();
+        //this.sceneS.add(shadowMesh);
 
         this.scene.add(mesh);
 
@@ -891,11 +922,11 @@ BSWG.render = new function() {
             clr: clr,
             pos: pos,
             size: size,
-            shadowMesh: shadowMesh,
-            shadowMat: shadowMat,
+            //shadowMesh: shadowMesh,
+            //shadowMat: shadowMat,
             destroy: function() {
                 BSWG.render.scene.remove(this.mesh);
-                BSWG.render.sceneS.remove(this.shadowMesh);
+                //BSWG.render.sceneS.remove(this.shadowMesh);
 
                 this.mesh.geometry.dispose();
                 this.mesh.material.dispose();
@@ -904,11 +935,11 @@ BSWG.render = new function() {
                 this.mesh = null;
                 this.mat = null;
                 this.geom = null;
-                this.shadowMesh.geometry = null;
-                this.shadowMesh.material = null;
-                this.shadowMat.dispose();
-                this.shadowMat = null;
-                this.shadowMesh = null;
+                //this.shadowMesh.geometry = null;
+                //this.shadowMesh.material = null;
+                //this.shadowMat.dispose();
+                //this.shadowMat = null;
+                //this.shadowMesh = null;
 
                 for (var i=0; i<self.textObjs.length; i++) {
                     if (self.textObjs[i] === this) {
@@ -927,9 +958,9 @@ BSWG.render = new function() {
                     this.mesh.updateMatrix();
                 }
 
-                this.shadowMesh.scale.set(this.mesh.scale.x, this.mesh.scale.y, this.mesh.scale.z);
-                this.shadowMesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
-                this.shadowMesh.updateMatrix();
+                //this.shadowMesh.scale.set(this.mesh.scale.x, this.mesh.scale.y, this.mesh.scale.z);
+                //this.shadowMesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+                //this.shadowMesh.updateMatrix();
 
                 this.mat.uniforms.light.value.x = lp.x;
                 this.mat.uniforms.light.value.y = lp.y;

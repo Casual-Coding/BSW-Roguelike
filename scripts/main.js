@@ -113,6 +113,7 @@ var BSWG = new function(){
     var shaders = {
         'vertex': [
             'basicVertex',
+            'basicVertex2',            
             'bgVertex',
             'jpointsVertex',
             'expVertex',

@@ -1204,7 +1204,10 @@ BSWG.componentList = new function () {
 
         var len = CL.length;
         for (var i=0; i<len; i++) {
-            if (!CL[i].removed && raycaster.intersectObjects(CL[i].queryMeshes).length > 0) {
+            if (!CL[i] || !CL[i].queryMeshes) {
+                continue;
+            }
+            if (!CL[i].removed && raycaster.intersectObjects(CL[i].queryMeshes.constructor === Array ? CL[i].queryMeshes : [ CL[i].queryMeshes ]).length > 0) {
                 return CL[i];
             }
         }
@@ -1303,7 +1306,10 @@ BSWG.componentList = new function () {
         var dist = vlen+0.001;
         var best = null, bestP = null;
         this.inLine(p.x, p.y, p2.x, p2.y, function(C){
-            var inter = raycaster.intersectObjects(C.queryMeshes);
+            if (!C || !C.queryMeshes) {
+                return;
+            }
+            var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
             for (var j=0; j<inter.length; j++)
             {
                 if (inter[j].distance < dist) {

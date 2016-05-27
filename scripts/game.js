@@ -1277,12 +1277,14 @@ BSWG.game = new function(){
             }
 
             var offset = null;
-            /*if (self.ccblock) {
-                var offset = self.ccblock.obj.body.GetLinearVelocity().THREE(0.0);  
-                offset.x = -offset.x * 0.5;
-                offset.y = -offset.y * 0.5;
+            /*var cc = self.ccblock || BSWG.componentList.allCCs()[0];
+            if (cc) {
+                var offset = cc.obj.body.GetLinearVelocity().THREE(0.0);  
+                offset.x = -offset.x * 0.2;
+                offset.y = -offset.y * 0.2;
             }*/
             BSWG.render.updateCam3D(self.cam, offset);
+            
             BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);

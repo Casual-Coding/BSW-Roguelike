@@ -210,7 +210,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     }
 
     if (water) {
-        this.mat = BSWG.render.newMaterial("basicVertex", "tileWaterFragment", {
+        this.mat = BSWG.render.newMaterial("basicVertex2", "tileWaterFragment", {
             clr: {
                 type: 'v4',
                 value: new THREE.Vector4(color[0], color[1], color[2], color[3])
@@ -222,6 +222,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             shadowMap: {
                 type: 't',
                 value: BSWG.render.shadowMap
+            },
+            shadowMatrix: {
+                type: 'm4',
+                value: BSWG.render.shadowMatrix
             },
             extra: {
                 type: 'v4',
@@ -242,7 +246,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         });
     }
     else {
-        this.mat = BSWG.render.newMaterial("basicVertex", "tileFragment", {
+        this.mat = BSWG.render.newMaterial("basicVertex2", "tileFragment", {
             clr: {
                 type: 'v4',
                 value: new THREE.Vector4(color[0], color[1], color[2], 1.0)
@@ -255,10 +259,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 't',
                 value: nmap || BSWG.render.images['grass_nm'].texture
             },
-            /*map: {
-                type: 't',
-                value: this.normalMap.texture
-            },*/
+            shadowMatrix: {
+                type: 'm4',
+                value: BSWG.render.shadowMatrix
+            },
             shadowMap: {
                 type: 't',
                 value: BSWG.render.shadowMap
@@ -280,11 +284,12 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
 
     this.update = function(dt) {
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
-
         this.mat.uniforms.light.value.set(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0);
         this.mat.uniforms.extra.value.x = BSWG.render.time;
         this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
         this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+        this.mat.uniforms.shadowMatrix.needsUpdate = true;
+        this.mat.uniforms.shadowMatrix.value.needsUpdate = true;
         this.mat.needsUpdate = true;
     };
 

@@ -13,6 +13,7 @@ uniform sampler2D shadowMap;
 uniform vec2 viewport;
 uniform vec3 cam;
 varying float vFragDepth;
+varying vec4 vShadowCoord;
 
 void main() {
 
@@ -44,11 +45,11 @@ void main() {
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(max(l, 0.0), 1.5) + 0.2;
 
-    gl_FragColor = vec4(clr.rgb*l*0.75, 1.0);
+    gl_FragColor = vec4(clr.rgb*l, 1.0);
 
-    vec2 svp = (vPosition.xy - cam.xy) * cam.z * 0.333333333 + vec2(0.5, 0.5);
+    vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
-    float zval = vPosition.z-0.175;
+    float zval = vPosition.z-0.15;
     if (svp.x > 0. && svp.y > 0. && svp.x < 1. && svp.y < 1.) {
         svec = texture2D(shadowMap, svp);
         zval = (svec.r * 65536.0 + svec.g * 256.0 + svec.b) / 256.0 - 256.0;
