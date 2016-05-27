@@ -61,12 +61,13 @@ void main() {
              + texture2D(shadowMap, svp - vec2(0., 1./2048.))
              + texture2D(shadowMap, svp + vec2(0., 1./2048.))) / 5.;
         zval = (svec.r * 65536.0 + svec.g * 256.0 + svec.b) / 256.0 - 256.0;
+        zval -= 0.05;
     }
     if (zval > (vPosition.z-0.01)) {
         gl_FragColor.rgb *= (1.0 - svec.a) * 0.75 + 0.25;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((vPosition.z-zval)*7.5+1.0)) * 0.75 + 0.25;
+        gl_FragColor.rgb *= (1.0 - svec.a / ((vPosition.z-zval)*15.+1.0)) * 0.75 + 0.25;
     }
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
 

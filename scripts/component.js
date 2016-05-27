@@ -54,7 +54,48 @@ BSWG.compAnchored = function(self) {
     return ((self.onCC && self.onCC.anchored) || self.anchored) ? true : false;
 };
 
-BSWG.updateOnCC = function (a, b) {
+BSWG.updateOnCC = function () {
+
+    var len = BSWG.componentList.compList.length;
+    var ccs = new Array();
+    for (var i=0; i<len; i++) {
+        BSWG.componentList.compList[i].onCC = null;
+        if (BSWG.componentList.compList[i].type == 'cc') {
+            ccs.push(BSWG.componentList.compList[i])
+        }
+    }
+
+    var mark = function(n, cc, u) {
+
+        if (!n)
+            return false;
+
+        if (!u) u = {};
+        if (u[n.id])
+            return false;
+        u[n.id] = true;
+
+        n.onCC = cc;
+
+        if (n.welds) {
+            for (var key in n.welds) {
+                if (n.welds[key]) {
+                    mark(n.welds[key].other, cc, u);
+                }
+            }
+        }
+
+        return false;
+
+    };
+
+    for (var i=0; i<ccs.length; i++) {
+        mark(ccs[i], ccs[i]);
+    }
+
+};
+
+BSWG._updateOnCC = function (a, b) {
 
     var cc = a.onCC || (b && b.onCC ? b.onCC : null);
     if (!cc && a.type == 'cc') {
