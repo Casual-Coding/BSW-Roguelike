@@ -380,9 +380,6 @@ BSWG.input = new function(){
                     win.toggleFullscreen();
                 }
                 if (e.which === BSWG.KEY['F12']) {
-                    if (win.isDevToolsOpen()) {
-                        win.closeDevTools();
-                    }
                     win.showDevTools();
                 }
             }

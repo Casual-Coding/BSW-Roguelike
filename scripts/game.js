@@ -242,7 +242,8 @@ BSWG.game = new function(){
             window.setTimeout(function(i){
                 return function () {
                     var aiship = null;
-                    while (!aiship) {
+                    var k = 32;
+                    while (!aiship && (k--) > 0) {
 
                         var ta = Math.random() * 2 - 1;
                         var tr = Math.random();
@@ -458,6 +459,8 @@ BSWG.game = new function(){
                 this.cam.z *= 1.0;
 
                 Math.seedrandom();
+
+                this.titleSpawn = false;
 
                 if (this.title1) {
                     this.title1.add();
@@ -1180,9 +1183,10 @@ BSWG.game = new function(){
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
 
-                    if (BSWG.componentList.allCCs().length === 0) {
+                    if (BSWG.componentList.allCCs().length === 0 && !self.titleSpawn) {
                         var e = BSWG.getEnemy("heavy-fighter");
                         if (e && e.obj) {
+                            self.titleSpawn = true;
                             self.spawnEnemies([[e.obj, 8], [e.obj, 8]]);
                         }
                     }

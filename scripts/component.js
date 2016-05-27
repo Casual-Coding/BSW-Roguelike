@@ -241,7 +241,7 @@ BSWG.compImplied = function (a, b) {
 
 };
 
-BSWG.comp_hashSize = 2.0;
+BSWG.comp_hashSize = 6.0;
 BSWG.comp_staticHashSize = 32.0;
 
 BSWG.nextCompID = 1;
@@ -1117,10 +1117,10 @@ BSWG.componentList = new function () {
         var _x2 = this.aHashXY(BSWG.game.cam.x + BSWG.archiveRange);
         var _y2 = this.aHashXY(BSWG.game.cam.y + BSWG.archiveRange);
 
-        var x1 = Math.min(_x1, _x2) + 2;
-        var x2 = Math.max(_x1, _x2) - 2;
-        var y1 = Math.min(_y1, _y2) + 2;
-        var y2 = Math.max(_y1, _y2) - 2;
+        var x1 = Math.min(_x1, _x2);
+        var x2 = Math.max(_x1, _x2);
+        var y1 = Math.min(_y1, _y2);
+        var y2 = Math.max(_y1, _y2);
 
         for (var x=x1; x<=x2; x++) {
             for (var y=y1; y<=y2; y++) {

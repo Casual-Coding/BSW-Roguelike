@@ -500,8 +500,6 @@ BSWG.render = new function() {
                 this.viewport.h = ~~(maxRes.h / aspect);
             }
         }
-        this.canvas.width = this.viewport.w;
-        this.canvas.height = this.viewport.h;
         /*this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';*/
 
@@ -511,6 +509,8 @@ BSWG.render = new function() {
         this.canvas3D.style.height = '100%';*/
 
         if (!lvp || lvp.w !== this.viewport.w || lvp.h !== this.viewport.h) {
+            this.canvas.width = this.viewport.w;
+            this.canvas.height = this.viewport.h;
             this.renderer.setSize( this.viewport.w, this.viewport.h );
             this.cam3D.aspect = this.viewport.w / this.viewport.h;
             this.cam3D.updateProjectionMatrix();

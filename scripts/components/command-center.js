@@ -271,7 +271,6 @@ BSWG.component_CommandCenter = {
                         head.removeChild(this.aiScriptTag);
                         this.aiScriptTag = null;
                     } catch (e) { }
-                    // <- define helper functions here
                     BSWG.applyAIHelperFunctions(this.ai, this);
                     this.ai.init(this);
                 }

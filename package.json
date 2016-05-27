@@ -2,7 +2,7 @@
   "main": "index.html",
   "name": "BSWR",
   "description": "BlockShip Wars: Roguelike",
-  "version": "0.2.0",
+  "version": "0.2.5",
   "keywords": [
     "game",
     "roguelike",
@@ -21,7 +21,8 @@
     "height": 768
   },
   "webkit": {
-    "plugin": true
+    "plugin": false,
+    "chromium-args": "--disable-threaded-compositing"
   },
   "dependencies": {
   },

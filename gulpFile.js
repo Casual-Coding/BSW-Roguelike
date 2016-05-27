@@ -12,7 +12,7 @@ var getNW = function (run) {
     files.push('node_modules/open/**');
 
     var nw = new NwBuilder({
-        version: '0.12.3',
+        version: '0.15.0',
         files: glob(files),
         platforms: run ? ['win64'] : ['win64', 'osx64', 'linux64'] // change this to 'win' for/on windows
     });
