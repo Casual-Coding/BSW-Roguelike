@@ -1634,7 +1634,7 @@ BSWG.game = new function(){
                     if (e && e.obj) {
                         enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
                         if (ret.max && ret.max > 0) {
-                            for (var i=0; i<ret.max; i++) {
+                            for (var i=0; i<(ret.max-1); i++) {
                                 if (Math.random() < 0.5) {
                                     enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
                                 }

@@ -99,7 +99,11 @@ BSWG.enemySettings = [
             { type: 'marauder',         levels: [2,3,4], with: [ 'little-tough-guy'] },
             { type: 'striker',          levels: [2,3,4], with: [ 'marauder' ] },
             { type: 'striker',          levels: [4,5,6], max: 2, with: [ 'marauder' ] },
+            { type: 'striker',          levels: [2,3], max: 2, with: [ 'freighter' ] },
+            { type: 'striker',          levels: [4,5,6], with: [ 'freighter' ] },
+            { type: 'striker',          levels: [4,5,6], max: 2, with: [ 'freighter' ] },
             { type: 'striker',          levels: [4,5,6], with: [ 'little-brute', 'little-tough-guy'] },
+            { type: 'freighter',        levels: [2,3,4,5,6] }
         ]
     }
 ];
@@ -808,10 +812,6 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         var level1 = (startDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
         var level2 = (1.0 - endDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
 
-        if (i <= 3) {
-            level2 = level1;
-        }
-
         var level = Math.floor(((zone.order - 1) / (ret.zones.length-1)) * (eInfo.maxLevel - eInfo.minLevel)) + eInfo.minLevel;
 
         zone.minLevel = Math.floor(Math.min(level1, level2));
@@ -819,6 +819,12 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-3);
 
         var range = zone.maxLevel - zone.minLevel;
+        if (i < 2) {
+            range = 0;
+        }
+        else if (i < 3) {
+            range = 1;
+        }
         zone.minLevel = level;
         zone.maxLevel = level + range;
 

@@ -42,6 +42,7 @@ BSWG.getEnemy = function(type) {
         case 'little-tough-guy':title = 'Lil\' Tough Guy'; break;
         case 'tough-guy':       title = 'Tough Guy'; break;
         case 'stinger':         title = 'Stinger'; break;
+        case 'freighter':       title = 'Freighter'; break;
         default: break;
     }
 

@@ -41,7 +41,7 @@ BSWG.component_Block = {
         this.armour   = args.armour || false;
         this.triangle = args.triangle || 0;
 
-        this.maxHP = this.width * this.height * 150 / 9;
+        this.maxHP = this.width * this.height * 250 / 9;
         if (this.triangle) {
             this.maxHP /= 2.0;
         }

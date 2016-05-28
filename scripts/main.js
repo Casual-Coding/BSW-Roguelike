@@ -172,7 +172,8 @@ var BSWG = new function(){
         'brutenie',
         'marauder',
         'striker',
-        'four-blaster-x2'
+        'four-blaster-x2',
+        'freighter'
     ];
     for (var i=0; i<ai.length; i++) {
         scripts.push([
