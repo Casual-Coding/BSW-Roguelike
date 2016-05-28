@@ -5,7 +5,7 @@ BSWG.component_ChainLink = {
     type: 'chainlink',
     name: 'Chain Link',
 
-    maxHP: 20,
+    maxHP: 40,
 
     sortOrder:       1,
     hasConfig:       false,
