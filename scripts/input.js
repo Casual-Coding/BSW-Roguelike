@@ -377,7 +377,9 @@ BSWG.input = new function(){
             var win = BSWG.render.win;
             if (win) {
                 if (e.which === BSWG.KEY['F11']) {
+                    var fs = !win.isFullscreen;
                     win.toggleFullscreen();
+                    win.setAlwaysOnTop(fs);
                 }
                 if (e.which === BSWG.KEY['F12']) {
                     win.showDevTools();

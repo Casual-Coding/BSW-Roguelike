@@ -35,7 +35,7 @@ BSWG.component_Missile = {
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
-        this.fireT = 3.5;
+        this.fireT = 2.5;
         this.nextDestroy = false;
     },
 
@@ -79,7 +79,7 @@ BSWG.component_Missile = {
                     v.THREE(Math.random()*2.0)
                 );
                 var a = this.obj.body.GetAngle() + Math.PI;
-                var accel = 2.5 * [1,3,7][this.size-1];
+                var accel = 3.75 * [1,3,7][this.size-1];
                 this.obj.body.SetAwake(true);
                 var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
                 this.obj.body.ApplyForceToCenter(force);

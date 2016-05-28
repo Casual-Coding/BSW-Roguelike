@@ -56,12 +56,16 @@ BSWG.enemySettings = [
             { type: 'four-blaster',     levels: [0,1,2] },
             { type: 'four-blaster',     levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
             { type: 'four-blaster',     levels: [0,1,2], with: [ 'fighter' ] },
+            { type: 'four-blaster',     levels: [0,1,2], with: [ 'four-blaster-x2' ] },
+            { type: 'four-blaster-x2',  levels: [0,1,2] },
+            { type: 'four-blaster-x2',  levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
+            { type: 'four-blaster-x2',  levels: [0,1,2], with: [ 'fighter' ] },
             { type: 'heavy-fighter',    levels: [6,7,9,10] },
             { type: 'laser-fighter',    levels: [4,5,6] },
             { type: 'laser-fighter',    levels: [4,5,6], with: [ 'msl-fighter' ] },
             { type: 'little-brute',     levels: [3,4,5,6], max: 2 },
             { type: 'little-charger-2', levels: [3,4,5,6], max: 2 },
-            { type: 'little-charger',   levels: [4,5,6,7], max: 3 },
+            { type: 'little-charger',   levels: [4,5,6,7], max: 2 },
             { type: 'little-cruncher',  levels: [5,6,7] },
             { type: 'mele-boss',        levels: [8,9] },
             { type: 'missile-boss',     levels: [6,7,8], max: 2 },
@@ -72,8 +76,8 @@ BSWG.enemySettings = [
             { type: 'msl-fighter',      levels: [2,3,4,5], max: 2 },
             { type: 'scorpion',         levels: [5,6,7], with: [ 'uni-laser', 'uni-laser'] },
             { type: 'spinner',          levels: [4,5,6], max: 2 },
-            { type: 'spinner',          levels: [4,5,6], max: 2, with: [ 'little-charger', 'little-charger' ] },
-            { type: 'spinner',          levels: [4,5,6], max: 2, with: [ 'little-charger-2', 'little-charger-2' ] },
+            { type: 'spinner',          levels: [4,5,6], max: 1, with: [ 'little-charger', 'little-charger' ] },
+            { type: 'spinner',          levels: [4,5,6], max: 1, with: [ 'little-charger-2', 'little-charger-2' ] },
             { type: 'spinner',          levels: [7,8], max: 3 },
             { type: 'uni-dir-fighter',  levels: [0,1] },
             { type: 'uni-dir-fighter',  levels: [2,3], max: 2 },
@@ -85,7 +89,17 @@ BSWG.enemySettings = [
             { type: 'little-tough-guy', levels: [2,3], max: 2 },
             { type: 'tough-guy',        levels: [5,6,7], max: 2 },
             { type: 'stinger',          levels: [2,3] },
-            { type: 'stinger',          levels: [4,5,6], max: 2 }
+            { type: 'stinger',          levels: [4,5,6], max: 2 },
+            { type: 'brutenie',         levels: [0,1] },
+            { type: 'brutenie',         levels: [1,2], with: [ 'brutenie'] },
+            { type: 'brutenie',         levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
+            { type: 'brutenie',         levels: [1,2], with: [ 'fighter' ] },
+            { type: 'marauder',         levels: [1,2,3] },
+            { type: 'marauder',         levels: [2,3,4], with: [ 'marauder'] },
+            { type: 'marauder',         levels: [2,3,4], with: [ 'little-tough-guy'] },
+            { type: 'striker',          levels: [2,3,4], with: [ 'marauder' ] },
+            { type: 'striker',          levels: [4,5,6], max: 2, with: [ 'marauder' ] },
+            { type: 'striker',          levels: [4,5,6], with: [ 'little-brute', 'little-tough-guy'] },
         ]
     }
 ];
@@ -659,14 +673,14 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     var lastBattleP = null;
     var lastBattleZone = null;
     var lastZone = null;
-    var distanceLeft = Math.random() * 10 * ret.gridSize + 6 * ret.gridSize;
+    var distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
 
     ret.tickSpawner = function(dt, p) {
 
         var zone = this.getZone(p);
 
         if (BSWG.game.battleMode) {
-            distanceLeft = Math.random() * 10 * this.gridSize + 6 * this.gridSize;
+            distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
             lastBattleP = p.clone();
             lastP = p.clone();
             lastZone = zone;
@@ -677,7 +691,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         }
 
         if (zone !== lastZone) {
-            distanceLeft = Math.random() * 10 * this.gridSize + 6 * this.gridSize;
+            distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
         }
 
         if (lastP) {
@@ -691,9 +705,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
             else if (zone.enemies && zone.enemies.length) {
                 if (distanceLeft <= 0) {
-                    this.escapeDistance = this.gridSize * 6.0;
+                    this.escapeDistance = this.gridSize * 6.0 / 1.75;
                     lastBattleZone = zone;
-                    distanceLeft = Math.random() * 10 * this.gridSize + 6 * this.gridSize;
+                    distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
                     return zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
                 }
             }
@@ -964,7 +978,7 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
                 var E2 = BSWG.getEnemy(E.type);
                 if (E2 && E2.obj && E2.stats) {
                     var prob = E2.compStats(zone.tech);
-                    prob = Math.pow(prob, 2.5);
+                    prob = Math.pow(prob, 5.0);
                     if (Math.random() < prob) {
                         zone.enemies.push(E);
                     }

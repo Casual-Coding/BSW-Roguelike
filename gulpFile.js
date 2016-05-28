@@ -1,10 +1,11 @@
+var winres = require("winresourcer");
 var NwBuilder = require('nw-builder');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var glob = require('simple-glob');
 var exec = require('child_process').execSync;
  
-var getNW = function (run) {
+var getNW = function (run, dbg) {
 
     var files = [ 'package.json', 'index.html', 'scripts/**', 'shaders/*', 'images/*', 'fonts/*', 'css/*', 'sounds/*', 'music/*' ];
 
@@ -12,9 +13,9 @@ var getNW = function (run) {
     files.push('node_modules/open/**');
 
     var nw = new NwBuilder({
-        version: '0.15.0',
+        version: '0.12.3',
         files: glob(files),
-        platforms: run ? ['win64'] : ['win64', 'osx64', 'linux64'] // change this to 'win' for/on windows
+        platforms: run ? (dbg ? ['win64dbg'] : ['win64']) : ['win64', 'osx64', 'linux64'] // change this to 'win' for/on windows
     });
 
     // Log stuff you want
@@ -26,12 +27,19 @@ var getNW = function (run) {
 
 };
 
+var setIcons = function (done, dbg) {
+    if (done) {
+        done();
+    }
+};
+
 gulp.task('build', function () {
 
     var nw = getNW();
  
     // Build returns a promise, return it so the task isn't called in parallel
     return nw.build().catch(function (err) {
+        setIcons();
         gutil.log('nw', err);
     });
 
@@ -42,9 +50,27 @@ gulp.task('run', function () {
     var nw = getNW(true);
  
     return nw.build().then(function(){
-        exec("BSWR.exe", {
-            'cwd': 'build/BSWR/win64/'
+        setIcons(function(){
+            exec("BSWR.exe", {
+                'cwd': 'build/BSWR/win64/'
+            });
         });
+    }).catch(function (err) {
+        gutil.log('nw', err);
+    });
+
+});
+
+gulp.task('debug', function () {
+
+    var nw = getNW(true, true);
+ 
+    return nw.build().then(function(){
+        setIcons(function(){
+            exec("BSWR.exe", {
+                'cwd': 'build/BSWR/win64dbg/'
+            });
+        }, true);
     }).catch(function (err) {
         gutil.log('nw', err);
     });

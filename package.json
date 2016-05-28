@@ -18,11 +18,11 @@
     "min_width": 1280,
     "min_height": 768,
     "width": 1280,
-    "height": 768
+    "height": 768,
+    "icon": "images/icon-128.png"
   },
   "webkit": {
-    "plugin": false,
-    "chromium-args": "--disable-threaded-compositing"
+    "plugin": false
   },
   "dependencies": {
   },

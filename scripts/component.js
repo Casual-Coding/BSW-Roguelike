@@ -241,12 +241,13 @@ BSWG.compImplied = function (a, b) {
 
 };
 
-BSWG.comp_hashSize = 6.0;
+BSWG.comp_hashSize = 2.0;
 BSWG.comp_staticHashSize = 32.0;
 
 BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
 
+    this.initTime = Date.timeStamp();
     this.handleInput = function(key) {};
     this.frontOffset = 0.0;
 
@@ -1107,7 +1108,7 @@ BSWG.componentList = new function () {
                     //console.log('compList len after: ' + this.compList.length);
                     len = this.compList.length;
                     i = -1;
-                    continue;
+                    break;
                 }
             }
         }
@@ -1144,7 +1145,7 @@ BSWG.componentList = new function () {
                             list.splice(i, 1);
                             i -= 1;
                             //console.log('compList len after: ' + this.compList.length);
-                            continue;
+                            break;
                         }
                     }
                 }
@@ -1160,6 +1161,10 @@ BSWG.componentList = new function () {
             return o;
         }
         u[C.id] = true;
+
+        if ((Date.timeStamp() - C.initTime) < 2.5) {
+            return false;
+        }
 
         if (C.obj && C.obj.body) {
             if (C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {

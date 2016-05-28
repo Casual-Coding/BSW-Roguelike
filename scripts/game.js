@@ -221,6 +221,8 @@ BSWG.game = new function(){
 
     this.enemies = new Array();
 
+    this.spawnCount = 0;
+
     this.spawnEnemies = function (list) {
 
         if (this.scene !== BSWG.SCENE_TITLE && (!this.ccblock || this.ccblock.destroyed)) {
@@ -238,9 +240,12 @@ BSWG.game = new function(){
 
         var self = this;
 
+        this.spawnCount += list.length;
+
         for (var _i=0; _i<list.length; _i++) {
             window.setTimeout(function(i){
                 return function () {
+                    self.spawnCount -= 1;
                     var aiship = null;
                     var k = 32;
                     while (!aiship && (k--) > 0) {
@@ -374,6 +379,8 @@ BSWG.game = new function(){
             this.dialogObj.remove();
             this.dialogObj = null;
         }
+
+        this.spawnCount = 0;
 
         this.cam = new BSWG.camera();
 
@@ -1173,7 +1180,7 @@ BSWG.game = new function(){
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
             
-            document.title = "BlockShip Wars: Roguelike - " + Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + ")";
+            document.title = "BlockShip Wars: Roguelike - " + Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + ") " + BSWG.componentList.compList.length;
 
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');
@@ -1251,8 +1258,8 @@ BSWG.game = new function(){
                             self.cam.zoomTo(dt*2.5, toZ);
                             var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
                             var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
-                            p.x += self.ccblock.obj.body.GetLinearVelocity().x * 0.5;
-                            p.y += self.ccblock.obj.body.GetLinearVelocity().y * 0.5;
+                            p.x += self.ccblock.obj.body.GetLinearVelocity().x * 2.5;
+                            p.y += self.ccblock.obj.body.GetLinearVelocity().y * 2.5;
 
                             var bfr = BSWG.camVelLookBfr * viewport.w;
                             var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
@@ -1598,7 +1605,7 @@ BSWG.game = new function(){
                 var p = self.ccblock.obj.body.GetWorldCenter().clone();
                 var ret = self.map.tickSpawner(dt, p);
 
-                if (self.battleMode) {
+                if (self.battleMode && self.spawnCount === 0) {
                     var ccs = BSWG.componentList.allCCs();
                     if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
                         self.battleMode = false;

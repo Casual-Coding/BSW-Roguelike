@@ -1,6 +1,6 @@
 BSWG.tileSize = 512;
 BSWG.tileMeshSize = 64;
-BSWG.tileSizeWorld = 32.0;
+BSWG.tileSizeWorld = 48.0;
 BSWG.tileHeightWorld = 16.0;
 
 BSWG.tMask = {
@@ -555,7 +555,7 @@ BSWG.tileMap = function (layers) {
                 }
             }*/
 
-            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3,
+            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 2,
                 ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
                 tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
                 ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;

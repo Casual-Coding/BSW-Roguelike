@@ -525,7 +525,7 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
-    var last60dt = new Array(60);
+    var last60dt = new Array(20);
     for (var i=0; i<last60dt.length; i++) {
         last60dt[i] = 1.0/60;
     }
@@ -554,8 +554,6 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
-            self.animFrameID = window.requestAnimationFrame(renderFrame);
-
             var frameTime = Date.timeStamp();
             self.actualDt = frameTime - self.lastFrameTime;
             if (self.actualDt > 1/10) {
@@ -577,8 +575,8 @@ BSWG.render = new function() {
             }
             avg /= last60dt.length + 1;
 
-            var targetDt = 1/60;
-            if ((1/avg) < 15) {
+            var targetDt = 1/(Math.floor((1/avg)/5)*5);
+            /*if ((1/avg) < 15) {
                 targetDt = 1/10;
             }
             else if ((1/avg) < 25) {
@@ -592,13 +590,13 @@ BSWG.render = new function() {
             }
             else if ((1/avg) < 55) {
                 targetDt = 1/50;
-            }
+            }*/
 
             sumDt += self.actualDt;
 
-            if (sumDt < targetDt * 0.935) {
+            /*if (sumDt*1.1 < targetDt) {
                 return;
-            }
+            }*/
             while (sumDt >= targetDt) {
                 sumDt -= targetDt;
             }
@@ -626,9 +624,9 @@ BSWG.render = new function() {
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
 
-            self.renderer.clear();
+            self.renderer.sortObjects = false;
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
-            self.renderer.setViewport(0, 0, self.viewport.w, self.viewport.h);
+            self.renderer.sortObjects = true;
             self.renderer.render(self.scene, self.cam3D);
 
             if (self.customCursor && !self.dlgOpen) {
@@ -658,6 +656,8 @@ BSWG.render = new function() {
             }
 
             BSWG.input.newFrame();
+
+            self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);

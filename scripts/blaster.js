@@ -7,7 +7,11 @@ BSWG.blasterList = new function () {
         this.list.length = 0;
     };
 
+    this.idx = 0;
+
     this.updateRender = function (ctx, cam, dt) {
+
+        this.idx += 1;
 
         for (var i=0; i<this.list.length; i++) {
 
@@ -16,12 +20,16 @@ BSWG.blasterList = new function () {
             B.p.x += B.v.x * dt;
             B.p.y += B.v.y * dt;
             B.t -= dt;
-
-            var ret = BSWG.componentList.withRay(new b2Vec2(ox, oy).THREE(0.0), new b2Vec2(B.p.x+B.v.x/2, B.p.y+B.v.y/2).THREE(0.0));
-            var comp = ret ? ret.comp : null;
-            if (ret && ret.d > Math.sqrt(B.v.x*B.v.x+B.v.y*B.v.y)*dt) {
-                comp = null;
-            }
+            var comp = null;
+            //if ((this.idx % 3) === B.off) {
+                var ret = BSWG.componentList.withRay(B.lp.THREE(0.0), new b2Vec2(B.p.x+B.v.x/2, B.p.y+B.v.y/2).THREE(0.0));
+                B.lp.x = B.p.x;
+                B.lp.y = B.p.y;
+                comp = ret ? ret.comp : null;
+                if (ret && ret.d > Math.sqrt(B.v.x*B.v.x+B.v.y*B.v.y)*dt) {
+                    comp = null;
+                }
+            //}
             if (B.t <= 0.0 || comp) {
                 if (B.t <= 0.0 || comp !== B.source) {
                     if (comp && comp !== B.source) {
@@ -52,11 +60,11 @@ BSWG.blasterList = new function () {
             BSWG.render.boom.palette = chadaboom3D.blue_bright;
             BSWG.render.boom.add(
                 new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
-                1.35,
-                16,
-                0.2,
                 1.5,
-                new b2Vec2(B.v.x*0.65, B.v.y*0.65).THREE(0.0)
+                16,
+                0.125,
+                1.5,
+                new b2Vec2(B.v.x*0.85, B.v.y*0.85).THREE(0.0)
             );
 
             /*ctx.lineWidth = 2.5;
@@ -88,8 +96,10 @@ BSWG.blasterList = new function () {
 
             p: p,
             v: v,
-            t: 2.0,
-            source: source
+            t: 1.5,
+            lp: p.clone(),
+            source: source,
+            off: ~~(Math.random() * 3)
 
         });
 

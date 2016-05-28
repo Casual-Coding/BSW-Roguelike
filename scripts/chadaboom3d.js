@@ -51,7 +51,8 @@ window.chadaboom3D = function(batches, onLoad) {
 
                             });
 
-                            self.allTextures.push(bk.img[k2].texture)
+                            self.allTextures.push(bk.img[k2].texture);
+                            bk.img[k2].texIndex = self.allTextures.length-1;
 
                         }
                     }
@@ -181,6 +182,25 @@ chadaboom3D.prototype.init = function () {
     this.pOffset = 0;
     this.pCount = 0;
 
+    this.resMap = {};
+    for (var res=0; res<1024; res++) {
+        var bb = null;
+        for (var i=0; i<this.batches.length; i++) {
+            var d0 = bb ? Math.abs(res-bb.size) : 100000;
+            var d1 = Math.abs(res-this.batches[i].size);
+            if (bb && res < bb.size) {
+                d0 = Math.pow(d0, 0.75);
+            }
+            if (res < this.batches[i].size) {
+                d1 = Math.pow(d1, 0.75);
+            }
+            if (!bb || d0 > d1) {
+                bb = this.batches[i];
+            }
+        }
+        this.resMap[res] = bb;
+    }
+
 };
 
 chadaboom3D.prototype.readd = function () {
@@ -292,53 +312,20 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         return false;
     }
 
-    res = res || 256;
-    if (res < 0) {
-        res = 0;
-    }
+    res = Math.max(res || 256, 0);
     life = life || 2.0;
-    attack = attack || 2.0;
-    if (attack <= 0) {
-        attack = 0;
-    }
+    attack = Math.max(attack || 2.0, 0);
 
     if (!vel) {
         vel = { x:0, y:0, z:0 };
     }
 
-    var bb = null;
-    for (var i=0; i<this.batches.length; i++) {
-        var d0 = bb ? Math.abs(res-bb.size) : 100000;
-        var d1 = Math.abs(res-this.batches[i].size);
-        if (bb && res < bb.size) {
-            d0 = Math.pow(d0, 0.75);
-        }
-        if (res < this.batches[i].size) {
-            d1 = Math.pow(d1, 0.75);
-        }
-        if (!bb || d0 > d1) {
-            bb = this.batches[i];
-        }
-    }
-
+    var bb = this.resMap[~~(res)];
     if (!bb) {
         return false;
     }
 
-    var tex = bb.img[Math.floor(Math.random()*1000000) % bb.count].texture;
-    var found = false;
-
-    for (var i=0; i<this.allTextures.length && i<4; i++) {
-        if (this.allTextures[i] === tex) {
-            tex = i;
-            found = true;
-            break;
-        }
-    }
-
-    if (!found) {
-        tex = Math.min(this.allTextures.length - 1, 8-1);
-    }
+    var tex = bb.img[Math.floor(Math.random()*1000000) % bb.count].texIndex;
 
     var pos = posFn;
     var size = sizeFn;
@@ -349,7 +336,6 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     if (typeof sizeFn === "function") {
         size = sizeFn(res);
     }
-
     if (!(size > 0)) {
         return false;
     }

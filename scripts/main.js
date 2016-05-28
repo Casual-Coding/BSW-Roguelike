@@ -168,7 +168,11 @@ var BSWG = new function(){
         'uni-laser',
         'little-tough-guy',
         'tough-guy',
-        'stinger'
+        'stinger',
+        'brutenie',
+        'marauder',
+        'striker',
+        'four-blaster-x2'
     ];
     for (var i=0; i<ai.length; i++) {
         scripts.push([
