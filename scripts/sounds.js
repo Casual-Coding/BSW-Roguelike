@@ -22,6 +22,7 @@ BSWG.soundBase = function (desc) {
         panner.coneOuterGain = 0;
         panner.setOrientation(0,0,1);
         panner.setPosition(pos.x, pos.y, pos.z);
+        pos = null;
         return panner;
     };
 
@@ -43,64 +44,84 @@ BSWG.soundBase = function (desc) {
 
 }(75, 0.05);*/
 
-BSWG.sound_boom = BSWG.soundBase({
+BSWG.soundSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
-    play: function (pos, size, length) {
-
-        this.size = size;
-        this.length = length;
-        
-        var sizet = Math.clamp(size/5, 0.1, 1.0);
+    play: function (name, pos, amp, rate) {
+      
         var audioCtx = BSWG.music.audioCtx;
 
-        this.oscillator = audioCtx.createOscillator();
-        this.oscillator.type = 'square';
-        this.oscillator.frequency.value = 250 / (Math.pow(sizet, 0.35) - 0.05);
-        this.oscillator.start();
+        this.source = audioCtx.createBufferSource();
+        this.source.loop = false;
+        this.source.buffer = BSWG.soundBuffers[name];
+        this.source.playbackRate.value = rate || 1;
 
         this.gain = audioCtx.createGain();
-        this.gain.gain.value = sizet;
+        this.gain.gain.value = amp;
 
-        var it = this.oscillator.frequency.value;
-        var ot = this.oscillator.frequency.value/2;
-        for (var t=0; t<this.length; t+=0.1) {
-            var tt = Math.pow(t/this.length, 0.125) * Math.random();
-            this.oscillator.frequency.setValueAtTime(ot*tt + it*(1-tt), audioCtx.currentTime + t);
-            tt = Math.pow(t/this.length, 0.125);
-            this.gain.gain.setValueAtTime((1-tt) * sizet, audioCtx.currentTime + t);
-        }
-        this.gain.gain.setValueAtTime(0, audioCtx.currentTime + this.length);
+        this.panner = this.createPanner(pos, amp);
 
-        this.panner = this.createPanner(pos, sizet);
-
-        this.oscillator.connect(this.gain);
+        this.source.connect(this.gain);
         this.gain.connect(this.panner);
         this.panner.connect(audioCtx.destination);
 
         var self = this;
-        window.setTimeout(function() {
+        this.source.onended = function ( ) {
             self.stop();
             self = null;
-        }, ~~(this.length*1000) + 15);
+        };
+
+        this.source.start();
+
+        audioCtx = null;
+        pos = null;
+        name = null;
 
     },
 
     stop: function ( ) {
 
-        try { this.oscillator.stop(); } catch (e) { }
-        try { this.oscillator.disconnect(); } catch (e) { }
+        try { this.source.stop(); } catch (e) { }
+        try { this.source.disconnect(); } catch (e) { }
         try { this.gain.disconnect(); } catch (e) { }
         try { this.panner.disconnect(); } catch (e) { }
 
-        this.oscillator = null;
+        this.source = null;
         this.gain = null;
         this.panner = null;
 
     }
 
 });
+
+BSWG.soundBuffers = {};
+
+BSWG.soundLoad = function (onload) {
+
+    var sounds = [
+        { name: 'explosion', url: 'sounds/explosion.wav' }
+    ];
+
+    var urls = [];
+    for (var i=0; i<sounds.length; i++) {
+        urls.push(sounds[i].url);
+    }
+
+    var loader = new WABufferLoader(BSWG.music.audioCtx, urls, function(buffers){
+        for (var i=0; i<buffers.length; i++) {
+            sounds[i].buffer = buffers[i];
+            BSWG.soundBuffers[sounds[i].name] = buffers[i];
+        }
+
+        window.setInterval(BSWG.soundUpdate, 20);
+        if (onload) {
+            onload();
+        }
+    });
+
+    loader.load();
+};
 
 BSWG.soundUpdate = function () {
 
@@ -110,5 +131,3 @@ BSWG.soundUpdate = function () {
     }
 
 };
-
-window.setInterval(BSWG.soundUpdate, 20);

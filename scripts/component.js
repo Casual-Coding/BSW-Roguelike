@@ -9,7 +9,7 @@ BSWG.friendlyFactor = 1/16;
 // attack/defense bias to level difference
 BSWG.adBias = function(p, e) { // (p)layer (e)nemy
     var diff = Math.min(e-p, 10);
-    return 0.8074061526 * Math.pow(1.5255481, diff) * 0.5;
+    return 0.801983527 * Math.pow(1.896948118, diff);
 };
 BSWG.defenceBias = 2.0;
 
@@ -312,6 +312,9 @@ BSWG.component = function (desc, args) {
                 var p = this.obj.body.GetWorldCenter();
                 var v = this.obj.body.GetLinearVelocity();
                 var r = this.obj.radius;
+                if (this.type === 'cc') {
+                    r *= 2.0;
+                }
                 for (var i=0; i<20; i++) {
                     var a = Math.random() * Math.PI * 2.0;
                     var r2 = Math.random() * r * 0.5;

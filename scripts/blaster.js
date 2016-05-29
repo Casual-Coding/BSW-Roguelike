@@ -43,7 +43,9 @@ BSWG.blasterList = new function () {
                             32,
                             0.5,
                             1.5,
-                            comp.obj.body.GetLinearVelocity().clone().THREE(0.0)
+                            comp.obj.body.GetLinearVelocity().clone().THREE(0.0),
+                            null,
+                            comp && comp !== B.source
                         );
                     }
                     B.source = null;

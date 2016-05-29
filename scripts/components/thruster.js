@@ -157,7 +157,9 @@ BSWG.component_Thruster = {
                     32,
                     0.3*0.3*5.0,
                     4.0,
-                    v.THREE(Math.random()*2.0)
+                    v.THREE(Math.random()*2.0),
+                    null,
+                    i === 0
                 );
 
                 p = v = null;

@@ -194,12 +194,14 @@ var BSWG = new function(){
                 return;
 
             BSWG.music.init(function(){
-                BSWG.render.init(function(){
-                    BSWG.physics.init();
-                    BSWG.input.init();
-                    BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
-                    BSWG.game.start();
-                }, images, shaders);
+                BSWG.soundLoad(function(){
+                    BSWG.render.init(function(){
+                        BSWG.physics.init();
+                        BSWG.input.init();
+                        BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
+                        BSWG.game.start();
+                    }, images, shaders);
+                });
             });
         };
 

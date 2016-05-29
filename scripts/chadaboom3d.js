@@ -302,7 +302,7 @@ chadaboom3D.blue = 2;
 chadaboom3D.blue_bright = 3;
 chadaboom3D.green = 4;
 
-chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub) {
+chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub, makeSound) {
 
     if (!(res > 0 && life > 0 && attack > 0)) {
         return false;
@@ -404,10 +404,10 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     this.particleUpdate = true;
 
-    /*var sizet = Math.clamp(size/10, 0, 1);
-    if (sizet > 0.5 || Math.random() > Math.pow(sizet, 0.01)) {
-        new BSWG.sound_boom().play(pos, size, life);
-    }*/
+    var sizet = Math.clamp(size/10, 0, 1);
+    if ((sizet > 0.125 || makeSound) && makeSound !== false) {
+        new BSWG.soundSample().play('explosion', pos, Math.pow(sizet, 0.5), Math.clamp(0.4/(sizet*0.75+0.25), 0.25, 2.0));
+    }
 
     size = null;
     pos = null;
