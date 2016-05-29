@@ -1013,6 +1013,7 @@ BSWG.componentList = new function () {
 
     this.archHash = {};
     this.archObjNextID = 1;
+    this.playerComps = [];
 
     this.update = function (dt) {
 
@@ -1027,6 +1028,8 @@ BSWG.componentList = new function () {
             delete this.hash[key];
         }
 
+        this.playerComps.length = 0;
+
         var len = this.compList.length;
         for (var i=0; i<len; i++) {
 
@@ -1035,6 +1038,10 @@ BSWG.componentList = new function () {
             var r = C.obj.radius * 1.25;
             var x1 = this.hashXY(p.x - r), y1 = this.hashXY(p.y - r),
                 x2 = this.hashXY(p.x + r), y2 = this.hashXY(p.y + r);
+
+            if (C.onCC === BSWG.game.ccblock && BSWG.game.ccblock) {
+                this.playerComps.push(C.onCC);
+            }
 
             for (var x=x1; x<=x2; x++) {
                 for (var y=y1; y<=y2; y++) {
@@ -1486,6 +1493,24 @@ BSWG.componentList = new function () {
                 ret.push(C);
             }
         });
+        return ret;
+    };
+
+    this.withinRadiusPlayerOnly = function (p, r) {
+        var ret = new Array();
+        var len = this.playerComps.length;
+        for (var i=0; i<len; i++) {
+            var C = this.playerComps[i];
+            if (C) {
+                var p2 = C.obj.body.GetWorldCenter();
+                var dist = Math.pow(p2.x - p.x, 2.0) +
+                           Math.pow(p2.y - p.y, 2.0);
+                if (dist < Math.pow(r+C.obj.radius, 2.0)) {
+                    ret.push(C);
+                }
+            }
+        }
+        
         return ret;
     };
 

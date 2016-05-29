@@ -431,9 +431,9 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         this.first = null;
                         this.list.length = 0;
 
-                        BSWG.componentList
-                        var CL = BSWG.componentList.withinRadius(this.cWorld, this.maxDist);
-                        for (var i=0; i<CL.length; i++) {
+                        var CL = BSWG.componentList.withinRadiusPlayerOnly(this.cWorld, this.maxDist);
+                        //BSWG.componentList.withinRadius(this.cWorld, this.maxDist);
+                        for (var i=0; CL && i<CL.length; i++) {
                             if (!CL[i] || !CL[i].obj) {
                                 continue;
                             }
