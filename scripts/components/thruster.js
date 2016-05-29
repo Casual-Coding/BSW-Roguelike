@@ -100,6 +100,8 @@ BSWG.component_Thruster = {
                 v.THREE(Math.random()*2.0)
             );
 
+            p = v = null;
+
             this.thrustT -= dt;
 
         }
@@ -156,7 +158,9 @@ BSWG.component_Thruster = {
                     0.3*0.3*5.0,
                     4.0,
                     v.THREE(Math.random()*2.0)
-                );           
+                );
+
+                p = v = null;
             }
         }
         
@@ -168,6 +172,7 @@ BSWG.component_Thruster = {
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);
             this.thrustT = 0.3;
+            force = null;
         }
 
     },

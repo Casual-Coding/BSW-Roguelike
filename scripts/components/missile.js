@@ -31,6 +31,8 @@ BSWG.component_Missile = {
             offsetAngle: -Math.PI/8.0,
             restitution: 0.75
         });
+
+        verts = null;
         
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);

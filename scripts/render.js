@@ -702,6 +702,8 @@ BSWG.render = new function() {
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();
             this.cam3DS.updateMatrixWorld(true);
+
+            p1 = p2 = null;
         }
     };
 
@@ -721,11 +723,10 @@ BSWG.render = new function() {
 
         if (this.cam3D && this.viewport) {
 
-            var p2 = new THREE.Vector3(p.x, p.y, z).project(this.cam3D);
-            return new b2Vec2(
-                (p2.x + 1) * this.viewport.w * 0.5,
-                (-p2.y + 1) * this.viewport.h * 0.5
-            );
+            var ret = new THREE.Vector3(p.x, p.y, z).project(this.cam3D);
+            ret.x = (ret.x + 1) * this.viewport.w * 0.5;
+            ret.y = (-ret.y + 1) * this.viewport.h * 0.5;
+            return ret;
 
         }
         else {
@@ -758,11 +759,13 @@ BSWG.render = new function() {
                 0.5
             ).unproject(this.cam3D);
 
-            var dir = p2.sub( this.cam3D.position ).normalize();
-            var distance = -this.cam3D.position.z / dir.z;
-            p2 = this.cam3D.position.clone().add(dir.multiplyScalar(distance));
+            var p2 = p2.sub( this.cam3D.position ).normalize();
+            var distance = -this.cam3D.position.z / p2.z;
+            p2 = this.cam3D.position.clone().add(p2.multiplyScalar(distance));
 
-            return new b2Vec2(p2.x, p2.y);
+            var ret = new b2Vec2(p2.x, p2.y);
+            p2 = null;
+            return ret;
 
         }
         else {
@@ -977,6 +980,8 @@ BSWG.render = new function() {
                 }
 
                 this.mat.needsUpdate = true;
+
+                lp = null;
             }
         };
 

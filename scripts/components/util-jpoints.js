@@ -202,6 +202,10 @@ BSWG.jpointRenderer = new function() {
 
         clrAttr.needsUpdate = true;
         posAttr.needsUpdate = true;
+
+        pos = clr = comp0center = null;
+        compList.length = 0;
+        compList = null;
     };
 
 }();

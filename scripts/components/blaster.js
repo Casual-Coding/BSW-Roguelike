@@ -137,6 +137,9 @@ BSWG.component_Blaster = {
 
             this.fireT = 1.15 / 2;
             this.kickBack = 1.0;
+
+            p[0] = null;
+            p = null;
         }
         
         if (accel)
@@ -147,6 +150,7 @@ BSWG.component_Blaster = {
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);    
             this.thrustT = 0.3;
+            force = null;
         }
 
     },

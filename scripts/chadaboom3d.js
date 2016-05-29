@@ -350,6 +350,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
                 z: vel.z
             };
             this.add(pos, size*0.15, 32, life * 1.0, attack, v2, true);
+            v2 = null;
         }
     }
 
@@ -402,6 +403,15 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     }
 
     this.particleUpdate = true;
+
+    /*var sizet = Math.clamp(size/10, 0, 1);
+    if (sizet > 0.5 || Math.random() > Math.pow(sizet, 0.01)) {
+        new BSWG.sound_boom().play(pos, size, life);
+    }*/
+
+    size = null;
+    pos = null;
+    vel = null;
 
     return true;
 

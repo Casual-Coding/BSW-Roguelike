@@ -637,21 +637,24 @@ BSWG.physics = new function(){
 
     };
 
+    var wm = null;
+
     this.collisionCallbackPre = function(contact) {
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
-        var wm = new b2WorldManifold();
+        if (!wm) {
+             wm = new b2WorldManifold();
+        }
         contact.GetWorldManifold(wm);
         var p = wm.m_points[0];
         contact._ta = ba.GetLinearVelocityFromWorldPoint(p);
         contact._tb = bb.GetLinearVelocityFromWorldPoint(p);
         ba.__lastForce = 0;
         bb.__lastForce = 0;
+        ba = bb = contact = p = null;
     }
 
     var self = this;
-
-    var wm = null;
 
     this.collisionCallback = function(contact, impulse) {
 
@@ -703,8 +706,11 @@ BSWG.physics = new function(){
                         4.0,
                         new b2Vec2(Math.cos(a)*tforce*0.005-v.x, Math.sin(a)*tforce*0.005-v.y).THREE(Math.random()*3.0)
                     );
+                    v = null;
                 }
             }
+
+            ta = tb = ba = bb = contact = null;
         }
 
     };

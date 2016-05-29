@@ -158,7 +158,7 @@ BSWG.game = new function(){
         Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
         this.curSong = new BSWG.song(3, bpm, 0.0, settings);
         //this.curSong.start();
-        this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
+        //this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.setSongCache = function(song, vol, fadeIn) {
         if (this.curSong) {
@@ -166,7 +166,7 @@ BSWG.game = new function(){
         }
         this.curSong = song;
         //this.curSong.start();
-        this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
+        //this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
     this.repeatSong = function() {
         if (this.curSong) {
@@ -176,7 +176,7 @@ BSWG.game = new function(){
 
     this.stopMusic = function(t) {
         if (this.curSong) {
-            this.curSong.fadeOutStop(t||1.0);
+            //this.curSong.fadeOutStop(t||1.0);
         }
         this.curSong = null;
     };
@@ -717,6 +717,7 @@ BSWG.game = new function(){
                                 }
                                 if (any) {
                                     vr += 1.0;
+                                    p = null;
                                     continue;
                                 }
                                 var args = {};
@@ -728,6 +729,7 @@ BSWG.game = new function(){
                                 args.pos = p;
                                 args.angle = Math.random()*Math.PI*2.0;
                                 new BSWG.component(B.comp, args);
+                                p = null;
                                 break;
                             }
                         }
@@ -1272,6 +1274,8 @@ BSWG.game = new function(){
                             p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
 
                             self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
+
+                            p = p1 = pc = p2 = null;
                         }
                         else {
                             self.cam.zoomTo(dt*2.5, toZ);
