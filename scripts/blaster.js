@@ -22,7 +22,7 @@ BSWG.blasterList = new function () {
             B.t -= dt;
             var comp = null;
             //if ((this.idx % 3) === B.off) {
-                var ret = BSWG.componentList.withRay(B.lp.THREE(0.0), new b2Vec2(B.p.x+B.v.x/2, B.p.y+B.v.y/2).THREE(0.0));
+                var ret = BSWG.componentList.withRay(B.lp.THREE(0.0), new b2Vec2(B.p.x+B.v.x*dt*2, B.p.y+B.v.y*dt*2).THREE(0.0));
                 B.lp.x = B.p.x;
                 B.lp.y = B.p.y;
                 comp = ret ? ret.comp : null;
