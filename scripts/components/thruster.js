@@ -173,8 +173,13 @@ BSWG.component_Thruster = {
                     4.0,
                     v.THREE(Math.random()*2.0),
                     null,
-                    i === 0
+                    false
                 );
+
+                if (i === 0) {
+                    var sizet = Math.clamp((1.35*0.3*5.0 * this.size)/10, 0, 1) * (Math.random() * 0.1 + 0.95);
+                    new BSWG.soundSample().play('explosion', p.particleWrap(0.025 * this.size), Math.pow(sizet, 0.5)*0.35, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0)*0.65);
+                }
 
                 p = v = null;
             }

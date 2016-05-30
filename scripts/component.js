@@ -313,7 +313,7 @@ BSWG.component = function (desc, args) {
                 var v = this.obj.body.GetLinearVelocity();
                 var r = this.obj.radius;
                 if (this.type === 'cc') {
-                    r *= 2.0;
+                    r *= 1.5;
                 }
                 for (var i=0; i<20; i++) {
                     var a = Math.random() * Math.PI * 2.0;
