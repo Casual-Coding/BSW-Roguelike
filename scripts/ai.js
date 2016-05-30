@@ -244,6 +244,10 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
 
                 obj.moveTo = function (p, keyDown, left, right, forward, reverse) { // Stateless
 
+                    if (!comp || !comp.obj || !comp.obj.body || !p) {
+                        return;
+                    }
+
                     left = left || BSWG.KEY.LEFT;
                     right = right || BSWG.KEY.RIGHT;
                     if (!this.tracker) {

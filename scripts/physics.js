@@ -40,13 +40,7 @@ BSWG.physics = new function(){
         };
 
         b2Vec2.prototype.particleWrap = function(z) {
-            var pos = new THREE.Vector3(this.x, this.y, z);
-            return function(vx, vy, vz) {
-                pos.x += vx;
-                pos.y += vy;
-                pos.z += vz;
-                return pos;
-            };
+            return new THREE.Vector3(this.x, this.y, z);
         };
 
         if (!b2Vec2.prototype.clone) {

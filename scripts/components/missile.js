@@ -39,13 +39,16 @@ BSWG.component_Missile = {
 
         this.fireT = 2.5;
         this.nextDestroy = false;
-
-        new BSWG.soundSample().play('missile', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.025+0.2);
     },
 
     destroy: function() {
 
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
         this.meshObj.destroy();
+        this.meshObj = null;
 
     },
 
@@ -60,6 +63,11 @@ BSWG.component_Missile = {
     },
 
     update: function(dt) {
+
+        if (!this.sound) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+1.5/this.size, true);
+        }
 
         if (this.fireT > 0 && (this.obj.body.__lastForce||0.0) < 0.01 && !this.nextDestroy) {
 
@@ -132,6 +140,9 @@ BSWG.component_Missile = {
                 this.removeSafe();
             }
         }
+
+        this.sound.volume(Math.clamp(this.fireT,0,1) * (this.size/2) * 0.75);
+        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
     }
 
 };

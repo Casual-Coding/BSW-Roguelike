@@ -84,7 +84,7 @@ BSWG.component_Thruster = {
 
         if (!this.sound) {
             this.sound = new BSWG.soundSample();
-            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+0.25/this.size, true);
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+0.5/this.size, true);
         }
 
         if (this.dispKeys) {

@@ -406,7 +406,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     var sizet = Math.clamp(size/10, 0, 1) * (Math.random() * 0.1 + 0.95);
     if ((sizet > 0.125 || makeSound) && makeSound !== false) {
-        new BSWG.soundSample().play('explosion', pos, Math.pow(sizet, 0.5), Math.clamp(0.4/(sizet*0.75+0.25), 0.25, 2.0));
+        new BSWG.soundSample().play('explosion', pos, Math.pow(sizet, 0.5)*1.5, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0));
     }
 
     size = null;
