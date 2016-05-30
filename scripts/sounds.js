@@ -48,12 +48,12 @@ BSWG.soundSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
-    play: function (name, pos, amp, rate) {
+    play: function (name, pos, amp, rate, loop) {
       
         var audioCtx = BSWG.music.audioCtx;
 
         this.source = audioCtx.createBufferSource();
-        this.source.loop = false;
+        this.source.loop = !!loop;
         this.source.buffer = BSWG.soundBuffers[name];
         this.source.playbackRate.value = rate || 1;
 
@@ -80,16 +80,42 @@ BSWG.soundSample = BSWG.soundBase({
 
     },
 
+    volume: function (val) {
+        try {
+            this.gain.gain.value = Math.clamp(val, 0, 1);
+        }
+        catch (e) {
+
+        }
+    },
+
+    position: function (p) {
+        try {
+            this.panner.setPosition(p.x, p.y, p.z);
+        }
+        catch (e) {
+
+        }
+        p = null;
+    },
+
     stop: function ( ) {
 
-        try { this.source.stop(); } catch (e) { }
-        try { this.source.disconnect(); } catch (e) { }
-        try { this.gain.disconnect(); } catch (e) { }
-        try { this.panner.disconnect(); } catch (e) { }
+        this.source.onended = null;
 
-        this.source = null;
-        this.gain = null;
-        this.panner = null;
+        try { this.source.stop(); } catch (e) { }
+
+        var self = this;
+        window.setTimeout(function() {
+            try { self.source.disconnect(); } catch (e) { }
+            try { self.gain.disconnect(); } catch (e) { }
+            try { self.panner.disconnect(); } catch (e) { }
+
+            self.source = null;
+            self.gain = null;
+            self.panner = null;
+            self = null;
+        }, 1);
 
     }
 
@@ -100,7 +126,11 @@ BSWG.soundBuffers = {};
 BSWG.soundLoad = function (onload) {
 
     var sounds = [
-        { name: 'explosion', url: 'sounds/explosion.wav' }
+        { name: 'explosion', url: 'sounds/explosion.wav' },
+        { name: 'blaster', url: 'sounds/blaster.wav' },
+        { name: 'missile', url: 'sounds/missile.wav' },
+        { name: 'thruster', url: 'sounds/thruster.wav' },
+        { name: 'laser', url: 'sounds/laser.wav' }
     ];
 
     var urls = [];

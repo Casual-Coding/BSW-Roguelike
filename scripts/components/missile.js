@@ -39,6 +39,8 @@ BSWG.component_Missile = {
 
         this.fireT = 2.5;
         this.nextDestroy = false;
+
+        new BSWG.soundSample().play('missile', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.025+0.2);
     },
 
     destroy: function() {

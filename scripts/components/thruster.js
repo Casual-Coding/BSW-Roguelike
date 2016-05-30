@@ -62,8 +62,14 @@ BSWG.component_Thruster = {
 
     destroy: function() {
 
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
         this.meshObj.destroy();
         this.selMeshObj.destroy();
+        this.meshObj = null;
+        this.selMeshObj = null;
 
     },
 
@@ -75,6 +81,11 @@ BSWG.component_Thruster = {
     },
 
     update: function(dt) {
+
+        if (!this.sound) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+0.25/this.size, true);
+        }
 
         if (this.dispKeys) {
             this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase();
@@ -107,6 +118,9 @@ BSWG.component_Thruster = {
         }
         else
             this.thrustT = 0.0;
+
+        this.sound.volume(Math.clamp(this.thrustT,0,1) * (this.size/2) * 2.0);
+        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
 
     },
 

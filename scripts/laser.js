@@ -28,6 +28,11 @@ BSWG.laserList = new function () {
         ret.angle = angle;
         ret.source = source || null;
 
+        ret.sound = new BSWG.soundSample();
+        ret.sound.play('laser', p.THREE(0.2), 1.0, Math.random()*0.1+0.9, true);
+        ret.sound2 = new BSWG.soundSample();
+        ret.sound2.play('laser', p.THREE(0.2), 0.1, Math.random()*0.1+0.9, true);
+
         ret.mat = BSWG.render.newMaterial("basicVertex", "laserFragment", {
             clr: {
                 type: 'v4',
@@ -62,6 +67,8 @@ BSWG.laserList = new function () {
         ret.set = function(p, angle) {
             this.p = p;
             this.angle = angle;
+            this.sound.position(p.THREE(0.2));
+            this.sound.volume(0.5);
         };
 
         ret.destroy = function() {
@@ -81,6 +88,11 @@ BSWG.laserList = new function () {
             this.mat = null;
             this.geom = null;
             this.source = null;
+
+            this.sound.stop();
+            this.sound = null;
+            this.sound2.stop();
+            this.sound2 = null;
 
         };
 
@@ -114,9 +126,12 @@ BSWG.laserList = new function () {
                         new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*3.0)
                     );
                 }
+                this.sound2.position(p.THREE(0.2));
+                this.sound2.volume(0.5);
             }
             else {
                 this.mat.uniforms.laser.value.x = BSWG.laserRange;
+                this.sound2.volume(0.0);
             }
 
             this.mat.needsUpdate = true;
