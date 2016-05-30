@@ -21,6 +21,8 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         for (var i=0; i<imgData.data.length; i+=4) {
             self.heightMap[~~(i/4)] = imgData.data[i+0];
         }
+        imgData.data.length = 0;
+        imgData = null;
         //BSWG.render.heightMapToNormalMap(self.heightMap, ctx, w, h, tileMask);
     }, true);
 
