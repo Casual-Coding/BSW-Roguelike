@@ -44,11 +44,15 @@ BSWG.soundBase = function (desc) {
 
 }(75, 0.05);*/
 
+BSWG.soundVolume = 1.0;
+
 BSWG.soundSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
     play: function (name, pos, amp, rate, loop) {
+
+        amp *= BSWG.soundVolume * 8;
       
         var audioCtx = BSWG.music.audioCtx;
 
@@ -82,6 +86,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     volume: function (val) {
         try {
+            val *= BSWG.soundVolume * 8;
             this.gain.gain.value = Math.clamp(val, 0, 1);
         }
         catch (e) {

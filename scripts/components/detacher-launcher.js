@@ -68,6 +68,10 @@ BSWG.component_DetacherLauncher = {
 
     destroy: function() {
 
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
         this.meshObj.destroy();
         this.meshObj2.destroy();
         this.selMeshObj.destroy();
@@ -112,6 +116,12 @@ BSWG.component_DetacherLauncher = {
     },
 
     update: function(dt) {
+
+        if (!this.sound) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+1.0/(this.size*0.5+0.5), true);
+        }
+
         if (this.dispKeys) {
             this.dispKeys['launch'][0] = BSWG.KEY_NAMES[this.launchKey].toTitleCase();
             this.dispKeys['launch'][2] = BSWG.input.KEY_DOWN(this.launchKey);
@@ -135,7 +145,9 @@ BSWG.component_DetacherLauncher = {
                     32,
                     0.3*T*5.0,
                     4.0,
-                    v.THREE(Math.random()*2.0)
+                    v.THREE(Math.random()*2.0),
+                    null,
+                    false
                 );
                 var a = this.obj.body.GetAngle() + Math.PI;
                 var accel = 20.0 * [1,3,7][this.size-1];
@@ -149,6 +161,9 @@ BSWG.component_DetacherLauncher = {
         }
         else
             this.fireT = 0.0;
+
+        this.sound.volume(Math.clamp(this.fireT,0,1) * (this.size/2) * 3.25);
+        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
     },
 
     handleInput: function(keys) {
@@ -177,8 +192,15 @@ BSWG.component_DetacherLauncher = {
                     32,
                     0.3*0.3*5.0,
                     4.0,
-                    v.THREE(Math.random()*2.0)
+                    v.THREE(Math.random()*2.0),
+                    null,
+                    false
                 );
+
+                if (i === 0) {
+                    var sizet = Math.clamp((1.35*0.3*5.0 * this.size)/10, 0, 1) * (Math.random() * 0.1 + 0.95);
+                    new BSWG.soundSample().play('explosion', p.particleWrap(0.025 * this.size), Math.pow(sizet, 0.5)*0.65, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0)*0.65);
+                }
             }
         }
     }
