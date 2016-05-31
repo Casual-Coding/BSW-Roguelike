@@ -94,6 +94,11 @@ BSWG.component_SawMotor = {
 
     destroy: function() {
 
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
+
         this.meshObj1.destroy();
         this.selMeshObj1.destroy();
         this.meshObj2.destroy();
@@ -146,6 +151,11 @@ BSWG.component_SawMotor = {
 
     update: function(dt) {
 
+        if (!this.sound) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('saw', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+0.5/this.size, true);
+        }
+
         var robj = null;
         for (var k in this.welds) {
             if (this.welds[k] && this.welds[k].obj.revolute) {
@@ -163,6 +173,10 @@ BSWG.component_SawMotor = {
 
         this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
         this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
+
+        this.sound.volume(Math.clamp(this.motorSpeed/100,0,1) * (this.size/2) * 2.0);
+        this.sound.rate(Math.clamp(this.motorSpeed/100,0.05,1) / (this.size/2) * 8.0);
+        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
 
     },
 

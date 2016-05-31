@@ -77,9 +77,16 @@ BSWG.component_HingeHalf = {
         this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);
         BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
 
+        this.moveT = 0;
+
     },
 
     destroy: function() {
+
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
 
         this.meshObj1.destroy();
         this.selMeshObj1.destroy();
@@ -142,6 +149,11 @@ BSWG.component_HingeHalf = {
 
     update: function(dt) {
 
+        if (!this.sound && this.motor) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+1.0/(this.size*0.5+0.5), true);
+        }
+
         //if (this.dispKeys) {
             this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
             this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
@@ -165,6 +177,15 @@ BSWG.component_HingeHalf = {
             }
         }
 
+        if (this.sound && robj) {
+            this.sound.volume(Math.clamp(Math.abs(robj.joint.GetMotorSpeed()/1.5), 0, 1));
+        }
+        else if (this.sound) {
+            this.sound.volume(0);
+        }
+        if (this.sound) {
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        }
     },
 
 };

@@ -653,7 +653,10 @@ BSWG.component = function (desc, args) {
                                 0.75,
                                 32,
                                 0.4,
-                                1.0
+                                1.0,
+                                null,
+                                null,
+                                true
                             );
                         }
 
@@ -674,7 +677,10 @@ BSWG.component = function (desc, args) {
                             1.25,
                             32,
                             0.4,
-                            1.0
+                            1.0,
+                            null,
+                            null,
+                            true
                         );
 
                         BSWG.input.EAT_MOUSE('left');

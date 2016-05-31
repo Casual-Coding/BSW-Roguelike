@@ -94,6 +94,15 @@ BSWG.soundSample = BSWG.soundBase({
         }
     },
 
+    rate: function (val) {
+        try {
+            this.source.playbackRate.value = val || 1;
+        }
+        catch (e) {
+
+        }
+    },
+
     position: function (p) {
         try {
             this.panner.setPosition(p.x, p.y, p.z);
@@ -135,7 +144,9 @@ BSWG.soundLoad = function (onload) {
         { name: 'blaster', url: 'sounds/blaster.wav' },
         { name: 'missile', url: 'sounds/missile.wav' },
         { name: 'thruster', url: 'sounds/thruster.wav' },
-        { name: 'laser', url: 'sounds/laser.wav' }
+        { name: 'laser', url: 'sounds/laser.wav' },
+        { name: 'saw', url: 'sounds/saw.wav' },
+        { name: 'hinge', url: 'sounds/hinge.wav' }
     ];
 
     var urls = [];

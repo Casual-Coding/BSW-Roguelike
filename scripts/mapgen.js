@@ -984,7 +984,7 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
                 var E2 = BSWG.getEnemy(E.type);
                 if (E2 && E2.obj && E2.stats) {
                     var prob = E2.compStats(zone.tech);
-                    prob = Math.pow(prob, 5.0);
+                    prob = Math.pow(prob, 2.0);
                     if (Math.random() < prob) {
                         zone.enemies.push(E);
                     }

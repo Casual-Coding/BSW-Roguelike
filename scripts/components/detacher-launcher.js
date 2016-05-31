@@ -162,7 +162,7 @@ BSWG.component_DetacherLauncher = {
         else
             this.fireT = 0.0;
 
-        this.sound.volume(Math.clamp(this.fireT,0,1) * (this.size/2) * 3.25);
+        this.sound.volume(Math.clamp(this.fireT-6,0,1) * (this.size/2) * 3.25);
         this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
     },
 
