@@ -159,6 +159,11 @@ chadaboom3D.prototype.init = function () {
     this.mat = BSWG.render.newMaterial("expVertex", "expFragment", uniforms, THREE.AdditiveBlending);
     this.mat.depthWrite = false;
 
+    this.mat.blending = THREE.CustomBlending;
+    this.mat.blendSrc = THREE.SrcAlphaFactor;
+    this.mat.blendDst = THREE.OneMinusSrcAlphaFactor;
+    this.mat.blendEquation = THREE.AddEquation;
+
     mesh = new THREE.Mesh( geom, this.mat );
     mesh.frustumCulled = false;
     mesh.position.z = 2.0;
@@ -281,11 +286,11 @@ chadaboom3D.blue_bright = [
     [ 1.0,   1.0,  1.0,  1.0 ]
 ];
 
-chadaboom3D.green = [
-    [ 0.25, 0.25, 0.25,  1/3 ],
-    [ 0.0,   1.0,  0.0,  2/3 ],
-    [ 1.0,   1.0,  1.0,  1.0 ],
-    [ 1.0,   1.0,  1.0,  1.0 ]
+chadaboom3D.smoke = [
+    [ 0.0,  0.0,  0.0,  1.5/3 ],
+    [ 0.2,  0.2,  0.2,  2.0/3 ],
+    [ 0.4,  0.4,  0.4,  2.5/3 ],
+    [ 0.6,  0.6,  0.6,  1.0 ]
 ];
 
 chadaboom3D.palettes = [
@@ -293,14 +298,14 @@ chadaboom3D.palettes = [
     chadaboom3D.fire_bright,
     chadaboom3D.blue,
     chadaboom3D.blue_bright,
-    chadaboom3D.green
+    chadaboom3D.smoke
 ];
 
 chadaboom3D.fire = 0;
 chadaboom3D.fire_bright = 1;
 chadaboom3D.blue = 2;
 chadaboom3D.blue_bright = 3;
-chadaboom3D.green = 4;
+chadaboom3D.smoke = 4;
 
 chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub, makeSound) {
 
@@ -340,6 +345,8 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         return false;
     }
 
+    var opalette = this.palette;
+
     if (!noSub && size > 0.1) {
         for (var i=0; i<2; i++) {
             var len = size * Math.random() * 2.0;
@@ -352,6 +359,11 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
             this.add(pos, size*0.15, 32, life * 1.0, attack, v2, true);
             v2 = null;
         }
+    }
+    else if (Math.random() < 0.15 && size < 0.15) {
+        this.palette = chadaboom3D.smoke;
+        size *= 6.0;
+        life *= 1.5;
     }
 
     var palIdx = Math.clamp(this.palette || chadaboom3D.fire, 0, chadaboom3D.palettes.length-1);
@@ -412,6 +424,8 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     size = null;
     pos = null;
     vel = null;
+
+    this.palette = opalette;
 
     return true;
 

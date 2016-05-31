@@ -1500,6 +1500,9 @@ BSWG.componentList = new function () {
     };
 
     this.withinRadiusPlayerOnly = function (p, r) {
+        if (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body) {
+            return new Array();
+        }
         var ret = new Array();
         var len = this.playerComps.length;
         for (var i=0; i<len; i++) {

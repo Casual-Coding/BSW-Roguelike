@@ -292,6 +292,10 @@ BSWG.component_CommandCenter = {
 
         }
 
+        if (BSWG.game.scene !== BSWG.SCENE_TITLE && (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body)) {
+            return {};
+        }
+
         if (this.ai && !this.aiPaused) {
 
             var cmd = this.aiCmdBfr ? this.aiCmdBfr[0] : null;
