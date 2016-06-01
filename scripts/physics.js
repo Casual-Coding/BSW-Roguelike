@@ -565,7 +565,20 @@ BSWG.physics = new function(){
         return Math.distVec2(arc.p, b) - (arc.r + br);
     };
 
+    this.scrapes = [];
+
     this.reset = function (){
+
+        for (var i=0; i<this.scrapes.length; i++) {
+            this.scrapes[i].a.stop();
+            this.scrapes[i].b.stop();
+            this.scrapes[i].a = null;
+            this.scrapes[i].b = null;
+            delete this.scrapes[i].a;
+            delete this.scrapes[i].b;
+            this.scrapes[i] = null;
+        }
+        this.scrapes = [];
 
         while (this.welds.length) {
             this.removeWeld(this.welds[0]);
@@ -585,6 +598,8 @@ BSWG.physics = new function(){
     };
 
     this.lastDT = 1.0/60.0;
+
+    this.framen = 0;
 
     this.update = function (dt){
 
@@ -629,6 +644,33 @@ BSWG.physics = new function(){
             }
         }
 
+        for (var i=0; i<this.scrapes.length; i++) {
+            var S = this.scrapes[i];
+            if ((S.lframe + 2) < this.framen) {
+                new BSWG.soundSample().play('bump', S.lp, S.va/2.0, S.ra);
+                new BSWG.soundSample().play('bump', S.lp, S.vb/2.0, S.rb);
+                S.a.stop();
+                S.b.stop();
+                S.a = null;
+                S.b = null;
+                S.lp = null;
+                delete S.lp;
+                delete S.a;
+                delete S.b;
+                delete S.lframe;
+                var contact = S.parent;
+                contact._sound = null;
+                delete contact._sound;
+                S.parent = null;
+                delete S.parent;
+                this.scrapes[i] = null;
+                this.scrapes.splice(i, 1);
+            }
+            S = null;
+        }
+
+        this.framen += 1;
+
     };
 
     var wm = null;
@@ -669,8 +711,36 @@ BSWG.physics = new function(){
             tb.x -= contact._tb.x;
             tb.y -= contact._tb.y;
 
-            var forceA = (Math.lenVec2(ta) * ba.GetMass()) / self.lastDT;
-            var forceB = (Math.lenVec2(tb) * bb.GetMass()) / self.lastDT;
+            var ma = ba.GetMass(), mb = bb.GetMass();
+
+            var forceA = (Math.lenVec2(ta) * ma) / self.lastDT;
+            var forceB = (Math.lenVec2(tb) * mb) / self.lastDT;
+
+            var p3 = p.THREE(0.2);
+
+            if (!contact._sound) {
+                contact._sound = {
+                    a: new BSWG.soundSample(),
+                    b: new BSWG.soundSample(),
+                    lframe: self.framen,
+                    parent: contact,
+                    va: 0, vb: 0, ra: 0, rb: 0, lp: null
+                }
+                contact._sound.a.play('scrape', p3, 1.0, 1.0, true);
+                contact._sound.b.play('scrape', p3, 1.0, 1.0, true);
+                self.scrapes.push(contact._sound);
+            }
+
+            contact._sound.a.volume(contact._sound.va = Math.clamp(forceA / 2, 0, 1));
+            contact._sound.b.volume(contact._sound.vb = Math.clamp(forceB / 2, 0, 1));
+            contact._sound.a.rate(contact._sound.ra = 0.35 / (ma / 5));
+            contact._sound.b.rate(contact._sound.rb = 0.35 / (mb / 5));
+            contact._sound.a.position(p3);
+            contact._sound.b.position(p3);
+            contact._sound.lframe = self.framen;
+            contact._sound.lp = p3;
+
+            p3 = null;
 
             var tforce = forceA + forceB;
 

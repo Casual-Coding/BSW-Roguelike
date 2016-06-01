@@ -146,7 +146,9 @@ BSWG.soundLoad = function (onload) {
         { name: 'thruster', url: 'sounds/thruster.wav' },
         { name: 'laser', url: 'sounds/laser.wav' },
         { name: 'saw', url: 'sounds/saw.wav' },
-        { name: 'hinge', url: 'sounds/hinge.wav' }
+        { name: 'hinge', url: 'sounds/hinge.wav' },
+        { name: 'bump', url: 'sounds/bump.wav' },
+        { name: 'scrape', url: 'sounds/scrape.wav' }
     ];
 
     var urls = [];
