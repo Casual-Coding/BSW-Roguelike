@@ -151,13 +151,25 @@ BSWG.component_HingeHalf = {
 
         if (!this.sound && this.motor) {
             this.sound = new BSWG.soundSample();
-            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+1.0/(this.size*0.5+0.5), true);
+            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, Math.random()*0.1+1.0/(this.size*0.5+0.5), true);
         }
 
         //if (this.dispKeys) {
             this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
             this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
         //}
+
+        var robj = null;
+        for (var k in this.welds) {
+            if (this.welds[k] && this.welds[k].obj.revolute ) {
+                robj = this.welds[k].obj;
+                break;
+            }
+        }
+
+        if (robj) {
+            robj.joint.__ms *= 0.75;
+        }        
 
     },
 
@@ -174,11 +186,12 @@ BSWG.component_HingeHalf = {
         if (robj) {
             if (keys[this.rotKey]) {
                 robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1.5 : 1.5));
+                robj.joint.__ms = 1.0;
             }
         }
 
         if (this.sound && robj) {
-            this.sound.volume(Math.clamp(Math.abs(robj.joint.GetMotorSpeed()/1.5), 0, 1));
+            this.sound.volume(Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.01, 0, 1));
         }
         else if (this.sound) {
             this.sound.volume(0);
