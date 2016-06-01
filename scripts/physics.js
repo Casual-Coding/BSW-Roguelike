@@ -724,7 +724,7 @@ BSWG.physics = new function(){
                     b: new BSWG.soundSample(),
                     lframe: self.framen,
                     parent: contact,
-                    va: 0, vb: 0, ra: 0, rb: 0, lp: null
+                    va: 0, vb: 0, ra: 0, rb: 0, lp: p3
                 }
                 contact._sound.a.play('scrape', p3, 1.0, 1.0, true);
                 contact._sound.b.play('scrape', p3, 1.0, 1.0, true);
@@ -738,7 +738,7 @@ BSWG.physics = new function(){
             contact._sound.a.position(p3);
             contact._sound.b.position(p3);
             contact._sound.lframe = self.framen;
-            contact._sound.lp = p3;
+            contact._sound.lp.set(p3.x, p3.y, p3.z);
 
             p3 = null;
 

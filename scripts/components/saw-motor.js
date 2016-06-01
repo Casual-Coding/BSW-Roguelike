@@ -169,15 +169,16 @@ BSWG.component_SawMotor = {
             robj.vMotorSpeed = this.motorSpeed;
             this.motorSpeed -= (this.motorSpeed * dt);
             this.motorAccel = 0.0;
+            this.sound.volume(Math.clamp(this.motorSpeed/100,0,1) * (this.size/2) * 2.0);
+            this.sound.rate(Math.clamp(this.motorSpeed/100,0.05,1) / (this.size/2) * 8.0);
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        }
+        else {
+            this.sound.volume(0.0);
         }
 
         this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
         this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
-
-        this.sound.volume(Math.clamp(this.motorSpeed/100,0,1) * (this.size/2) * 2.0);
-        this.sound.rate(Math.clamp(this.motorSpeed/100,0.05,1) / (this.size/2) * 8.0);
-        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
-
     },
 
     handleInput: function(keys) {
