@@ -375,8 +375,11 @@ BSWG.playerStats = function(load) {
         defend:     0,
         speed:      0,
         levelUp:    false,
-        money:      100
+        money:      100,
+        store:      null
     };
+
+    load.store = [];
 
     for (var key in load) {
         this[key] = load[key];
@@ -389,6 +392,70 @@ BSWG.playerStats = function(load) {
         }
         return ret;
     };
+
+    var sbt = BSWG.componentList.sbTypes;
+    for (var i=0; i<sbt.length; i++) {
+        for (var j=0; j<sbt[i].sbadd.length; j++) {
+            sbt[i].sbadd[j].count = 0;
+        }
+    }
+
+    this.addStore = function (comp, inc) {
+        inc = inc || 1;
+        var sbt = BSWG.componentList.sbTypes;
+        for (var i=0; i<sbt.length; i++) {
+            if (sbt[i].type != comp.type) {
+                continue;
+            }
+            for (var j=0; j<sbt[i].sbadd.length; j++) {
+                var obj = sbt[i].sbadd[j];
+                var nobj = {};
+                var eq = true;
+                for (var key in obj) {
+                    if (key != 'title' && key != 'count' && obj[key] !== comp[key]) {
+                        eq = false;
+                    }
+                    if (key != 'title' && key != 'count') {
+                        nobj[key] = obj[key];
+                    }
+                }
+                if (eq) {
+                    nobj.type = sbt[i].type;
+                    obj.count = (obj.count || 0) + inc;
+                    if (obj.count < 0) {
+                        obj.count = 0;
+                    }
+                    while (inc < 0) {
+                        for (var k=0; k<this.store.length; k++) {
+                            var eq2 = true;
+                            for (var key in obj) {
+                                if (key != 'title' && key != 'count' && obj[key] !== this.store[k][key]) {
+                                    eq2 = false;
+                                }
+                            }
+                            if (eq2) {
+                                this.store.splice(k, 1);
+                                break;
+                            }
+                        }
+                        inc += 1;
+                    }
+                    while (inc > 0) {
+                        this.store.push(nobj);
+                        inc -= 1;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    var ostore = load.store;
+    load.store = [];
+    for (var i=0; i<ostore.length; i++) {
+        this.addStore(ostore[i], 1);
+    }
 
     this.pointsUsed = function () {
         return this.attack + this.mele + this.defend + this.speed;

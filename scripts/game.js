@@ -712,7 +712,8 @@ BSWG.game = new function(){
                     click: function (me) {
                     }
                 });*/
-                if (scene === BSWG.SCENE_GAME2) {
+
+                if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
                     this.compPal = new BSWG.uiControl(BSWG.control_CompPalette, {
                         x: 2048, y: 70,
                         w: 128 * 3,
@@ -738,18 +739,26 @@ BSWG.game = new function(){
                                 }
                                 var args = {};
                                 for (var key in B.args) {
-                                    if (key !== 'title') {
+                                    if (key !== 'title' && key !== 'count') {
                                         args[key] = B.args[key];
                                     }
                                 }
                                 args.pos = p;
                                 args.angle = Math.random()*Math.PI*2.0;
-                                new BSWG.component(B.comp, args);
+                                var comp = new BSWG.component(B.comp, args);
                                 p = null;
+                                if (self.scene === BSWG.SCENE_GAME1) {
+                                    self.xpInfo.addStore(comp, -1);
+                                }
+                                comp = null;
                                 break;
                             }
                         }
-                    });
+                    });                    
+                }
+
+
+                if (scene === BSWG.SCENE_GAME2) {
                     this.loadBtn = new BSWG.uiControl(BSWG.control_Button, {
                         x: 10 + 50 + 10 + 50 + 10, y: 10,
                         w: 110, h: 65,
@@ -1057,6 +1066,12 @@ BSWG.game = new function(){
                         }
                         else {
                         }
+                    }
+
+                    while (BSWG.componentList.compList.length) {
+                        var comp = BSWG.componentList.compList[0];
+                        self.xpInfo.addStore(comp);
+                        comp.remove();
                     }
 
                     this.ccblock = new BSWG.component(BSWG.component_CommandCenter, {

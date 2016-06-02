@@ -938,7 +938,7 @@ BSWG.control_CompPalette = {
             headers[i] = {
                 x: x,
                 y: y,
-                text: CL[i].name
+                text: CL[i].name,
             };
             y += 20;
 
@@ -1055,6 +1055,14 @@ BSWG.control_CompPalette = {
 
         for (var i=0; i<this.buttons.length; i++) {
             var B = this.buttons[i];
+            
+            if (BSWG.game.scene === BSWG.SCENE_GAME1) {
+                if (this.buttons[i].args.count < 1) {
+                    ctx.globalAlpha = 0.125;
+                    B.mouseIn = B.mouseDown = false;
+                }
+            }
+
             ctx.font = '12px Orbitron';
             ctx.strokeStyle = '#888';
             ctx.fillStyle = 'rgba(50,50,50,1)';
@@ -1071,11 +1079,28 @@ BSWG.control_CompPalette = {
 
             ctx.lineWidth = 1.0;
 
-            ctx.textAlign = 'center';
-            ctx.fillStyle = B.mouseDown ? '#bbb' : '#bbb';
-            ctx.fillText(B.text, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5+4);
+            if (BSWG.game.scene === BSWG.SCENE_GAME1) {
+                ctx.textAlign = 'left';
+                ctx.fillStyle = B.mouseDown ? '#bbb' : '#bbb';
+                ctx.fillText(B.text, B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
+            }
+            else {
+                ctx.textAlign = 'center';
+                ctx.fillStyle = B.mouseDown ? '#bbb' : '#bbb';
+                ctx.fillText(B.text, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5+4);
+            }
 
-            ctx.textAlign = 'left';            
+            if (BSWG.game.scene === BSWG.SCENE_GAME1) {
+                if (this.buttons[i].args.count > 0) {
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(this.buttons[i].args.count + '', B.x + this.p.x + B.w - 4, B.y + this.p.y + B.h*0.5+4);
+                }
+            }
+
+            ctx.textAlign = 'left';
+
+            ctx.globalAlpha = 1.0;
         }
 
     },
@@ -1084,7 +1109,7 @@ BSWG.control_CompPalette = {
 
         var toX = 2048;
 
-        if (BSWG.game.editMode) {
+        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode)) {
             toX = BSWG.render.viewport.w - (this.w);
         }
 
@@ -1104,6 +1129,12 @@ BSWG.control_CompPalette = {
                     B.mouseIn = true;
                 else
                     B.mouseIn = false;
+                
+                if (BSWG.game.scene === BSWG.SCENE_GAME1) {
+                    if (this.buttons[i].args.count < 1) {
+                        B.mouseIn = B.mouseDown = false;
+                    }
+                }
 
                 if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock)
                 {

@@ -843,7 +843,7 @@ BSWG.componentList = new function () {
                 for (var j=0; j<sbadd.length; j++) {
                     var args = {};
                     for (var key in sbadd[j]) {
-                        if (key !== 'title') {
+                        if (key !== 'title' && key !== 'count') {
                             args[key] = sbadd[j][key];
                         }
                     }
