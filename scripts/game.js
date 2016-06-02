@@ -405,6 +405,7 @@ BSWG.game = new function(){
         this.cam = new BSWG.camera();
         BSWG.render.updateCam3D(this.cam);
         this.editMode = false;
+        this.storeMode = false;
         this.showControls = false;
 
         if (this.tileMap) {
@@ -687,6 +688,21 @@ BSWG.game = new function(){
                         self.showControls = me.selected;
                     }
                 });
+                if (scene === BSWG.SCENE_GAME1) {
+                    this.storeBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: 10,
+                        w: 65, h: 65,
+                        text: BSWG.render.images['store-mode'],
+                        selected: this.storeMode,
+                        click: function (me) {
+                            me.selected = !me.selected;
+                            self.storeMode = me.selected;
+                        }
+                    });
+                }
+                else {
+                    this.storeBtn = null;
+                }
 
                 /*this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
                     x: 10, y: 10,
@@ -1470,21 +1486,20 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && BSWG.planets.inzone(self.ccblock.obj.body.GetWorldCenter()) && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1) {
+            if (self.ccblock && !self.ccblock.destroyed && self.safeZone && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1) {
                 if (!self.saveHealAdded) {
                     self.saveBtn.add();
-                    //self.healBtn.add();
                     self.saveHealAdded = true;
                 }
-                //self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
-                //self.saveBtn.p.x = self.healBtn.p.x + 10 + self.healBtn.w;
             }
             else {
                 if (self.saveHealAdded) {
                     self.saveBtn.remove();
-                    //self.healBtn.remove();
                     self.saveHealAdded = false;
                 }
+            }
+            if (self.storeBtn) {
+                self.storeBtn.text = self.safeZone ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
             }
 
             if (self.scene === BSWG.SCENE_GAME2) {
@@ -1521,6 +1536,7 @@ BSWG.game = new function(){
                     }
                 }
                 self.inZone = self.map.getZone(self.ccblock.obj.body.GetWorldCenter());
+                self.safeZone = self.inZone.safe && Math.distVec2(self.inZone.worldP, self.ccblock.obj.body.GetWorldCenter()) < (5 * self.map.gridSize);
                 if (!self.zSwitchTime) {
                     self.zSwitchTime = Date.timeStamp() - 5;
                 }
@@ -1578,6 +1594,13 @@ BSWG.game = new function(){
                 self.editBtn.p.y = self.hudY(self.hudBtn[6][1]) + 2;
                 self.editBtn.w = self.hudX(self.hudBtn[6][2]) - self.editBtn.p.x - 4;
                 self.editBtn.h = self.hudY(self.hudBtn[6][3]) - self.editBtn.p.y - 4;
+            }
+
+            if (self.storeBtn) {
+                self.storeBtn.p.x = self.hudX(self.hudBtn[10][0]) + 2;
+                self.storeBtn.p.y = self.hudY(self.hudBtn[10][1]) + 2;
+                self.storeBtn.w = self.hudX(self.hudBtn[10][2]) - self.storeBtn.p.x - 4;
+                self.storeBtn.h = self.hudY(self.hudBtn[10][3]) - self.storeBtn.p.y - 4;
             }
 
             if (self.anchorBtn) {

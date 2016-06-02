@@ -210,6 +210,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 if (valid) {
                     ret.zones[i] = new Object();
                     ret.zones[i].p = p;
+                    ret.zones[i].worldP = new b2Vec2(p.x * ret.gridSize, p.y * ret.gridSize);
                     ret.zones[i].name = BSWG.randomName.get();
                     ret.zones[i].discovered = false;
                     ret.zones[i].id = i;
@@ -245,6 +246,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     ret.zones[i].hasPlanet = true;
                     ret.zones[j].hasPlanet = true;
                     ret.zones[i].home = true;
+                    ret.zones[i].safe = true;
                     ret.zones[j].end = true;
                     found = true;
                 }
@@ -677,14 +679,14 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     var lastBattleP = null;
     var lastBattleZone = null;
     var lastZone = null;
-    var distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
+    var distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
 
     ret.tickSpawner = function(dt, p) {
 
         var zone = this.getZone(p);
 
         if (BSWG.game.battleMode) {
-            distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
+            distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
             lastBattleP = p.clone();
             lastP = p.clone();
             lastZone = zone;
@@ -695,7 +697,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         }
 
         if (zone !== lastZone) {
-            distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
+            distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
         }
 
         if (lastP) {
@@ -709,9 +711,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
             else if (zone.enemies && zone.enemies.length) {
                 if (distanceLeft <= 0) {
-                    this.escapeDistance = this.gridSize * 6.0 / 1.75;
+                    this.escapeDistance = this.gridSize * 6.0 / 1.35;
                     lastBattleZone = zone;
-                    distanceLeft = Math.random() * 10 * this.gridSize / 1.75 + 6 * this.gridSize / 1.75;
+                    distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
                     return zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
                 }
             }
