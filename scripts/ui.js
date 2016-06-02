@@ -1081,7 +1081,7 @@ BSWG.control_CompPalette = {
 
             if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                 ctx.textAlign = 'left';
-                ctx.fillStyle = B.mouseDown ? '#bbb' : '#bbb';
+                ctx.fillStyle = B.mouseDown ? '#fff' : '#fff';
                 ctx.fillText(B.text, B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
             }
             else {
@@ -1093,7 +1093,7 @@ BSWG.control_CompPalette = {
             if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                 if (this.buttons[i].args.count > 0) {
                     ctx.textAlign = 'right';
-                    ctx.fillStyle = 'white';
+                    ctx.fillStyle = '#0f0';
                     ctx.fillText(this.buttons[i].args.count + '', B.x + this.p.x + B.w - 4, B.y + this.p.y + B.h*0.5+4);
                 }
             }
@@ -1109,7 +1109,7 @@ BSWG.control_CompPalette = {
 
         var toX = 2048;
 
-        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode)) {
+        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode && BSWG.game.safeZone)) {
             toX = BSWG.render.viewport.w - (this.w);
         }
 

@@ -286,11 +286,11 @@ chadaboom3D.blue_bright = [
     [ 1.0,   1.0,  1.0,  1.0 ]
 ];
 
-chadaboom3D.smoke = [
-    [ 0.0,  0.0,  0.0,  1.5/3 ],
-    [ 0.2,  0.2,  0.2,  2.0/3 ],
-    [ 0.4,  0.4,  0.4,  2.5/3 ],
-    [ 0.6,  0.6,  0.6,  1.0 ]
+chadaboom3D.green = [
+    [ 0.25, 0.25, 0.25,  1/3 ],
+    [ 0.0,   1.0,  0.0,  2/3 ],
+    [ 1.0,   1.0,  1.0,  1.0 ],
+    [ 1.0,   1.0,  1.0,  1.0 ]
 ];
 
 chadaboom3D.palettes = [
@@ -298,14 +298,14 @@ chadaboom3D.palettes = [
     chadaboom3D.fire_bright,
     chadaboom3D.blue,
     chadaboom3D.blue_bright,
-    chadaboom3D.smoke
+    chadaboom3D.green
 ];
 
 chadaboom3D.fire = 0;
 chadaboom3D.fire_bright = 1;
 chadaboom3D.blue = 2;
 chadaboom3D.blue_bright = 3;
-chadaboom3D.smoke = 4;
+chadaboom3D.green = 4;
 
 chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub, makeSound) {
 
@@ -361,7 +361,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         }
     }
     else if (Math.random() < 0.15 && size < 0.15) {
-        this.palette = chadaboom3D.smoke;
+        //this.palette = chadaboom3D.smoke;
         size *= 6.0;
         life *= 1.5;
     }
@@ -418,7 +418,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     var sizet = Math.clamp(size/10, 0, 1) * (Math.random() * 0.1 + 0.95);
     if ((sizet > 0.125 || makeSound) && makeSound !== false) {
-        new BSWG.soundSample().play('explosion', pos, Math.pow(sizet, 0.5)*1.5, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0));
+        new BSWG.soundSample().play(this.palette === chadaboom3D.green ? 'store' : 'explosion', pos, Math.pow(sizet, 0.5)*1.5, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0));
     }
 
     size = null;

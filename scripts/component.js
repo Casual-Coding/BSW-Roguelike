@@ -41,6 +41,9 @@ BSWG.generateTag = function () {
 };
 
 BSWG.componentHoverFn = function(self) {
+    if (!BSWG.game.editMode && BSWG.game.storeMode && BSWG.game.scene === BSWG.SCENE_GAME1 && !self.onCC && BSWG.componentList.mouseOver === self) {
+        return true;
+    }
     if (BSWG.componentList.mouseOver !== self || !BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
         return false;
     }
@@ -274,7 +277,7 @@ BSWG.component = function (desc, args) {
     this.hp = this.maxHP;
     this.destroyed = false;
 
-    this.takeDamage = function (amt, fromC, noMin) {
+    this.takeDamage = function (amt, fromC, noMin, disolve) {
 
         if (BSWG.game.scene === BSWG.SCENE_TITLE) {
             return;
@@ -303,6 +306,10 @@ BSWG.component = function (desc, args) {
             return;
         }
 
+        if (disolve) {
+            amt = this.hp * 1000 + 1000;
+        }
+
         this.hp -= amt;
         if (this.hp > this.maxHP) {
             this.hp = this.maxHP;
@@ -315,12 +322,12 @@ BSWG.component = function (desc, args) {
                 if (this.type === 'cc') {
                     r *= 1.5;
                 }
-                for (var i=0; i<40; i++) {
+                for (var i=0; i<(disolve ? 1 : 40); i++) {
                     var a = Math.random() * Math.PI * 2.0;
                     var r2 = Math.random() * r * 0.5;
                     var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
                                         p.y + Math.sin(a) * r2);
-                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                    BSWG.render.boom.palette = disolve ? chadaboom3D.green : chadaboom3D.fire_bright;
                     BSWG.render.boom.add(
                         p2.particleWrap(0.025),
                         r*(3.5 + 2.5*Math.random()),
@@ -329,7 +336,7 @@ BSWG.component = function (desc, args) {
                         2.0,
                         v.THREE(Math.random()*2.0),
                         null,
-                        i < 4
+                        i < (disolve ? 1 : 4)
                     );
                 }
             }
@@ -1228,7 +1235,10 @@ BSWG.componentList = new function () {
             this.mouseOver = this.compHover2;
         }
         if (this.mouseOver && BSWG.componentHoverFn(this.mouseOver) && (!BSWG.ui.mouseBlock || BSWG.game.grabbedBlock)) {
-            if (this.mouseOver.hasConfig && this.mouseOver.onCC && BSWG.game.editMode && !BSWG.ui.mouseBlock) {
+            if (BSWG.game.storeMode && !BSWG.game.editMode && BSWG.game.scene === BSWG.SCENE_GAME1) {
+                BSWG.render.setCustomCursor(true, 4);
+            }
+            else if (this.mouseOver.hasConfig && this.mouseOver.onCC && BSWG.game.editMode && !BSWG.ui.mouseBlock) {
                 BSWG.render.setCustomCursor(true, 3);
             }
             else {

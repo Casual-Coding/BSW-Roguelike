@@ -746,10 +746,11 @@ BSWG.game = new function(){
                                 args.pos = p;
                                 args.angle = Math.random()*Math.PI*2.0;
                                 var comp = new BSWG.component(B.comp, args);
-                                p = null;
                                 if (self.scene === BSWG.SCENE_GAME1) {
                                     self.xpInfo.addStore(comp, -1);
+                                    new BSWG.soundSample().play('store-2', p.THREE(0.2), 0.5, 2.0);
                                 }
+                                p = null;
                                 comp = null;
                                 break;
                             }
@@ -1341,6 +1342,14 @@ BSWG.game = new function(){
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
 
+                    if (self.storeMode && !self.editMode && BSWG.input.MOUSE_RELEASED('left') && BSWG.componentList.mouseOver) {
+                        var comp = BSWG.componentList.mouseOver;
+                        if (!comp.onCC) {
+                            self.xpInfo.addStore(comp, 1);
+                            comp.takeDamage(1000000, null, true, true);
+                        }
+                        comp = null;
+                    }
                     if (self.editMode && !self.ccblock.destroyed) {
 
                         if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.ui.mouseBlock) {
