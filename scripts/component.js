@@ -315,7 +315,7 @@ BSWG.component = function (desc, args) {
                 if (this.type === 'cc') {
                     r *= 1.5;
                 }
-                for (var i=0; i<20; i++) {
+                for (var i=0; i<40; i++) {
                     var a = Math.random() * Math.PI * 2.0;
                     var r2 = Math.random() * r * 0.5;
                     var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
@@ -327,7 +327,9 @@ BSWG.component = function (desc, args) {
                         256,
                         1 + Math.pow(r, 1/3) * Math.random(),
                         2.0,
-                        v.THREE(Math.random()*2.0)
+                        v.THREE(Math.random()*2.0),
+                        null,
+                        i < 4
                     );
                 }
             }

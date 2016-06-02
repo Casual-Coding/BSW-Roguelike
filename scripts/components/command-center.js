@@ -117,6 +117,10 @@ BSWG.component_CommandCenter = {
 
     destroy: function() {
 
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
         this.meshObj.destroy();
         this.selMeshObj.destroy();
         this.meshObj2.destroy();
@@ -185,6 +189,11 @@ BSWG.component_CommandCenter = {
 
     update: function(dt) {
 
+        if (!this.sound) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 0.2, 0.1, true);
+        }
+
         this.dispKeys['left'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.LEFT);
         this.dispKeys['right'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.RIGHT);
         this.dispKeys['forward'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.UP);
@@ -207,8 +216,10 @@ BSWG.component_CommandCenter = {
                 if (C && ((C.onCC && C.onCC.id === this.id) || (C.id === this.id))) {
                     C.obj.body.SetLinearVelocity(v.clone());
                 }
-            }            
+            }
         }
+
+        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
 
     },
 
@@ -361,6 +372,10 @@ BSWG.component_CommandCenter = {
         else {
             accel *= 2.5;
             rot *= 1.5;
+        }
+
+        if (this.sound) {
+            this.sound.volume(0.2 * (Math.abs(rot) + Math.abs(accel)));
         }
 
         if (rot) {

@@ -4,7 +4,7 @@ BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 BSWG.camVelLookBfr         = 0.3; // * viewport.w
 BSWG.lookRange             = 45.0;
-BSWG.grabSpeed             = 4.0;
+BSWG.grabSpeed             = 2.75;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
