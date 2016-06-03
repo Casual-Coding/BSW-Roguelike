@@ -16,6 +16,8 @@ BSWG.defenceBias = 2.0;
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
 
+BSWG.compExpireTime = 7.5 * 60.0;
+
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var chars2 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -656,16 +658,18 @@ BSWG.component = function (desc, args) {
                         var p1 = this.jpointsw[this.jmatch[i][0]];
 
                         if (!autos) {
+                            var p = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2);
+                            new BSWG.soundSample().play('store', p, 0.11, 2.0);
                             BSWG.render.boom.palette = chadaboom3D.blue;
                             BSWG.render.boom.add(
-                                new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2),
+                                p,
                                 0.75,
                                 32,
                                 0.4,
                                 1.0,
                                 null,
                                 null,
-                                true
+                                false
                             );
                         }
 
@@ -673,24 +677,26 @@ BSWG.component = function (desc, args) {
                     }
                     else if (!autos) {
                         BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
+                        var p = this.jpointsw[this.jmatch[i][0]].particleWrap(0.2);
                         this.welds[this.jmatch[i][0]].other = null;
                         this.welds[this.jmatch[i][0]] = null;
                         this.jmatch[i][1].welds[this.jmatch[i][2]].other = null;
                         this.jmatch[i][1].welds[this.jmatch[i][2]] = null;  
 
                         BSWG.updateOnCC(this, this.jmatch[i][1]);
-
+                        new BSWG.soundSample().play('store-2', p, 0.11, 2.0);
                         BSWG.render.boom.palette = chadaboom3D.fire;
                         BSWG.render.boom.add(
-                            this.jpointsw[this.jmatch[i][0]].particleWrap(0.2),
+                            p,
                             1.25,
                             32,
                             0.4,
                             1.0,
                             null,
                             null,
-                            true
+                            false
                         );
+                        p = null;
 
                         BSWG.input.EAT_MOUSE('left');
                     }
@@ -1162,7 +1168,7 @@ BSWG.componentList = new function () {
                         //console.log(x1, y1, x2, y2);
                         //console.log('Unarchiving ' + list[i].list.length + ' objects');
                         //console.log('compList len before: ' + this.compList.length);
-                        if (this.load(list[i], null, true, true) === -1) {
+                        if (this.load(list[i], null, true, true, true) === -1) {
                             console.log('Unarchive failed (collision)');
                         }
                         else {
@@ -1569,7 +1575,7 @@ BSWG.componentList = new function () {
     };
 
     this.autoWelds = null;
-    this.load = function(obj, spawn, noArch, archRadCheck) {
+    this.load = function(obj, spawn, noArch, archRadCheck, timeCheck) {
 
         var comps = obj.list;
         var cc = null;
@@ -1621,13 +1627,22 @@ BSWG.componentList = new function () {
                 continue;
             }
 
+            var pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
+
+            if (BSWG.game && BSWG.game.map && timeCheck && (BSWG.game.map.mapTime - C.mapTime) > BSWG.compExpireTime) {
+                var zone = BSWG.game.map.getZone(pos);
+                if (!zone || !zone.safe) {
+                    continue;
+                }
+            }
+
             var args = new Object();
             if (C.args) {
                 for (var key in C.args) {
                     args[key] = C.args[key];
                 }
             }
-            args.pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
+            args.pos = pos;
             args.angle = C.angle;
             var OC = new BSWG.component(this.typeMap[C.type], args);
             if (OC.type === 'cc') {
@@ -1719,6 +1734,7 @@ BSWG.componentList = new function () {
             OC.pos = { x: pos.x, y: pos.y };
             OC.angle = angle;
             OC.tag = C.tag ? C.tag : BSWG.generateTag();
+            OC.mapTime = (BSWG.game && BSWG.game.map) ? BSWG.game.map.mapTime : 0.0;
 
             OC.args = new Object();
             for (var j=0; j<C.serialize.length; j++) {

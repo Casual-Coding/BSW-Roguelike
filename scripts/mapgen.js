@@ -681,7 +681,11 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     var lastZone = null;
     var distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
 
+    ret.mapTime = 0.0;
+
     ret.tickSpawner = function(dt, p) {
+
+        ret.mapTime += dt;
 
         var zone = this.getZone(p);
 
