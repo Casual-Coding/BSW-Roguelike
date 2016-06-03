@@ -282,12 +282,19 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
-        for (var i=0; i<numPlanets; i++) {
-            var p = ret.planets[i];
-            ret.obMap[~~(p.p.x)][~~(p.p.y)] = Math.min(i+1, 9);
-            ret.obMap[~~(p.p.x)+1][~~(p.p.y)] = Math.min(i+1, 9);
-            ret.obMap[~~(p.p.x)][~~(p.p.y)+1] = Math.min(i+1, 9);
-            ret.obMap[~~(p.p.x)+1][~~(p.p.y)+1] = Math.min(i+1, 9);
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                var xy = new b2Vec2(x,y);
+                for (var i=0; i<numPlanets; i++) {
+                    var p = ret.planets[i];
+                    var dist = Math.distVec2(p.p, xy);
+                    if (dist < 5) {
+                        ret.obMap[x][y] = (~~(Math.random()*8) + 1);
+                        break;
+                    }
+                }
+                xy = null;
+            }
         }
 
         for (var x=0; x<size; x++) {
@@ -407,7 +414,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         for (var x=1; x<(size-1); x++) {
             for (var y=1; y<(size-1); y++) {
-                if (ret.obMap[x][y]) {
+                if (ret.obMap[x][y] && Math.random() < 0.25) {
                     ret.terMap[x][y] = 0;
                     ret.terMap[x-1][y] = 0;
                     ret.terMap[x+1][y] = 0;
@@ -431,7 +438,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                         return 0;
                     }
                 },
-                color: [0.5, 0.5, 1.5]
+                color: [0.5, 0.5, 1.5],
+                flashColor: [1.1, 1.1, 1.5]
             },
             'tileset-mountain': {
                 map: function(x,y) {

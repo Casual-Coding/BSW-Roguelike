@@ -284,6 +284,8 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         });
     }
 
+    this.time = Math.random()*1000;
+
     this.update = function(dt) {
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
         this.mat.uniforms.light.value.set(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0);
@@ -292,7 +294,12 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
         this.mat.uniforms.shadowMatrix.needsUpdate = true;
         this.mat.uniforms.shadowMatrix.value.needsUpdate = true;
+        if (this.flashColor) {
+            var t = Math.pow(Math.sin(this.time*3.5)*0.5+0.5, 3.0);
+            this.mat.uniforms.clr.value.set(color[0]*(1-t)+this.flashColor[0]*t, color[1]*(1-t)+this.flashColor[1]*t, color[2]*(1-t)+this.flashColor[2]*t, 1.0);
+        }
         this.mat.needsUpdate = true;
+        this.time += dt;
     };
 
     this.destroy = function() {
@@ -374,10 +381,10 @@ BSWG.tileMap = function (layers) {
     }
     for (var set in layers) {
         if (layers[set].decals) {
-            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp);
+            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor);
         }
         else {
-            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp);
+            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor);
         }
     }
 
@@ -717,7 +724,7 @@ BSWG.makeCityTiles = function (seed) {
 
 };
 
-BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp) {
+BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp, flashColor) {
 
     var image = (typeof imageName === 'string') ? BSWG.render.images[imageName] : imageName;
 
@@ -782,6 +789,7 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp)
         for (var i=0; i<this.tiles.length; i++) {
             for (var j=0; j<this.tiles[i].length; j++) {
                 if (this.tiles[i][j]) {
+                    this.tiles[i][j].flashColor = flashColor || null;
                     this.tiles[i][j].update(dt);
                 }
             }
