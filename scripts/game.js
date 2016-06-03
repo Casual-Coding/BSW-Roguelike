@@ -748,7 +748,7 @@ BSWG.game = new function(){
                                 var comp = new BSWG.component(B.comp, args);
                                 if (self.scene === BSWG.SCENE_GAME1) {
                                     self.xpInfo.addStore(comp, -1);
-                                    new BSWG.soundSample().play('store-2', p.THREE(0.2), 0.5, 2.0);
+                                    new BSWG.soundSample().play('store-2', p.THREE(0.2), 0.85, 0.45);
                                 }
                                 p = null;
                                 comp = null;

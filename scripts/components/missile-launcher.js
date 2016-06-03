@@ -140,6 +140,30 @@ BSWG.component_MissileLauncher = {
 
             });
 
+            var r = 0.5;
+            var pl = new b2Vec2(0.0,  1.1);
+            var p = BSWG.physics.localToWorld([pl], this.obj.body);
+
+            for (var i=0; i<10; i++) {
+                var a = Math.random() * Math.PI * 2.0;
+                var r2 = Math.random() * r * 0.5;
+                var p2 = new b2Vec2(p[0].x + Math.cos(a) * r2,
+                                    p[0].y + Math.sin(a) * r2);
+                BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                BSWG.render.boom.add(
+                    p2.particleWrap(-0.2),
+                    r*(3.5 + 2.5*Math.random())*1.5,
+                    256,
+                    1 + Math.pow(r, 1/3) * Math.random(),
+                    2.0,
+                    v.THREE(Math.random()*2.0),
+                    null,
+                    i < 1
+                );
+            }
+
+            pl = a = v = av = p = null;
+
             accel = 1;
 
             this.fireT = 1.5/2;

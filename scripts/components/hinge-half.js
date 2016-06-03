@@ -171,6 +171,15 @@ BSWG.component_HingeHalf = {
             robj.joint.__ms *= 0.75;
         }        
 
+        if (this.sound && this.onCC && robj && robj.objA && robj.objA.comp && robj.objA.comp.onCC && robj.objB && robj.objB.comp && robj.objB.comp.onCC) {
+            this.sound.volume(Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.01, 0, 1));
+        }
+        else if (this.sound) {
+            this.sound.volume(0);
+        }
+        if (this.sound) {
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        }
     },
 
     handleInput: function(keys) {
@@ -188,16 +197,6 @@ BSWG.component_HingeHalf = {
                 robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1.5 : 1.5));
                 robj.joint.__ms = 1.0;
             }
-        }
-
-        if (this.sound && robj) {
-            this.sound.volume(Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.01, 0, 1));
-        }
-        else if (this.sound) {
-            this.sound.volume(0);
-        }
-        if (this.sound) {
-            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
         }
     },
 

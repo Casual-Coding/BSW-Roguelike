@@ -107,13 +107,13 @@ BSWG.component_Missile = {
             }
             else {
                 if (this.fireT > 0.0) {
-                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
                     var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
                     if (this.obj.body.__lastHit) {
                         if (this.obj.body.__lastHit.__comp) {
                             this.obj.body.__lastHit.__comp.takeDamage(BSWG.missileDmg);
                         }
                     }
+                    BSWG.render.boom.palette = chadaboom3D.fire_bright;
                     BSWG.render.boom.add(
                         this.obj.body.GetWorldCenter().particleWrap(0.05),
                         1.0*4.0*this.size*1.5,
@@ -125,6 +125,7 @@ BSWG.component_Missile = {
                     for (var i=0; i<16; i++) {
                         var a = Math.random()*Math.PI*2.0;
                         var r = Math.random()*3.0+0.5;
+                        BSWG.render.boom.palette = chadaboom3D.fire_bright;
                         BSWG.render.boom.add(
                             this.obj.body.GetWorldCenter().particleWrap(0.05),
                             1.0*4.0*this.size*(0.25+Math.random()*0.15),

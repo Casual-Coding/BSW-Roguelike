@@ -164,7 +164,7 @@ BSWG.component_SawMotor = {
             }
         }
 
-        if (robj) {
+        if (this.onCC && robj && robj.objA && robj.objA.comp && robj.objA.comp.onCC && robj.objB && robj.objB.comp && robj.objB.comp.onCC) {
             this.motorSpeed += this.motorAccel * dt;
             robj.vMotorSpeed = this.motorSpeed;
             this.motorSpeed -= (this.motorSpeed * dt);

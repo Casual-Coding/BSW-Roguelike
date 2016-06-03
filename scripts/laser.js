@@ -68,7 +68,6 @@ BSWG.laserList = new function () {
             this.p = p;
             this.angle = angle;
             this.sound.position(p.THREE(0.2));
-            this.sound.volume(0.5);
         };
 
         ret.destroy = function() {
