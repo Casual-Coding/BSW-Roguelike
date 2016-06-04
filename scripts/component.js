@@ -18,6 +18,8 @@ BSWG.arch_hashSize = 25.0;
 
 BSWG.compExpireTime = 7.5 * 60.0;
 
+BSWG.orphanDefense = 8.0;
+
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var chars2 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -295,6 +297,10 @@ BSWG.component = function (desc, args) {
                 amt *= BSWG.friendlyFactor;
                 isFriendly = true;
             }
+        }
+
+        if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
+            amt /= BSWG.orphanDefense;
         }
 
         if (this.onCC && !isFriendly) {

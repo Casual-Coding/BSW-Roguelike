@@ -626,7 +626,7 @@ BSWG.render = new function() {
 
             self.renderer.sortObjects = false;
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
-            self.renderer.context.finish();
+            //self.renderer.context.finish();
             self.renderer.sortObjects = true;
             self.renderer.render(self.scene, self.cam3D);
 

@@ -5657,6 +5657,7 @@ Box2D.postDefs = [];
       }
       this.Report(contactSolver.m_constraints);
    }
+   var __s_impulse = new b2ContactImpulse();
    b2Island.prototype.Report = function (constraints) {
       if (this.m_listener == null) {
          return;
@@ -5665,10 +5666,10 @@ Box2D.postDefs = [];
          var c = this.m_contacts[i];
          var cc = constraints[i];
          for (var j = 0; j < cc.pointCount; ++j) {
-            b2Island.s_impulse.normalImpulses[j] = cc.points[j].normalImpulse;
-            b2Island.s_impulse.tangentImpulses[j] = cc.points[j].tangentImpulse;
+            __s_impulse.normalImpulses[j] = cc.points[j].normalImpulse;
+            __s_impulse.tangentImpulses[j] = cc.points[j].tangentImpulse;
          }
-         this.m_listener.PostSolve(c, b2Island.s_impulse);
+         this.m_listener.PostSolve(c, __s_impulse);
       }
    }
    b2Island.prototype.AddBody = function (body) {
@@ -5682,7 +5683,7 @@ Box2D.postDefs = [];
       this.m_joints[this.m_jointCount++] = joint;
    }
    Box2D.postDefs.push(function () {
-      Box2D.Dynamics.b2Island.s_impulse = new b2ContactImpulse();
+      //Box2D.Dynamics.b2Island.s_impulse = new b2ContactImpulse();
    });
    b2TimeStep.b2TimeStep = function () {};
    b2TimeStep.prototype.Set = function (step) {

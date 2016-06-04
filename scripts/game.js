@@ -1361,6 +1361,13 @@ BSWG.game = new function(){
                                 }
                             }
                         }
+
+                        if (grabbedBlock && (grabbedBlock.destroyed || !grabbedBlock.obj || !grabbedBlock.obj.body)) {
+                            grabbedBlock = null;
+                            grabbedLocal = null;
+                            BSWG.physics.endMouseDrag();
+                        }
+
                         if (grabbedBlock && (BSWG.input.MOUSE_RELEASED('left') || grabbedBlock.distanceTo(self.ccblock) > BSWG.maxGrabDistance)) {
                             grabbedBlock.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
                             grabbedBlock.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
