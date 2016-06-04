@@ -285,22 +285,25 @@ BSWG.component = function (desc, args) {
             return;
         }
 
-        if (this.onCC) {
+        var isFriendly = false;
+        if (fromC && fromC.onCC && this.onCC) {
+            if (fromC.onCC.id === this.onCC.id) {
+                amt *= BSWG.friendlyFactor;
+                isFriendly = true;
+            }
+            else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
+                amt *= BSWG.friendlyFactor;
+                isFriendly = true;
+            }
+        }
+
+        if (this.onCC && !isFriendly) {
             amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
             if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
                 amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) * BSWG.defenceBias;
             }
             else if (this.onCC && BSWG.game.ccblock) {
                 amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
-            }
-        }
-
-        if (fromC && fromC.onCC && this.onCC) {
-            if (fromC.onCC.id === this.onCC.id) {
-                amt *= BSWG.friendlyFactor;
-            }
-            else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
-                amt *= BSWG.friendlyFactor;
             }
         }
 

@@ -1264,56 +1264,50 @@ BSWG.game = new function(){
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
 
-                        if (!self.editMode) {
-                            toZ /= Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
+                        toZ /= Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
 
-                            var ccs = BSWG.componentList.allCCs();
-                            var avgDist = 0.0;
-                            var avgP = self.ccblock.p().clone();
-                            var w = 1;
-                            avgP.x *= w;
-                            avgP.y *= w;
-                            for (var i=0; i<ccs.length; i++) {
-                                var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
-                                avgDist += dist;
-                                var tw = 1;
-                                if (dist > 20) {
-                                    tw = 1 / (1+(dist-20)/10);
-                                }
-                                avgP.x += ccs[i].p().x * tw;
-                                avgP.y += ccs[i].p().y * tw;
-                                w += tw;
+                        var ccs = BSWG.componentList.allCCs();
+                        var avgDist = 0.0;
+                        var avgP = self.ccblock.p().clone();
+                        var w = 1;
+                        avgP.x *= w;
+                        avgP.y *= w;
+                        for (var i=0; i<ccs.length; i++) {
+                            var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
+                            avgDist += dist;
+                            var tw = 1;
+                            if (dist > 20) {
+                                tw = 1 / (1+(dist-20)/10);
                             }
-                            avgP.x /= w;
-                            avgP.y /= w;
-                            avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
-                            toZ /= Math.max(Math.log(avgDist), 1.0);
-                            toZ = Math.max(toZ, 0.007);
-
-                            self.cam.zoomTo(dt*2.5, toZ);
-                            var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-                            var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
-                            p.x += self.ccblock.obj.body.GetLinearVelocity().x * 2.5;
-                            p.y += self.ccblock.obj.body.GetLinearVelocity().y * 2.5;
-
-                            var bfr = BSWG.camVelLookBfr * viewport.w;
-                            var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
-                            var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
-                            var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
-                            var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
-                            var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
-
-                            p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
-                            p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
-
-                            self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
-
-                            p = p1 = pc = p2 = null;
+                            avgP.x += ccs[i].p().x * tw;
+                            avgP.y += ccs[i].p().y * tw;
+                            w += tw;
                         }
-                        else {
-                            self.cam.zoomTo(dt*2.5, toZ);
-                            self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, self.ccblock.p().clone(), 1.0-BSWG.mouseLookFactor));
-                        }
+                        avgP.x /= w;
+                        avgP.y /= w;
+                        avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
+                        toZ /= Math.max(Math.log(avgDist), 1.0);
+                        toZ = Math.max(toZ, 0.007);
+
+                        self.cam.zoomTo(dt*2.5, toZ);
+                        var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
+                        var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
+                        p.x += self.ccblock.obj.body.GetLinearVelocity().x * 2.5;
+                        p.y += self.ccblock.obj.body.GetLinearVelocity().y * 2.5;
+
+                        var bfr = BSWG.camVelLookBfr * viewport.w;
+                        var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
+                        var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
+                        var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
+                        var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
+                        var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
+
+                        p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
+                        p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
+
+                        self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
+
+                        p = p1 = pc = p2 = null;
                     }
 
                     break;

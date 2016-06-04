@@ -80,6 +80,6 @@ void main() {
     }
 
     clr = clamp(clr, 0.0, 1.0);
-    gl_FragColor = vec4(pow(clr.r, 4.0), pow(clr.g, 4.0), pow(clr.b, 4.0), amp);
+    gl_FragColor = vec4(pow(clr.r, 4.0), pow(clr.g, 4.0), pow(clr.b, 4.0), clamp(amp*2., 0., 1.));
 
 }

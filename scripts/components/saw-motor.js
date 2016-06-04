@@ -175,6 +175,11 @@ BSWG.component_SawMotor = {
         }
         else {
             this.sound.volume(0.0);
+            this.motorAccel = 0.0;
+            if (robj) {
+                this.motorSpeed -= (this.motorSpeed * dt);
+                robj.vMotorSpeed = this.motorSpeed;
+            }
         }
 
         this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();

@@ -1,7 +1,7 @@
 // BlockShip Wars Physics
 
 BSWG.hitDmg  = 0.01;
-BSWG.meleDmg = 12.0;
+BSWG.meleDmg = 4.5;
 
 BSWG.physics = new function(){
 
@@ -9,7 +9,7 @@ BSWG.physics = new function(){
     this.positionIterations = 32;
     this.velocityIterations = 32;
     this.world              = null;
-    this.maxWeldForce       = 5000.0;
+    this.maxWeldForce       = 15000.0;
     this.welds              = [];
     this.objects            = [];
     this.baseDamping        = 0.225;
@@ -619,7 +619,7 @@ BSWG.physics = new function(){
             );
             var minHealth = Math.min(compA ? compA.hp / compA.maxHP : 1.0,
                                      compB ? compB.hp / compB.maxHP : 1.0);
-            mwf *= (Math.pow(minHealth, 1/atts)-0.1);
+            mwf *= (Math.pow(minHealth, 1/atts)-0.25);
             if (Math.max(tn, fn) > mwf) {
                 this.welds[i].broken = true;
             }
@@ -647,8 +647,6 @@ BSWG.physics = new function(){
         for (var i=0; i<this.scrapes.length; i++) {
             var S = this.scrapes[i];
             if ((S.lframe + 2) < this.framen) {
-                new BSWG.soundSample().play('bump', S.lp, S.va/2.0, S.ra);
-                new BSWG.soundSample().play('bump', S.lp, S.vb/2.0, S.rb);
                 S.a.stop();
                 S.b.stop();
                 S.a = null;
@@ -706,10 +704,10 @@ BSWG.physics = new function(){
             var ta = ba.GetLinearVelocityFromWorldPoint(p).clone();
             var tb = bb.GetLinearVelocityFromWorldPoint(p).clone();
 
-            ta.x -= contact._ta.x;
-            ta.y -= contact._ta.y;
-            tb.x -= contact._tb.x;
-            tb.y -= contact._tb.y;
+            ta.x -= tb.x;
+            ta.y -= tb.y;
+            tb.x = -ta.x;
+            tb.y = -ta.y;
 
             var ma = ba.GetMass(), mb = bb.GetMass();
 
@@ -717,30 +715,38 @@ BSWG.physics = new function(){
             var forceB = (Math.lenVec2(tb) * mb) / self.lastDT;
 
             var p3 = p.THREE(0.2);
+            var S = contact._sound || null;
+            var newSound = !S;
 
-            if (!contact._sound) {
-                contact._sound = {
+            if (newSound) {
+                S = contact._sound = {
                     a: new BSWG.soundSample(),
                     b: new BSWG.soundSample(),
                     lframe: self.framen,
                     parent: contact,
                     va: 0, vb: 0, ra: 0, rb: 0, lp: p3
                 }
-                contact._sound.a.play('scrape', p3, 1.0, 1.0, true);
-                contact._sound.b.play('scrape', p3, 1.0, 1.0, true);
-                self.scrapes.push(contact._sound);
+                S.a.play('scrape', p3, 1.0, 1.0, true);
+                S.b.play('scrape', p3, 1.0, 1.0, true);
+                self.scrapes.push(S);
             }
 
-            contact._sound.a.volume(contact._sound.va = Math.clamp(forceA / 2, 0, 1));
-            contact._sound.b.volume(contact._sound.vb = Math.clamp(forceB / 2, 0, 1));
-            contact._sound.a.rate(contact._sound.ra = 0.35 / (ma / 5));
-            contact._sound.b.rate(contact._sound.rb = 0.35 / (mb / 5));
-            contact._sound.a.position(p3);
-            contact._sound.b.position(p3);
-            contact._sound.lframe = self.framen;
-            contact._sound.lp.set(p3.x, p3.y, p3.z);
+            S.a.volume(S.va = Math.clamp(forceA / 2, 0, 1.75));
+            S.b.volume(S.vb = Math.clamp(forceB / 2, 0, 1.75));
+            S.a.rate(S.ra = 0.35 / (ma / 2.5));
+            S.b.rate(S.rb = 0.35 / (mb / 2.5));
+            S.a.position(p3);
+            S.b.position(p3);
+            S.lframe = self.framen;
+            S.lp.set(p3.x, p3.y, p3.z);
+
+            if (newSound) {
+                new BSWG.soundSample().play('bump', S.lp, S.va/2.0, S.ra);
+                new BSWG.soundSample().play('bump', S.lp, S.vb/2.0, S.rb);               
+            }
 
             p3 = null;
+            S = null;
 
             var tforce = forceA + forceB;
 

@@ -626,6 +626,7 @@ BSWG.render = new function() {
 
             self.renderer.sortObjects = false;
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
+            self.renderer.context.finish();
             self.renderer.sortObjects = true;
             self.renderer.render(self.scene, self.cam3D);
 
@@ -698,6 +699,8 @@ BSWG.render = new function() {
             this.cam3DS.updateProjectionMatrix();
 
             this.cam3DS.position.set(cam.x + 75.0, cam.y, 20.0);
+            this.cam3DS.updateMatrix();
+            this.cam3DS.updateMatrixWorld(true);
             this.cam3DS.lookAt(new THREE.Vector3(cam.x + 75.0 - 2.5, cam.y, 17.5));
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();
