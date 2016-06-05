@@ -184,7 +184,7 @@ chadaboom3D.prototype.init = function () {
     smesh.needsUpdate = true;
 
     BSWG.render.scene.add( mesh );
-    //BSWG.render.sceneS.add( smesh );
+    BSWG.render.sceneS.add( smesh );
 
     this.mesh = mesh;
     this.smesh = smesh;
@@ -223,7 +223,7 @@ chadaboom3D.prototype.init = function () {
 chadaboom3D.prototype.readd = function () {
 
     BSWG.render.scene.add(this.mesh);
-    //BSWG.render.sceneS.add(this.smesh);
+    BSWG.render.sceneS.add(this.smesh);
 
 };
 

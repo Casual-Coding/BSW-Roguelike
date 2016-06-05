@@ -302,6 +302,9 @@ BSWG.component = function (desc, args) {
         if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
             amt /= BSWG.orphanDefense;
         }
+        if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
+            amt /= BSWG.orphanDefense;
+        }
 
         if (this.onCC && !isFriendly) {
             amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
@@ -668,7 +671,7 @@ BSWG.component = function (desc, args) {
 
                         if (!autos) {
                             var p = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2);
-                            new BSWG.soundSample().play('store', p, 0.11, 2.0);
+                            new BSWG.soundSample().play('store', p, 0.31, 2.0);
                             BSWG.render.boom.palette = chadaboom3D.blue;
                             BSWG.render.boom.add(
                                 p,
@@ -680,6 +683,11 @@ BSWG.component = function (desc, args) {
                                 null,
                                 false
                             );
+                            var ma = this.obj.body.GetMass(),
+                                mb = this.jmatch[i][1].obj.body.GetMass();
+                            new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (ma / 2.5));
+                            new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (mb / 2.5));
+                            p = null;
                         }
 
                         BSWG.input.EAT_MOUSE('left');
@@ -693,7 +701,7 @@ BSWG.component = function (desc, args) {
                         this.jmatch[i][1].welds[this.jmatch[i][2]] = null;  
 
                         BSWG.updateOnCC(this, this.jmatch[i][1]);
-                        new BSWG.soundSample().play('store-2', p, 0.11, 2.0);
+                        new BSWG.soundSample().play('store-2', p, 0.31, 2.0);
                         BSWG.render.boom.palette = chadaboom3D.fire;
                         BSWG.render.boom.add(
                             p,
