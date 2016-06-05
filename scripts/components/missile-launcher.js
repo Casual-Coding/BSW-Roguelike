@@ -50,6 +50,8 @@ BSWG.component_MissileLauncher = {
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
+        this.xpBase = 0.02 * this.size;
+
     },
 
     destroy: function() {

@@ -79,6 +79,8 @@ BSWG.component_HingeHalf = {
 
         this.moveT = 0;
 
+        this.xpBase = 0.01 * this.size;
+
     },
 
     destroy: function() {

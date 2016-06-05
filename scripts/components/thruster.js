@@ -60,6 +60,8 @@ BSWG.component_Thruster = {
 
         this.soundT = 0.0;
 
+        this.xpBase = 0.015 * this.size;
+
     },
 
     destroy: function() {

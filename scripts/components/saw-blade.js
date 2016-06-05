@@ -81,6 +81,8 @@ BSWG.component_SawBlade = {
             this.selMeshObjs[i] = BSWG.genereteBlockPolyOutline(tmpObj);
             BSWG.componentList.makeQueryable(this, this.meshObjs[i].mesh);
         }
+
+        this.xpBase = 0.05 * this.size;
     },
 
     destroy: function() {

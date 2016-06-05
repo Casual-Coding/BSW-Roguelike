@@ -31,7 +31,7 @@ void main() {
 
     float l1w = max(dot(normalize(vNormal+0.75*wNormal*dot(wNormal, vNormal)), normalize(lightDir)), 0.0);
 
-    gl_FragColor.rgb = clr.rgb * (0.1 + 5.0*l1w) * 0.5;
+    gl_FragColor.rgb = clr.rgb * (0.2 + 5.0*pow(l1w, 2.0)) * 0.5;
     gl_FragColor.a = clr.a;
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);

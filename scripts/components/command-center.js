@@ -79,6 +79,8 @@ BSWG.component_CommandCenter = {
         this.aiStr = args.aiStr || null;
 
         this.onCC = this;
+
+        this.xpBase = 0.1;
     },
 
     level: function() {

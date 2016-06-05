@@ -90,6 +90,8 @@ BSWG.component_SawMotor = {
         this.selMeshObj3 = BSWG.genereteBlockPolyOutline({ verts: this.averts, body: this.obj.body });
         BSWG.componentList.makeQueryable(this, this.meshObj3.mesh);
 
+        this.xpBase = 0.025 * this.size;
+
     },
 
     destroy: function() {

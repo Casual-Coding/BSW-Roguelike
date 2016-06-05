@@ -61,6 +61,8 @@ BSWG.component_Block = {
         //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
+        this.xpBase = 0.01 * this.width * this.height / 9;
+
     },
 
     destroy: function() {

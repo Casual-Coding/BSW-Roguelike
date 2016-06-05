@@ -330,7 +330,34 @@ BSWG.component = function (desc, args) {
         }
         if (this.hp <= 0 && !this.destroyed) {
             if (this.obj && this.obj.body) {
+
                 var p = this.obj.body.GetWorldCenter();
+
+                if (BSWG.xpDisplay && BSWG.game.xpInfo && this.onCC !== BSWG.game.ccblock && !isFriendly && !disolve) {
+                    var level = 0;
+                    if (!this.onCC) {
+                        level = BSWG.game.ccblock.level();
+                    }
+                    else {
+                        level = this.onCC.level();
+                    }
+                    var xpi0 = BSWG.xpInfo[level];
+                    var xpi = BSWG.xpInfo[level+1];
+                    if (xpi && xpi0) {
+                        var totalXP = xpi.xp - xpi0.xp;
+                        totalXP *= this.xpBase ? this.xpBase : 0.01;
+                        if (!this.onCC) {
+                            totalXP /= 5;
+                        }
+                        totalXP = Math.floor(totalXP);
+                        if (totalXP < 1) {
+                            totalXP = 0;
+                        }
+                        if (totalXP > 0) {
+                            BSWG.xpDisplay.giveXP(totalXP, p.clone());
+                        }
+                    }
+                }
                 var v = this.obj.body.GetLinearVelocity();
                 var r = this.obj.radius;
                 if (this.type === 'cc') {

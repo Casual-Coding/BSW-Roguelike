@@ -65,6 +65,8 @@ BSWG.component_ChainLink = {
         this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);
         BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
 
+        this.xpBase = 0.005;
+
     },
 
     destroy: function() {

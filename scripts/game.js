@@ -57,7 +57,7 @@ BSWG.game = new function(){
                     self.hudDlgX2 = w/2-(bfr+bsz*2);
 
                     H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
-                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr, (bfr*2+bsz*4)-bfr*2, bsz, 0.5, 0.25); // 1
+                    H.hudBtn.push([-1000, -1000, 10, 10]); // 1
 
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 2
                     H.plate(w/2-(bfr+bsz*2)+bfr+bsz, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 3
@@ -89,6 +89,19 @@ BSWG.game = new function(){
                     H.plate(7+128+7, (48-40)/2, 128, 42, 0.5, 0.35); // 14
                     H.plate(7+128+7+128+7, (48-40)/2, 128, 42, 0.5, 0.35); // 15
                     H.plate(7+128+7+128+7+128+7, (48-40)/2, 384, 42, 0.5, 0.15); // 16
+                }
+                else if (scene === BSWG.SCENE_GAME1) {
+                    for (var i=0; i<4; i++) {
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 13..16
+                    }                    
+                }
+
+                if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr, (bfr*2+bsz*4)-bfr*2, bsz/3, 0.5, 0.25); // 17 (xp meter)
+                    var sz2 = ((bfr*2+bsz*4)-bfr*2) / 3;
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 18 (stats button: bosses beaten, zones discovered, etc)
+                    H.plate(w/2-(bfr+bsz*2)+bfr+sz2, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 19 (specials button)
+                    H.plate(w/2-(bfr+bsz*2)+bfr+sz2*2, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 20 (level up/points tree)
                 }
 
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
@@ -394,6 +407,7 @@ BSWG.game = new function(){
         BSWG.planets.init();
         BSWG.ui.clear();
         BSWG.ai.init();
+        BSWG.xpDisplay.clear();
         
         this.aiBtn = null;
 
@@ -646,6 +660,7 @@ BSWG.game = new function(){
                     //this.map.planets[0].pobj.capture();
                     //startPos = this.map.startPos;
                 }
+                BSWG.xpDisplay.xpInfo = this.xpInfo;
                 //this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
                 //});
                 this.mapImage = this.tileMap.minimap.image;
@@ -700,9 +715,33 @@ BSWG.game = new function(){
                             self.storeMode = me.selected;
                         }
                     });
+                    this.statsBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: 10,
+                        w: 65, h: 65,
+                        text: 'Stats',
+                        click: function (me) {
+                        }
+                    });
+                    this.specialsBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: 10,
+                        w: 65, h: 65,
+                        text: 'Specials',
+                        click: function (me) {
+                        }
+                    });
+                    this.levelUpBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: 10,
+                        w: 65, h: 65,
+                        text: 'Points',
+                        click: function (me) {
+                        }
+                    });
                 }
                 else {
                     this.storeBtn = null;
+                    this.statsBtn = null;
+                    this.specialsBtn = null;
+                    this.levelUpBtn = null;
                 }
 
                 /*this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -1423,6 +1462,7 @@ BSWG.game = new function(){
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
             BSWG.laserList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
+            BSWG.xpDisplay.updateRender(ctx, self.cam, dt);
 
             if (self.tileMap) {
                 self.tileMap.update(dt);
@@ -1643,6 +1683,27 @@ BSWG.game = new function(){
                 self.showControlsBtn.h = self.hudY(self.hudBtn[8][3]) - self.showControlsBtn.p.y - 4;
             }
 
+            if (self.statsBtn) {
+                self.statsBtn.p.x = self.hudX(self.hudBtn[18][0]) + 2;
+                self.statsBtn.p.y = self.hudY(self.hudBtn[18][1]) + 2;
+                self.statsBtn.w = self.hudX(self.hudBtn[18][2]) - self.statsBtn.p.x - 4;
+                self.statsBtn.h = self.hudY(self.hudBtn[18][3]) - self.statsBtn.p.y - 4;
+            }
+
+            if (self.specialsBtn) {
+                self.specialsBtn.p.x = self.hudX(self.hudBtn[19][0]) + 2;
+                self.specialsBtn.p.y = self.hudY(self.hudBtn[19][1]) + 2;
+                self.specialsBtn.w = self.hudX(self.hudBtn[19][2]) - self.specialsBtn.p.x - 4;
+                self.specialsBtn.h = self.hudY(self.hudBtn[19][3]) - self.specialsBtn.p.y - 4;
+            }
+
+            if (self.levelUpBtn) {
+                self.levelUpBtn.p.x = self.hudX(self.hudBtn[20][0]) + 2;
+                self.levelUpBtn.p.y = self.hudY(self.hudBtn[20][1]) + 2;
+                self.levelUpBtn.w = self.hudX(self.hudBtn[20][2]) - self.levelUpBtn.p.x - 4;
+                self.levelUpBtn.h = self.hudY(self.hudBtn[20][3]) - self.levelUpBtn.p.y - 4;
+            }
+
             /*if (self.healBtn) {
                 self.healBtn.p.x = self.hudX(self.hudBtn[9][0]) + 2;
                 self.healBtn.p.y = self.hudY(self.hudBtn[9][1]) + 2;
@@ -1718,6 +1779,37 @@ BSWG.game = new function(){
                 ctx.font = (~~(h*0.25)) + 'px Orbitron';
                 ctx.textAlign = 'left';
                 ctx.fillTextB(self.exportFN, x + w * 0.05, y + h * 0.5 + (h*0.25*0.5), true);
+            }
+
+            if (self.hudBtn[17] && self.xpInfo) {
+                var X = self.hudX(self.hudBtn[17][0]) + 2;
+                var Y = self.hudY(self.hudBtn[17][1]) + 2;
+                var W = self.hudX(self.hudBtn[17][2]) - X - 4;
+                var H = self.hudY(self.hudBtn[17][3]) - Y - 4;
+
+                var lstat = self.xpInfo.levelProgress();
+
+                ctx.fillStyle = '#002';
+                ctx.globalAlpha = 0.75;
+                ctx.fillRect(X, Y, W, H);
+                ctx.globalAlpha = 1.0;
+
+                ctx.fillStyle = '#050';
+                ctx.globalAlpha = 0.75;
+                ctx.fillRect(X+1, Y+1, W*lstat.t-2, H-2);
+                ctx.globalAlpha = 1.0;
+
+                ctx.fillStyle = '#aaa';
+                ctx.strokeStyle = '#00f';
+                ctx.font = (~~(H*0.75)) + 'px Orbitron';
+                ctx.textAlign = 'left';
+                ctx.fillTextB('Lvl. ' + self.xpInfo.level, X + W * 0.01, Y + H * 0.4 + (H*0.75*0.5), true);
+
+                ctx.fillStyle = '#aaa';
+                ctx.strokeStyle = '#00f';
+                ctx.font = (~~(H*0.75)) + 'px Orbitron';
+                ctx.textAlign = 'right';
+                ctx.fillTextB('' + lstat.current + '/' + lstat.next + ' XP', X + W - W * 0.01, Y + H * 0.4 + (H*0.75*0.5), true);
             }
 
             if (self.mapImage) {

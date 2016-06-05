@@ -53,6 +53,8 @@ BSWG.component_Laser = {
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
+        this.xpBase = 0.03 * this.size;
+
     },
 
     destroy: function() {

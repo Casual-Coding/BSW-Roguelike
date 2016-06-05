@@ -21,6 +21,7 @@ var BSWG = new function(){
         'ai.js',
         'player-stats.js',
         'sounds.js',
+        'xpdisplay.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
