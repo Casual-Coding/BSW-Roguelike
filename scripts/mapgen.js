@@ -225,7 +225,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     console.log('Map generation error: Number of zones forced to 0');
                 }
                 if (i < numPlanets) {
-                    console.log('Map generator error: Number of zones forced to less than number of planets')
+                    console.log('Map generation error: Number of zones forced to less than number of planets')
                 }
                 break;
             }
@@ -279,21 +279,6 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             if (k >= 1000) {
                 numPlanets = i;
                 ret.planets.length = numPlanets;
-            }
-        }
-
-        for (var x=0; x<size; x++) {
-            for (var y=0; y<size; y++) {
-                var xy = new b2Vec2(x,y);
-                for (var i=0; i<numPlanets; i++) {
-                    var p = ret.planets[i];
-                    var dist = Math.distVec2(p.p, xy);
-                    if (dist < 5) {
-                        ret.obMap[x][y] = (~~(Math.random()*8) + 1);
-                        break;
-                    }
-                }
-                xy = null;
             }
         }
 
@@ -412,15 +397,21 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
-        for (var x=1; x<(size-1); x++) {
-            for (var y=1; y<(size-1); y++) {
-                if (ret.obMap[x][y] && Math.random() < 0.25) {
-                    ret.terMap[x][y] = 0;
-                    ret.terMap[x-1][y] = 0;
-                    ret.terMap[x+1][y] = 0;
-                    ret.terMap[x][y-1] = 0;
-                    ret.terMap[x][y+1] = 0;
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                var xy = new b2Vec2(x,y);
+                for (var i=0; i<numPlanets; i++) {
+                    var p = ret.planets[i];
+                    var dist = Math.distVec2(p.p, xy);
+                    if (dist < 3) {
+                        ret.terMap[x][y] = 0;
+                    }
+                    if (dist < 5) {
+                        ret.obMap[x][y] = (~~(Math.random()*8) + 1);
+                        break;
+                    }
                 }
+                xy = null;
             }
         }
 

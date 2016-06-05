@@ -136,6 +136,7 @@ var BSWG = new function(){
             'selectionFragment',
             'jpointsFragment',
             'expFragment',
+            'expFragmentShadow',
             'planetFragment',
             'planetRingFragment',
             'pRangeFragment',

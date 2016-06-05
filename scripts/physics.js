@@ -620,7 +620,7 @@ BSWG.physics = new function(){
             );
             var minHealth = Math.min(compA ? compA.hp / compA.maxHP : 1.0,
                                      compB ? compB.hp / compB.maxHP : 1.0);
-            mwf *= (Math.pow(minHealth, 1/atts)-0.25);
+            mwf *= (Math.pow(minHealth, 1/atts)-0.15);
             if (Math.max(tn, fn) > mwf) {
                 this.welds[i].broken = true;
             }

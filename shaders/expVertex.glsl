@@ -15,9 +15,10 @@ varying vec4 pal1;
 varying vec4 pal2;
 varying vec4 pal3;
 varying vec4 pal4;
+varying vec4 vPosition;
 
 void main() {
-    
+
     float T = (time - attr1.w) / attr2.z;
     if (T > 0.0 && T < 1.0) {       
         // Position
@@ -26,6 +27,7 @@ void main() {
         float tsc = min((1.0-T)*2.0, 1.0);
         vec3 pos2 = position + vec3((attr3.x * ca - attr3.y * sa) * tsc, (attr3.y * ca + attr3.x * sa) * tsc, -2.0/attr3.z) * attr3.z
                              + t * attr1.xyz;
+        vPosition = modelMatrix * vec4( pos2, 1.0 );
         gl_Position = projectionMatrix * modelViewMatrix * vec4( pos2, 1.0 );
 
         // Animation frame

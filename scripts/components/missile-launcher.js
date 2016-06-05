@@ -152,7 +152,7 @@ BSWG.component_MissileLauncher = {
                 BSWG.render.boom.palette = chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
                     p2.particleWrap(-0.2),
-                    r*(3.5 + 2.5*Math.random())*1.5,
+                    r*(3.5 + 2.5*Math.random())*0.7,
                     256,
                     1 + Math.pow(r, 1/3) * Math.random(),
                     2.0,

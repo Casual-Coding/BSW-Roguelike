@@ -15,7 +15,7 @@ BSWG.soundBase = function (desc) {
         panner.panningModel = 'HRTF';
         panner.distanceModel = 'inverse';
         panner.refDistance = 1;
-        panner.maxDistance = 100 * amp;
+        panner.maxDistance = 100 * amp * 2.0;
         panner.rolloffFactor = 1;
         panner.coneInnerAngle = 360;
         panner.coneOuterAngle = 0;
@@ -46,29 +46,55 @@ BSWG.soundBase = function (desc) {
 
 BSWG.soundVolume = 1.0;
 
+BSWG.soundMixerClass = function () {
+
+    var audioCtx = BSWG.music.audioCtx;
+
+    this.gain = audioCtx.createGain();
+    this.setVolume(BSWG.soundVolume);
+
+    this.compressor = audioCtx.createDynamicsCompressor();
+    this.compressor.threshold.value = -50;
+    this.compressor.knee.value = 40;
+    this.compressor.ratio.value = 12;
+    this.compressor.reduction.value = -20;
+    this.compressor.attack.value = 0;
+    this.compressor.release.value = 0.25;
+
+    this.gain.connect(this.compressor);
+    this.compressor.connect(audioCtx.destination);
+
+};
+
+BSWG.soundMixerClass.prototype.setVolume = function (val) {
+
+    this.gain.gain.value = Math.clamp(val, 0, 1);
+
+};
+
+BSWG.mixer = null;
+
 BSWG.soundSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
     play: function (name, pos, amp, rate, loop) {
-
-        amp *= BSWG.soundVolume * 8;
-      
+     
         var audioCtx = BSWG.music.audioCtx;
 
         this.source = audioCtx.createBufferSource();
         this.source.loop = !!loop;
         this.source.buffer = BSWG.soundBuffers[name];
-        this.source.playbackRate.value = rate || 1;
+        this.source.playbackRate.value = Math.clamp(rate || 1, 0.1, 10.0);
 
         this.gain = audioCtx.createGain();
-        this.gain.gain.value = amp;
+        this.gain.gain.value = amp * 0.5;
 
         this.panner = this.createPanner(pos, amp);
 
         this.source.connect(this.gain);
         this.gain.connect(this.panner);
-        this.panner.connect(audioCtx.destination);
+        this.panner.connect(BSWG.mixer.gain);
 
         var self = this;
         this.source.onended = function ( ) {
@@ -86,8 +112,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     volume: function (val) {
         try {
-            val *= BSWG.soundVolume * 8;
-            this.gain.gain.value = Math.clamp(val, 0, 1);
+            this.gain.gain.value = Math.clamp(val * 0.5, 0, 1);
         }
         catch (e) {
 
@@ -96,7 +121,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     rate: function (val) {
         try {
-            this.source.playbackRate.value = val || 1;
+            this.source.playbackRate.value = Math.clamp(val || 1, 0.1, 10.0);
         }
         catch (e) {
 
@@ -112,7 +137,7 @@ BSWG.soundSample = BSWG.soundBase({
         }
         p = null;
     },
-
+ 
     stop: function ( ) {
 
         this.source.onended = null;
@@ -177,6 +202,10 @@ BSWG.soundUpdate = function () {
 
     if (BSWG.render.cam3D && BSWG.music.audioCtx) {
         var p = BSWG.render.cam3D.position;
+        if (!BSWG.mixer) {
+            BSWG.mixer = new BSWG.soundMixerClass();
+        }
+        BSWG.mixer.setVolume(BSWG.soundVolume);
         BSWG.music.audioCtx.listener.setPosition(p.x, p.y, p.z);
     }
 

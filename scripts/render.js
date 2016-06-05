@@ -262,8 +262,8 @@ BSWG.render = new function() {
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize);
         this.shadowMap.texture.format = THREE.RGBAFormat;
         this.shadowMap.texture.minFilter = THREE.LinearFilter;
-        this.shadowMap.texture.magFilter = THREE.LinearMipMapLinearFilter;
-        this.shadowMap.texture.generateMipmaps = true;
+        this.shadowMap.texture.magFilter = THREE.NearestFilter;
+        this.shadowMap.texture.generateMipmaps = false;
         this.shadowMap.stencilBuffer = false;
 
         this.sizeViewport();
@@ -624,7 +624,8 @@ BSWG.render = new function() {
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
 
-            self.renderer.sortObjects = false;
+            self.renderer.sortObjects = true;
+            //self.shadowMap.texture.needsUpdate = true;
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
             //self.renderer.context.finish();
             self.renderer.sortObjects = true;
@@ -677,8 +678,10 @@ BSWG.render = new function() {
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld(true);
 
-            var p1 = this.unproject3D(new b2Vec2(-this.viewport.w*1.0, -this.viewport.h*0.5));
-            var p2 = this.unproject3D(new b2Vec2(this.viewport.w*1.5, this.viewport.h*1.5));
+            var ww = Math.max(this.viewport.w, this.viewport.h);
+
+            var p1 = this.unproject3D(new b2Vec2(-ww, -ww));
+            var p2 = this.unproject3D(new b2Vec2(ww, ww));
             var x2 = Math.max(p2.x, p1.x), x1 = Math.min(p2.x, p1.x);
             var y2 = Math.max(p2.y, p1.y), y1 = Math.min(p2.y, p1.y);
 

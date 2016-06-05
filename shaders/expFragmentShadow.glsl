@@ -65,23 +65,12 @@ void main() {
     }
 
     amp = pow(max(amp, 0.), 1.0-amp*0.9);
-    vec3 clr = vec3(0., 0., 0.);
+    amp = min(amp, 1.0);
 
-    if (amp < pal1.a) {
-        clr = mix(clr, pal1.rgb, amp / pal1.a);
-    }
-    else if (amp < pal2.a) {
-        clr = mix(pal1.rgb, pal2.rgb, (amp-pal1.a) / (pal2.a - pal1.a));
-    }
-    else if (amp < pal3.a) {
-        clr = mix(pal2.rgb, pal3.rgb, (amp-pal2.a) / (pal3.a - pal2.a));
-    }
-    else {
-        amp = min(amp, 1.0);
-        clr = mix(pal3.rgb, pal4.rgb, (amp-pal3.a) / (1.0 - pal3.a));
-    }
-
-    clr = clamp(clr, 0.0, 1.0);
-    gl_FragColor = vec4(pow(clr.r, 4.0), pow(clr.g, 4.0), pow(clr.b, 4.0), clamp(amp*2., 0., 1.));
+    float z = (vPosition.z/vPosition.w+256.0) * 256.0;
+    float a = mod(z, 1.0);
+    float b = mod(floor(z)/256.0, 1.0);
+    float c = floor(z/256.0)/256.0;
+    gl_FragColor = vec4(c, b, a, clamp(amp*2., 0., 1.)*0.05);
 
 }

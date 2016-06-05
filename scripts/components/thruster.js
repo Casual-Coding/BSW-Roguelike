@@ -58,6 +58,8 @@ BSWG.component_Thruster = {
         //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
+        this.soundT = 0.0;
+
     },
 
     destroy: function() {
@@ -119,7 +121,9 @@ BSWG.component_Thruster = {
         else
             this.thrustT = 0.0;
 
-        this.sound.volume(Math.clamp(this.thrustT,0,1) * (this.size/2) * 2.0);
+        this.soundT += (this.thrustT - this.soundT) * dt * 4.0;
+
+        this.sound.volume(Math.clamp(this.soundT,0,1) * (this.size/2) * 2.0);
         this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
 
     },
