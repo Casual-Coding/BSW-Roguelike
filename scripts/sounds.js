@@ -68,6 +68,7 @@ BSWG.soundMixerClass = function () {
 
 BSWG.soundMixerClass.prototype.setVolume = function (val) {
 
+    this.gain.gain.value = Math.clamp(val, 0, 1) * 1.5;
 
 };
 
