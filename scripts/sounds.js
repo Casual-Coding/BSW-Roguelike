@@ -90,11 +90,18 @@ BSWG.soundSample = BSWG.soundBase({
         this.gain = audioCtx.createGain();
         this.gain.gain.value = amp * 0.5;
 
-        this.panner = this.createPanner(pos, amp);
+        if (pos) {
+            this.panner = this.createPanner(pos, amp);
+        }
 
         this.source.connect(this.gain);
-        this.gain.connect(this.panner);
-        this.panner.connect(BSWG.mixer.gain);
+        if (this.panner) {
+            this.gain.connect(this.panner);
+            this.panner.connect(BSWG.mixer.gain);
+        }
+        else {
+            this.gain.connect(BSWG.mixer.gain);
+        }
 
         var self = this;
         this.source.onended = function ( ) {
@@ -130,7 +137,9 @@ BSWG.soundSample = BSWG.soundBase({
 
     position: function (p) {
         try {
-            this.panner.setPosition(p.x, p.y, p.z);
+            if (this.panner) {
+                this.panner.setPosition(p.x, p.y, p.z);
+            }
         }
         catch (e) {
 
@@ -148,7 +157,9 @@ BSWG.soundSample = BSWG.soundBase({
         window.setTimeout(function() {
             try { self.source.disconnect(); } catch (e) { }
             try { self.gain.disconnect(); } catch (e) { }
-            try { self.panner.disconnect(); } catch (e) { }
+            if (self.panner) {
+                try { self.panner.disconnect(); } catch (e) { }
+            }
 
             self.source = null;
             self.gain = null;
@@ -175,7 +186,8 @@ BSWG.soundLoad = function (onload) {
         { name: 'bump', url: 'sounds/bump.wav' },
         { name: 'scrape', url: 'sounds/scrape.wav' },
         { name: 'store', url: 'sounds/store.wav' },
-        { name: 'store-2', url: 'sounds/store-2.wav' }
+        { name: 'store-2', url: 'sounds/store-2.wav' },
+        { name: 'levelup', url: 'sounds/levelup.wav' }
     ];
 
     var urls = [];

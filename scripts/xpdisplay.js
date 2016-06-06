@@ -1,10 +1,30 @@
 BSWG.xpDisplay = new (function(){
 
     this.list = new Array();
+    this.luText = null;
 
     this.clear = function () {
         this.list.length = 0;
         this.xpInfo = null;
+
+        if (this.luText) {
+            this.luText.remove();
+            this.luText.destroy();
+        }
+
+        this.luT = 0.0;
+
+        this.luText = new BSWG.uiControl(BSWG.control_3DTextButton, {
+            x: BSWG.render.viewport.w*0.5, y: BSWG.render.viewport.h * 0.55,
+            w: 800, h: 100,
+            vpXCenter: true,
+            text: 'Level Up',
+            color: [1.5, 1.5, 0, 1],
+            hoverColor: [1.5, 1.5, 0, 1],
+            lowDetail: true,
+            click: function (me) {}
+        });
+        this.luText.hide();
     };
 
     this.xpInfo = null;
@@ -13,6 +33,10 @@ BSWG.xpDisplay = new (function(){
 
         if (!this.xpInfo) {
             return;
+        }
+
+        if (this.luText) {
+            this.luText.p.y = BSWG.render.viewport.h * 0.55;
         }
 
         for (var i=0; i<this.list.length; i++) {
@@ -58,6 +82,24 @@ BSWG.xpDisplay = new (function(){
             }
 
             L = null;
+        }
+
+        if (this.luText && this.xpInfo.levelUp) {
+            this.luText.show();
+            this.luT = 5.0;
+            new BSWG.soundSample().play('levelup', null, 0.65, 1.0);
+            this.xpInfo.levelUp = false;
+        }
+
+        if (this.luT > 0) {
+            this.luT -= dt;
+            if (this.luT <= 0) {
+                this.luT = 0.0;
+                this.luText.hide();
+            }
+            else {
+                this.luText.textColor[3] = this.luText.hoverColor[3] = Math.min(this.luT, 1.0);
+            }
         }
 
     };
