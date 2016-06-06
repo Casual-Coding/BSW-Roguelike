@@ -221,7 +221,7 @@ BSWG.render = new function() {
 
     };
 
-    this.init = function(complete, images, shaders) {
+    this.init = function(complete, images, shaders, textures) {
 
         if (!Detector.webgl) {
             alert('WebGL not supported.');
@@ -233,12 +233,16 @@ BSWG.render = new function() {
         this.canvas = document.createElement('canvas');
         this.canvas.oncontextmenu = function(){ return false; };
         this.canvas.style.position = 'fixed';
-        this.canvas.style.zIndex = 2;
+        this.canvas.style.zIndex = 200;
+        this.canvas.style.left = '0px';
+        this.canvas.style.right = '0px';
         this.ctx = this.canvas.getContext('2d');
 
         this.canvas3D = document.createElement('canvas');
         this.canvas3D.style.position = 'fixed';
-        this.canvas3D.style.zIndex = 1;
+        this.canvas3D.style.zIndex = 100;
+        this.canvas3D.style.left = '0px';
+        this.canvas3D.style.right = '0px';
         this.canvas3D.oncontextmenu = function(){ return false; };
 
         this.cam3D = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
@@ -270,14 +274,15 @@ BSWG.render = new function() {
 
         BSWG.initCanvasContext(this.ctx);
 
+        this.ctx.globalAlpha = 1.0;
         this.ctx.clearRect(0, 0, this.viewport.w, this.viewport.h);
         this.ctx.font = '48px Orbitron';
         this.ctx.textAlign = 'left';
         this.ctx.fillStyle = '#77d';
         this.ctx.fillTextB('Loading ...', 48, this.viewport.h - 48, true);
 
-        document.body.appendChild(this.canvas);
         document.body.appendChild(this.canvas3D);
+        document.body.appendChild(this.canvas);
 
         this.images = images = images || {};
 
@@ -314,6 +319,12 @@ BSWG.render = new function() {
             });
         };
 
+        var makeTexture = {};
+        textures = textures || [];
+        for (var i=0; i<textures.length; i++) {
+            makeTexture[textures[i]] = true;
+        }
+
         var toLoad = 0;
         for (var key in images) {
             toLoad += 1;
@@ -324,9 +335,10 @@ BSWG.render = new function() {
         for (var key in images) {
             var img = new Image();
             img.src = 'images/' + images[key];
+            img.makeTexture = makeTexture[key];
             img.onload = function() {
 
-                if (Math.isPow2(parseInt(this.width)) && Math.isPow2(parseInt(this.height))) {
+                if (Math.isPow2(parseInt(this.width)) && Math.isPow2(parseInt(this.height)) && this.makeTexture) {
                     this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
                     this.texture.needsUpdate = true;
                 }
@@ -554,8 +566,6 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
-            self.animFrameID = window.requestAnimationFrame(renderFrame);
-
             var frameTime = Date.timeStamp();
             self.actualDt = frameTime - self.lastFrameTime;
             if (self.actualDt > 1/10) {
@@ -642,6 +652,8 @@ BSWG.render = new function() {
             }
 
             BSWG.input.newFrame();
+
+            self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);

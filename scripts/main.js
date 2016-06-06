@@ -115,6 +115,12 @@ var BSWG = new function(){
         'tileset-snow': 'tileset-snow-512.png',
         'tileset-rockland': 'tileset-rockland-512.png'
     };
+    var makeTexture = [
+        'test_nm',
+        'grass_nm',
+        'water_nm',
+        'damage_nm'
+    ];
     var shaders = {
         'vertex': [
             'basicVertex',
@@ -205,7 +211,7 @@ var BSWG = new function(){
                         BSWG.input.init();
                         BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
                         BSWG.game.start();
-                    }, images, shaders);
+                    }, images, shaders, makeTexture);
                 });
             });
         };

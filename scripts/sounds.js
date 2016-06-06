@@ -80,7 +80,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     play: function (name, pos, amp, rate, loop) {
      
-        var audioCtx = BSWG.music.audioCtx;
+        var audioCtx = this.audioCtx = BSWG.music.audioCtx;
 
         this.source = audioCtx.createBufferSource();
         this.source.loop = !!loop;
@@ -119,7 +119,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     volume: function (val) {
         try {
-            this.gain.gain.value = Math.clamp(val * 0.5, 0, 1);
+            this.gain.gain.setValueAtTime(Math.clamp(val * 0.5, 0, 1), this.audioCtx.currentTime);
         }
         catch (e) {
 
@@ -128,7 +128,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     rate: function (val) {
         try {
-            this.source.playbackRate.value = Math.clamp(val || 1, 0.1, 10.0);
+            this.source.playbackRate.setValueAtTime(Math.clamp(val || 1, 0.1, 10.0), this.audioCtx.currentTime);
         }
         catch (e) {
 
@@ -149,6 +149,7 @@ BSWG.soundSample = BSWG.soundBase({
  
     stop: function ( ) {
 
+        this.audioCtx = null;
         this.source.onended = null;
 
         try { this.source.stop(); } catch (e) { }
