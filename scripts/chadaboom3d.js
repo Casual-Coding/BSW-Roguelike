@@ -324,7 +324,7 @@ chadaboom3D.green = 4;
 
 chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub, makeSound) {
 
-    if (!(res > 0 && life > 0 && attack > 0)) {
+    if (!res || !life || !attack || !isFinite(res) || !isFinite(life) || ! isFinite(attack)) {
         return false;
     }
 
@@ -356,7 +356,10 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     if (typeof sizeFn === "function") {
         size = sizeFn(res);
     }
-    if (!(size > 0)) {
+    if (!isFinite(size) || !size)  {
+        return false;
+    }
+    if (!isFinite(pos.x) || !isFinite(pos.y) || !isFinite(pos.z)) {
         return false;
     }
 
@@ -382,7 +385,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     }
 
     var palIdx = Math.clamp(this.palette || chadaboom3D.fire, 0, chadaboom3D.palettes.length-1);
-    if (typeof palIdx !== 'number' || !(palIdx > -1)) {
+    if (!isFinite(palIdx) || !(palIdx > -1) || !palIdx) {
         palIdx = 0;
     }
 

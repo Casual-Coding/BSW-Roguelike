@@ -13,6 +13,6 @@ void main() {
         d = 0.0;
     }
     
-    gl_FragColor = clr * d;
+    gl_FragColor = clamp(clr * d, 0., 1.);
 
 }

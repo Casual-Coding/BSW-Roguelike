@@ -48,4 +48,6 @@ void main() {
         gl_FragColor = mix(gl_FragColor, vec4(1.,1.,1.,1.), (warpIn - 0.1) / 0.9);
     }
 
+    gl_FragColor = clamp(gl_FragColor, 0., 1.);
+
 }

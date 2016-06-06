@@ -71,6 +71,6 @@ void main() {
     float a = mod(z, 1.0);
     float b = mod(floor(z)/256.0, 1.0);
     float c = floor(z/256.0)/256.0;
-    gl_FragColor = vec4(c, b, a, clamp(amp*2., 0., 1.)*0.25);
+    gl_FragColor = clamp(vec4(c, b, a, clamp(amp*2., 0., 1.)*0.25), 0., 1.);
 
 }

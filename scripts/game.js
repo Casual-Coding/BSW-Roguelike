@@ -1367,7 +1367,7 @@ BSWG.game = new function(){
             BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
-            BSWG.planets.render(dt);
+            //BSWG.planets.render(dt);
 
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
@@ -1878,7 +1878,11 @@ BSWG.game = new function(){
                 }
             }
 
+            ctx.globalAlpha = 1.0;
+
             BSWG.ui.render(ctx, viewport);
+
+            ctx.globalAlpha = 1.0;
 
             if (self.switchScene) {
 

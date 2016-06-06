@@ -103,8 +103,11 @@ BSWG.soundSample = BSWG.soundBase({
             this.gain.connect(BSWG.mixer.gain);
         }
 
+        this.playing = true;
+
         var self = this;
         this.source.onended = function ( ) {
+            self.playing = false;
             self.stop();
             self = null;
         };
@@ -118,32 +121,44 @@ BSWG.soundSample = BSWG.soundBase({
     },
 
     volume: function (val) {
-        try {
-            this.gain.gain.setValueAtTime(Math.clamp(val * 0.5, 0, 1), this.audioCtx.currentTime);
+        //try {
+        if (this.playing) {
+            val = Math.clamp(val * 0.5, 0, 1);
+            if (!val || Math.abs(this.gain.gain.value - val) > 0.01) {
+                this.gain.gain.value = val;
+            }
         }
-        catch (e) {
-
-        }
+            //this.gain.gain.setValueAtTime(Math.clamp(val * 0.5, 0, 1), this.audioCtx.currentTime);
+        //}
+        //catch (e) {
+//
+        //}
     },
 
     rate: function (val) {
-        try {
-            this.source.playbackRate.setValueAtTime(Math.clamp(val || 1, 0.1, 10.0), this.audioCtx.currentTime);
+        //try {
+        if (this.playing) {
+            val = Math.clamp(val || 1, 0.1, 10.0);
+            if (!val || Math.abs(this.source.playbackRate.value - val) > 0.01) {
+                this.source.playbackRate.value = val;
+            }
         }
-        catch (e) {
+            //this.source.playbackRate.setValueAtTime(Math.clamp(val || 1, 0.1, 10.0), this.audioCtx.currentTime);
+        //}
+        //catch (e) {
 
-        }
+        //}
     },
 
     position: function (p) {
-        try {
-            if (this.panner) {
-                this.panner.setPosition(p.x, p.y, p.z);
-            }
+        //try {
+        if (this.panner && this.playing) {
+            this.panner.setPosition(p.x, p.y, p.z);
         }
-        catch (e) {
+        //}
+        //catch (e) {
 
-        }
+        //}
         p = null;
     },
  
@@ -152,21 +167,18 @@ BSWG.soundSample = BSWG.soundBase({
         this.audioCtx = null;
         this.source.onended = null;
 
-        try { this.source.stop(); } catch (e) { }
+        if (this.playing) {
+            this.source.stop();
+        }
 
-        var self = this;
-        window.setTimeout(function() {
-            try { self.source.disconnect(); } catch (e) { }
-            try { self.gain.disconnect(); } catch (e) { }
-            if (self.panner) {
-                try { self.panner.disconnect(); } catch (e) { }
-            }
-
-            self.source = null;
-            self.gain = null;
-            self.panner = null;
-            self = null;
-        }, 1);
+        this.source.disconnect();
+        this.gain.disconnect();
+        if (this.panner) {
+            this.panner.disconnect();
+        }
+        this.source = null;
+        this.gain = null;
+        this.panner = null;
 
     }
 

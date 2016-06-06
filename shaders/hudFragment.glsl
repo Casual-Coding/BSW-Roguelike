@@ -55,6 +55,6 @@ void main() {
     nm2.a = pow(max(nm2.a, 0.0), 6.0);
 
     gl_FragColor = vec4(l+nm2.a * l * 0.1, l-nm2.a * l * 0.31, l-nm2.a * l * 0.4, min(nm.a*16.0, 1.0));
-    gl_FragColor *= clr;
+    gl_FragColor = clamp(clr * gl_FragColor, 0., 1.);
 
 }

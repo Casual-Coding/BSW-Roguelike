@@ -233,19 +233,19 @@ BSWG.render = new function() {
         this.canvas = document.createElement('canvas');
         this.canvas.oncontextmenu = function(){ return false; };
         this.canvas.style.position = 'fixed';
-        this.canvas.style.zIndex = 200;
+        this.canvas.style.zIndex = 2;
         this.canvas.style.left = '0px';
         this.canvas.style.right = '0px';
         this.ctx = this.canvas.getContext('2d');
 
         this.canvas3D = document.createElement('canvas');
         this.canvas3D.style.position = 'fixed';
-        this.canvas3D.style.zIndex = 100;
+        this.canvas3D.style.zIndex = 1;
         this.canvas3D.style.left = '0px';
         this.canvas3D.style.right = '0px';
         this.canvas3D.oncontextmenu = function(){ return false; };
 
-        this.cam3D = new THREE.PerspectiveCamera(85, 1.5, 1.0, 1000);
+        this.cam3D = new THREE.PerspectiveCamera(85, 1.5, 1.0, 100);
         this.cam3D.matrixAutoUpdate = true;
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
@@ -255,7 +255,7 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.OrthographicCamera( -50, 50, 50, -50, 1, 1000 );
+        this.cam3DS = new THREE.OrthographicCamera( -50, 50, 50, -50, 1, 200 );
         this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
@@ -330,8 +330,9 @@ BSWG.render = new function() {
             toLoad += 1;
         }
         var totalImages = toLoad;
-        if (!totalImages && complete)
+        if (!totalImages && complete) {
             complete();
+        }
         for (var key in images) {
             var img = new Image();
             img.src = 'images/' + images[key];
@@ -651,10 +652,15 @@ BSWG.render = new function() {
                 self.ctx.fillRect(0, 0, self.viewport.w, self.viewport.h);
             }
 
+            self.ctx.fillColor = '#fff';
+            self.ctx.fillText(self.renderer.info.memory.textures + '', 15, 15);
+
             BSWG.input.newFrame();
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
+
+        window.gc();
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);
     };

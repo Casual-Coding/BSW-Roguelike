@@ -272,6 +272,7 @@ BSWG.component = function (desc, args) {
         this.onCC = this;
     }
 
+    BSWG.blockPolySmooth = null;
     this.init(args);
 
     if (!this.maxHP) {
