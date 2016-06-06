@@ -827,7 +827,7 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         if (i < 2) {
             range = 0;
         }
-        else if (i < 3) {
+        else {
             range = 1;
         }
         zone.minLevel = level;

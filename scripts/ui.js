@@ -167,6 +167,13 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
     this.hudMesh.needsUpdate = true;
     this.hudMat.needsUpdate = true;
 
+    this.clr = [
+        this.hudMat.uniforms.clr.value.x,
+        this.hudMat.uniforms.clr.value.y,
+        this.hudMat.uniforms.clr.value.z,
+        this.hudMat.uniforms.clr.value.w
+    ];
+
     this.set_pos = function (_x, _y) {
         this.x = _x;
         this.y = _y;
@@ -204,6 +211,10 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             clr ? clr[2] : 1,
             clr ? clr[3] : 1
         );
+        this.clr[0] = this.hudMat.uniforms.clr.value.x;
+        this.clr[1] = this.hudMat.uniforms.clr.value.y;
+        this.clr[2] = this.hudMat.uniforms.clr.value.z;
+        this.clr[3] = this.hudMat.uniforms.clr.value.w;
         this.hudMat.needsUpdate = true;
     };
 
@@ -212,6 +223,17 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             return;
         }
         this.hudMat.uniforms.hudNm.value = nm.texture;
+        this.hudMat.needsUpdate = true;
+    };
+
+    this.do_flashing = function ( ) {
+        var t = Math.sin(BSWG.render.time * Math.PI) * 0.5 + 0.5;
+        this.hudMat.uniforms.clr.value.set(
+            this.clr[0] * t + 1.5 * (1-t),
+            this.clr[1] * t + 1.5 * (1-t),
+            this.clr[2] * t + 1.5 * (1-t),
+            this.clr[3]
+        );
         this.hudMat.needsUpdate = true;
     };
 
@@ -471,6 +493,9 @@ BSWG.control_Button = {
             this.hudObj.set_size(this.w, this.h);
             this.hudObj.set_invert(this.selected || this.mouseDown);
             this.hudObj.set_clr(this.mouseIn ? [1.1, 1.1, 1.3, 1] : [0.9, 0.9, 1, 1]);
+            if (this.flashing) {
+                this.hudObj.do_flashing();
+            }
         }
 
         ctx.font = Math.min(~~(this.h * 0.5), 16) + 'px Orbitron';

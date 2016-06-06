@@ -40,7 +40,7 @@ var BSWG = new function(){
         'components/util-render.js'
     ];
     var images = {
-        'nebula_0': 'nebula-512-0.png',
+        /*'nebula_0': 'nebula-512-0.png',
         'nebula_1': 'nebula-512-1.png',
         'nebula_2': 'nebula-512-2.png',
         'nebula_3': 'nebula-512-3.png',
@@ -69,7 +69,7 @@ var BSWG = new function(){
         'stars_11': 'stars-512-11.png',
         'stars_12': 'stars-512-12.png',
         'stars_13': 'stars-512-13.png',
-        'stars_14': 'stars-512-14.png',
+        'stars_14': 'stars-512-14.png',*/
         'test_nm': 'test-normalmap.png',
         'grass_nm': 'grass-nm.png',
         'water_nm': 'water-nm.png',

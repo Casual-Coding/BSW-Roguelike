@@ -466,6 +466,10 @@ BSWG.playerStats = function(load) {
         return xpi.points;
     };
 
+    this.pointsLeft = function () {
+        return Math.max(0, this.points() - this.pointsUsed());
+    };
+
     this.buff = function() {
         var xpi = BSWG.xpInfo[this.level];
         return xpi.buff;

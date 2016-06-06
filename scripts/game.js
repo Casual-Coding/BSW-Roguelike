@@ -1801,15 +1801,23 @@ BSWG.game = new function(){
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
-                ctx.font = (~~(H*0.75)) + 'px Orbitron';
+                ctx.font = (~~(H*0.65)) + 'px Orbitron';
                 ctx.textAlign = 'left';
-                ctx.fillTextB('Lvl. ' + self.xpInfo.level, X + W * 0.01, Y + H * 0.4 + (H*0.75*0.5), true);
+                ctx.fillTextB('Lvl. ' + self.xpInfo.level, X + W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
-                ctx.font = (~~(H*0.75)) + 'px Orbitron';
+                ctx.font = (~~(H*0.65)) + 'px Orbitron';
                 ctx.textAlign = 'right';
-                ctx.fillTextB('' + lstat.current + '/' + lstat.next + ' XP', X + W - W * 0.01, Y + H * 0.4 + (H*0.75*0.5), true);
+                ctx.fillTextB('' + lstat.current + '/' + lstat.next + ' XP', X + W - W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
+            }
+
+            if (self.xpInfo && self.levelUpBtn) {
+                var points = self.xpInfo.pointsLeft();
+                self.levelUpBtn.flashing = points > 0;
+                if (points > 0) {
+                    self.levelUpBtn.text = 'Points (' + points + ')';
+                }
             }
 
             if (self.mapImage) {
