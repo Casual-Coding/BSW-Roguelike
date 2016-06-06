@@ -245,7 +245,7 @@ BSWG.render = new function() {
         this.cam3D.matrixAutoUpdate = true;
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: false, antialias: true });
         this.renderer.setClearColor( 0x000000, 0x00 );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.loader = new THREE.JSONLoader();
@@ -554,6 +554,8 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
+            self.animFrameID = window.requestAnimationFrame(renderFrame);
+
             var frameTime = Date.timeStamp();
             self.actualDt = frameTime - self.lastFrameTime;
             if (self.actualDt > 1/10) {
@@ -576,27 +578,8 @@ BSWG.render = new function() {
             avg /= last60dt.length + 1;
 
             var targetDt = 1/(Math.floor((1/avg)/5)*5);
-            /*if ((1/avg) < 15) {
-                targetDt = 1/10;
-            }
-            else if ((1/avg) < 25) {
-                targetDt = 1/20;
-            }
-            else if ((1/avg) < 35) {
-                targetDt = 1/30;
-            }
-            else if ((1/avg) < 45) {
-                targetDt = 1/40;
-            }
-            else if ((1/avg) < 55) {
-                targetDt = 1/50;
-            }*/
-
             sumDt += self.actualDt;
 
-            /*if (sumDt*1.1 < targetDt) {
-                return;
-            }*/
             while (sumDt >= targetDt) {
                 sumDt -= targetDt;
             }
@@ -625,11 +608,12 @@ BSWG.render = new function() {
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
 
             self.renderer.sortObjects = true;
-            //self.shadowMap.texture.needsUpdate = true;
+            self.renderer.clear();
+            self.renderer.context.finish();
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
-            //self.renderer.context.finish();
-            self.renderer.sortObjects = true;
+            self.renderer.context.finish();
             self.renderer.render(self.scene, self.cam3D);
+            self.renderer.context.finish();
 
             if (self.customCursor && !self.dlgOpen) {
                 document.body.style.cursor = 'none';
@@ -658,8 +642,6 @@ BSWG.render = new function() {
             }
 
             BSWG.input.newFrame();
-
-            self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);

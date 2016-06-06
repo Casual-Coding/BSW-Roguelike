@@ -526,6 +526,10 @@ BSWG.component = function (desc, args) {
 
     this.cacheJPW = function() {
         if (this.jpointsw) {
+            for (var i=0; i<this.jpointsw.length; i++) {
+                this.jpointsw[i] = null;
+            }
+            this.jpointsw.length = 0;
             this.jpointsw = null;
         }
         this.jpointsw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
@@ -550,7 +554,16 @@ BSWG.component = function (desc, args) {
             return;
         }
 
-        this.jmatch = new Array();
+        if (this.jmatch) {
+            for (var i=0; i<this.jmatch.length; i++) {
+                this.jmatch[i].length = 0;
+                this.jmatch[i] = null;
+            }
+            this.jmatch.length = 0;
+            this.jmatch = null;
+        }
+
+        this.jmatch = [];
         this.jmhover = -1;
 
         var _p = this.obj.body.GetWorldCenter();
@@ -592,6 +605,7 @@ BSWG.component = function (desc, args) {
                             (p1.motorType && p1.motorType === p2.motorType) ||
                             (p1.motorType && (p1.motorType%10) != (p2.motorType%10))) &&
                             !(p1.motorType === 61 && p2.motorType === 61)) {
+                            p1 = p2 = null;
                             continue;
                         }
                         if (d2 < BSWG.component_minJMatch) {
@@ -618,11 +632,16 @@ BSWG.component = function (desc, args) {
                                     cl[i].jmhover = k2;
                                 }
                             }
+                            p1 = p2 = null;
                             break;
                         }
+                        p1 = p2 = null;
                     }
             }
-        }       
+        }   
+
+        cl.length = 0;
+        _p = p = cl = jpw = t = mps = mp = null;
     }   
 
     this.baseUpdate = function(dt) {

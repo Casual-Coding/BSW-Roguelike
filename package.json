@@ -2,7 +2,7 @@
   "main": "index.html",
   "name": "BSWR",
   "description": "BlockShip Wars: Roguelike",
-  "version": "0.2.5",
+  "version": "0.2.9",
   "keywords": [
     "game",
     "roguelike",
@@ -14,7 +14,7 @@
     "title": "BlockShip Wars: Roguelike",
     "toolbar": false,
     "frame": true,
-    "fullscreen": false,
+    "fullscreen": true,
     "min_width": 1280,
     "min_height": 768,
     "width": 1280,
@@ -31,5 +31,19 @@
     "gulp-util": "^3.0.7",
     "nw-builder": "^2.2.0",
     "simple-glob": "^0.1.0"
-  }
+  },
+  "licenses": [{
+    "type": "GPLv2",
+    "url": "http://www.example.com/licenses/gpl.html"
+  }],
+  "repositories": [{
+    "type": "git", 
+    "url": "https://github.com/chadams77/BSW-Roguelike.git",
+    "path": ""
+  }],
+  "maintainers": [{
+    "name": "Chris Adams",
+    "email": "chris.ah.adams@gmail.com",
+    "web": "https://github.com/chadams77"
+  }]
 }

@@ -190,6 +190,7 @@ BSWG.jpointRenderer = new function() {
                     }
                     idx += 1;
                 }
+                map = null;
             }
         }
         for (; idx<BSWG.maxJPointsRender; idx++) {
