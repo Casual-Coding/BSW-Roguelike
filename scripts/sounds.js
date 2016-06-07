@@ -103,8 +103,6 @@ BSWG.soundSample = BSWG.soundBase({
             this.gain.connect(BSWG.mixer.gain);
         }
 
-        this.playing = true;
-
         var self = this;
         this.source.onended = function ( ) {
             self.playing = false;
@@ -113,6 +111,7 @@ BSWG.soundSample = BSWG.soundBase({
         };
 
         this.source.start();
+        this.playing = true;
 
         audioCtx = null;
         pos = null;
@@ -122,7 +121,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     volume: function (val) {
         //try {
-        if (this.playing) {
+        if (this.playing && isFinite(val)) {
             val = Math.clamp(val * 0.5, 0, 1);
             if (!val || Math.abs(this.gain.gain.value - val) > 0.01) {
                 this.gain.gain.value = val;
@@ -137,7 +136,7 @@ BSWG.soundSample = BSWG.soundBase({
 
     rate: function (val) {
         //try {
-        if (this.playing) {
+        if (this.playing && isFinite(val)) {
             val = Math.clamp(val || 1, 0.1, 10.0);
             if (!val || Math.abs(this.source.playbackRate.value - val) > 0.01) {
                 this.source.playbackRate.value = val;
@@ -170,6 +169,8 @@ BSWG.soundSample = BSWG.soundBase({
         if (this.playing) {
             this.source.stop();
         }
+
+        this.playing = false;
 
         this.source.disconnect();
         this.gain.disconnect();

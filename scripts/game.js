@@ -311,6 +311,7 @@ BSWG.game = new function(){
             var obj = new Object();
             obj.map = this.map.serialize();
             obj.comp = BSWG.componentList.serialize(null, true);
+            obj.xpInfo = this.xpInfo.serialize();
 
             localStorage.game_save = JSON.stringify(obj);
 
@@ -637,13 +638,13 @@ BSWG.game = new function(){
 
                 if (args.load) {
                     this.map = BSWG.genMap(args.load.map);
-                    this.tileMap = new BSWG.tileMap(map.tm_desc);
+                    this.tileMap = new BSWG.tileMap(this.map.tm_desc);
                     this.ccblock = BSWG.componentList.load(args.load.comp);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
                     this.cam.y = p.y;
+                    this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
                     this.noDefault = true;
-                    this.xpInfo = new BSWG.playerStats(args.load.xpi);
                 }
                 else {
                     Math.seedrandom();
@@ -651,21 +652,11 @@ BSWG.game = new function(){
                     this.map = BSWG.genMap(162, 35, 8);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc);
                     this.xpInfo = new BSWG.playerStats();
-                    //Math.seedrandom();
-                    //for (var i=0; i<this.map.planets.length; i++) {
-                    //    var planet = BSWG.planets.add({pos: this.map.planets[i].worldP.THREE(), type: i===0 ? BSWG.planet_TERRAN : null});
-                    //    this.map.planets[i].pobj = planet;
-                    //}
                     startPos = this.map.planets[0].worldP.clone();
-                    //this.map.planets[0].pobj.capture();
-                    //startPos = this.map.startPos;
                 }
                 BSWG.xpDisplay.xpInfo = this.xpInfo;
-                //this.mapImage = BSWG.render.proceduralImage(this.map.size*4, this.map.size*4, function(ctx, w, h){
-                //});
                 this.mapImage = this.tileMap.minimap.image;
                 this.tileMap.addCollision(0, 0, this.map.size, this.map.size);
-                //this.nebulas = new BSWG.nebulas(this.map);
 
             case BSWG.SCENE_GAME2:
 
@@ -897,6 +888,7 @@ BSWG.game = new function(){
                             self.ccblock = BSWG.componentList.load(this.backup);
                             self.aiship = null;
                             self.battleMode = false;
+                            window.gc();
                         }
 
                     };
@@ -1199,12 +1191,14 @@ BSWG.game = new function(){
         }
 
         BSWG.render.resetl60();
+        window.gc();
 
     };
 
     this.shipTest = null;
     this.emodeTint = 0.0;
     this.bmodeTint = 0.0;
+    this.lastGC = Date.timeStamp();
 
     this.start = function ()
     {
@@ -1218,6 +1212,13 @@ BSWG.game = new function(){
         BSWG.input.emulateMouseWheel([BSWG.KEY['-'], BSWG.KEY['NUMPAD -']], [BSWG.KEY['='], BSWG.KEY['NUMPAD +']], 2);
 
         BSWG.render.startRenderer(function(dt, time){
+
+            if (!self.battleMode && self.ccblock && self.ccblock.obj && self.ccblock.obj.body && Math.lenVec2(self.ccblock.obj.body.GetLinearVelocity()) < 0.01) {
+                if ((Date.timeStamp() - self.lastGC) > (2.5*60)) {
+                    window.gc();
+                    self.lastGC = Date.timeStamp();
+                }
+            }
 
             self.hudBottomY = self.hudY(self.hudBottomYT);
 
@@ -1723,6 +1724,7 @@ BSWG.game = new function(){
                     var ccs = BSWG.componentList.allCCs();
                     if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
                         self.battleMode = false;
+                        window.gc();
                     }
                     for (var i=0; i<ccs.length; i++) {
                         if (self.ccblock && self.ccblock.id !== ccs[i].id && (ccs[i].obj && ccs[i].obj.body && Math.distVec2(ccs[i].obj.body.GetWorldCenter(), self.ccblock.obj.body.GetWorldCenter()) > self.map.escapeDistance)) {

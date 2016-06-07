@@ -724,18 +724,18 @@ BSWG.physics = new function(){
             self.scrapes.push(S);
         }
 
-        S.a.volume(S.va = Math.clamp(forceA / 2, 0, 1.75));
-        S.b.volume(S.vb = Math.clamp(forceB / 2, 0, 1.75));
-        S.a.rate(S.ra = 0.35 / (ma / 2.5));
-        S.b.rate(S.rb = 0.35 / (mb / 2.5));
+        S.a.volume((S.va = Math.clamp(forceA / 2, 0, 1.75))*0.8);
+        S.b.volume((S.vb = Math.clamp(forceB / 2, 0, 1.75))*0.8);
+        S.a.rate((S.ra = 0.35 / (ma / 2.5)) / 2.0);
+        S.b.rate((S.rb = 0.35 / (mb / 2.5)) / 2.0);
         S.a.position(p3);
         S.b.position(p3);
         S.lframe = self.framen;
         S.lp.set(p3.x, p3.y, p3.z);
 
         if (newSound) {
-            new BSWG.soundSample().play('bump', S.lp, S.va/2.0, S.ra);
-            new BSWG.soundSample().play('bump', S.lp, S.vb/2.0, S.rb);               
+            new BSWG.soundSample().play('bump', S.lp, S.va/1.5, S.ra);
+            new BSWG.soundSample().play('bump', S.lp, S.vb/1.5, S.rb);               
         }
 
         p3 = null;

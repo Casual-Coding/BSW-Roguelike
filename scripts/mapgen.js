@@ -103,7 +103,13 @@ BSWG.enemySettings = [
             { type: 'striker',          levels: [4,5,6], with: [ 'freighter' ] },
             { type: 'striker',          levels: [4,5,6], max: 2, with: [ 'freighter' ] },
             { type: 'striker',          levels: [4,5,6], with: [ 'little-brute', 'little-tough-guy'] },
-            { type: 'freighter',        levels: [2,3,4,5,6] }
+            { type: 'freighter',        levels: [2,3,4,5,6] },
+            { type: 'tracker',          levels: [0] },
+            { type: 'tracker',          levels: [0] },
+            { type: 'tracker',          levels: [0] },
+            { type: 'tracker',          levels: [1], max: 2 },
+            { type: 'tracker',          levels: [1], max: 2 },
+            { type: 'tracker',          levels: [1], max: 2 }
         ]
     }
 ];
@@ -139,19 +145,23 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         scan(ret);
 
         Math.seedrandom();
-        for (var i=0; i<ret.planets.length; i++) {
+        /*for (var i=0; i<ret.planets.length; i++) {
             if (!ret.planets[i].pobj) {
                 console.log('Map load error: Couldn\'t load planet');
             }
             else {
                 //ret.planets[i].pobj = BSWG.planets.add(ret.planets[i].pobj);
             }
-        }
+        }*/
 
         for (var i=0; i<ret.zones.length; i++) {
             BSWG.genMap_LoadMusicSettings_Zone(ret.zones[i], ret.eInfo);
         }
 
+        size       = ret.size;
+        areaNo     = ret.areaNo;
+        numZones   = ret.zones.length;
+        numPlanets = ret.planets.length;
     }
     else {
 
@@ -415,120 +425,128 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
-        ret.tm_desc = {
-            'city-tiles': {
-                decals: BSWG.makeCityTiles(1),
-                normalMap: BSWG.render.images['test_nm'].texture,
-                normalMapScale: 24.0,
-                normalMapAmp: 5.0,
-                map: function(x, y) {
-                    if (x >= 0 && y >= 0 && x < size && y < size) {
-                        return ret.obMap[x][y];
+        ret.ctileSeed = ~~(Math.random()*100000);
+    }
+
+    Math.seedrandom(ret.ctileSeed);
+    var obtiles = BSWG.makeCityTiles(1);
+
+    ret.tm_desc = {
+        'city-tiles': {
+            decals: obtiles,
+            normalMap: BSWG.render.images['test_nm'].texture,
+            normalMapScale: 24.0,
+            normalMapAmp: 5.0,
+            map: function(x, y) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    return ret.obMap[x][y];
+                }
+                else {
+                    return 0;
+                }
+            },
+            color: [0.5, 0.5, 1.5],
+            flashColor: [1.1, 1.1, 1.5]
+        },
+        'tileset-mountain': {
+            map: function(x,y) {
+                return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
+            },
+            collision: true,
+            color: [1.0, 1.0, 1.0]
+        },
+        'tileset-land': {
+            map: function(x,y) {
+                return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
+            },
+            color: [0.4, 0.75, 0.2]
+        },
+        'tileset-sand': {
+            map: function(x,y) {
+                return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
+            },
+            color: [1.5, 1.0, 0.5]
+        },
+        'tileset-rockland': {
+            map: function(x,y) {
+                return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
+            },
+            color: [0.75, 0.5, 0.5]
+        },
+        'tileset-snow': {
+            map: function(x,y) {
+                return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
+            },
+            color: [2.25, 2.25, 2.25]
+        },
+        'tileset-below': {
+            map: function(x,y) {
+                return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
+            },
+            color: [0.75, 0.75, 0.20],
+            isBelow: true
+        },
+        'water': {
+            color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+            level: 0.20,
+            map: function(x,y) {
+                return true
+            },
+            isWater: true
+        },
+        'minimap': {
+            bounds: [ 0, 0, size, size ],
+            getColor: function(x, y) {
+                if (this.getDiscovered(x, y)) {
+                    if (ret.colMap[x][y]) {
+                        return 'rgba(192, 192, 192, 1)';
                     }
-                    else {
-                        return 0;
+                    else if (ret.terMap[x][y] === 0) {
+                        return 'rgba(6, 50, 80, 1)';
                     }
-                },
-                color: [0.5, 0.5, 1.5],
-                flashColor: [1.1, 1.1, 1.5]
-            },
-            'tileset-mountain': {
-                map: function(x,y) {
-                    return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
-                },
-                collision: true,
-                color: [1.0, 1.0, 1.0]
-            },
-            'tileset-land': {
-                map: function(x,y) {
-                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
-                },
-                color: [0.4, 0.75, 0.2]
-            },
-            'tileset-sand': {
-                map: function(x,y) {
-                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
-                },
-                color: [1.5, 1.0, 0.5]
-            },
-            'tileset-rockland': {
-                map: function(x,y) {
-                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
-                },
-                color: [0.75, 0.5, 0.5]
-            },
-            'tileset-snow': {
-                map: function(x,y) {
-                    return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
-                },
-                color: [2.25, 2.25, 2.25]
-            },
-            'tileset-below': {
-                map: function(x,y) {
-                    return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
-                },
-                color: [0.75, 0.75, 0.20],
-                isBelow: true
-            },
-            'water': {
-                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
-                level: 0.20,
-                map: function(x,y) {
-                    return true
-                },
-                isWater: true
-            },
-            'minimap': {
-                bounds: [ 0, 0, size, size ],
-                getColor: function(x, y) {
-                    if (this.getDiscovered(x, y)) {
-                        if (ret.colMap[x][y]) {
-                            return 'rgba(192, 192, 192, 1)';
-                        }
-                        else if (ret.terMap[x][y] === 0) {
-                            return 'rgba(6, 50, 80, 1)';
-                        }
-                        else if (ret.terMap[x][y] === 1) {
-                            return 'rgba(40, 80, 20, 1)';
-                        }
-                        else if (ret.terMap[x][y] === 2) {
-                            return 'rgba(96, 72, 48, 1)';
-                        }
-                        else if (ret.terMap[x][y] === 3) {
-                            return 'rgba(56, 40, 40, 1)';
-                        }
-                        else if (ret.terMap[x][y] === 4) {
-                            return 'rgba(130, 130, 130, 1)';
-                        }
+                    else if (ret.terMap[x][y] === 1) {
+                        return 'rgba(40, 80, 20, 1)';
                     }
-                    else {
-                        return 'rgba(0, 0, 0, 1)';
+                    else if (ret.terMap[x][y] === 2) {
+                        return 'rgba(96, 72, 48, 1)';
                     }
-                },
-                setDiscovered: function(x, y, undis) {
-                    if (x >= 0 && y >= 0 && x < size && y < size) {
-                        var zone = ret.zones[ret.zoneMap[x][y]];
-                        if (!zone.discovered) {
-                            undis = true;
-                        }
-                        ret.disMap[x][y] = (!undis) ? 1 : 0;
+                    else if (ret.terMap[x][y] === 3) {
+                        return 'rgba(56, 40, 40, 1)';
                     }
-                },
-                getDiscovered: function(x, y) {
-                    if (x >= 0 && y >= 0 && x < size && y < size) {
-                        return ret.disMap[x][y] ? true : false;
-                    }
-                    else {
-                        return false;
+                    else if (ret.terMap[x][y] === 4) {
+                        return 'rgba(130, 130, 130, 1)';
                     }
                 }
+                else {
+                    return 'rgba(0, 0, 0, 1)';
+                }
+            },
+            setDiscovered: function(x, y, undis) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    var zone = ret.zones[ret.zoneMap[x][y]];
+                    if (!zone.discovered) {
+                        undis = true;
+                    }
+                    ret.disMap[x][y] = (!undis) ? 1 : 0;
+                }
+            },
+            getDiscovered: function(x, y) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    return ret.disMap[x][y] ? true : false;
+                }
+                else {
+                    return false;
+                }
             }
-        };
-    }
+        }
+    };
 
     ret.serialize = function () {
 
         var self = this;
+
+        var odesc = this.tm_desc;
+        this.tm_desc = null;
 
         for (var i=0; i<this.zones.length; i++) {
             this.zones[i].__zoneIndex = (i+1);
@@ -594,8 +612,12 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         };
 
-        return scan(this);
+        var ret = scan(this);
 
+        this.tm_desc = odesc;
+        odesc = null;
+
+        return ret;
     };
 
     ret.renderZoneMap = function (ctx, clr, flipY, scale, onlyDisc) {
@@ -966,7 +988,7 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
     }
 
     zone.enemies = new Array();
-    var k = 10;
+    var k = 250;
     while (zone.enemies.length < 8 && k-- > 0) {
         for (var i=0; i<eInfo.enemies.length; i++) {
             var E = eInfo.enemies[i];
@@ -988,9 +1010,12 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
             if (found) {
                 var E2 = BSWG.getEnemy(E.type);
                 if (E2 && E2.obj && E2.stats) {
-                    var prob = E2.compStats(zone.tech);
-                    prob = Math.pow(prob, 2.0);
-                    if (Math.random() < prob) {
+                    //var prob = E2.compStats(zone.tech);
+                    //prob = Math.pow(prob, 2.0);
+                    //if (Math.random() < prob) {
+                    //    zone.enemies.push(E);
+                    //}
+                    if (Math.random() < 0.05) {
                         zone.enemies.push(E);
                     }
                 }

@@ -223,7 +223,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             },
             shadowMap: {
                 type: 't',
-                value: BSWG.render.shadowMap
+                value: BSWG.render.shadowMap.texture
             },
             shadowMatrix: {
                 type: 'm4',
@@ -267,7 +267,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             },
             shadowMap: {
                 type: 't',
-                value: BSWG.render.shadowMap
+                value: BSWG.render.shadowMap.texture
             },
             extra: {
                 type: 'v4',

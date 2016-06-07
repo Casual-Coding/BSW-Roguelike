@@ -170,11 +170,14 @@ BSWG.component_HingeHalf = {
         }
 
         if (robj) {
-            robj.joint.__ms *= 0.75;
-        }        
+            if (!robj.joint.__ms || robj.joint.__ms < 0.05) {
+                robj.joint.__ms = 0.0;
+            }
+            robj.joint.__ms *= 0.25;
+        }
 
-        if (this.sound && this.onCC && robj && robj.objA && robj.objA.comp && robj.objA.comp.onCC && robj.objB && robj.objB.comp && robj.objB.comp.onCC) {
-            this.sound.volume(Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.01, 0, 1));
+        if (this.sound && this.onCC && robj && robj.objA && robj.objA.comp && robj.objA.comp.onCC && robj.objB && robj.objB.comp && robj.objB.comp.onCC && isFinite(robj.joint.__ms)) {
+            this.sound.volume(Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.025, 0, 1));
         }
         else if (this.sound) {
             this.sound.volume(0);

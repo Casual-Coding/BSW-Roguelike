@@ -43,6 +43,7 @@ BSWG.getEnemy = function(type) {
         case 'tough-guy':       title = 'Tough Guy'; break;
         case 'stinger':         title = 'Stinger'; break;
         case 'freighter':       title = 'Freighter'; break;
+        case 'tracker':         title = 'Tracker'; break;
         default: break;
     }
 
@@ -143,6 +144,61 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
         obj.type = type;
 
         switch (type) {
+
+            case 'turret':
+
+                var comp = obj.comp;
+                var oradius = obj.radius || comp.obj.radius;
+                var forwardOffset = obj.forwardOffset || 0.0;
+                var reverse = obj.reverse || false;
+                var limit = obj.limit || Math.PI/2.05;
+
+                obj.track = function (p, keyDown, left, right, keyFire) { // Stateless
+
+                    if (!comp || !comp.obj || !comp.obj.body || !p) {
+                        return;
+                    }
+
+                    left = left || BSWG.KEY.LEFT;
+                    right = right || BSWG.KEY.RIGHT;
+
+                    var mp = comp.obj.body.GetWorldCenter();
+                    var distance = Math.distVec2(mp, p);
+                    var radius = oradius;
+
+                    var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset);
+                    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
+
+                    this.angleDistance = angDiff;
+
+                    if (distance > radius || this.tracker) {
+                        if (Math.abs(angDiff) < limit) {
+                            var ad2 = angDiff;
+                            if (reverse) {
+                                ad2 *= -1;
+                            }
+                            if (ad2 > 0.0) {
+                                keyDown[left] = true;
+                            }
+                            else if (ad2 < 0.0) {
+                                keyDown[right] = true;
+                            }
+                            keyDown[keyFire] = true;
+                        }
+                    }
+
+                };
+
+                obj.updateRender = function (ctx, dt) {
+
+                    lastDT = dt;
+
+                };
+
+                sensors.push(obj);
+                break;
+
+                break;
 
             case 'tracker': //
                 obj.tracker = true;
@@ -849,6 +905,9 @@ BSWG.ai = new function() {
     this.logError = function(text) {
         text = text + '';
         var lines = text.match(/[^\r\n]+/g);
+        if (!lines) {
+            return;
+        }
         for (var i=0; i<lines.length; i++) {
             if (lines[i].length > 70) {
                 lines[i] = lines[i].substring(0, 35) + ' ... ' + lines[i].substring(lines[i].length-35);

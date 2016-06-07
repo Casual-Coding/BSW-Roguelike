@@ -255,7 +255,7 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.OrthographicCamera( -50, 50, 50, -50, 1, 200 );
+        this.cam3DS = new THREE.OrthographicCamera(-50, 50, 50, -50, 1, 150);
         this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
@@ -652,15 +652,13 @@ BSWG.render = new function() {
                 self.ctx.fillRect(0, 0, self.viewport.w, self.viewport.h);
             }
 
-            self.ctx.fillColor = '#fff';
-            self.ctx.fillText(self.renderer.info.memory.textures + '', 15, 15);
+            //self.ctx.fillColor = '#fff';
+            //self.ctx.fillText(self.renderer.info.memory.textures + '', 15, 15);
 
             BSWG.input.newFrame();
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
-
-        window.gc();
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);
     };

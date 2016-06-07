@@ -379,7 +379,9 @@ BSWG.playerStats = function(load) {
         store:      null
     };
 
-    load.store = [];
+    if (!load.store) {
+        load.store = [];
+    }
 
     for (var key in load) {
         this[key] = load[key];
@@ -404,7 +406,7 @@ BSWG.playerStats = function(load) {
         inc = inc || 1;
         var sbt = BSWG.componentList.sbTypes;
         for (var i=0; i<sbt.length; i++) {
-            if (sbt[i].type != comp.type) {
+            if (sbt[i].type !== comp.type) {
                 continue;
             }
             for (var j=0; j<sbt[i].sbadd.length; j++) {
@@ -412,30 +414,32 @@ BSWG.playerStats = function(load) {
                 var nobj = {};
                 var eq = true;
                 for (var key in obj) {
-                    if (key != 'title' && key != 'count' && obj[key] !== comp[key]) {
-                        eq = false;
-                    }
-                    if (key != 'title' && key != 'count') {
+                    if (key !== 'title' && key !== 'count') {
+                        if (obj[key] !== comp[key]) {
+                            eq = false;
+                        }
                         nobj[key] = obj[key];
                     }
                 }
                 if (eq) {
-                    nobj.type = sbt[i].type;
+                    nobj.type = comp.type;
                     obj.count = (obj.count || 0) + inc;
                     if (obj.count < 0) {
                         obj.count = 0;
                     }
                     while (inc < 0) {
                         for (var k=0; k<this.store.length; k++) {
-                            var eq2 = true;
-                            for (var key in obj) {
-                                if (key != 'title' && key != 'count' && obj[key] !== this.store[k][key]) {
-                                    eq2 = false;
+                            if (this.store[k].type === comp.type) {
+                                var eq2 = true;
+                                for (var key in obj) {
+                                    if (key !== 'title' && key !== 'count' && obj[key] !== this.store[k][key]) {
+                                        eq2 = false;
+                                    }
                                 }
-                            }
-                            if (eq2) {
-                                this.store.splice(k, 1);
-                                break;
+                                if (eq2) {
+                                    this.store.splice(k, 1);
+                                    break;
+                                }
                             }
                         }
                         inc += 1;
@@ -451,10 +455,10 @@ BSWG.playerStats = function(load) {
         return false;
     };
 
-    var ostore = load.store;
-    load.store = [];
-    for (var i=0; i<ostore.length; i++) {
-        this.addStore(ostore[i], 1);
+    var ostore = this.store;
+    this.store = [];
+    for (var _i=0; _i<ostore.length; _i++) {
+        this.addStore(ostore[_i], 1);
     }
 
     this.pointsUsed = function () {
