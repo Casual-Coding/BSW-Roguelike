@@ -1223,7 +1223,10 @@ BSWG.componentList = new function () {
             var C = this.compList[i];
             if (C.onCC === null && C.type != 'cc') {
                 var list = this.shouldArc(C);
-                if (list && list.length) {
+                if (list === true) {
+                    C.removeSafe();
+                }
+                else if (list && list.length) {
                     var arch = this.serialize(null, null, list);
                     arch.archived = true;
                     arch.id = this.archObjNextID++;
@@ -1291,7 +1294,7 @@ BSWG.componentList = new function () {
 
     this.shouldArc = function (C, u, o) {
 
-        if (C.type === 'missile') {
+        if (C.type === 'missile' || C.onCC) {
             return false;
         }
 
@@ -1308,8 +1311,8 @@ BSWG.componentList = new function () {
 
         if (C.obj && C.obj.body) {
             var zone = BSWG.game.map ? BSWG.game.map.getZone(C.obj.body.GetWorldCenter()) : null;
-            if (zone && !zone.safe) {
-                return false;
+            if (zone && !zone.safe && C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {
+                return true;
             }
 
             if (C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {
@@ -1743,7 +1746,7 @@ BSWG.componentList = new function () {
 
             var pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
 
-            if (BSWG.game && BSWG.game.map && timeCheck && (BSWG.game.map.mapTime - C.mapTime) > BSWG.compExpireTime) {
+            if (BSWG.game && BSWG.game.map && timeCheck/* && (BSWG.game.map.mapTime - C.mapTime) > BSWG.orphanTimeLive*/) {
                 var zone = BSWG.game.map.getZone(pos);
                 if (!zone || !zone.safe) {
                     continue;

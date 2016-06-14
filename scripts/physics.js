@@ -351,14 +351,16 @@ BSWG.physics = new function(){
         obj.bodyDef = new b2BodyDef();
         if (!obj.static) {
             obj.bodyDef.type = b2Body.b2_dynamicBody;
+            obj.bodyDef.position = pos;
+            obj.bodyDef.angle = angle;
+            obj.body = this.world.CreateBody( obj.bodyDef );
+            obj.body.SetLinearDamping(this.baseDamping);
+            obj.body.SetAngularDamping(this.baseDamping);
+            obj.body.__mele = !!def.isMele;
         }
-        obj.bodyDef.position = pos;
-        obj.bodyDef.angle = angle;
-        obj.body = this.world.CreateBody( obj.bodyDef );
-        obj.body.SetLinearDamping(this.baseDamping);
-        obj.body.SetAngularDamping(this.baseDamping);
-
-        obj.body.__mele = !!def.isMele;
+        else {
+            obj.body = this.ground;
+        }
 
         obj.fixtureDef = new b2FixtureDef();
         obj.fixtureDef.density = def.density || 1.0;
@@ -426,7 +428,14 @@ BSWG.physics = new function(){
                 }
 
                 obj.verts = verts;
-                obj.shape = b2PolygonShape.AsArray(Math.scalePoly(verts, 0.99), verts.length);
+                var verts2 = Math.scalePoly(verts, 0.99)
+                if (obj.static) {
+                    for (var i=0; i<verts2.length; i++) {
+                        verts2[i].x += pos.x;
+                        verts2[i].y += pos.y;
+                    }
+                }
+                obj.shape = b2PolygonShape.AsArray(verts2, verts.length);
                 break;
 
             default:
@@ -470,7 +479,9 @@ BSWG.physics = new function(){
             obj.fixture = obj.body.CreateFixture( obj.fixtureDef );
         }
 
-        obj.body.ResetMassData();
+        if (!obj.static) {
+            obj.body.ResetMassData();
+        }
 
         this.objects.push(obj);
 
