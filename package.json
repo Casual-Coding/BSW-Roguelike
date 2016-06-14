@@ -14,7 +14,7 @@
     "title": "BlockShip Wars: Roguelike",
     "toolbar": false,
     "frame": true,
-    "fullscreen": true,
+    "fullscreen": false,
     "min_width": 1280,
     "min_height": 768,
     "width": 1280,
@@ -26,7 +26,7 @@
   },
   "dependencies": {
   },
-  "js-flags": "--expose-gc",
+  "js-flags": "",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",

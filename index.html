@@ -27,9 +27,12 @@
         <script>
 
             BSWG.nwg = null;
-            if (require) {
+            if (window.require) {
                 BSWG.nwg = require('nw.gui') || null;
                 BSWG.app = BSWG.nwg.App || null;
+            }
+            if (!window.gc) {
+                window.gc = function () {};
             }
 
             jQuery = jQuery.noConflict();

@@ -19,6 +19,7 @@ BSWG.arch_hashSize = 25.0;
 BSWG.compExpireTime = 7.5 * 60.0;
 
 BSWG.orphanDefense = 8.0;
+BSWG.orphanTimeLive = 90.0;
 
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -64,7 +65,7 @@ BSWG.compAnchored = function(self) {
 BSWG.updateOnCC = function () {
 
     var len = BSWG.componentList.compList.length;
-    var ccs = new Array();
+    var ccs = [];
     for (var i=0; i<len; i++) {
         BSWG.componentList.compList[i].onCC = null;
         if (BSWG.componentList.compList[i].type == 'cc') {
@@ -150,7 +151,11 @@ BSWG._updateOnCC = function (a, b) {
             return false;
         u[n.id] = true;
 
+        var before = n.onCC;
         n.onCC = flag ? cc : null;
+        if (before && !n.onCC) {
+            n.orphanTime = Date.timeStamp();
+        }
 
         if (n.welds) {
             for (var key in n.welds) {
@@ -262,10 +267,10 @@ BSWG.component = function (desc, args) {
         this[key] = desc[key];
 
     this.id = BSWG.nextCompID++;
-    this.jpoints = new Array();
-    this.jmatch = new Array();
+    this.jpoints = [];
+    this.jmatch = [];
     this.jmatch = -1;
-    this.welds = new Object();
+    this.welds = {};
     this.onCC = null;
     this.tag = BSWG.generateTag();
     if (this.type === 'cc') {
@@ -281,115 +286,6 @@ BSWG.component = function (desc, args) {
 
     this.hp = this.maxHP;
     this.destroyed = false;
-
-    this.takeDamage = function (amt, fromC, noMin, disolve) {
-
-        if (BSWG.game.scene === BSWG.SCENE_TITLE) {
-            return;
-        }
-
-        var isFriendly = false;
-        if (fromC && fromC.onCC && this.onCC) {
-            if (fromC.onCC.id === this.onCC.id) {
-                amt *= BSWG.friendlyFactor;
-                isFriendly = true;
-            }
-            else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
-                amt *= BSWG.friendlyFactor;
-                isFriendly = true;
-            }
-        }
-
-        if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
-            amt /= BSWG.orphanDefense;
-        }
-        if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
-            amt /= BSWG.orphanDefense;
-        }
-
-        if (this.onCC && !isFriendly) {
-            amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
-            if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
-                amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) * BSWG.defenceBias;
-            }
-            else if (this.onCC && BSWG.game.ccblock) {
-                amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
-            }
-        }
-
-        if (amt < 1 && !noMin) {
-            return;
-        }
-
-        if (disolve) {
-            amt = this.hp * 1000 + 1000;
-        }
-
-        this.hp -= amt;
-        if (this.hp > this.maxHP) {
-            this.hp = this.maxHP;
-        }
-        if (this.hp <= 0 && !this.destroyed) {
-            if (this.obj && this.obj.body) {
-
-                var p = this.obj.body.GetWorldCenter();
-
-                if (BSWG.xpDisplay && BSWG.game.xpInfo && this.onCC !== BSWG.game.ccblock && !isFriendly && !disolve) {
-                    var level = 0;
-                    if (!this.onCC) {
-                        level = BSWG.game.ccblock.level();
-                    }
-                    else {
-                        level = this.onCC.level();
-                    }
-                    var xpi0 = BSWG.xpInfo[level];
-                    var xpi = BSWG.xpInfo[level+1];
-                    if (xpi && xpi0) {
-                        var totalXP = xpi.xp - xpi0.xp;
-                        totalXP *= this.xpBase ? this.xpBase : 0.01;
-                        if (!this.onCC) {
-                            totalXP /= 5;
-                        }
-                        totalXP = Math.floor(totalXP);
-                        if (totalXP < 1) {
-                            totalXP = 0;
-                        }
-                        if (totalXP > 0) {
-                            BSWG.xpDisplay.giveXP(totalXP, p.clone());
-                        }
-                    }
-                }
-                var v = this.obj.body.GetLinearVelocity();
-                var r = this.obj.radius;
-                if (this.type === 'cc') {
-                    r *= 1.5;
-                }
-                for (var i=0; i<(disolve ? 1 : 40); i++) {
-                    var a = Math.random() * Math.PI * 2.0;
-                    var r2 = Math.random() * r * 0.5;
-                    var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
-                                        p.y + Math.sin(a) * r2);
-                    BSWG.render.boom.palette = disolve ? chadaboom3D.green : chadaboom3D.fire_bright;
-                    BSWG.render.boom.add(
-                        p2.particleWrap(0.025),
-                        r*(3.5 + 2.5*Math.random()),
-                        256,
-                        1 + Math.pow(r, 1/3) * Math.random(),
-                        2.0,
-                        v.THREE(Math.random()*2.0),
-                        null,
-                        i < (disolve ? 1 : 4)
-                    );
-                }
-            }
-
-            this.hp = 0;
-            this.destroyed = true;
-            this.onCC = null;
-            this.removeSafe();
-        }
-
-    };
 
     if (this.obj) {
         this.obj.comp = this;
@@ -413,346 +309,464 @@ BSWG.component = function (desc, args) {
             this.jpoints[i].y *= 1.0005;
         }
 
-        this.jpointsNormals = new Array(this.jpoints.length);
-        for (var i=0; i<this.jpointsNormals.length; i++) {
+        this.jpointsNormals = [];
+        for (var i=0; i<this.jpoints.length; i++) {
             this.jpointsNormals[i] = BSWG.physics.getNormalAt(this.obj, this.jpoints[i]);
         }
 
     }
 
-    this.p = function (v) {
+    BSWG.componentList.add(this);
+
+};
+
+BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
+
+    if (BSWG.game.scene === BSWG.SCENE_TITLE || this.type === 'missile') {
+        return;
+    }
+
+    var isFriendly = false;
+    if (fromC && fromC.onCC && this.onCC) {
+        if (fromC.onCC.id === this.onCC.id) {
+            amt *= BSWG.friendlyFactor;
+            isFriendly = true;
+        }
+        else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
+            amt *= BSWG.friendlyFactor;
+            isFriendly = true;
+        }
+    }
+
+    if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
+        amt /= BSWG.orphanDefense;
+    }
+    if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
+        amt /= BSWG.orphanDefense;
+    }
+
+    if (this.onCC && !isFriendly) {
+        amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
+        if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
+            amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) * BSWG.defenceBias;
+        }
+        else if (this.onCC && BSWG.game.ccblock) {
+            amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
+        }
+    }
+
+    if (amt < 1 && !noMin) {
+        return;
+    }
+
+    if (disolve) {
+        amt = this.hp * 1000 + 1000;
+    }
+
+    this.hp -= amt;
+    if (this.hp > this.maxHP) {
+        this.hp = this.maxHP;
+    }
+    if (this.hp <= 0 && !this.destroyed) {
         if (this.obj && this.obj.body) {
-            if (!v) {
-                return this.obj.body.GetWorldCenter();
-            }
-            else {
-                return this.obj.body.GetWorldPoint(v);
-            }
-        }
-        else {
-            return null;
-        }
-    };
 
-    this.remove = function() {
+            var p = this.obj.body.GetWorldCenter();
 
-        BSWG.componentList.remove(this);
-
-    };
-
-    this.removeSafe = function() {
-
-        BSWG.componentList.compRemove.push(this);
-
-    };
-
-    this.baseRenderOver = function(ctx, cam, dt) {
-
-        if (this.renderOver) {
-            this.renderOver(ctx, cam, dt);
-        }
-
-        if (!this.jpointsw) {
-            return;
-        }
-
-        if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
-            for (var key in this.dispKeys) {
-                var info = this.dispKeys[key];
-                if (info) {
-                    var text = info[0];
-                    var rot = 0.0;
-
-                    var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
-                    var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
-                    ctx.globalAlpha = 0.5;
-                    ctx.fillStyle = info[2] ? '#777' : '#fff';
-                    ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
-
-                    ctx.save();
-
-                    ctx.translate(Math.floor(p.x), Math.floor(p.y));
-                    ctx.rotate(rot);
-                    ctx.translate(0, 3);
-
-                    ctx.font = '11px Orbitron';
-                    ctx.globalAlpha = 1.0;
-                    ctx.fillStyle = info[2] ? '#fff' : '#000';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(text, 0, 0);
-                    ctx.textAlign = 'left';
-
-                    ctx.restore();
+            if (BSWG.xpDisplay && BSWG.game.xpInfo && this.onCC !== BSWG.game.ccblock && !isFriendly && !disolve) {
+                var level = 0;
+                if (!this.onCC) {
+                    level = BSWG.game.ccblock.level();
+                }
+                else {
+                    level = this.onCC.level();
+                }
+                var xpi0 = BSWG.xpInfo[level];
+                var xpi = BSWG.xpInfo[level+1];
+                if (xpi && xpi0) {
+                    var totalXP = xpi.xp - xpi0.xp;
+                    totalXP *= this.xpBase ? this.xpBase : 0.01;
+                    if (!this.onCC) {
+                        totalXP /= 5;
+                    }
+                    totalXP = Math.floor(totalXP);
+                    if (totalXP < 1) {
+                        totalXP = 0;
+                    }
+                    if (totalXP > 0) {
+                        BSWG.xpDisplay.giveXP(totalXP, p.clone());
+                    }
                 }
             }
-        }
-
-        if (this.tag && BSWG.ai.editor && !BSWG.game.showControls && this.onCC === BSWG.game.ccblock && BSWG.componentList.compHover2 === this) {
-            var text = this.tag;
-            var rot = 0.0;
-
-            ctx.font = '14px Courier, monospace';
-            var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
-            var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
-            ctx.globalAlpha = 1.0;
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(p.x - w * 0.5, p.y - 10 - 15, w, 20);
-
-            ctx.save();
-
-            ctx.translate(Math.floor(p.x), Math.floor(p.y) - 15);
-            ctx.rotate(rot);
-            ctx.translate(0, 3);
-
-            ctx.globalAlpha = 1.0;
-            ctx.fillStyle = '#000';
-            ctx.textAlign = 'center';
-            ctx.fillText(text, 0, 0);
-            ctx.textAlign = 'left';
-
-            ctx.restore();
-        }
-
-        ctx.globalAlpha = 1.0;
-
-        if (this.traceClr) {
-            ctx.globalAlpha = 0.85;
-            var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
-            ctx.fillStyle = this.traceClr;
-            ctx.fillRect(p.x-5, p.y-5, 10, 10);
-            ctx.globalAlpha = 1.0;
-        }
-
-    };
-
-    this.cacheJPW = function() {
-        if (this.jpointsw) {
-            for (var i=0; i<this.jpointsw.length; i++) {
-                this.jpointsw[i] = null;
+            var v = this.obj.body.GetLinearVelocity();
+            var r = this.obj.radius;
+            if (this.type === 'cc') {
+                r *= 1.5;
             }
-            this.jpointsw.length = 0;
-            this.jpointsw = null;
-        }
-        this.jpointsw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
-        for (var i=0; i<this.jpoints.length; i++) {
-            this.jpointsw[i].motorType = this.jpoints[i].motorType || 0;
-        }
-        this.jmhover = -1;
-    };
-
-    this.updateJCache = function() {
-
-        if (!BSWG.game.editMode && !BSWG.componentList.autoWelds) {
-            return;
-        }
-
-        var autos = null;
-        if (BSWG.componentList.autoWelds) {
-            autos = BSWG.componentList.autoWelds;
-        }
-
-        if (!this.jpointsw || (this.onCC !== BSWG.game.ccblock && this.onCC !== null && !BSWG.componentList.autoWelds)) {
-            return;
-        }
-
-        if (this.jmatch) {
-            for (var i=0; i<this.jmatch.length; i++) {
-                this.jmatch[i].length = 0;
-                this.jmatch[i] = null;
-            }
-            this.jmatch.length = 0;
-            this.jmatch = null;
-        }
-
-        this.jmatch = [];
-        this.jmhover = -1;
-
-        var _p = this.obj.body.GetWorldCenter();
-        var p = new b2Vec2(_p.x, _p.y);
-        var cl = BSWG.componentList.withinRadius(p, this.obj.radius+0.5);
-
-        var jpw = this.jpointsw;
-
-        var mps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
-        var mp = BSWG.render.unproject3D(mps, 0.0);
-
-        var mind = 10.0;
-        for (var i=0; i<jpw.length; i++) {
-            var tp = jpw[i];
-            var d = Math.pow(tp.x - mp.x, 2.0) +
-                    Math.pow(tp.y - mp.y, 2.0);
-            if (d < mind)
-            {
-                this.jmhover = i;
-                mind = d;
+            for (var i=0; i<(disolve ? 1 : 40); i++) {
+                var a = Math.random() * Math.PI * 2.0;
+                var r2 = Math.random() * r * 0.5;
+                var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
+                                    p.y + Math.sin(a) * r2);
+                BSWG.render.boom.palette = disolve ? chadaboom3D.green : chadaboom3D.fire_bright;
+                BSWG.render.boom.add(
+                    p2.particleWrap(0.025),
+                    r*(3.5 + 2.5*Math.random()),
+                    256,
+                    1 + Math.pow(r, 1/3) * Math.random(),
+                    2.0,
+                    v.THREE(Math.random()*2.0),
+                    null,
+                    i < (disolve ? 1 : 4)
+                );
             }
         }
-        if (mind > BSWG.component_jMatchClickRange || BSWG.compActiveConfMenu) {
-            this.jmhover = -1;
-        }
 
-        for (var i=0; i<cl.length; i++) {
-            if (cl[i] !== this && BSWG.physics.bodyDistance(this.obj.body, cl[i].obj.body) < 1.0) {
-                var jpw2 = cl[i].jpointsw;
+        this.hp = 0;
+        this.destroyed = true;
+        this.onCC = null;
+        this.removeSafe();
+    }
 
-                for (var k1=0; jpw && k1<jpw.length; k1++)
-                    for (var k2=0; jpw2 && k2<jpw2.length; k2++)
-                    {
-                        var p1 = jpw[k1];
-                        var p2 = jpw2[k2];
-                        var d2 = Math.pow(p1.x - p2.x, 2.0) +
-                                 Math.pow(p1.y - p2.y, 2.0);
-                        if (((p1.motorType && !p2.motorType) || (p2.motorType && !p1.motorType) ||
-                            (p1.motorType && p1.motorType === p2.motorType) ||
-                            (p1.motorType && (p1.motorType%10) != (p2.motorType%10))) &&
-                            !(p1.motorType === 61 && p2.motorType === 61)) {
-                            p1 = p2 = null;
-                            continue;
-                        }
-                        if (d2 < BSWG.component_minJMatch) {
-                            var auto = false;
-                            if (autos) {
-                                var _c = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5);
-                                for (var f=0; f<autos.length; f++) {
-                                    if (Math.distSqVec2(_c, autos[f]) < BSWG.component_minJMatch) {
-                                        auto = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            this.jmatch.push([
-                                k1, cl[i], k2, p1.motorType || 0, p2.motorType || 0, auto
-                            ]);
-                            if (cl[i].jmhover === k2) {
-                                if (BSWG.game.editMode) {
-                                    this.jmhover = k1;
-                                }
-                            }
-                            else if (this.jmhover === k1) {
-                                if (BSWG.game.editMode) {
-                                    cl[i].jmhover = k2;
-                                }
-                            }
-                            p1 = p2 = null;
-                            break;
-                        }
-                        p1 = p2 = null;
-                    }
-            }
-        }   
+};
 
-        cl.length = 0;
-        _p = p = cl = jpw = t = mps = mp = null;
-    }   
-
-    this.baseUpdate = function(dt) {
-
-        if (!BSWG.game.battleMode && BSWG.game.ccblock) {
-            this.takeDamage(-dt*5.0, null, true);
-        }
-
-        if (BSWG.compAnchored(this)) {
-            if (this.obj && this.obj.body) {
-                this.obj.body.SetAngularDamping(5.0);
-                this.obj.body.SetLinearDamping(5.0);
-            }
+BSWG.component.prototype.p = function (v) {
+    if (this.obj && this.obj.body) {
+        if (!v) {
+            return this.obj.body.GetWorldCenter();
         }
         else {
-            if (this.obj && this.obj.body) {
-                this.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
-                this.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
+            return this.obj.body.GetWorldPoint(v);
+        }
+    }
+    else {
+        return null;
+    }
+};
+
+BSWG.component.prototype.remove = function() {
+
+    BSWG.componentList.remove(this);
+
+};
+
+BSWG.component.prototype.removeSafe = function() {
+
+    BSWG.componentList.compRemove.push(this);
+
+};
+
+BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
+
+    if (this.renderOver) {
+        this.renderOver(ctx, cam, dt);
+    }
+
+    if (!this.jpointsw) {
+        return;
+    }
+
+    if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
+        for (var key in this.dispKeys) {
+            var info = this.dispKeys[key];
+            if (info) {
+                var text = info[0];
+                var rot = 0.0;
+
+                var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
+                var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = info[2] ? '#777' : '#fff';
+                ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
+
+                ctx.save();
+
+                ctx.translate(Math.floor(p.x), Math.floor(p.y));
+                ctx.rotate(rot);
+                ctx.translate(0, 3);
+
+                ctx.font = '11px Orbitron';
+                ctx.globalAlpha = 1.0;
+                ctx.fillStyle = info[2] ? '#fff' : '#000';
+                ctx.textAlign = 'center';
+                ctx.fillText(text, 0, 0);
+                ctx.textAlign = 'left';
+
+                ctx.restore();
             }
         }
+    }
 
-        if (!this.jpointsw || !this.jmatch) {
-            return;
+    if (this.tag && BSWG.ai.editor && !BSWG.game.showControls && this.onCC === BSWG.game.ccblock && BSWG.componentList.compHover2 === this) {
+        var text = this.tag;
+        var rot = 0.0;
+
+        ctx.font = '14px Courier, monospace';
+        var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+        var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(p.x - w * 0.5, p.y - 10 - 15, w, 20);
+
+        ctx.save();
+
+        ctx.translate(Math.floor(p.x), Math.floor(p.y) - 15);
+        ctx.rotate(rot);
+        ctx.translate(0, 3);
+
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, 0, 0);
+        ctx.textAlign = 'left';
+
+        ctx.restore();
+    }
+
+    if (this.orphanTimeLeft && this.orphanTimeLeft < 30.0) {
+        var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+        var sz = Math.max(BSWG.render.viewport.w, BSWG.render.viewport.h) / 150;
+        ctx.globalAlpha = Math.clamp(this.orphanTimeLeft, 0, 1) * (1 - Math.clamp((this.orphanTimeLeft-30), 0, 1));
+        var t = this.orphanTimeLeft / BSWG.orphanTimeLive;
+        ctx.fillStyle = 'rgba(' + Math.floor((1-t)*255) + ',' + Math.floor(Math.pow(t, 0.25)*255) + ',92,1)';
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.font = sz + 'px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.strokeText(Math.floor(this.orphanTimeLeft) + '', p.x, p.y + (sz*0.5));
+        ctx.fillText(Math.floor(this.orphanTimeLeft) + '', p.x, p.y + (sz*0.5));
+        ctx.globalAlpha = 1.0;
+    }
+
+    ctx.globalAlpha = 1.0;
+
+    if (this.traceClr) {
+        ctx.globalAlpha = 0.85;
+        var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+        ctx.fillStyle = this.traceClr;
+        ctx.fillRect(p.x-5, p.y-5, 10, 10);
+        ctx.globalAlpha = 1.0;
+    }
+
+};
+
+BSWG.component.prototype.cacheJPW = function() {
+    if (this.jpointsw) {
+        for (var i=0; i<this.jpointsw.length; i++) {
+            this.jpointsw[i] = null;
         }
+        this.jpointsw.length = 0;
+        this.jpointsw = null;
+    }
+    this.jpointsw = BSWG.physics.localToWorld(this.jpoints, this.obj.body);
+    for (var i=0; i<this.jpoints.length; i++) {
+        this.jpointsw[i].motorType = this.jpoints[i].motorType || 0;
+    }
+    this.jmhover = -1;
+};
 
-        var doWelds = false;
+BSWG.component.prototype.updateJCache = function() {
 
-        if (BSWG.game.editMode) {
+    if (!BSWG.game.editMode && !BSWG.componentList.autoWelds) {
+        return;
+    }
 
-            if (this.jmhover >= 0 && !BSWG.ui.mouseBlock && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift')) {
+    var autos = null;
+    if (BSWG.componentList.autoWelds) {
+        autos = BSWG.componentList.autoWelds;
+    }
 
-                doWelds = true;
+    if (!this.jpointsw || (this.onCC !== BSWG.game.ccblock && this.onCC !== null && !BSWG.componentList.autoWelds)) {
+        return;
+    }
 
+    if (this.jmatch) {
+        for (var i=0; i<this.jmatch.length; i++) {
+            this.jmatch[i].length = 0;
+            this.jmatch[i] = null;
+        }
+        this.jmatch.length = 0;
+        this.jmatch = null;
+    }
+
+    this.jmatch = [];
+    this.jmhover = -1;
+
+    var _p = this.obj.body.GetWorldCenter();
+    var p = new b2Vec2(_p.x, _p.y);
+    var cl = BSWG.componentList.withinRadius(p, this.obj.radius+0.5);
+
+    var jpw = this.jpointsw;
+
+    var mps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
+    var mp = BSWG.render.unproject3D(mps, 0.0);
+
+    var mind = 10.0;
+    for (var i=0; i<jpw.length; i++) {
+        var tp = jpw[i];
+        var d = Math.pow(tp.x - mp.x, 2.0) +
+                Math.pow(tp.y - mp.y, 2.0);
+        if (d < mind)
+        {
+            this.jmhover = i;
+            mind = d;
+        }
+    }
+    if (mind > BSWG.component_jMatchClickRange || BSWG.compActiveConfMenu) {
+        this.jmhover = -1;
+    }
+
+    for (var i=0; i<cl.length; i++) {
+        if (cl[i] !== this && BSWG.physics.bodyDistance(this.obj.body, cl[i].obj.body) < 1.0) {
+            var jpw2 = cl[i].jpointsw;
+
+            for (var k1=0; jpw && k1<jpw.length; k1++)
+                for (var k2=0; jpw2 && k2<jpw2.length; k2++)
+                {
+                    var p1 = jpw[k1];
+                    var p2 = jpw2[k2];
+                    var d2 = Math.pow(p1.x - p2.x, 2.0) +
+                             Math.pow(p1.y - p2.y, 2.0);
+                    if (((p1.motorType && !p2.motorType) || (p2.motorType && !p1.motorType) ||
+                        (p1.motorType && p1.motorType === p2.motorType) ||
+                        (p1.motorType && (p1.motorType%10) != (p2.motorType%10))) &&
+                        !(p1.motorType === 61 && p2.motorType === 61)) {
+                        p1 = p2 = null;
+                        continue;
+                    }
+                    if (d2 < BSWG.component_minJMatch) {
+                        var auto = false;
+                        if (autos) {
+                            var _c = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5);
+                            for (var f=0; f<autos.length; f++) {
+                                if (Math.distSqVec2(_c, autos[f]) < BSWG.component_minJMatch) {
+                                    auto = true;
+                                    break;
+                                }
+                            }
+                        }
+                        this.jmatch.push([
+                            k1, cl[i], k2, p1.motorType || 0, p2.motorType || 0, auto
+                        ]);
+                        if (cl[i].jmhover === k2) {
+                            if (BSWG.game.editMode) {
+                                this.jmhover = k1;
+                            }
+                        }
+                        else if (this.jmhover === k1) {
+                            if (BSWG.game.editMode) {
+                                cl[i].jmhover = k2;
+                            }
+                        }
+                        p1 = p2 = null;
+                        break;
+                    }
+                    p1 = p2 = null;
+                }
+        }
+    }   
+
+    cl.length = 0;
+    _p = p = cl = jpw = t = mps = mp = null;
+};   
+
+BSWG.component.prototype.baseUpdate = function(dt) {
+
+    this.orphanTimeLeft = 0.0;
+    if (BSWG.game.scene === BSWG.SCENE_GAME1 && !this.onCC && this.obj && this.obj.body && this.type !== 'missile') {
+        var zone = BSWG.game.map ? BSWG.game.map.getZone(this.obj.body.GetWorldCenter()) : null;
+        if (zone && !zone.safe) {
+            if (this.orphanTime && !BSWG.game.battleMode) {
+                this.orphanTimeLeft = BSWG.orphanTimeLive - (Date.timeStamp() - this.orphanTime);
+                if (this.orphanTimeLeft <= 0.0) {
+                    this.orphanTimeLeft = 0.0;
+                    this.takeDamage(1000000000, null, true, true);
+                }
+            }
+            else if (!this.orphanTime) {
+                this.orphanTime = Date.timeStamp();
+            }
+            else {
+                this.orphanTime += dt;
+                this.orphanTimeLeft = 0.0;
             }
         }
+    }
+    else if (this.onCC) {
+        this.orphanTime = null;
+    }
 
-        var autos = null;
+    if (!BSWG.game.battleMode && BSWG.game.ccblock) {
+        this.takeDamage(-dt*5.0, null, true);
+    }
 
-        if (BSWG.componentList.autoWelds) {
-            autos = BSWG.componentList.autoWelds;
+    if (BSWG.compAnchored(this)) {
+        if (this.obj && this.obj.body) {
+            this.obj.body.SetAngularDamping(5.0);
+            this.obj.body.SetLinearDamping(5.0);
+        }
+    }
+    else {
+        if (this.obj && this.obj.body) {
+            this.obj.body.SetAngularDamping(BSWG.physics.baseDamping);
+            this.obj.body.SetLinearDamping(BSWG.physics.baseDamping);
+        }
+    }
+
+    if (!this.jpointsw || !this.jmatch) {
+        return;
+    }
+
+    var doWelds = false;
+
+    if (BSWG.game.editMode) {
+        if (this.jmhover >= 0 && !BSWG.ui.mouseBlock && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift')) {
             doWelds = true;
         }
+    }
 
-        if (doWelds) {
-            for (var i=0; i<this.jmatch.length; i++) {
-                if (((this.jmatch[i][0] === this.jmhover || this.jmatch[i][5]) && this.jmatch[i][1].id > this.id)) {
-                    if (!this.welds[this.jmatch[i][0]]) {
-                        var obj = BSWG.physics.createWeld(this.obj.body, this.jmatch[i][1].obj.body,
-                                                          this.jpoints[this.jmatch[i][0]],
-                                                          this.jmatch[i][1].jpoints[this.jmatch[i][2]],
-                                                          true,
-                                                          this.jpointsNormals[this.jmatch[i][0]],
-                                                          this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
-                                                          this.jmatch[i][3],
-                                                          this.jmatch[i][4],
-                                                          [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
-                                                          );
+    var autos = null;
 
-                        if (this.onCC && !this.jmatch[i][1].onCC) {
-                            this.jmatch[i][1].onCC = this.onCC;
-                        }
-                        if (!this.onCC && this.jmatch[i][1].onCC) {
-                            this.onCC = this.jmatch[i][1].onCC;
-                        }
+    if (BSWG.componentList.autoWelds) {
+        autos = BSWG.componentList.autoWelds;
+        doWelds = true;
+    }
 
-                        this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
-                        this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
+    if (doWelds) {
+        for (var i=0; i<this.jmatch.length; i++) {
+            if (((this.jmatch[i][0] === this.jmhover || this.jmatch[i][5]) && this.jmatch[i][1].id > this.id)) {
+                if (!this.welds[this.jmatch[i][0]]) {
+                    var obj = BSWG.physics.createWeld(this.obj.body, this.jmatch[i][1].obj.body,
+                                                      this.jpoints[this.jmatch[i][0]],
+                                                      this.jmatch[i][1].jpoints[this.jmatch[i][2]],
+                                                      true,
+                                                      this.jpointsNormals[this.jmatch[i][0]],
+                                                      this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
+                                                      this.jmatch[i][3],
+                                                      this.jmatch[i][4],
+                                                      [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
+                                                      );
 
-                        BSWG.updateOnCC(this, this.jmatch[i][1]);
-
-                        var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
-                        var p1 = this.jpointsw[this.jmatch[i][0]];
-
-                        if (!autos) {
-                            var p = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2);
-                            new BSWG.soundSample().play('store', p, 0.31, 2.0);
-                            BSWG.render.boom.palette = chadaboom3D.blue;
-                            BSWG.render.boom.add(
-                                p,
-                                0.75,
-                                32,
-                                0.4,
-                                1.0,
-                                null,
-                                null,
-                                false
-                            );
-                            var ma = this.obj.body.GetMass(),
-                                mb = this.jmatch[i][1].obj.body.GetMass();
-                            new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (ma / 2.5));
-                            new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (mb / 2.5));
-                            p = null;
-                        }
-
-                        BSWG.input.EAT_MOUSE('left');
+                    if (this.onCC && !this.jmatch[i][1].onCC) {
+                        this.jmatch[i][1].onCC = this.onCC;
                     }
-                    else if (!autos) {
-                        BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
-                        var p = this.jpointsw[this.jmatch[i][0]].particleWrap(0.2);
-                        this.welds[this.jmatch[i][0]].other = null;
-                        this.welds[this.jmatch[i][0]] = null;
-                        this.jmatch[i][1].welds[this.jmatch[i][2]].other = null;
-                        this.jmatch[i][1].welds[this.jmatch[i][2]] = null;  
+                    if (!this.onCC && this.jmatch[i][1].onCC) {
+                        this.onCC = this.jmatch[i][1].onCC;
+                    }
 
-                        BSWG.updateOnCC(this, this.jmatch[i][1]);
-                        new BSWG.soundSample().play('store-2', p, 0.31, 2.0);
-                        BSWG.render.boom.palette = chadaboom3D.fire;
+                    this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
+                    this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
+
+                    BSWG.updateOnCC(this, this.jmatch[i][1]);
+
+                    var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
+                    var p1 = this.jpointsw[this.jmatch[i][0]];
+
+                    if (!autos) {
+                        var p = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2);
+                        new BSWG.soundSample().play('store', p, 0.31, 2.0);
+                        BSWG.render.boom.palette = chadaboom3D.blue;
                         BSWG.render.boom.add(
                             p,
-                            1.25,
+                            0.75,
                             32,
                             0.4,
                             1.0,
@@ -760,92 +774,118 @@ BSWG.component = function (desc, args) {
                             null,
                             false
                         );
+                        var ma = this.obj.body.GetMass(),
+                            mb = this.jmatch[i][1].obj.body.GetMass();
+                        new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (ma / 2.5));
+                        new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (mb / 2.5));
                         p = null;
+                    }
 
-                        BSWG.input.EAT_MOUSE('left');
+                    BSWG.input.EAT_MOUSE('left');
+                }
+                else if (!autos) {
+                    BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
+                    var p = this.jpointsw[this.jmatch[i][0]].particleWrap(0.2);
+                    this.welds[this.jmatch[i][0]].other = null;
+                    this.welds[this.jmatch[i][0]] = null;
+                    this.jmatch[i][1].welds[this.jmatch[i][2]].other = null;
+                    this.jmatch[i][1].welds[this.jmatch[i][2]] = null;  
+
+                    BSWG.updateOnCC(this, this.jmatch[i][1]);
+                    new BSWG.soundSample().play('store-2', p, 0.31, 2.0);
+                    BSWG.render.boom.palette = chadaboom3D.fire;
+                    BSWG.render.boom.add(
+                        p,
+                        1.25,
+                        32,
+                        0.4,
+                        1.0,
+                        null,
+                        null,
+                        false
+                    );
+                    p = null;
+
+                    BSWG.input.EAT_MOUSE('left');
+                }
+            }
+        }
+    }
+
+    if (this.welds) {
+        for (var k in this.welds) {
+            if (this.welds[k] && this.welds[k].obj.broken) {
+                var other = this.welds[k].other;
+                var k2;
+                for (k2 in other.welds) {
+                    if (other.welds[k2] && other.welds[k2].obj === this.welds[k].obj) {
+                        BSWG.physics.removeWeld(this.welds[k].obj);
+                        this.welds[k].other = null;
+                        this.welds[k] = null;
+                        other.welds[k2].other = null;
+                        other.welds[k2] = null; 
+                        BSWG.updateOnCC(this, other);
+                        break;
                     }
                 }
             }
         }
+    }
 
-        if (this.welds) {
-            for (var k in this.welds) {
-                if (this.welds[k] && this.welds[k].obj.broken) {
-                    var other = this.welds[k].other;
-                    var k2;
-                    for (k2 in other.welds) {
-                        if (other.welds[k2] && other.welds[k2].obj === this.welds[k].obj) {
-                            BSWG.physics.removeWeld(this.welds[k].obj);
-                            this.welds[k].other = null;
-                            this.welds[k] = null;
-                            other.welds[k2].other = null;
-                            other.welds[k2] = null; 
-                            BSWG.updateOnCC(this, other);
-                            break;
-                        }
-                    }
-                }
+};
+
+BSWG.component.prototype.pointIn = function(p) {
+
+    if (this.obj.type === 'multipoly') {
+
+        for (var i=0; i<this.obj.fixture.length; i++) {
+            if (!!this.obj.fixture[i].TestPoint(p)) {
+                return true;
             }
         }
+        return false;
+    }
+    else {
+        return !!this.obj.fixture.TestPoint(p);
+    }
 
-    };
+};
 
-    this.pointIn = function(p) {
+BSWG.component.prototype.getLocalPoint = function(p) {
 
-        if (this.obj.type === 'multipoly') {
+    var p2 = this.obj.body.GetLocalPoint(p);
+    return new b2Vec2(p2.x, p2.y);
 
-            for (var i=0; i<this.obj.fixture.length; i++) {
-                if (!!this.obj.fixture[i].TestPoint(p)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        else {
-            return !!this.obj.fixture.TestPoint(p);
-        }
+};
 
-    };
+BSWG.component.prototype.getWorldPoint = function(p) {
 
-    this.getLocalPoint = function(p) {
+    var p2 = this.obj.body.GetWorldPoint(p);
+    return new b2Vec2(p2.x, p2.y);
 
-        var p2 = this.obj.body.GetLocalPoint(p);
-        return new b2Vec2(p2.x, p2.y);
+};
 
-    };
+BSWG.component.prototype.addForce = function (f, p) {
 
-    this.getWorldPoint = function(p) {
+    if (!p)
+        this.obj.body.ApplyForceToCenter(f);
+    else
+        this.obj.body.ApplyForce(f, p);
 
-        var p2 = this.obj.body.GetWorldPoint(p);
-        return new b2Vec2(p2.x, p2.y);
+};
 
-    };
-
-    this.addForce = function (f, p) {
-
-        if (!p)
-            this.obj.body.ApplyForceToCenter(f);
-        else
-            this.obj.body.ApplyForce(f, p);
-
-    };
-
-    this.distanceTo = function (comp2) {
-        if (!this.obj || !this.obj.body || !comp2.obj || !comp2.obj.body) {
-            return 1000000.0;
-        }
-        return Math.distVec2(this.obj.body.GetWorldCenter(), comp2.obj.body.GetWorldCenter());
-    };
-
-    BSWG.componentList.add(this);
-
+BSWG.component.prototype.distanceTo = function (comp2) {
+    if (!this.obj || !this.obj.body || !comp2.obj || !comp2.obj.body) {
+        return 1000000.0;
+    }
+    return Math.distVec2(this.obj.body.GetWorldCenter(), comp2.obj.body.GetWorldCenter());
 };
 
 BSWG.componentList = new function () {
 
-    this.compList = new Array();
-    this.compRemove = new Array();
-    this.staticList = new Array();
+    this.compList = [];
+    this.compRemove = [];
+    this.staticList = [];
 
     this.clearStatic = function () {
 
@@ -904,7 +944,7 @@ BSWG.componentList = new function () {
             'thruster':         BSWG.component_Thruster
         };
 
-        this.sbTypes = new Array();
+        this.sbTypes = [];
         for (var key in this.typeMap) {
             if (this.typeMap[key].sbadd) {
                 this.sbTypes.push(this.typeMap[key]);
@@ -943,7 +983,7 @@ BSWG.componentList = new function () {
 
     this.allCCs = function () {
         var len = this.compList.length;
-        var ret = new Array();
+        var ret = [];
         for (var i=0; i<len; i++) {
             if (this.compList[i].type === 'cc') {
                 ret.push(this.compList[i]);
@@ -1170,14 +1210,14 @@ BSWG.componentList = new function () {
         var CL = this.compList;
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type == 'cc') {
-                CL[i].totalMass = (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;;
+                CL[i].totalMass = (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
             }
         }
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type != 'cc') {
-                CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;;
+                CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
             }
-        }       
+        }
 
         for (var i=0; i<len; i++) {
             var C = this.compList[i];
@@ -1194,7 +1234,7 @@ BSWG.componentList = new function () {
                             var p = list[j].obj.body.GetWorldCenter();
                             var key = this.aHashKey(p.x, p.y);
                             if (!this.archHash[key]) {
-                                this.archHash[key] = new Array();
+                                this.archHash[key] = [];
                             }
                             this.archHash[key].push(arch);
                         }
@@ -1250,6 +1290,11 @@ BSWG.componentList = new function () {
     };
 
     this.shouldArc = function (C, u, o) {
+
+        if (C.type === 'missile') {
+            return false;
+        }
+
         if (!u) u = {};
         if (!o) o = [];
         if (u[C.id]) {
@@ -1262,6 +1307,11 @@ BSWG.componentList = new function () {
         }
 
         if (C.obj && C.obj.body) {
+            var zone = BSWG.game.map ? BSWG.game.map.getZone(C.obj.body.GetWorldCenter()) : null;
+            if (zone && !zone.safe) {
+                return false;
+            }
+
             if (C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {
                 o.push(C);
                 if (C.welds) {
@@ -1511,7 +1561,7 @@ BSWG.componentList = new function () {
     this.makeQueryable = function (comp, mesh) {
 
         mesh.__compid = comp.id;
-        comp.queryMeshes = comp.queryMeshes || new Array();
+        comp.queryMeshes = comp.queryMeshes || [];
         comp.queryMeshes.push(mesh);
         return true;
 
@@ -1575,7 +1625,7 @@ BSWG.componentList = new function () {
     };
 
     this.withinRadius = function (p, r) {
-        var ret = new Array();
+        var ret = [];
         this.withinBox(p.x-r, p.y-r, p.x+r, p.y+r, function(C){
             var p2 = C.obj.body.GetWorldCenter();
             var dist = Math.pow(p2.x - p.x, 2.0) +
@@ -1589,9 +1639,9 @@ BSWG.componentList = new function () {
 
     this.withinRadiusPlayerOnly = function (p, r) {
         if (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body) {
-            return new Array();
+            return [];
         }
-        var ret = new Array();
+        var ret = [];
         var len = this.playerComps.length;
         for (var i=0; i<len; i++) {
             var C = this.playerComps[i];
@@ -1649,7 +1699,7 @@ BSWG.componentList = new function () {
         var offset = (spawn.p || new b2Vec2(0, 0)).clone();
         var angle  = spawn.a || 0.0;
 
-        this.autoWelds = this.autoWelds || new Array();
+        this.autoWelds = this.autoWelds || [];
 
         if (shipOnly) {
             for (var i=0; i<comps.length; i++) {
@@ -1767,7 +1817,7 @@ BSWG.componentList = new function () {
     // returns JSON
     this.serialize = function(onCC, everything, fromList) {
 
-        var comps = fromList || new Array();
+        var comps = fromList || [];
 
         if (!fromList) {
 
@@ -1782,7 +1832,7 @@ BSWG.componentList = new function () {
 
         }
 
-        var out = new Array(comps.length);
+        var out = [];
 
         for (var i=0; i<comps.length; i++) {
             var C  = comps[i];
@@ -1806,7 +1856,7 @@ BSWG.componentList = new function () {
                 OC.args[key] = C[key];
             }
 
-            OC.welds = new Array();
+            OC.welds = [];
             if (C.welds) {
                 for (var key in C.welds) {
                     var W = C.welds[key];
