@@ -673,6 +673,12 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         );
     };
 
+    ret.getColMap = function(p) {
+        var x = Math.floor(p.x/BSWG.tileSizeWorld);
+        var y = Math.floor(p.y/BSWG.tileSizeWorld);
+        return this.colMap[x] && this.colMap[x][y];
+    };
+
     ret.getZone = function(p) {
         p = new b2Vec2(
             p.x / this.gridSize,

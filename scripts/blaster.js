@@ -9,6 +9,10 @@ BSWG.blasterList = new function () {
 
     this.idx = 0;
 
+    var static = {
+        takeDamage: function () {}
+    };
+
     this.updateRender = function (ctx, cam, dt) {
 
         this.idx += 1;
@@ -29,6 +33,9 @@ BSWG.blasterList = new function () {
                 if (ret && ret.d > Math.sqrt(B.v.x*B.v.x+B.v.y*B.v.y)*dt) {
                     comp = null;
                 }
+                if (!comp && BSWG.game.map && BSWG.game.map.getColMap(B.p)) {
+                    comp = static;
+                }
             //}
             if (B.t <= 0.0 || comp) {
                 if (B.t <= 0.0 || comp !== B.source) {
@@ -43,7 +50,7 @@ BSWG.blasterList = new function () {
                             32,
                             0.5,
                             1.5,
-                            comp.obj.body.GetLinearVelocity().clone().THREE(0.0),
+                            comp.obj ? comp.obj.body.GetLinearVelocity().clone().THREE(0.0) : new THREE.Vector3(0., 0., 0.),
                             null,
                             comp && comp !== B.source
                         );
