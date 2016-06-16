@@ -419,6 +419,26 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
                     i < (disolve ? 1 : 4)
                 );
             }
+            if (!this.disolve) {
+                if (this.welds) {
+                    for (var key in this.welds) {
+                        if (this.welds[key]) {
+                            var b = this.welds[key].other;
+                            if (b && b.obj && b.obj.body && this.obj && this.obj.body) {
+                                var p = b.obj.body.GetWorldCenter().clone();
+                                var p2 = this.obj.body.GetWorldCenter();
+                                p.x -= p2.x;
+                                p.y -= p2.y;
+                                var len = Math.lenVec2(p);
+                                p.x = (p.x / len) * r * 5;
+                                p.y = (p.y / len) * r * 5;
+                                b.obj.body.ApplyForceToCenter(p);
+                                p = p2 = null;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         this.hp = 0;

@@ -446,48 +446,65 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 }
             },
             color: [0.5, 0.5, 1.5],
-            flashColor: [1.1, 1.1, 1.5]
+            flashColor: [1.1, 1.1, 1.5],
+            reflect: 0.75,
         },
         'tileset-mountain': {
             map: function(x,y) {
                 return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
             },
             collision: true,
-            color: [1.0, 1.0, 1.0]
+            color: [1.0, 1.0, 1.0],
+            reflect: 0.2,
+            normalMapAmp: 3.5,
         },
         'tileset-land': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
             },
-            color: [0.4, 0.75, 0.2]
+            color: [0.4, 0.75, 0.2],
+            relfect: 0.2,
+            normalMapAmp: 3.0,
         },
         'tileset-sand': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
             },
-            color: [1.5, 1.0, 0.5]
+            color: [1.5, 1.0, 0.5],
+            reflect: 0.3,
+            normalMap: BSWG.render.images['water_nm'].texture,
+            normalMapScale: 3.0,
+            normalMapAmp: 1.0,
         },
         'tileset-rockland': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
             },
-            color: [0.75, 0.5, 0.5]
+            color: [0.75/3, 0.5/3, 0.5/3],
+            reflect: 0.15,
+            normalMapAmp: 5.0,
         },
         'tileset-snow': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
-            color: [2.25, 2.25, 2.25]
+            color: [2.25, 2.25, 2.25],
+            reflect: 0.3,
+            normalMap: BSWG.render.images['water_nm'].texture,
+            normalMapScale: 2.5,
+            normalMapAmp: 1.0,
         },
         'tileset-below': {
             map: function(x,y) {
                 return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
             },
             color: [0.75, 0.75, 0.20],
-            isBelow: true
+            isBelow: true,
+            reflect: 0.5,
+            normalMapAmp: 1.5
         },
         'water': {
-            color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+            color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.8],
             level: 0.20,
             map: function(x,y) {
                 return true

@@ -60,7 +60,9 @@ BSWG.component_DetacherLauncher = {
             new b2Vec2(this.size * ( 0.25 - 0.2), this.size * -0.125)
         ];
         
+        BSWG.bpmReflect = 0.2;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+        BSWG.bpmReflect = 0.5;
         this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: arrowVerts, comp: this}, 0.7, Math.polyCentroid(arrowVerts), 0.3);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);

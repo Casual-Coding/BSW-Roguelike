@@ -13,6 +13,7 @@ uniform vec2 viewport;
 uniform vec3 cam;
 varying float vFragDepth;
 varying vec4 vShadowCoord;
+uniform sampler2D envMap;
 
 void main() {
 
@@ -29,10 +30,20 @@ void main() {
     vec3 wNormal = normalize(clrw.xyz);
     vec3 lightDir = light.xyz - vPosition.xyz;
 
-    float l1w = max(dot(normalize(vNormal+0.75*wNormal*dot(wNormal, vNormal)), normalize(lightDir)), 0.0);
+    vec3 envNormal = normalize(vNormal+0.75*wNormal*dot(wNormal, vNormal));
+
+    float l1w = max(dot(envNormal, normalize(lightDir)), 0.0);
 
     gl_FragColor.rgb = clr.rgb * (0.2 + 5.0*pow(l1w, 2.0)) * 0.5;
     gl_FragColor.a = clr.a;
+
+    vec3 incident = normalize(vSPosition.xyz);
+    vec3 reflected = reflect(incident, envNormal);
+    vec2 envCoord = reflected.xy*0.5;
+    envCoord.y *= viewport.y/viewport.x;
+    envCoord += vec2(0.5, 0.5);
+    vec3 envClr = texture2D(envMap, envCoord).rgb;
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.75);
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);

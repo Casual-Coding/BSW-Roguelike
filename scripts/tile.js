@@ -10,7 +10,11 @@ BSWG.tMask = {
     D: 8
 };
 
-BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale, nmapAmp) {
+BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale, nmapAmp, reflect) {
+
+    if (!reflect && reflect !== 0.0) {
+        reflect = 0.125;
+    }
 
     var self = this;
     this.heightMap = new Array(BSWG.tileSize * BSWG.tileSize);
@@ -221,6 +225,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 't',
                 value: BSWG.render.images['water_nm'].texture
             },
+            envMap: {
+                type: 't',
+                value: BSWG.render.envMap.texture
+            },
             shadowMap: {
                 type: 't',
                 value: BSWG.render.shadowMap.texture
@@ -253,6 +261,14 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 'v4',
                 value: new THREE.Vector4(color[0], color[1], color[2], 1.0)
             },
+            envMap: {
+                type: 't',
+                value: BSWG.render.envMap.texture
+            },
+            vreflect: {
+                type: 'f',
+                value: reflect
+            },
             light: {
                 type: 'v4',
                 value: new THREE.Vector4(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0)
@@ -282,6 +298,8 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
             }
         });
+        this.mat.shading = THREE.FlatShading;
+        this.mat.needsUpdate = true;
     }
 
     this.time = Math.random()*1000;
@@ -381,10 +399,10 @@ BSWG.tileMap = function (layers) {
     }
     for (var set in layers) {
         if (layers[set].decals) {
-            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor);
+            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect);
         }
         else {
-            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor);
+            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect);
         }
     }
 
@@ -724,7 +742,7 @@ BSWG.makeCityTiles = function (seed) {
 
 };
 
-BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp, flashColor) {
+BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp, flashColor, reflect) {
 
     var image = (typeof imageName === 'string') ? BSWG.render.images[imageName] : imageName;
 
@@ -754,19 +772,19 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
 
     this.tiles = [
         [
-            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*0, BSWG.tMask.R | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp),
-            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp),
-            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp)
+            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*0, BSWG.tMask.R | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect),
+            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect),
+            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect)
         ],
         [
-            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*1, BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp),
-            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp),
-            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp)
+            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*1, BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect),
+            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect),
+            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect)
         ],
         [
-            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*2, BSWG.tMask.R | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp),
-            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp),
-            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp)
+            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*2, BSWG.tMask.R | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect),
+            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect),
+            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect)
         ]
     ];
 

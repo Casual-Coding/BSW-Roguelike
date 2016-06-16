@@ -57,10 +57,12 @@ BSWG.component_ChainLink = {
         }
         
         //BSWG.blockPolySmooth = 0.05;
+        BSWG.bpmReflect = 0.2;
         this.meshObj1 = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         this.selMeshObj1 = BSWG.genereteBlockPolyOutline(this.obj);
         //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
+        BSWG.bpmReflect = 0.2;
         this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body, comp: this }, 0.7, this.motorC, 0.0, 0.05);
         this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);
         BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);

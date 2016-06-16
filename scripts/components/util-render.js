@@ -7,6 +7,9 @@ BSWG.bpmMatCacheISize = 256;
 
 BSWG.bpmGeomCache = {};
 
+BSWG.bpmReflectDefault = 0.35;
+BSWG.bpmReflect = BSWG.bpmReflectDefault;
+
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     if (!BSWG.bpmMatCache) {
@@ -45,7 +48,19 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     warpIn: {
                         type: 'f',
                         value: 1.0
-                    }
+                    },
+                    vreflect: {
+                        type: 'f',
+                        value: BSWG.bpmReflect
+                    },
+                    envMap: {
+                        type: 't',
+                        value: BSWG.render.envMap.texture
+                    },
+                    viewport: {
+                        type: 'v2',
+                        value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+                    },
                 }),
                 matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
                 used: false
@@ -85,7 +100,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             zcenter = body.GetLocalCenter();
         }
         else {
-            var bc = body.GetLocalCenter()
+            var bc = body.GetLocalCenter();
             offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
         }
 
@@ -211,7 +226,19 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                 warpIn: {
                     type: 'f',
                     value: 1.0
-                }
+                },
+                vreflect: {
+                    type: 'f',
+                    value: BSWG.bpmReflect
+                },
+                envMap: {
+                    type: 't',
+                    value: BSWG.render.envMap.texture
+                },
+                viewport: {
+                    type: 'v2',
+                    value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+                },
             }),
             matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
             used: false
@@ -220,6 +247,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     }
 
     ret.mat = BSWG.bpmMatCache[matIdx].mat;
+    ret.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
+    ret.mat.uniforms.vreflect.value = BSWG.bpmReflect;
     ret.mesh = new THREE.Mesh(ret.geom, ret.mat);
 
     ret.matS = BSWG.bpmMatCache[matIdx].matS;
@@ -297,6 +326,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         var dmg = (obj && obj.comp) ? (1.0 - (obj.comp.hp / obj.comp.maxHP)) : 0.0;
 
         self.mat.uniforms.extra.value.w = dmg;
+        self.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
 
         if (obj && obj.comp && obj.comp.p && dmg > 0.25) {
             if (Math.pow(Math.random(), 0.25) < dmg) {
@@ -338,6 +368,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         }
 
         self.mat.needsUpdate = true;
+
+        BSWG.bpmReflect = BSWG.bpmReflectDefault;
     };
 
     ret.destroy = function() {

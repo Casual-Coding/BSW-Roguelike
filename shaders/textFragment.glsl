@@ -5,10 +5,11 @@ varying vec4 vSPosition;
 varying vec3 vLocal;
 varying mat3 vNormalMatrix;
 
-uniform sampler2D map;
+uniform sampler2D map, envMap;
 uniform vec4 light;
 uniform vec4 clr;
 uniform vec4 extra;
+uniform vec2 viewport;
 
 void main() {
 
@@ -30,5 +31,14 @@ void main() {
     float l = min(l0 * ((l1*0.8+0.6) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.05 + 0.2, 0.75);
     l = pow(max(l, 0.0), 1.25) + 0.15;
     gl_FragColor = clamp(vec4(clr.rgb*l, clr.a), 0., 1.);
+
+    vec3 envNormal = normalize(tNormal + vNormal.xyz);
+    vec3 incident = normalize(vSPosition.xyz);
+    vec3 reflected = reflect(incident, envNormal);
+    vec2 envCoord = reflected.xy*0.5;
+    envCoord.y *= viewport.y/viewport.x;
+    envCoord += vec2(0.5, 0.5);
+    vec3 envClr = texture2D(envMap, envCoord).rgb;
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.25);
 
 }

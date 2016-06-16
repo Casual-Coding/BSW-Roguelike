@@ -13,6 +13,9 @@ uniform vec4 clr;
 uniform vec4 extra;
 uniform float warpIn;
 uniform sampler2D shadowMap;
+uniform sampler2D envMap;
+uniform vec2 viewport;
+uniform float vreflect;
 
 void main() {
 
@@ -50,6 +53,14 @@ void main() {
         gl_FragColor = mix(gl_FragColor, vec4(1.,1.,1.,1.), (warpIn - 0.1) / 0.9);
     }
 
+    vec3 envNormal = normalize(mix(tNormal, tNormald, dmg) + vNormal.xyz);
+    vec3 incident = normalize(vSPosition.xyz);
+    vec3 reflected = reflect(incident, envNormal);
+    vec2 envCoord = reflected.xy*0.5;
+    envCoord.y *= viewport.y/viewport.x;
+    envCoord += vec2(0.5, 0.5);
+    vec3 envClr = texture2D(envMap, envCoord).rgb;
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, vreflect);
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
@@ -71,5 +82,4 @@ void main() {
         gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*15.+1.0)) * 0.85 + 0.15;
     }
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
-
 }

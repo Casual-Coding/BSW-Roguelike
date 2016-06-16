@@ -107,6 +107,7 @@ BSWG.component_Spikes = {
                     Math.sin(Math.PI/2) * this.size * 0.10
                 );
             }
+            BSWG.bpmReflect = i === 0 ? 0.4 : 1.0;
             this.meshObjs[i] = BSWG.generateBlockPolyMesh(tmpObj, 0.7, center, null, i === 0 ? 0.075 : 0.025);
             this.selMeshObjs[i] = BSWG.genereteBlockPolyOutline(tmpObj);
             BSWG.componentList.makeQueryable(this, this.meshObjs[i].mesh);

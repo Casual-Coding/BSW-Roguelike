@@ -892,6 +892,14 @@ BSWG.render = new function() {
             extra: {
                 type: 'v4',
                 value: new THREE.Vector4(1,0,0,0)
+            },
+            envMap: {
+                type: 't',
+                value: BSWG.render.envMap.texture
+            },
+            viewport: {
+                type: 'v2',
+                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
             }
         });
 
@@ -978,6 +986,8 @@ BSWG.render = new function() {
                 else {
                     this.mat.uniforms.extra.value.x = 1.0 * this.mesh.scale.z;
                 }
+
+                this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
 
                 if (this.clr) {
                     this.mat.uniforms.clr.value.set(this.clr[0], this.clr[1], this.clr[2], this.clr[3]);

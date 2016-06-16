@@ -398,6 +398,8 @@ BSWG.game = new function(){
 
         this.cam = new BSWG.camera();
 
+        BSWG.render.envMap = BSWG.render.images['env-map-1'];
+
         BSWG.render.clearScene();
         BSWG.jpointRenderer.readd();
         BSWG.physics.reset();
@@ -478,6 +480,8 @@ BSWG.game = new function(){
 
         switch (scene) {
             case BSWG.SCENE_TITLE:
+
+                BSWG.render.envMap = BSWG.render.images['env-map-2'];
 
                 this.cam.z *= 1.0;
 
@@ -595,11 +599,14 @@ BSWG.game = new function(){
                             }
                         },
                         color: [0.5, 0.5, 1.5],
-                        flashColor: [1.1, 1.1, 1.5]
+                        flashColor: [1.1, 1.1, 1.5],
+                        reflect: 0.75
                     },
                     'tileset-land': {
                         map: BSWG.mapPerlin,
-                        color: [0.75, 0.2, 0.1]
+                        color: [0.25, 0.0, 0.0],
+                        reflect: 0.1,
+                        normalMapAmp: 4.0
                     },
                     'tileset-below': {
                         map: function(x,y) {
@@ -609,7 +616,7 @@ BSWG.game = new function(){
                         isBelow: true
                     },
                     'water': {
-                        color: [0.2, 0, 0, 0.6],
+                        color: [0.4, 0, 0, 0.9],
                         map: function(x,y) {
                             return true;
                         },
@@ -659,6 +666,8 @@ BSWG.game = new function(){
                 this.tileMap.addCollision(0, 0, this.map.size, this.map.size);
 
             case BSWG.SCENE_GAME2:
+
+                BSWG.render.envMap = BSWG.render.images['env-map-1'];
 
                 if (scene === BSWG.SCENE_GAME2) {
                     this.noDefault = false;
@@ -932,14 +941,18 @@ BSWG.game = new function(){
                             },
                             'tileset-land': {
                                 map: function(x,y) { return (Math.abs(x) > 1 || Math.abs(y) > 1) && BSWG.mapPerlin(x,y); },
-                                color: [0.4, 0.75, 0.2]
+                                color: [0.4, 0.75, 0.2],
+                                relfect: 0.2,
+                                normalMapAmp: 3.0,
                             },
                             'tileset-below': {
                                 map: function(x,y) {
                                     return true;
                                 },
                                 color: [0.75, 0.75, 0.20],
-                                isBelow: true
+                                isBelow: true,
+                                reflect: 0.5,
+                                normalMapAmp: 1.5
                             },
                             'city-tiles': {
                                 decals: BSWG.makeCityTiles(1),
@@ -960,7 +973,7 @@ BSWG.game = new function(){
                                 map: function(x,y) {
                                     return true
                                 },
-                                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.5],
+                                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.8],
                                 level: 0.20,
                                 isWater: true
                             }

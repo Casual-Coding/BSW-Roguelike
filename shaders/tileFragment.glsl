@@ -9,17 +9,22 @@ varying mat3 vNormalMatrix;
 uniform sampler2D exMap;
 uniform vec4 light, clr, extra;
 
-uniform sampler2D shadowMap;
+uniform sampler2D shadowMap, envMap;
 uniform vec2 viewport;
 uniform vec3 cam;
+uniform float vreflect;
 varying float vFragDepth;
 varying vec4 vShadowCoord;
 
 void main() {
 
-    vec3 blending = abs( vNormal );
+    //vec3 fdx = vec3(dFdx(vPosition.x),dFdx(vPosition.y),dFdx(vPosition.z));
+    //vec3 fdy = vec3(dFdy(vPosition.x),dFdy(vPosition.y),dFdy(vPosition.z));
+    vec3 N = vNormal;//normalize(cross(fdx,fdy));
+
+    vec3 blending = abs( N );
     float topFactor = blending.z / (blending.x + blending.y + blending.z);
-    blending = vNormal + vec3(1.0, 1.0, 1.0);
+    blending = N + vec3(1.0, 1.0, 1.0);
     blending = normalize(max(blending, 0.00001));
     float b = (blending.x + blending.y + blending.z);
     blending /= vec3(b, b, b);
@@ -41,11 +46,20 @@ void main() {
 
     float l0 = clrn.a * 0.5 + 0.5 * pow(clrw.a, 2.0);
     float l1 = pow(max(dot(normalize((normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7) * extra.z;
-    float l2 = (pow(max(dot(normalize(vNormal), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
+    float l2 = (pow(max(dot(normalize(N), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(max(l, 0.0), 2.0) + 0.3;
 
     gl_FragColor = vec4(clr.rgb*l, 1.0);
+
+    vec3 incident = normalize(vSPosition.xyz);
+    vec3 reflected = reflect(incident, N);
+    vec2 envCoord = reflected.xy*0.5;
+    envCoord.y *= viewport.y/viewport.x;
+    envCoord += vec2(0.5, 0.5);
+    vec3 envClr = texture2D(envMap, envCoord).rgb;
+    //gl_FragColor.rgb = clamp(gl_FragColor.rgb + gl_FragColor.rgb * envClr * vreflect * 4.0, 0., 1.);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, vreflect);
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);

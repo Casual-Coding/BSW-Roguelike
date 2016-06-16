@@ -61,6 +61,7 @@ BSWG.component_SawBlade = {
         cjp.motorType = (false ? 1 : 2) * 10 + this.size + 2;
         this.jpoints = [ cjp ];
 
+        BSWG.bpmReflect = 0.4;
         this.meshObjs = new Array(this.nteeth+1);
         this.selMeshObjs = new Array(this.nteeth+1);
 
@@ -77,6 +78,7 @@ BSWG.component_SawBlade = {
                     (tmpObj.verts[0].y + tmpObj.verts[2].y) * 0.5
                 );
             }
+            BSWG.bpmReflect = i === 0 ? 0.2 : 1.0;
             this.meshObjs[i] = BSWG.generateBlockPolyMesh(tmpObj, 0.7, center, null, i === 0 ? 0.075 : 0.025);
             this.selMeshObjs[i] = BSWG.genereteBlockPolyOutline(tmpObj);
             BSWG.componentList.makeQueryable(this, this.meshObjs[i].mesh);

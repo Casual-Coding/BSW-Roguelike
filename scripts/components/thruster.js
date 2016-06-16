@@ -52,6 +52,7 @@ BSWG.component_Thruster = {
 
         //BSWG.blockPolySmooth = 0.1;
 
+        BSWG.bpmReflect = 0.5;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.65, new b2Vec2((verts[2].x + verts[3].x) * 0.5,
                                                                              (verts[2].y + verts[3].y) * 0.5 - 0.25 * this.size), null, 0.3);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);

@@ -46,6 +46,7 @@ BSWG.component_MissileLauncher = {
         this.thrustT = 0.0;
         this.kickBack = 0.0;
 
+        BSWG.bpmReflect = 0.4;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, 0.6));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);

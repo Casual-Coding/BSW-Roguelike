@@ -34,6 +34,7 @@ BSWG.component_Missile = {
 
         verts = null;
         
+        BSWG.bpmReflect = 0.6;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
