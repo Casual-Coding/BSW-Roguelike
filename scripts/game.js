@@ -90,7 +90,7 @@ BSWG.game = new function(){
                     H.plate(7+128+7+128+7, (48-40)/2, 128, 42, 0.5, 0.35); // 15
                     H.plate(7+128+7+128+7+128+7, (48-40)/2, 384, 42, 0.5, 0.15); // 16
                 }
-                else if (scene === BSWG.SCENE_GAME1) {
+                else if (scene !== BSWG.SCENE_GAME2) {
                     for (var i=0; i<4; i++) {
                         H.hudBtn.push([-1000, -1000, 10, 10]); // 13..16
                     }                    
@@ -102,6 +102,11 @@ BSWG.game = new function(){
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 18 (stats button: bosses beaten, zones discovered, etc)
                     H.plate(w/2-(bfr+bsz*2)+bfr+sz2, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 19 (specials button)
                     H.plate(w/2-(bfr+bsz*2)+bfr+sz2*2, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 20 (level up/points tree)
+                }
+                else {
+                    for (var i=0; i<4; i++) {
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 17..20
+                    }                   
                 }
 
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
