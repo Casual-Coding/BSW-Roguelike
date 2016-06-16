@@ -602,29 +602,33 @@ BSWG.game = new function(){
                         flashColor: [1.1, 1.1, 1.5],
                         reflect: 0.75
                     },
-                    'tileset-land': {
+                    'tileset-mountain': {
                         map: BSWG.mapPerlin,
-                        color: [0.375, 0.0, 0.0],
+                        color: [0.5, 0.0, 0.0],
                         reflect: 0.2,
-                        normalMapAmp: 4.0
+                        normalMapAmp: 4.0,
+                        normalMapScale: 2.0,
                     },
                     'tileset-below': {
                         map: function(x,y) {
                             return true
                         },
-                        color: [1, 0.0, 0.0],
+                        color: [0.6, 0.0, 0.0],
+                        normalMapAmp: 1.5,
+                        normalMapScale: 0.5,
                         isBelow: true
                     },
                     'water': {
-                        color: [0.4, 0, 0, 0.9],
+                        color: [0.05, 0, 0, 0.95],
                         map: function(x,y) {
                             return true;
                         },
                         level: 0.15,
+                        normalMapScale: 0.5,
                         isWater: true
                     }
                 };
-                this.tileMap = new BSWG.tileMap(desc);
+                this.tileMap = new BSWG.tileMap(desc, -5);
 
                 this.setSong(134, {
                     seed1: 48,

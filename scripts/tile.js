@@ -239,7 +239,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             },
             extra: {
                 type: 'v4',
-                value: new THREE.Vector4(BSWG.render.time, 1., 0., 0.)
+                value: new THREE.Vector4(BSWG.render.time, 1., nmapAmp || 1.0, nmapScale || 1.0)
             },
             light: {
                 type: 'v4',
@@ -388,7 +388,9 @@ BSWG.testMap = {
     }
 }
 
-BSWG.tileMap = function (layers) {
+BSWG.tileMap = function (layers, zoff) {
+
+    zoff = zoff || 0.0;
 
     this.layers = layers;
     this.sets = {};
@@ -399,10 +401,10 @@ BSWG.tileMap = function (layers) {
     }
     for (var set in layers) {
         if (layers[set].decals) {
-            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect);
+            this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect, zoff);
         }
         else {
-            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect);
+            this.sets[set] = new BSWG.tileSet(set, layers[set].color, layers[set].level ? layers[set].level : null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect, zoff);
         }
     }
 
@@ -513,7 +515,7 @@ BSWG.tileMap = function (layers) {
                                 takeDamage: function() {}
                             };
                             fakeComp.collisionMesh = new THREE.Mesh( geom, mat );
-                            fakeComp.collisionMesh.position.set((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld, -10.0);
+                            fakeComp.collisionMesh.position.set((x+0.5) * BSWG.tileSizeWorld, (y+0.5) * BSWG.tileSizeWorld, -10.0 + zoff);
                             fakeComp.collisionMesh.rotation.z = Math.PI/2;
                             fakeComp.collisionMesh.updateMatrix();
                             fakeComp.collisionMesh.updateMatrixWorld();
@@ -742,7 +744,7 @@ BSWG.makeCityTiles = function (seed) {
 
 };
 
-BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp, flashColor, reflect) {
+BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp, flashColor, reflect, zoff) {
 
     var image = (typeof imageName === 'string') ? BSWG.render.images[imageName] : imageName;
 
@@ -841,12 +843,12 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
 
         var ret = new Object();
         ret.mesh = new THREE.Mesh( tile.geom, tile.mat );
-        ret.mesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0);
+        ret.mesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0+zoff);
         ret.mesh.rotation.z = Math.PI/2;
         ret.mesh.updateMatrix();
         if (tile.shadowMat) {
             ret.smesh = new THREE.Mesh( tile.geom, tile.shadowMat );
-            ret.smesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0);
+            ret.smesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0+zoff);
             ret.smesh.rotation.z = Math.PI/2;
             ret.smesh.updateMatrix();
             BSWG.render.sceneS.add(ret.smesh);

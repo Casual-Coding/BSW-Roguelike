@@ -165,7 +165,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
     this.hudMesh.renderOrder = 2000.0 + this.z;
     
     this.hudMesh.needsUpdate = true;
-    this.hudMat.needsUpdate = true;
+    //this.hudMat.needsUpdate = true;
 
     this.clr = [
         this.hudMat.uniforms.clr.value.x,
@@ -198,7 +198,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             moving ? 1.0 : 0.0,
             0.0
         );
-        this.hudMat.needsUpdate = true;
+        //this.hudMat.needsUpdate = true;
     }
 
     this.set_clr = function (clr) {
@@ -215,7 +215,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
         this.clr[1] = this.hudMat.uniforms.clr.value.y;
         this.clr[2] = this.hudMat.uniforms.clr.value.z;
         this.clr[3] = this.hudMat.uniforms.clr.value.w;
-        this.hudMat.needsUpdate = true;
+        //this.hudMat.needsUpdate = true;
     };
 
     this.set_nm = function (nm) {
@@ -223,7 +223,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             return;
         }
         this.hudMat.uniforms.hudNm.value = nm.texture;
-        this.hudMat.needsUpdate = true;
+        //this.hudMat.needsUpdate = true;
     };
 
     this.do_flashing = function ( ) {
@@ -234,7 +234,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             this.clr[2] * t + 1.5 * (1-t),
             this.clr[3]
         );
-        this.hudMat.needsUpdate = true;
+        //this.hudMat.needsUpdate = true;
     };
 
     this.update = function (dt) {
@@ -264,7 +264,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
 
             this.hudMat.uniforms.scale.value.set(this.w/vp.w, this.h/vp.h, x/vp.w*2.0, y/vp.h*2.0);
             this.hudMat.uniforms.vp.value.set(this.w, this.h);
-            this.hudMat.needsUpdate = true;
+            //this.hudMat.needsUpdate = true;
         }
 
     };

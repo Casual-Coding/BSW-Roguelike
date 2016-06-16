@@ -24,7 +24,7 @@ void main() {
     float b = (blending.x + blending.y + blending.z);
     blending /= vec3(b, b, b);
 
-    vec3 texCoord = vPosition.xyz / 32.0 + vec3(0.5*extra.x/50.0, 1.0*extra.x/50.0, 1.0*extra.x/50.0) + 0.5;
+    vec3 texCoord = vPosition.xyz / 32.0 * extra.w + vec3(0.5*extra.x/50.0, 1.0*extra.x/50.0, 1.0*extra.x/50.0) + 0.5;
     vec4 clrw = texture2D(exMap, texCoord.xy * extra.y);
 
     vec3 wNormal = normalize(clrw.xyz);
