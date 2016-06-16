@@ -492,7 +492,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             reflect: 0.3,
             normalMap: BSWG.render.images['water_nm'].texture,
             normalMapScale: 2.5,
-            normalMapAmp: 1.0,
+            normalMapAmp: 0.75,
         },
         'tileset-below': {
             map: function(x,y) {

@@ -539,7 +539,7 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
             }
         }
 
-        self.mat.needsUpdate = true;
+        //self.mat.needsUpdate = true;
     };
 
     ret.destroy = function() {

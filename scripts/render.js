@@ -993,7 +993,7 @@ BSWG.render = new function() {
                     this.mat.uniforms.clr.value.set(this.clr[0], this.clr[1], this.clr[2], this.clr[3]);
                 }
 
-                this.mat.needsUpdate = true;
+                //this.mat.needsUpdate = true;
 
                 lp = null;
             }
