@@ -32,13 +32,13 @@ void main() {
     l = pow(max(l, 0.0), 1.25) + 0.15;
     gl_FragColor = clamp(vec4(clr.rgb*l, clr.a), 0., 1.);
 
-    vec3 envNormal = normalize(tNormal + vNormal.xyz);
+    vec3 envNormal = normalize(tNormal*0.2 + vNormal.xyz);
     vec3 incident = normalize(vSPosition.xyz);
     vec3 reflected = reflect(incident, envNormal);
     vec2 envCoord = reflected.xy*0.5;
     envCoord.y *= viewport.y/viewport.x;
     envCoord += vec2(0.5, 0.5);
     vec3 envClr = texture2D(envMap, envCoord).rgb;
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.25);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.15);
 
 }

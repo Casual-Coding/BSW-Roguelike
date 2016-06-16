@@ -310,13 +310,13 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         this.mat.uniforms.extra.value.x = BSWG.render.time;
         this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
         this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
-        this.mat.uniforms.shadowMatrix.needsUpdate = true;
-        this.mat.uniforms.shadowMatrix.value.needsUpdate = true;
+        //this.mat.uniforms.shadowMatrix.needsUpdate = true;
+        //this.mat.uniforms.shadowMatrix.value.needsUpdate = true;
         if (this.flashColor) {
             var t = Math.pow(Math.sin(this.time*3.5)*0.5+0.5, 3.0);
             this.mat.uniforms.clr.value.set(color[0]*(1-t)+this.flashColor[0]*t, color[1]*(1-t)+this.flashColor[1]*t, color[2]*(1-t)+this.flashColor[2]*t, 1.0);
         }
-        this.mat.needsUpdate = true;
+        //this.mat.needsUpdate = true;
         this.time += dt;
     };
 
@@ -482,7 +482,7 @@ BSWG.tileMap = function (layers) {
         };
 
         var mat = new THREE.MeshBasicMaterial({});
-        var geom = new THREE.BoxGeometry( BSWG.tileSizeWorld, BSWG.tileSizeWorld, BSWG.tileSizeWorld );
+        var geom = new THREE.BoxGeometry( BSWG.tileSizeWorld, BSWG.tileSizeWorld, 50.0 );
 
         var self = this;
         for (var setk in layers) {

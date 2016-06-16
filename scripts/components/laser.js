@@ -50,6 +50,7 @@ BSWG.component_Laser = {
         this.kickBack = 0.0;
 
         BSWG.bpmReflect = 0.6;
+        BSWG.bpmSmoothNormals = true;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[1].x+verts[5].x)*0.5, 0.2));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);

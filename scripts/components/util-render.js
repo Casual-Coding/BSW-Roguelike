@@ -9,6 +9,7 @@ BSWG.bpmGeomCache = {};
 
 BSWG.bpmReflectDefault = 0.35;
 BSWG.bpmReflect = BSWG.bpmReflectDefault;
+BSWG.bpmSmoothNormals = false;
 
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
@@ -81,6 +82,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     if (zoffset) { key += 'o' + K(zoffset); }
     if (depth) { key += 'd' + K(depth); }
     if (iscale) { key += 'i' + K(iscale); }
+    if (BSWG.bpmSmoothNormals) { key += 'f'; }
     if (BSWG.blockPolySmooth) { key += 'x' + K(BSWG.blockPolySmooth||-1); }
     for (var i=0; i<verts.length; i++) { key += K(verts[i].x) + K(verts[i].y); }
 
@@ -174,6 +176,9 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         }
 
         ret.geom.computeFaceNormals();
+        if (BSWG.bpmSmoothNormals) {
+            ret.geom.computeVertexNormals();
+        }
         ret.geom.computeBoundingSphere();
         ret.geom.needsUpdate = true;
         ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
@@ -261,7 +266,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     ret.mat.uniforms.extra.value.set(1,0,0,0);
     ret.mat.uniforms.light.value.set(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0);
 
-    ret.mat.needsUpdate = true;
+    //ret.mat.needsUpdate = true;
     ret.mesh.needsUpdate = true;
 
     BSWG.render.scene.add( ret.mesh );
@@ -367,7 +372,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             clr2.set(self.lclr[0] * (1-t) + t * 1, self.lclr[1] * (1-t), self.lclr[2] * (1-t), self.lclr[3]);
         }
 
-        self.mat.needsUpdate = true;
+        //self.mat.needsUpdate = true;
 
         BSWG.bpmReflect = BSWG.bpmReflectDefault;
     };
@@ -395,6 +400,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     };
 
     ret.update();
+
+    BSWG.bpmSmoothNormals = false;
 
     return ret;
 

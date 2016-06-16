@@ -56,7 +56,7 @@ BSWG.component_Block = {
         this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
         //BSWG.blockPolySmooth = 0.03;
-        BSWG.bpmReflect = 0.2;
+        BSWG.bpmReflect = 0.4;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         //BSWG.blockPolySmooth = null;

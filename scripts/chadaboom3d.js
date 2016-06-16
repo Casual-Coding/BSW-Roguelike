@@ -178,8 +178,8 @@ chadaboom3D.prototype.init = function () {
     smesh.renderOrder = 1500.0;
 
     geom.needsUpdate = true;
-    this.mat.needsUpdate = true;
-    this.shadowMat.needsUpdate = true;
+    //this.mat.needsUpdate = true;
+    //this.shadowMat.needsUpdate = true;
     mesh.needsUpdate = true;
     smesh.needsUpdate = true;
 
@@ -235,9 +235,9 @@ chadaboom3D.prototype.render = function(dt) {
 
     this.time += dt;
     this.mat.uniforms.time.value = this.time;
-    this.mat.needsUpdate = true;
+    //this.mat.needsUpdate = true;
     this.shadowMat.uniforms.time.value = this.time;
-    this.shadowMat.needsUpdate = true;
+    //this.shadowMat.needsUpdate = true;
 
     if (this.particleUpdate == true) {
         this.particleUpdate = false;

@@ -79,7 +79,9 @@ BSWG.component_SawBlade = {
                 );
             }
             BSWG.bpmReflect = i === 0 ? 0.2 : 1.0;
+            BSWG.bpmSmoothNormals = true;
             this.meshObjs[i] = BSWG.generateBlockPolyMesh(tmpObj, 0.7, center, null, i === 0 ? 0.075 : 0.025);
+            BSWG.bpmSmoothNormals = true;
             this.selMeshObjs[i] = BSWG.genereteBlockPolyOutline(tmpObj);
             BSWG.componentList.makeQueryable(this, this.meshObjs[i].mesh);
         }
@@ -99,11 +101,11 @@ BSWG.component_SawBlade = {
     render: function(ctx, cam, dt) {
 
         var selClr = [0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0];
-        var toothClr = [1.0, 1.0, 1.0, 1];
+        var toothClr = [0.4, 0.4, 0.4, 1];
         var wheelClr = [1.0, 0.6, 0.05, 1];
         for (var i=0; i<this.meshObjs.length; i++) {
             this.selMeshObjs[i].update(selClr);
-            this.meshObjs[i].update(i > 0 ? toothClr : wheelClr, i > 0 ? 10.0 : 1.25, BSWG.compAnchored(this));
+            this.meshObjs[i].update(i > 0 ? toothClr : wheelClr, i > 0 ? 1000.0 : 1.25, BSWG.compAnchored(this));
         }
 
     },

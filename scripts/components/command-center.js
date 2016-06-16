@@ -49,7 +49,7 @@ BSWG.component_CommandCenter = {
 
         //BSWG.blockPolySmooth = 0.02;
 
-        BSWG.bpmReflect = 0.5;
+        BSWG.bpmReflect = 0.6;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.8);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
