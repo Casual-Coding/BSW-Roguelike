@@ -5,7 +5,8 @@ BSWG.weather = function() {
         wind: new THREE.Vector3(0, 0, 0),
         color: new THREE.Vector4(0, 0, 0.5, 0.5),
         size: 0.02,
-        density: 0.0
+        density: 0.0,
+        speed: 1.0
     };
 
     this.time = 0.0;
@@ -18,10 +19,11 @@ BSWG.weather = function() {
     this.color.set(this.defaults.color.x, this.defaults.color.y, this.defaults.color.z, this.defaults.color.w);
     this.size = this.defaults.size;
     this.density = this.defaults.density;
+    this.speed = this.defaults.speed;
 
     this.hasInit = true;
 
-    this.MAX_PRT = 1024 * 16;
+    this.MAX_PRT = 1024 * 32;
     this.vertices = new Float32Array(this.MAX_PRT * 3 * 3);
     this.attr1 = new Float32Array(this.MAX_PRT * 4 * 3);
 
@@ -91,10 +93,14 @@ BSWG.weather = function() {
             type: 't',
             value: BSWG.render.envMap ? BSWG.render.envMap.texture : null
         },
+        cam: {
+            type: 'v3',
+            value: new THREE.Vector3(0, 0, 0)
+        }
     };
 
-    //this.shadowMat = BSWG.render.newMaterial("weatherVertex", "weatherFragmentShadow", uniforms);
-    //this.shadowMat.depthWrite = false;
+    this.shadowMat = BSWG.render.newMaterial("weatherVertex", "weatherFragmentShadow", uniforms);
+    this.shadowMat.depthWrite = false;
 
     this.mat = BSWG.render.newMaterial("weatherVertex", "weatherFragment", uniforms, THREE.AdditiveBlending);
     this.mat.depthWrite = false;
@@ -109,20 +115,20 @@ BSWG.weather = function() {
     mesh.position.z = 2.0;
     mesh.renderOrder = 1500.0;
 
-    //smesh = new THREE.Mesh( geom, this.shadowMat );
-    //smesh.frustumCulled = false;
-    //smesh.position.z = 2.0;
-    //smesh.renderOrder = 1500.0;
+    smesh = new THREE.Mesh( geom, this.shadowMat );
+    smesh.frustumCulled = false;
+    smesh.position.z = 2.0;
+    smesh.renderOrder = 1500.0;
 
     geom.needsUpdate = true;
     mesh.needsUpdate = true;
-    //smesh.needsUpdate = true;
+    smesh.needsUpdate = true;
 
     BSWG.render.scene.add( mesh );
     BSWG.render.sceneS.add( smesh );
 
     this.mesh = mesh;
-    //this.smesh = smesh;
+    this.smesh = smesh;
 
     this.posAttr = geom.getAttribute('position');
     this.a1Attr = geom.getAttribute('attr1');
@@ -137,14 +143,14 @@ BSWG.weather.prototype.transition = function (args, speed) {
     for (var key in this.defaults) {
         this.settingsFade[key] = (args && (args[key] || args[key] === 0.0)) ? args[key] : this.defaults[key];
     }
-    this.settingsFade.speed = speed || 1.0;
+    this.settingsFade._speed = speed || 1.0;
 
 };
 
 BSWG.weather.prototype.readd = function () {
 
     BSWG.render.scene.add(this.mesh);
-    //BSWG.render.sceneS.add(this.smesh);
+    BSWG.render.sceneS.add(this.smesh);
 
 };
 
@@ -155,7 +161,7 @@ BSWG.weather.prototype.render = function(dt) {
     }
 
     if (this.settingsFade) {
-        var sp = Math.clamp(dt * this.settingsFade.speed, 0, 1);
+        var sp = Math.clamp(dt * this.settingsFade._speed, 0, 1);
         var lerp = function(a, b) {
             return (b - a) * sp + a;
         };
@@ -173,7 +179,7 @@ BSWG.weather.prototype.render = function(dt) {
         }
     }
 
-    this.time += dt;
+    this.time += dt * this.speed;
     this.mat.uniforms.time.value = this.time;
     this.mat.uniforms.density.value = this.density;
     this.mat.uniforms.wind.value.set(this.wind.x, this.wind.y, this.wind.z);
@@ -181,6 +187,7 @@ BSWG.weather.prototype.render = function(dt) {
     this.mat.uniforms.color.value.set(this.color.x, this.color.y, this.color.z, this.color.w);
     this.mat.uniforms.size.value = this.size;
     this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
+    this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
 
 };
 

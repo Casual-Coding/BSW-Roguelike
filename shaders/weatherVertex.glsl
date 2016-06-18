@@ -6,6 +6,7 @@ uniform float time;
 uniform float density;
 uniform float size;
 uniform vec3 wind;
+uniform vec3 cam;
 attribute vec4 attr1;
 varying vec4 vAttr1;
 varying vec4 vPosition;
@@ -21,19 +22,37 @@ void main() {
 
     // Position
 
-    float timeFall = 4.0;
-    float fallHeight = 50.0;
+    float timeFall = 2.0;
+    float fallHeight = 45.0;
     float t2 = time + attr1.y;
     float stage = floor(t2 / timeFall);
     float T = (t2 - stage * timeFall) / timeFall;
 
     float seed = rand(vec2(attr1.x, sin(stage/16.0))) + attr1.z + attr1.w;
-    vec3 ipos = vec3((vec2(rand(vec2(seed, 0.0)), rand(vec2(0.0, seed))) - vec2(0.5, 0.5)) * 100.0, fallHeight);
+    vec3 ipos = vec3((vec2(rand(vec2(seed, 0.0)), rand(vec2(0.0, seed))) - vec2(0.5, 0.5)) * 400.0, fallHeight);
 
-    ipos.z -= T * (fallHeight + 10.0);
+    // Keep on camera, minimize jumping
+
+    if (ipos.x < (cam.x-50.0)) {
+        ipos.x += floor(cam.x / 50.0 + 0.9999) * 50.0;
+    }
+    else if (ipos.x > (cam.x+50.0)) {
+        ipos.x -= floor(-cam.x / 50.0 + 0.9999) * 50.0;
+    }
+    if (ipos.y < (cam.y-50.0)) {
+        ipos.y += floor(cam.y / 50.0 + 0.9999) * 50.0;
+    }
+    else if (ipos.y > (cam.y+50.0)) {
+        ipos.y -= floor(-cam.y / 50.0 + 0.9999) * 50.0;
+    }
+
+    // Fall
+
+    ipos.z -= T * (fallHeight + 5.0);
+
+    // Output position
 
     vec3 pos2 = position * size + ipos;
-
     vPosition = modelMatrix * vec4(pos2, 1.0);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos2, 1.0);
     vSPosition = gl_Position;

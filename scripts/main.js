@@ -160,6 +160,7 @@ var BSWG = new function(){
             'tileWaterFragment',
             'shadowFragment',
             'weatherFragment',
+            'weatherFragmentShadow',
         ]
     };
     var ai = [

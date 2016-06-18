@@ -14,7 +14,7 @@ void main() {
     }
     else {
         gl_FragColor = color;
-        gl_FragColor.rgb = mix(color.rgb, vec3(1., 1., 1.), 1./(1.+15.*length(vUv+vec2(-size*0.7, size*0.1))));
+        gl_FragColor.rgb = mix(color.rgb, vec3(1., 1., 1.), 0.5/(1.+15.*length(vUv+vec2(-size*0.7, size*0.1))));
         gl_FragColor.a *= 1./(1.+2.*length(vUv));
 
         vec3 envNormal = normalize(vec3(vUv, 1.5));
@@ -24,6 +24,6 @@ void main() {
         envCoord.y *= 1. / 1.5;
         envCoord += vec2(0.5, 0.5);
         vec3 envClr = texture2D(envMap, envCoord).rgb;
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.75);
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.5);
     }
 }
