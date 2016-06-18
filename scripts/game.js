@@ -633,7 +633,7 @@ BSWG.game = new function(){
                         isWater: true
                     }
                 };
-                this.tileMap = new BSWG.tileMap(desc, -5);
+                this.tileMap = new BSWG.tileMap(desc, -8);
 
                 this.setSong(134, {
                     seed1: 48,
@@ -984,7 +984,7 @@ BSWG.game = new function(){
                                 map: function(x,y) {
                                     return true
                                 },
-                                color: [0.05*0.5, 0.4*0.5, 0.75*0.5, 0.8],
+                                color: [0.05*0.5, 0.4*0.25, 0.75*0.5, 0.65],
                                 level: 0.20,
                                 isWater: true
                             }

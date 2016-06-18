@@ -30,7 +30,7 @@ void main() {
     vec3 wNormal = normalize(clrw.xyz);
     vec3 lightDir = light.xyz - vPosition.xyz;
 
-    vec3 envNormal = normalize(vNormal+0.75*wNormal*dot(wNormal, vNormal));
+    vec3 envNormal = vNormalMatrix * wNormal;
 
     float l1w = max(dot(envNormal, normalize(lightDir)), 0.0);
 

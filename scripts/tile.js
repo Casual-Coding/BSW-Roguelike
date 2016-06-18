@@ -588,6 +588,12 @@ BSWG.tileMap = function (layers, zoff) {
                 ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2,
                 tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2,
                 ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2;
+            if (zoff < -5) {
+                tx1 -= 1;
+                ty1 -= 1;
+                tx2 += 1;
+                ty2 += 1;
+            }
             /*if (layer.isWater) {
                 tx1 = (~~(Math.min(p1.x, p2.x) / (BSWG.tileSizeWorld * 10))) - 3;
                 ty1 = (~~(Math.min(p1.y, p2.y) / (BSWG.tileSizeWorld * 10))) - 2;

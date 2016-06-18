@@ -266,8 +266,8 @@ BSWG.render = new function() {
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize);
         this.shadowMap.texture.format = THREE.RGBAFormat;
         this.shadowMap.texture.minFilter = THREE.LinearFilter;
-        this.shadowMap.texture.magFilter = THREE.NearestFilter;
-        this.shadowMap.texture.generateMipmaps = false;
+        this.shadowMap.texture.magFilter = THREE.LinearFilter;
+        this.shadowMap.texture.generateMipmaps = true;
         this.shadowMap.stencilBuffer = false;
 
         this.sizeViewport();

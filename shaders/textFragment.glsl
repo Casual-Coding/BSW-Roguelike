@@ -32,7 +32,7 @@ void main() {
     l = pow(max(l, 0.0), 1.25) + 0.15;
     gl_FragColor = clamp(vec4(clr.rgb*l, clr.a), 0., 1.);
 
-    vec3 envNormal = normalize(tNormal*0.2 + vNormal.xyz);
+    vec3 envNormal = vNormalMatrix * tNormal;
     vec3 incident = normalize(vSPosition.xyz);
     vec3 reflected = reflect(incident, envNormal);
     vec2 envCoord = reflected.xy*0.5;
