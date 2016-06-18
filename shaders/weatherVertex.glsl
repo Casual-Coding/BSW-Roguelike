@@ -49,12 +49,12 @@ void main() {
 
     // Fall
 
-    ipos.z -= T * (fallHeight + 5.0);
+    ipos.z -= T * (fallHeight + 15.0);
 
     // Output position
 
     vec3 pos1 = position;
-    pos1.z *= (10./60.) * (speed-0.1) * (fallHeight + 5.0);
+    pos1.z *= (10./60.) * (speed-0.1) * (fallHeight + 15.0);
     vec3 pos2 = pos1 * size + ipos;
     vPosition = modelMatrix * vec4(pos2, 1.0);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos2, 1.0);

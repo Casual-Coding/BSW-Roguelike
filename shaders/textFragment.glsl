@@ -10,6 +10,8 @@ uniform vec4 light;
 uniform vec4 clr;
 uniform vec4 extra;
 uniform vec2 viewport;
+uniform vec4 envMapTint;
+uniform vec4 envMapParam;
 
 void main() {
 
@@ -39,6 +41,7 @@ void main() {
     envCoord.y *= viewport.y/viewport.x;
     envCoord += vec2(0.5, 0.5);
     vec3 envClr = texture2D(envMap, envCoord).rgb;
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.15);
+    envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(0.15 + envMapParam.x, 0., 1.));
 
 }

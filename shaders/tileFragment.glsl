@@ -16,6 +16,9 @@ uniform float vreflect;
 varying float vFragDepth;
 varying vec4 vShadowCoord;
 
+uniform vec4 envMapTint;
+uniform vec4 envMapParam;
+
 void main() {
 
     //vec3 fdx = vec3(dFdx(vPosition.x),dFdx(vPosition.y),dFdx(vPosition.z));
@@ -58,8 +61,9 @@ void main() {
     envCoord.y *= viewport.y/viewport.x;
     envCoord += vec2(0.5, 0.5);
     vec3 envClr = texture2D(envMap, envCoord).rgb;
+    envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
     //gl_FragColor.rgb = clamp(gl_FragColor.rgb + gl_FragColor.rgb * envClr * vreflect * 4.0, 0., 1.);
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, vreflect);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 1.));
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);

@@ -62,6 +62,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                         type: 'v2',
                         value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
                     },
+                    envMapTint: {
+                        type: 'v4',
+                        value: BSWG.render.envMapTint
+                    },
+                    envMapParam: {
+                        type: 'v4',
+                        value: BSWG.render.envMapParam
+                    },
                 }),
                 matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
                 used: false
@@ -243,6 +251,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                 viewport: {
                     type: 'v2',
                     value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+                },
+                envMapTint: {
+                    type: 'v4',
+                    value: BSWG.render.envMapTint
+                },
+                envMapParam: {
+                    type: 'v4',
+                    value: BSWG.render.envMapParam
                 },
             }),
             matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),

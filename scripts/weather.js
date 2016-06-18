@@ -6,20 +6,27 @@ BSWG.weather = function() {
         color: new THREE.Vector4(0, 0, 0.5, 0.5),
         size: 0.02,
         density: 0.0,
-        speed: 1.0
+        speed: 1.0,
+        tint: new THREE.Vector4(0, 0, 0, 0),
+        contrast: 1.0,
+        wet: 0.0
     };
 
     this.time = 0.0;
 
     this.wind = new THREE.Vector3();
     this.color = new THREE.Vector4();
+    this.tint = new THREE.Vector4();
 
     this.damping = this.defaults.damping;
     this.wind.set(this.defaults.wind.x, this.defaults.wind.y, this.defaults.wind.z);
     this.color.set(this.defaults.color.x, this.defaults.color.y, this.defaults.color.z, this.defaults.color.w);
+    this.tint.set(this.defaults.tint.x, this.defaults.tint.y, this.defaults.tint.z, this.defaults.tint.w);
     this.size = this.defaults.size;
     this.density = this.defaults.density;
     this.speed = this.defaults.speed;
+    this.wet = this.defaults.wet;
+    this.contrast = this.defaults.contrast;
 
     this.hasInit = true;
 
@@ -110,6 +117,10 @@ BSWG.weather = function() {
         envMap: {
             type: 't',
             value: BSWG.render.envMap ? BSWG.render.envMap.texture : null
+        },
+        envMapTint: {
+            type: 'v4',
+            value: BSWG.render.envMapTint
         },
         cam: {
             type: 'v3',
@@ -209,6 +220,8 @@ BSWG.weather.prototype.render = function(dt) {
     this.mat.uniforms.speed.value = this.speed;
     this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
     this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+    BSWG.render.envMapTint.set(this.tint.x, this.tint.y, this.tint.z, this.tint.w);
+    BSWG.render.envMapParam.set(this.wet, this.contrast, 0., 0.);
 
 };
 

@@ -252,7 +252,15 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             cam: {
                 type: 'v3',
                 value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
-            }
+            },
+            envMapTint: {
+                type: 'v4',
+                value: BSWG.render.envMapTint
+            },            
+            envMapParam: {
+                type: 'v4',
+                value: BSWG.render.envMapParam
+            },
         });
     }
     else {
@@ -296,7 +304,15 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             cam: {
                 type: 'v3',
                 value: new THREE.Vector3(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z)
-            }
+            },
+            envMapTint: {
+                type: 'v4',
+                value: BSWG.render.envMapTint
+            },            
+            envMapParam: {
+                type: 'v4',
+                value: BSWG.render.envMapParam
+            },
         });
         this.mat.shading = THREE.FlatShading;
         this.mat.needsUpdate = true;

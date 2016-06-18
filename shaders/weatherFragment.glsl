@@ -6,6 +6,7 @@ varying vec4 vAttr1;
 varying vec4 vPosition;
 varying vec4 vSPosition;
 uniform sampler2D envMap;
+uniform vec4 envMapTint, envMapParam;
 
 void main() {
 
@@ -24,6 +25,7 @@ void main() {
         envCoord.y *= 1. / 1.5;
         envCoord += vec2(0.5, 0.5);
         vec3 envClr = texture2D(envMap, envCoord).rgb;
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, 0.5);
+        envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(0.5 + envMapParam.x, 0., 1.));
     }
 }

@@ -204,6 +204,8 @@ BSWG.render = new function() {
     this.cam3D = null;
     this.dlgOpen = false;
     this.resized = true;
+    this.envMapTint = new THREE.Vector4(0,0,0,0);
+    this.envMapParam = new THREE.Vector4(0,0,0,0);
 
     var maxRes = null; //{ w: 1920, h: 1080 };
 
@@ -221,6 +223,8 @@ BSWG.render = new function() {
         if (this.weather) {
             this.weather.readd();
         }
+        this.envMapTint.set(0,0,0,0);
+        this.envMapParam.set(0,0,0,0);
 
     };
 
@@ -900,6 +904,14 @@ BSWG.render = new function() {
             envMap: {
                 type: 't',
                 value: BSWG.render.envMap.texture
+            },
+            envMapTint: {
+                type: 'v4',
+                value: BSWG.render.envMapTint
+            },
+            envMapParam: {
+                type: 'v4',
+                value: BSWG.render.envMapParam
             },
             viewport: {
                 type: 'v2',

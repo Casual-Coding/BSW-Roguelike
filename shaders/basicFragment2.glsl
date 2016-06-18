@@ -16,6 +16,8 @@ uniform sampler2D shadowMap;
 uniform sampler2D envMap;
 uniform vec2 viewport;
 uniform float vreflect;
+uniform vec4 envMapTint;
+uniform vec4 envMapParam;
 
 void main() {
 
@@ -60,7 +62,8 @@ void main() {
     envCoord.y *= viewport.y/viewport.x;
     envCoord += vec2(0.5, 0.5);
     vec3 envClr = texture2D(envMap, envCoord).rgb;
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, vreflect);
+    envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 1.));
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
