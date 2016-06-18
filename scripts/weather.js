@@ -4,6 +4,8 @@ BSWG.weather = function() {
         damping: 0.9,
         wind: new THREE.Vector3(0, 0, 0),
         color: new THREE.Vector4(0, 0, 0.5, 0.5),
+        lightning: new THREE.Vector4(0, 0, 0, 0.0),
+        lightningFreq: 0.0,
         size: 0.02,
         density: 0.0,
         speed: 1.0,
@@ -17,11 +19,14 @@ BSWG.weather = function() {
     this.wind = new THREE.Vector3();
     this.color = new THREE.Vector4();
     this.tint = new THREE.Vector4();
+    this.lightning = new THREE.Vector4();
 
     this.damping = this.defaults.damping;
     this.wind.set(this.defaults.wind.x, this.defaults.wind.y, this.defaults.wind.z);
     this.color.set(this.defaults.color.x, this.defaults.color.y, this.defaults.color.z, this.defaults.color.w);
     this.tint.set(this.defaults.tint.x, this.defaults.tint.y, this.defaults.tint.z, this.defaults.tint.w);
+    this.lightning.set(this.defaults.lightning.x, this.defaults.lightning.y, this.defaults.lightning.z, this.defaults.lightning.w);
+    this.lightningFreq = this.defaults.lightningFreq;
     this.size = this.defaults.size;
     this.density = this.defaults.density;
     this.speed = this.defaults.speed;
@@ -220,6 +225,9 @@ BSWG.weather.prototype.render = function(dt) {
     this.mat.uniforms.speed.value = this.speed;
     this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
     this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+    if (Math.random() < this.lightningFreq) {
+        this.tint.set(this.lightning.x, this.lightning.y, this.lightning.z, this.lightning.w);
+    }
     BSWG.render.envMapTint.set(this.tint.x, this.tint.y, this.tint.z, this.tint.w);
     BSWG.render.envMapParam.set(this.wet, this.contrast, 0., 0.);
 
