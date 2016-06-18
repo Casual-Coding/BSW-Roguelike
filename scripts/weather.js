@@ -64,13 +64,13 @@ BSWG.weather = function() {
         this.faces[i * 9 + 1] = i * 4 + 1;
         this.faces[i * 9 + 2] = i * 4 + 3;
 
-        this.faces[i * 9 + 3] = i * 4 + 1;
-        this.faces[i * 9 + 4] = i * 4 + 2;
-        this.faces[i * 9 + 5] = i * 4 + 3;
+        this.faces[i * 9 + 3] = i * 4 + 3;
+        this.faces[i * 9 + 4] = i * 4 + 1;
+        this.faces[i * 9 + 5] = i * 4 + 2;
 
-        this.faces[i * 9 + 3] = i * 4 + 2;
-        this.faces[i * 9 + 4] = i * 4 + 0;
-        this.faces[i * 9 + 5] = i * 4 + 3;
+        this.faces[i * 9 + 6] = i * 4 + 2;
+        this.faces[i * 9 + 7] = i * 4 + 3;
+        this.faces[i * 9 + 8] = i * 4 + 0;
     }
 
     geom = new THREE.BufferGeometry();
@@ -122,7 +122,7 @@ BSWG.weather = function() {
     this.shadowMat.side = THREE.DoubleSide;
 
     this.mat = BSWG.render.newMaterial("weatherVertex", "weatherFragment", uniforms, THREE.AdditiveBlending);
-    this.mat.depthWrite = true;
+    this.mat.depthWrite = false;
     this.mat.side = THREE.DoubleSide;
 
     this.mat.blending = THREE.CustomBlending;
