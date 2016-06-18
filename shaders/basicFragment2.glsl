@@ -53,6 +53,7 @@ void main() {
         gl_FragColor = mix(gl_FragColor, vec4(1.,1.,1.,1.), (warpIn - 0.1) / 0.9);
     }
 
+    vec3 envNormal = (vNormalMatrix * mix(tNormal, tNormald, dmg)).xyz;
     vec3 incident = normalize(vSPosition.xyz);
     vec3 reflected = reflect(incident, envNormal);
     vec2 envCoord = reflected.xy*0.5;
