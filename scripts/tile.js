@@ -310,6 +310,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         this.mat.uniforms.extra.value.x = BSWG.render.time;
         this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
         this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+        this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
         //this.mat.uniforms.shadowMatrix.needsUpdate = true;
         //this.mat.uniforms.shadowMatrix.value.needsUpdate = true;
         if (this.flashColor) {

@@ -22,6 +22,7 @@ var BSWG = new function(){
         'player-stats.js',
         'sounds.js',
         'xpdisplay.js',
+        'weather.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
@@ -134,7 +135,8 @@ var BSWG = new function(){
             'expVertex',
             'planetVertex',
             'pRangeVertex',
-            'hudVertex'
+            'hudVertex',
+            'weatherVertex',
         ],
         'fragment': [
             'basicFragment',
@@ -156,7 +158,8 @@ var BSWG = new function(){
             'hudFragment',
             'tileFragment',
             'tileWaterFragment',
-            'shadowFragment'
+            'shadowFragment',
+            'weatherFragment',
         ]
     };
     var ai = [

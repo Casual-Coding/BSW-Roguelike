@@ -416,6 +416,7 @@ BSWG.game = new function(){
         BSWG.ui.clear();
         BSWG.ai.init();
         BSWG.xpDisplay.clear();
+        BSWG.render.weather.clear();
         
         this.aiBtn = null;
 
@@ -1487,6 +1488,7 @@ BSWG.game = new function(){
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
             BSWG.laserList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
+            BSWG.render.weather.render(dt);
             BSWG.xpDisplay.updateRender(ctx, self.cam, dt);
 
             if (self.tileMap) {

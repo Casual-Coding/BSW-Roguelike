@@ -218,6 +218,9 @@ BSWG.render = new function() {
         if (this.boom) {
             this.boom.readd();
         }
+        if (this.weather) {
+            this.weather.readd();
+        }
 
     };
 
@@ -311,6 +314,7 @@ BSWG.render = new function() {
                     var loader = new THREE.FontLoader();
                     loader.load('fonts/orbitron-400.js', function (response) {
                         self.font3D = response;
+                        self.weather = new BSWG.weather();
                         if (ocomplete) {
                             ocomplete();
                         }
@@ -829,7 +833,7 @@ BSWG.render = new function() {
             material.blending = blendMode;
         }
 
-        material.needsUpdate = true;
+        //material.needsUpdate = true;
 
         return material;
     };
