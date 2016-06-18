@@ -5,6 +5,7 @@ uniform float damping;
 uniform float time;
 uniform float density;
 uniform float size;
+uniform float speed;
 uniform vec3 wind;
 uniform vec3 cam;
 attribute vec4 attr1;
@@ -52,7 +53,9 @@ void main() {
 
     // Output position
 
-    vec3 pos2 = position * size + ipos;
+    vec3 pos1 = position;
+    pos1.z *= (10./60.) * speed * (fallHeight + 5.0);
+    vec3 pos2 = pos1 * size + ipos;
     vPosition = modelMatrix * vec4(pos2, 1.0);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos2, 1.0);
     vSPosition = gl_Position;
