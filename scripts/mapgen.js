@@ -131,6 +131,12 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     if (obj[k] && obj[k].__isVec) {
                         obj[k] = new b2Vec2(obj[k].x, obj[k].y);
                     }
+                    else if (obj[k] && obj[k].__isVec3) {
+                        obj[k] = new THREE.Vector3(obj[k].x, obj[k].y, obj[k].z);
+                    }
+                    else if (obj[k] && obj[k].__isVec4) {
+                        obj[k] = new THREE.Vector4(obj[k].x, obj[k].y, obj[k].z, obj[k].w);
+                    }
                     else if (obj[k] && obj[k].__isZone) {
                         obj[k] = ret.zones[obj[k].index];
                     }
@@ -590,6 +596,23 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                         __isVec: true
                     };
                 }
+                else if (obj instanceof THREE.Vector3) {
+                    return {
+                        x: obj.x,
+                        y: obj.y,
+                        z: obj.z,
+                        __isVec3: true
+                    };
+                }
+                else if (obj instanceof THREE.Vector4) {
+                    return {
+                        x: obj.x,
+                        y: obj.y,
+                        z: obj.z,
+                        w: obj.w,
+                        __isVec4: true
+                    };
+                }
                 else if (obj instanceof BSWG.uiControl) {
                     return null;
                 }
@@ -834,6 +857,10 @@ BSWG.map_genBiome = function() {
     ret.sandF = ret.sand + ret.grassF;
     ret.rockF = ret.rock + ret.sandF;
     ret.snowF = ret.snow + ret.rockF;
+
+    ret.heat = (ret.sand + ret.rock*0.5 + ret.grass*0.5) - ret.snow;
+    ret.wet = (Math.random()*ret.water*0.25 + Math.random()*ret.snow*0.5 + Math.random()*ret.grass*0.25 - Math.random()*ret.sand*1.0) * 3.0;
+    ret.dark = Math.pow(Math.random(), 1.5);
 
     return ret;
 };

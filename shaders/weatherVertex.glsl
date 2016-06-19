@@ -6,6 +6,7 @@ uniform float time;
 uniform float density;
 uniform float size;
 uniform float speed;
+uniform float swirl;
 uniform vec3 wind;
 uniform vec3 cam;
 attribute vec4 attr1;
@@ -16,6 +17,8 @@ varying vec4 vSPosition;
 float rand(vec2 co){
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
+
+#define PI 3.141592
 
 void main() {
 
@@ -50,6 +53,11 @@ void main() {
     // Fall
 
     ipos.z -= T * (fallHeight + 15.0);
+
+    // Swirl
+
+    ipos.x += cos(T*PI*10.0) * swirl;
+    ipos.y += sin(T*PI*10.0) * swirl;
 
     // Output position
 

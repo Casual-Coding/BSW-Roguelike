@@ -2,7 +2,7 @@ BSWG.grabSlowdownDist      = 0.5;
 BSWG.grabSlowdownDistStart = 3.0;
 BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
-BSWG.camVelLookBfr         = 0.3; // * viewport.w
+BSWG.camVelLookBfr         = 0.15; // * viewport.w
 BSWG.lookRange             = 45.0;
 BSWG.grabSpeed             = 2.75;
 
@@ -635,6 +635,17 @@ BSWG.game = new function(){
                     }
                 };
                 this.tileMap = new BSWG.tileMap(desc, -8);
+                BSWG.render.weather.transition({
+                    density:        1,
+                    size:           0.15,
+                    color:          new THREE.Vector4(1, 1, 0, .6),
+                    speed:          0.1,
+                    lightning:      new THREE.Vector4(1, 1, 1, 1),
+                    lightningFreq:  0.01,
+                    wet:            0.175,
+                    tint:           new THREE.Vector4(1, 0, 0, .125),
+                    swirl:          5.0
+                }, 5);
 
                 this.setSong(134, {
                     seed1: 48,
@@ -1354,9 +1365,11 @@ BSWG.game = new function(){
                         toZ /= Math.max(Math.log(avgDist), 1.0);
                         toZ = Math.max(toZ, 0.007);
 
+                        self.cam.panTo(dt*(self.ccblock.anchored ? 0.15 : 1.0), avgP);
+
                         self.cam.zoomTo(dt*2.5, toZ);
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-                        var p = avgP.clone();//self.ccblock.obj.body.GetWorldCenter().clone();
+                        var p = ccp.clone();
                         p.x += self.ccblock.obj.body.GetLinearVelocity().x * 2.5;
                         p.y += self.ccblock.obj.body.GetLinearVelocity().y * 2.5;
 
@@ -1367,10 +1380,10 @@ BSWG.game = new function(){
                         var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
                         var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
 
-                        p.x = Math.clamp(p.x, ccp.x - w, ccp.x + w);
-                        p.y = Math.clamp(p.y, ccp.y - h, ccp.y + h);
+                        self.cam.panTo(dt*8.0*(self.ccblock.anchored ? 0.15 : 1.0), p);
 
-                        self.cam.panTo(dt*4.0*(self.ccblock.anchored ? 0.15 : 1.0), Math.interpolate(mp, p, 1.0-BSWG.mouseLookFactor));
+                        self.cam.x = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
+                        self.cam.y = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
 
                         p = p1 = pc = p2 = null;
                     }
@@ -1633,7 +1646,84 @@ BSWG.game = new function(){
                 if (!self.zSwitchTime) {
                     self.zSwitchTime = Date.timeStamp() - 5;
                 }
-                if (self.lastZone !== self.inZone && (Date.timeStamp() - self.zSwitchTime)>1.0) {
+                if (!self.lastWeatherChange) {
+                    self.lastWeatherChange = -1000.0;
+                }
+                if (self.inZone && (Date.timeStamp() - self.lastWeatherChange) > 60.0) {
+                    var B = self.inZone.biome;
+                    var desc = {
+                        density:        0.0,
+                        size:           0.15,
+                        color:          new THREE.Vector4(0, .3, 1, .6),
+                        speed:          2.5,
+                        lightning:      new THREE.Vector4(1, 1, 1, 1),
+                        lightningFreq:  0.0,
+                        wet:            0.0,
+                        tint:           new THREE.Vector4(0, .5, 1, 0),
+                        swirl:          0.0,
+                        tintSpeed:      1
+                    }
+
+                    if (B.heat > 0 && (B.wet < 0 || desc.density < 0.3)) {
+                        desc.tint.x = Math.clamp(desc.tint.x + B.heat * 0.8, 0., 1.);
+                        desc.tint.y = Math.clamp(desc.tint.x + B.heat * 0.2, 0., 1.);
+                    }
+                    else {
+                        desc.tint.x = Math.clamp(desc.tint.x + -B.heat, 0., 1.);
+                        desc.tint.y = Math.clamp(desc.tint.x + -B.heat, 0., 1.);
+                        desc.tint.z = Math.clamp(desc.tint.x + -B.heat, 0., 1.);
+                        desc.tint.w *= (1 + B.heat) * 0.5 + 0.5;
+                        desc.speed = 0.1;
+                        desc.size *= 1.35;
+                        desc.color.w *= 0.65;
+                        desc.color.x = desc.color.y = desc.color.z = 1.0;
+                    }
+
+                    if (B.wet > 0) {
+                        desc.density = Math.pow(Math.clamp(B.wet*Math.random(), 0, 1), 2.0);
+                        if (desc.density < 0.1) {
+                            desc.density = 0.0;
+                        }
+                        if (desc.density > 0.85) {
+                            desc.lightningFreq = 0.015*0.2;
+                        }
+                        else if (desc.density > 0.5) {
+                            desc.lightningFreq = 0.01*0.2;
+                        }
+                        desc.color.w = Math.clamp(desc.color.w * desc.density * 2.0, 0., 1.);
+                        if (desc.density > 0.2) {
+                            desc.tint.set(.15, .15, .15, Math.clamp(desc.density*6, 0., 0.9));
+                        }
+                        desc.wet = Math.clamp(B.wet, 0., 1.) * 0.35;
+                        desc.tint.z = Math.clamp(desc.tint.z + desc.wet * 0.25, 0., 1.);
+                    }
+                    else {
+                        desc.density = Math.pow(Math.clamp(-B.wet*Math.random()*5.0, 0, 1), 2.0);
+                        if (desc.density < 0.1) {
+                            desc.density = 0.0;
+                        }
+                        desc.color.set(.6, .3, .1, .7);
+                        desc.swirl = 5.0 * Math.random();
+                        desc.speed = -0.1;
+                        desc.wet = -0.1;
+                    }
+
+                    if (desc.color.w > 0.65) {
+                        desc.color.w = 0.65;
+                    }
+
+                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.3, 0., 1.), 2.5) * 0.7;
+
+                    desc.tint.x *= (1 - dark);
+                    desc.tint.y *= (1 - dark);
+                    desc.tint.z *= (1 - dark);
+                    desc.tint.w = Math.clamp(desc.tint.w + dark, 0., 1.);
+
+                    BSWG.render.weather.transition(desc, 0.5);
+
+                    self.lastWeatherChange = Date.timeStamp();
+                }
+                if (self.lastZone !== self.inZone && (Date.timeStamp() - self.zSwitchTime)>3.0) {
                     self.zSwitchTime = Date.timeStamp();
                     if (self.lastZone) {
                         //self.lastZone.zoneTitle.remove();
@@ -1644,6 +1734,9 @@ BSWG.game = new function(){
                     //self.inZone.zoneTitle.add();
                     self.inZone.zoneTitle.show();
                     self.lastZone = self.inZone;
+
+                    self.lastWeatherChange -= 30.0;
+
                     self.zoneChangeT = 6.0;
 
                     self.inZone.discovered = true;
