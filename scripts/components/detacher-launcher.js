@@ -123,7 +123,7 @@ BSWG.component_DetacherLauncher = {
 
         if (!this.sound) {
             this.sound = new BSWG.soundSample();
-            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+1.0/(this.size*0.5+0.5), true);
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
         }
 
         if (this.dispKeys) {
@@ -134,7 +134,7 @@ BSWG.component_DetacherLauncher = {
 
             var p = Math.rotVec2(new b2Vec2(this.size * 0.4, 0.0));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
-            var a = this.obj.body.GetAngle() + Math.PI + Math.random()*Math.PI/8.0 - Math.PI/16.0;
+            var a = this.obj.body.GetAngle() + Math.PI + Math._random()*Math.PI/8.0 - Math.PI/16.0;
             v.x -= Math.cos(a) * 6;
             v.y -= Math.sin(a) * 6;
             p = BSWG.physics.localToWorld(p, this.obj.body);
@@ -149,7 +149,7 @@ BSWG.component_DetacherLauncher = {
                     32,
                     0.3*T*5.0,
                     4.0,
-                    v.THREE(Math.random()*2.0),
+                    v.THREE(Math._random()*2.0),
                     null,
                     false
                 );
@@ -196,13 +196,13 @@ BSWG.component_DetacherLauncher = {
                     32,
                     0.3*0.3*5.0,
                     4.0,
-                    v.THREE(Math.random()*2.0),
+                    v.THREE(Math._random()*2.0),
                     null,
                     false
                 );
 
                 if (i === 0) {
-                    var sizet = Math.clamp((1.35*0.3*5.0 * this.size)/10, 0, 1) * (Math.random() * 0.1 + 0.95);
+                    var sizet = Math.clamp((1.35*0.3*5.0 * this.size)/10, 0, 1) * (Math._random() * 0.1 + 0.95);
                     new BSWG.soundSample().play('explosion', p.particleWrap(0.025 * this.size), Math.pow(sizet, 0.5)*0.65, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0)*0.65);
                 }
             }

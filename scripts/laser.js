@@ -29,9 +29,9 @@ BSWG.laserList = new function () {
         ret.source = source || null;
 
         ret.sound = new BSWG.soundSample();
-        ret.sound.play('laser', p.THREE(0.2), 1.0, Math.random()*0.1+0.9, true);
+        ret.sound.play('laser', p.THREE(0.2), 1.0, Math._random()*0.1+0.9, true);
         ret.sound2 = new BSWG.soundSample();
-        ret.sound2.play('laser', p.THREE(0.2), 0.1, Math.random()*0.1+0.9, true);
+        ret.sound2.play('laser', p.THREE(0.2), 0.1, Math._random()*0.1+0.9, true);
 
         ret.mat = BSWG.render.newMaterial("basicVertex", "laserFragment", {
             clr: {
@@ -101,7 +101,7 @@ BSWG.laserList = new function () {
             this.mesh.rotation.set(0, 0, this.angle);
             this.mesh.updateMatrix();
 
-            var white = Math.random();
+            var white = Math._random();
             this.mat.uniforms.clr.value.set(white, white, 1.0, 1.0);
 
             var p2 = new b2Vec2(this.p.x + Math.cos(this.angle+Math.PI/2) * BSWG.laserRange, this.p.y + Math.sin(this.angle+Math.PI/2) * BSWG.laserRange);
@@ -114,7 +114,7 @@ BSWG.laserList = new function () {
                 var p = new b2Vec2(ret.p.x, ret.p.y);
                 BSWG.render.boom.palette = chadaboom3D.blue_bright;
                 for (var i=0; i<2; i++) {
-                    var a = Math.random() * Math.PI * 2.0;
+                    var a = Math._random() * Math.PI * 2.0;
                     var v = ret.comp.obj.body.GetLinearVelocityFromWorldPoint(p);
                     BSWG.render.boom.add(
                         p.particleWrap(0.0),
@@ -122,7 +122,7 @@ BSWG.laserList = new function () {
                         32,
                         0.1*Math.pow(tforce, 0.33),
                         4.0,
-                        new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*3.0)
+                        new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math._random()*3.0)
                     );
                 }
                 this.sound2.position(p.THREE(0.2));

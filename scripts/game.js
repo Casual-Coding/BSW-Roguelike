@@ -918,7 +918,7 @@ BSWG.game = new function(){
                             self.ccblock = BSWG.componentList.load(this.backup);
                             self.aiship = null;
                             self.battleMode = false;
-                            window.gc();
+                            //window.gc();
                         }
 
                     };
@@ -1235,6 +1235,9 @@ BSWG.game = new function(){
     this.emodeTint = 0.0;
     this.bmodeTint = 0.0;
     this.lastGC = Date.timeStamp();
+    this.musicBPM = 60.0;
+    this.lastNote = 0.0;
+    this.noteIndex = 0;
 
     this.start = function ()
     {
@@ -1249,9 +1252,24 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            // hacked together real time music generator
+            self.musicBPM = (self.scene === BSWG.SCENE_TITLE || self.battleMode) ? 60 : 30;
+            var musicHappy = (self.scene === BSWG.SCENE_GAME2 || (self.inZone && self.inZone.safe));
+            var audioCtx = BSWG.music.audioCtx;
+            var ctime = audioCtx.currentTime;
+            var nextBeat = Math.ceil(ctime/(60/self.musicBPM)) * (60/self.musicBPM);
+            if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
+                Math.seedrandom(self.noteIndex%8 + (self.inZone ? self.inZone.id : 0));
+                new BSWG.noteSample().play(self.scene === BSWG.SCENE_TITLE ? 0.01 : 0.007, Math.floor(Math.random()*8) + Math.floor(self.noteIndex/4)%4, 1 + (self.noteIndex%2) * 1, musicHappy, nextBeat);
+                self.lastNote = nextBeat;
+                self.noteIndex += 1;
+                Math.seedrandom();
+            }
+            ////
+
             if (!self.battleMode && self.ccblock && self.ccblock.obj && self.ccblock.obj.body && Math.lenVec2(self.ccblock.obj.body.GetLinearVelocity()) < 0.01) {
                 if ((Date.timeStamp() - self.lastGC) > (2.5*60)) {
-                    window.gc();
+                    //window.gc();
                     self.lastGC = Date.timeStamp();
                 }
             }
@@ -1856,7 +1874,7 @@ BSWG.game = new function(){
                     var ccs = BSWG.componentList.allCCs();
                     if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
                         self.battleMode = false;
-                        window.gc();
+                        //window.gc();
                     }
                     for (var i=0; i<ccs.length; i++) {
                         if (self.ccblock && self.ccblock.id !== ccs[i].id && (ccs[i].obj && ccs[i].obj.body && Math.distVec2(ccs[i].obj.body.GetWorldCenter(), self.ccblock.obj.body.GetWorldCenter()) > self.map.escapeDistance)) {

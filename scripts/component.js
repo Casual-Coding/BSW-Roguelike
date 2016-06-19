@@ -403,18 +403,18 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
                 r *= 1.5;
             }
             for (var i=0; i<(disolve ? 1 : 40); i++) {
-                var a = Math.random() * Math.PI * 2.0;
-                var r2 = Math.random() * r * 0.5;
+                var a = Math._random() * Math.PI * 2.0;
+                var r2 = Math._random() * r * 0.5;
                 var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
                                     p.y + Math.sin(a) * r2);
                 BSWG.render.boom.palette = disolve ? chadaboom3D.green : chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
                     p2.particleWrap(0.025),
-                    r*(3.5 + 2.5*Math.random()),
+                    r*(3.5 + 2.5*Math._random()),
                     256,
-                    1 + Math.pow(r, 1/3) * Math.random(),
+                    1 + Math.pow(r, 1/3) * Math._random(),
                     2.0,
-                    v.THREE(Math.random()*2.0),
+                    v.THREE(Math._random()*2.0),
                     null,
                     i < (disolve ? 1 : 4)
                 );

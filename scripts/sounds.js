@@ -187,6 +187,76 @@ BSWG.soundSample = BSWG.soundBase({
 
 });
 
+BSWG.noteSad = [ 0, 2, 3, 5, 7, 8, 11 ];
+BSWG.noteHappy = [ 0, 2, 4, 5, 7, 9, 11 ]; 
+
+BSWG.noteSample = BSWG.soundBase({
+
+    // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
+
+    play: function (amp, interval, oct, happy, time) {
+    
+        var audioCtx = this.audioCtx = BSWG.music.audioCtx;
+
+        while (interval >= 7 && oct < 5) {
+            interval -= 7;
+            oct += 1;
+        }
+        while (interval < 0 && oct > 1) {
+            interval += 8;
+            oct -= 1;
+        }
+        interval = (interval + 7) % 7;
+
+        var note = BSWG.noteSad[interval];
+        if (happy) {
+            note = BSWG.noteHappy[interval];
+        }
+
+        this.source = audioCtx.createBufferSource();
+        this.source.loop = false;
+        this.source.buffer = BSWG.soundBuffers['e2-distorted'];
+        this.source.playbackRate.value = BSWG.music_NoteFreq(oct, note) / BSWG.music_NoteFreq(2, 8);
+
+        this.gain = audioCtx.createGain();
+        this.gain.gain.value = amp * 0.5;
+
+        this.source.connect(this.gain);
+        this.gain.connect(BSWG.mixer.gain);
+
+        var self = this;
+        this.source.onended = function ( ) {
+            self.playing = false;
+            self.stop();
+            self = null;
+        };
+
+        this.source.start(time || audioCtx.currentTime);
+        this.playing = true;
+
+        audioCtx = null;
+    },
+
+    stop: function ( ) {
+
+        this.audioCtx = null;
+        this.source.onended = null;
+
+        if (this.playing) {
+            this.source.stop();
+        }
+
+        this.playing = false;
+
+        this.source.disconnect();
+        this.gain.disconnect();
+        this.source = null;
+        this.gain = null;
+
+    }
+
+});
+
 BSWG.soundBuffers = {};
 
 BSWG.soundLoad = function (onload) {
@@ -206,6 +276,7 @@ BSWG.soundLoad = function (onload) {
         { name: 'levelup', url: 'sounds/levelup.wav' },
         { name: 'raindrop', url: 'sounds/raindrop.wav' },
         { name: 'swirl', url: 'sounds/swirl.wav' },
+        { name: 'e2-distorted', url: 'sounds/e2-distorted.wav' }
     ];
 
     var urls = [];

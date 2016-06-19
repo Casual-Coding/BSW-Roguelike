@@ -768,9 +768,9 @@ BSWG.physics = new function(){
                                             * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
             }
 
-            if (Math.random() < 1/2) {
-                var a = Math.random() * Math.PI * 2.0;
-                var v = [ta, tb][Math.floor(Math.random()*10000) % 2];
+            if (Math._random() < 1/2) {
+                var a = Math._random() * Math.PI * 2.0;
+                var v = [ta, tb][Math.floor(Math._random()*10000) % 2];
                 BSWG.render.boom.palette = chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
                     p.particleWrap(0.0),
@@ -778,7 +778,7 @@ BSWG.physics = new function(){
                     32,
                     0.1*Math.pow(tforce, 0.33),
                     4.0,
-                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math.random()*3.0)
+                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math._random()*3.0)
                 );
                 v = null;
             }

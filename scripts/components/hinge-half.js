@@ -155,7 +155,7 @@ BSWG.component_HingeHalf = {
 
         if (!this.sound && this.motor) {
             this.sound = new BSWG.soundSample();
-            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, Math.random()*0.1+1.0/(this.size*0.5+0.5), true);
+            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
         }
 
         //if (this.dispKeys) {

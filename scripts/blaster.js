@@ -108,11 +108,11 @@ BSWG.blasterList = new function () {
             t: 1.5,
             lp: p.clone(),
             source: source,
-            off: ~~(Math.random() * 3)
+            off: ~~(Math._random() * 3)
 
         });
 
-        new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0, Math.random()*0.1+0.35);
+        new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0, Math._random()*0.1+0.35);
 
     };
 

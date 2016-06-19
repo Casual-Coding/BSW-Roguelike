@@ -67,14 +67,14 @@ BSWG.component_Missile = {
 
         if (!this.sound) {
             this.sound = new BSWG.soundSample();
-            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math.random()*0.1+1.5/this.size, true);
+            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+1.5/this.size, true);
         }
 
         if (this.fireT > 0 && (this.obj.body.__lastForce||0.0) < 0.01 && !this.nextDestroy) {
 
             var p = Math.rotVec2(new b2Vec2(this.size * 0.6, 0.0));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
-            var a = this.obj.body.GetAngle() + Math.PI + Math.random()*Math.PI/8.0 - Math.PI/16.0;
+            var a = this.obj.body.GetAngle() + Math.PI + Math._random()*Math.PI/8.0 - Math.PI/16.0;
             v.x -= Math.cos(a) * 6;
             v.y -= Math.sin(a) * 6;
             p = BSWG.physics.localToWorld(p, this.obj.body);
@@ -89,7 +89,7 @@ BSWG.component_Missile = {
                     32,
                     0.7*T*1.25,
                     4.0,
-                    v.THREE(Math.random()*2.0)
+                    v.THREE(Math._random()*2.0)
                 );
                 var a = this.obj.body.GetAngle() + Math.PI;
                 var accel = 3.75 * [1,3,7][this.size-1];
@@ -121,19 +121,19 @@ BSWG.component_Missile = {
                         128,
                         1.0,
                         1.5,
-                        v.THREE(Math.random()*2.0)
+                        v.THREE(Math._random()*2.0)
                     );
                     for (var i=0; i<16; i++) {
-                        var a = Math.random()*Math.PI*2.0;
-                        var r = Math.random()*3.0+0.5;
+                        var a = Math._random()*Math.PI*2.0;
+                        var r = Math._random()*3.0+0.5;
                         BSWG.render.boom.palette = chadaboom3D.fire_bright;
                         BSWG.render.boom.add(
                             this.obj.body.GetWorldCenter().particleWrap(0.05),
-                            1.0*4.0*this.size*(0.25+Math.random()*0.15),
+                            1.0*4.0*this.size*(0.25+Math._random()*0.15),
                             32,
                             1.0,
                             4.0,
-                            new b2Vec2(v.x+Math.cos(a)*r, v.y+Math.sin(a)*r).THREE(Math.random()*2.0)
+                            new b2Vec2(v.x+Math.cos(a)*r, v.y+Math.sin(a)*r).THREE(Math._random()*2.0)
                         );
                     }
                 }

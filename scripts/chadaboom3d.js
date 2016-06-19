@@ -345,7 +345,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         return false;
     }
 
-    var tex = bb.img[Math.floor(Math.random()*1000000) % bb.count].texIndex;
+    var tex = bb.img[Math.floor(Math._random()*1000000) % bb.count].texIndex;
 
     var pos = posFn;
     var size = sizeFn;
@@ -367,8 +367,8 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     if (!noSub && size > 0.1) {
         for (var i=0; i<2; i++) {
-            var len = size * Math.random() * 2.0;
-            var a = Math.random() * Math.PI * 2.0;
+            var len = size * Math._random() * 2.0;
+            var a = Math._random() * Math.PI * 2.0;
             var v2 = {
                 x: vel.x + Math.cos(a) * len,
                 y: vel.y + Math.sin(a) * len,
@@ -378,7 +378,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
             v2 = null;
         }
     }
-    else if (Math.random() < 0.15 && size < 0.15) {
+    else if (Math._random() < 0.15 && size < 0.15) {
         //this.palette = chadaboom3D.smoke;
         size *= 6.0;
         life *= 1.5;
@@ -391,7 +391,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     var idx = this.particleIdx;
 
-    var rot = Math.random() * Math.PI * 2.0;
+    var rot = Math._random() * Math.PI * 2.0;
 
     size *= 0.45;
 
@@ -434,7 +434,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     this.particleUpdate = true;
 
-    var sizet = Math.clamp(size/10, 0, 1) * (Math.random() * 0.1 + 0.95);
+    var sizet = Math.clamp(size/10, 0, 1) * (Math._random() * 0.1 + 0.95);
     if ((sizet > 0.125 || makeSound) && makeSound !== false) {
         new BSWG.soundSample().play(this.palette === chadaboom3D.green ? 'store' : 'explosion', pos, Math.pow(sizet, 0.5)*1.5, Math.clamp(0.675/(sizet*0.75+0.25), 0.25, 2.0) / (this.palette === chadaboom3D.green ? 2.5 : 1.0));
     }
