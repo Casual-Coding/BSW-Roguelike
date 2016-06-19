@@ -2,7 +2,7 @@ BSWG.grabSlowdownDist      = 0.5;
 BSWG.grabSlowdownDistStart = 3.0;
 BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
-BSWG.camVelLookBfr         = 0.15; // * viewport.w
+BSWG.camVelLookBfr         = 0.22; // * viewport.w
 BSWG.lookRange             = 45.0;
 BSWG.grabSpeed             = 2.75;
 
@@ -1298,6 +1298,13 @@ BSWG.game = new function(){
             var mps = new b2Vec2(mx, my);
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
+            if (self.battleMode) {
+                if (!self.battleTime) {
+                    self.battleTime = 0.0;
+                }
+                self.battleTime += dt;
+            }
+
             switch (self.scene) {
                 case BSWG.SCENE_TITLE:
 
@@ -1344,12 +1351,15 @@ BSWG.game = new function(){
 
                         var ccs = BSWG.componentList.allCCs();
                         var avgDist = 0.0;
-                        var avgP = self.ccblock.p().clone();
-                        var w = 1;
+                        var avgP = new b2Vec2(0, 0);
+                        var w = 0;
                         avgP.x *= w;
                         avgP.y *= w;
                         for (var i=0; i<ccs.length; i++) {
                             var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
+                            if (dist < 0.1) {
+                                continue;
+                            }
                             avgDist += dist;
                             var tw = 1;
                             if (dist > 20) {
@@ -1359,19 +1369,20 @@ BSWG.game = new function(){
                             avgP.y += ccs[i].p().y * tw;
                             w += tw;
                         }
-                        avgP.x /= w;
-                        avgP.y /= w;
-                        avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
-                        toZ /= Math.max(Math.log(avgDist), 1.0);
-                        toZ = Math.max(toZ, 0.007);
-
-                        self.cam.panTo(dt*(self.ccblock.anchored ? 0.15 : 1.0), avgP);
+                        if (w>0.1) {
+                            avgP.x /= w;
+                            avgP.y /= w;
+                            avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
+                            toZ /= Math.max(Math.log(avgDist), 1.0);
+                            toZ = Math.max(toZ, 0.007);
+                            self.cam.panTo(0.75*dt*(self.ccblock.anchored ? 0.15 : 1.0)*Math.clamp(self.battleTime*2.5, 0., 1.), avgP);
+                        }
 
                         self.cam.zoomTo(dt*2.5, toZ);
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
                         var p = ccp.clone();
-                        p.x += self.ccblock.obj.body.GetLinearVelocity().x * 2.5;
-                        p.y += self.ccblock.obj.body.GetLinearVelocity().y * 2.5;
+                        p.x += self.ccblock.obj.body.GetLinearVelocity().x * 4;
+                        p.y += self.ccblock.obj.body.GetLinearVelocity().y * 4;
 
                         var bfr = BSWG.camVelLookBfr * viewport.w;
                         var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
@@ -1380,10 +1391,12 @@ BSWG.game = new function(){
                         var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
                         var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
 
-                        self.cam.panTo(dt*8.0*(self.ccblock.anchored ? 0.15 : 1.0), p);
+                        self.cam.panTo(2.0*dt*(self.ccblock.anchored ? 0.15 : 1.0), p);
 
-                        self.cam.x = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
-                        self.cam.y = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
+                        var tx = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
+                        var ty = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
+
+                        self.cam.panTo(8.*dt, new b2Vec2(tx, ty));
 
                         p = p1 = pc = p2 = null;
                     }
@@ -1712,7 +1725,7 @@ BSWG.game = new function(){
                         desc.color.w = 0.65;
                     }
 
-                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.3, 0., 1.), 2.5) * 0.7;
+                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.3, 0., 1.), 2.5) * 0.5;
 
                     desc.tint.x *= (1 - dark);
                     desc.tint.y *= (1 - dark);

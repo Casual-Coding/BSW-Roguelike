@@ -1,4 +1,5 @@
 varying vec4 vClr;
+uniform vec4 envMapTint;
 
 void main() {
 
@@ -6,5 +7,6 @@ void main() {
         discard;
     }
     gl_FragColor = vClr;
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, envMapTint.a*0.7);
 
 }

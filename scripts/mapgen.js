@@ -782,7 +782,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
             else if (zone.enemies && zone.enemies.length) {
                 if (distanceLeft <= 0) {
-                    this.escapeDistance = this.gridSize * 6.0 / 1.35;
+                    this.escapeDistance = this.gridSize * 4.0 / 1.35;
                     lastBattleZone = zone;
                     distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
                     return zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];

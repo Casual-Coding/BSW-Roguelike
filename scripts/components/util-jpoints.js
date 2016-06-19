@@ -48,12 +48,17 @@ BSWG.jpointRenderer = new function() {
         geom.addAttribute( 'pos',      new THREE.BufferAttribute( posArray, 4 ).setDynamic(true) );
         geom.addAttribute( 'clr',      new THREE.BufferAttribute( clrArray, 4 ).setDynamic(true) );
 
-        mat = BSWG.render.newMaterial("jpointsVertex", "jpointsFragment", null, null, THREE.DoubleSide);
+        mat = BSWG.render.newMaterial("jpointsVertex", "jpointsFragment", {
+            envMapTint: {
+                type: 'v4',
+                value: BSWG.render.envMapTint
+            }
+        }, null, THREE.DoubleSide);
         mesh = new THREE.Mesh( geom, mat );
         mesh.position.z = 0.065;
 
         geom.needsUpdate = true;
-        mat.needsUpdate = true;
+        //mat.needsUpdate = true;
         mesh.needsUpdate = true;
 
         BSWG.render.scene.add( mesh );
