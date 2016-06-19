@@ -239,8 +239,20 @@ BSWG.weather.prototype.render = function(dt) {
     this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
     if (Math.random() < this.lightningFreq) {
         this.tint.set(this.lightning.x, this.lightning.y, this.lightning.z, this.lightning.w);
-        new BSWG.soundSample().play('explosion', new THREE.Vector3(Math.random()*50-25+BSWG.game.cam.x, Math.random()*50-25+BSWG.game.cam.y, 40), 1.0, 0.35 * (Math.random()*0.1+0.9));
+        new BSWG.soundSample().play('explosion', new THREE.Vector3(Math.random()*25-12.5+BSWG.game.cam.x, Math.random()*25-12.5+BSWG.game.cam.y, 40), 1.0*Math.random(), 0.35 * (Math.random()*0.1+0.9));
     }
+    if (this.speed > 0 && Math.random() < this.density*0.6) {
+        if (this.speed > 1) {
+            new BSWG.soundSample().play('raindrop', new THREE.Vector3(Math.random()*50-25+BSWG.game.cam.x, Math.random()*50-25+BSWG.game.cam.y, Math.random()*6), Math.abs(this.speed)*(Math.random()*0.5+0.5), 1.0 * (Math.random()*0.1+0.9), false, 1.5 + Math.random() * 2.0);
+        }
+        if (Math.random() < 0.4) {
+            new BSWG.soundSample().play('swirl', new THREE.Vector3(Math.random()*50-25+BSWG.game.cam.x, Math.random()*50-25+BSWG.game.cam.y, Math.random()*40), Math.abs(this.speed)*0.02, 1.0 * (Math.random()*0.1+0.9));
+        }
+    }
+    if (Math.random() < this.density*0.1) {
+        new BSWG.soundSample().play('swirl', new THREE.Vector3(Math.random()*50-25+BSWG.game.cam.x, Math.random()*50-25+BSWG.game.cam.y, Math.random()*40), Math.abs(this.speed)*Math.abs(this.swirl)*0.1*Math.random(), 1.0 * (Math.random()*0.1+0.9));
+    }
+
     BSWG.render.envMapTint.set(this.tint.x, this.tint.y, this.tint.z, this.tint.w);
     BSWG.render.envMapParam.set(this.wet, this.contrast, 0., 0.);
 

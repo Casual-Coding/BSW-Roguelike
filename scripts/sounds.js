@@ -78,7 +78,9 @@ BSWG.soundSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
-    play: function (name, pos, amp, rate, loop) {
+    play: function (name, pos, amp, rate, loop, delay) {
+
+        delay = delay || 0.0;
      
         var audioCtx = this.audioCtx = BSWG.music.audioCtx;
 
@@ -110,7 +112,7 @@ BSWG.soundSample = BSWG.soundBase({
             self = null;
         };
 
-        this.source.start();
+        this.source.start(audioCtx.currentTime + delay);
         this.playing = true;
 
         audioCtx = null;
@@ -201,7 +203,9 @@ BSWG.soundLoad = function (onload) {
         { name: 'scrape', url: 'sounds/scrape.wav' },
         { name: 'store', url: 'sounds/store.wav' },
         { name: 'store-2', url: 'sounds/store-2.wav' },
-        { name: 'levelup', url: 'sounds/levelup.wav' }
+        { name: 'levelup', url: 'sounds/levelup.wav' },
+        { name: 'raindrop', url: 'sounds/raindrop.wav' },
+        { name: 'swirl', url: 'sounds/swirl.wav' },
     ];
 
     var urls = [];
