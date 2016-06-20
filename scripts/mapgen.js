@@ -841,10 +841,10 @@ BSWG.map_genBiome = function() {
     }
 
     if (ret.grass > ret.sand) {
-        ret.sand /= 3;
+        ret.sand /= 10;
     }
     else {
-        ret.grass /= 3;
+        ret.grass /= 10;
     }
 
     if (ret.grass > ret.snow) {
@@ -873,9 +873,13 @@ BSWG.map_genBiome = function() {
     ret.rockF = ret.rock + ret.sandF;
     ret.snowF = ret.snow + ret.rockF;
 
-    ret.heat = (ret.sand + ret.rock*0.5 + ret.grass*0.5) - ret.snow;
-    ret.wet = (Math.random()*ret.water*0.25 + Math.random()*ret.snow*0.5 + Math.random()*ret.grass*0.25 - Math.random()*ret.sand*1.0) * 3.0;
-    ret.dark = Math.pow(Math.random(), 1.5);
+    var sand = ret.sand > ret.grass && ret.sand > ret.snow ? ret.sand : 0.0;
+    var grass = ret.grass > ret.sand && ret.grass > ret.snow ? ret.grass : 0.0;
+    var snow = ret.snow > ret.grass && ret.snow > ret.sand ? ret.snow : 0.0;
+
+    ret.heat = (sand*2.0 + grass) - snow*2.0;
+    ret.wet = (ret.water*0.25 + snow*0.5 + grass*0.5 - sand) * 1.75;
+    ret.dark = Math.pow(Math.random(), 0.5);
 
     return ret;
 };
@@ -963,7 +967,7 @@ BSWG.genMap_MusicSettings_Zone = function(zone, eInfo) {
     zone.musicBPM = bpm;
     zone.musicSettings = settings;
     Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
-    zone.song = new BSWG.song(3, bpm, 0.0, settings);
+    //zone.song = new BSWG.song(3, bpm, 0.0, settings);
 
     if (zone.hasPlanet) {
         var capSettings = {};
@@ -973,7 +977,7 @@ BSWG.genMap_MusicSettings_Zone = function(zone, eInfo) {
         capSettings.happy = Math.random()*0.4 + 0.6;
         capSettings.intense *= 0.5;
         zone.musicCapSettings = capSettings;
-        zone.songCap = new BSWG.song(3, bpm, 0.0, capSettings);
+        //zone.songCap = new BSWG.song(3, bpm, 0.0, capSettings);
     }
 
 };
@@ -984,7 +988,7 @@ BSWG.genMap_LoadMusicSettings_Zone = function(zone, eInfo) {
 
         var settings = zone.musicSettings;
         Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
-        zone.song = new BSWG.song(3, zone.musicBPM, 0.0, settings);
+        //zone.song = new BSWG.song(3, zone.musicBPM, 0.0, settings);
 
         if (zone.hasPlanet) {
             var capSettings = zone.musicCapSettings;
@@ -997,7 +1001,7 @@ BSWG.genMap_LoadMusicSettings_Zone = function(zone, eInfo) {
                 capSettings.intense *= 0.5;
                 zone.musicCapSettings = capSettings;
             }
-            zone.songCap = new BSWG.song(3, zone.musicBPM, 0.0, capSettings);
+            //zone.songCap = new BSWG.song(3, zone.musicBPM, 0.0, capSettings);
         }
     }
     else {

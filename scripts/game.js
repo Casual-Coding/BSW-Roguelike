@@ -37,7 +37,7 @@ BSWG.game = new function(){
 
                 var H = BSWG.ui_HM(w, h);
 
-                var mmsize = 256;
+                var mmsize = 384;
                 var off = scene === BSWG.SCENE_GAME1 ? 0 : mmsize;
                 var bsz = 92;
                 var sc = bsz/96;
@@ -174,7 +174,7 @@ BSWG.game = new function(){
         settings = settings || {};
         bpm = bpm || 120;
         Math.seedrandom((settings.seed1 || 51) + (settings.seed2 || 0) * 1000.0);
-        this.curSong = new BSWG.song(3, bpm, 0.0, settings);
+        //this.curSong = new BSWG.song(3, bpm, 0.0, settings);
         //this.curSong.start();
         //this.curSong.setVolume(vol || 0.25, fadeIn || 3.0);
     };
@@ -1381,8 +1381,8 @@ BSWG.game = new function(){
                             if (dist > 20) {
                                 tw = 1 / ((1+dist-20)/5);
                             }
-                            avgP.x += ccs[i].p().x * tw + ccs[i].obj.body.GetLinearVelocity().x * 2 * tw;
-                            avgP.y += ccs[i].p().y * tw + ccs[i].obj.body.GetLinearVelocity().y * 2 * tw;
+                            avgP.x += ccs[i].p().x * tw + ccs[i].obj.body.GetLinearVelocity().x * (self.battleMode ? 2 : 3) * tw;
+                            avgP.y += ccs[i].p().y * tw + ccs[i].obj.body.GetLinearVelocity().y * (self.battleMode ? 2 : 3) * tw;
                             w += tw;
                         }
 
@@ -1397,8 +1397,8 @@ BSWG.game = new function(){
 
                         ccs = null;
 
-                        self.cam.zoomTo(dt*2.5, toZ);
-                        self.cam.zoomTo(dt*0.5, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.1 : 0.15), 1.75));
+                        self.cam.zoomTo(dt*1.25, toZ);
+                        self.cam.zoomTo(dt*0.25, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.1 : 0.15), 1.75));
 
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 
@@ -1709,16 +1709,17 @@ BSWG.game = new function(){
                     }
 
                     if (B.wet > 0) {
-                        desc.density = Math.pow(Math.clamp(B.wet*Math.random(), 0, 1), 1.0);
+                        desc.density = Math.pow(Math.clamp(B.wet*Math.random(), 0, 1), 1.5);
                         if (desc.density < 0.1) {
                             desc.density = 0.0;
                         }
-                        if (desc.density > 0.85) {
+                        if (desc.density > 0.85 && B.heat > 0) {
                             desc.lightningFreq = 0.015*0.2;
                         }
-                        else if (desc.density > 0.5) {
+                        else if (desc.density > 0.5 && B.heat > 0) {
                             desc.lightningFreq = 0.01*0.2;
                         }
+                        desc.density *= 0.4;
                         desc.color.w = Math.clamp(desc.color.w * desc.density * 2.0, 0., 1.);
                         if (desc.density > 0.2) {
                             desc.tint.set(.3, .3, .3, Math.clamp(desc.density*20, 0., 0.9));
@@ -1741,7 +1742,7 @@ BSWG.game = new function(){
                         desc.color.w = 0.65;
                     }
 
-                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.3, 0., 1.), 2.5) * 0.35;
+                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.15, 0., 1.), 1.5) * 0.5;
 
                     desc.tint.x *= (1 - dark);
                     desc.tint.y *= (1 - dark);
@@ -1764,7 +1765,7 @@ BSWG.game = new function(){
                     self.inZone.zoneTitle.show();
                     self.lastZone = self.inZone;
 
-                    self.lastWeatherChange -= 30.0;
+                    self.lastWeatherChange = Date.timeStamp() - 55.0;
 
                     self.zoneChangeT = 6.0;
 

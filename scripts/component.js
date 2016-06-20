@@ -1640,6 +1640,9 @@ BSWG.componentList = new function () {
     this.withinRadius = function (p, r) {
         var ret = [];
         this.withinBox(p.x-r, p.y-r, p.x+r, p.y+r, function(C){
+            if (C.isStatic) {
+                ret.push(C);
+            }
             var p2 = C.obj.body.GetWorldCenter();
             var dist = Math.pow(p2.x - p.x, 2.0) +
                        Math.pow(p2.y - p.y, 2.0);
@@ -1654,7 +1657,7 @@ BSWG.componentList = new function () {
         if (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body) {
             return [];
         }
-        var ret = [];
+        /*var ret = [];
         var len = this.playerComps.length;
         for (var i=0; i<len; i++) {
             var C = this.playerComps[i];
@@ -1668,7 +1671,15 @@ BSWG.componentList = new function () {
             }
         }
         
-        return ret;
+        return ret;*/
+        var C = BSWG.game.ccblock;
+        var p2 = C.obj.body.GetWorldCenter();
+        var dist = Math.pow(p2.x - p.x, 2.0) +
+                   Math.pow(p2.y - p.y, 2.0);
+        if (dist < Math.pow(r+C.obj.radius*4.0, 2.0)) {
+            return [C];
+        }
+        return [];
     };
 
     this.loadScan = function(obj) {
