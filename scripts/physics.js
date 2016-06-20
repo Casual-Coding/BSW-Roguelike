@@ -203,6 +203,7 @@ BSWG.physics = new function(){
         }
 
         this.world.DestroyJoint( obj.joint );
+
         obj.joint = null;
         obj.jointDef = null;
         obj.objA = null;
@@ -735,12 +736,14 @@ BSWG.physics = new function(){
             self.scrapes.push(S);
         }
 
-        S.a.volume((S.va = Math.clamp(forceA / 2, 0, 1.75))*0.8);
-        S.b.volume((S.vb = Math.clamp(forceB / 2, 0, 1.75))*0.8);
-        S.a.rate((S.ra = 0.35 / (ma / 2.5)) / 2.0);
-        S.b.rate((S.rb = 0.35 / (mb / 2.5)) / 2.0);
-        S.a.position(p3);
-        S.b.position(p3);
+        if (S.a && S.b) {
+            S.a.volume((S.va = Math.clamp(forceA / 2, 0, 1.75))*0.8);
+            S.b.volume((S.vb = Math.clamp(forceB / 2, 0, 1.75))*0.8);
+            S.a.rate((S.ra = 0.35 / (ma / 2.5)) / 2.0);
+            S.b.rate((S.rb = 0.35 / (mb / 2.5)) / 2.0);
+            S.a.position(p3);
+            S.b.position(p3);
+        }
         S.lframe = self.framen;
         S.lp.set(p3.x, p3.y, p3.z);
 

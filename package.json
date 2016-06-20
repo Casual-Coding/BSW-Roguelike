@@ -2,7 +2,7 @@
   "main": "index.html",
   "name": "BSWR",
   "description": "BlockShip Wars: Roguelike",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "keywords": [
     "game",
     "roguelike",

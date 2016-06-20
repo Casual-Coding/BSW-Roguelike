@@ -1253,14 +1253,14 @@ BSWG.game = new function(){
         BSWG.render.startRenderer(function(dt, time){
 
             // hacked together real time music generator
-            self.musicBPM = (self.scene === BSWG.SCENE_TITLE || self.battleMode) ? 60 : 30;
+            self.musicBPM = (self.scene === BSWG.SCENE_TITLE || self.battleMode) ? 30 : 15;
             var musicHappy = (self.scene === BSWG.SCENE_GAME2 || (self.inZone && self.inZone.safe));
             var audioCtx = BSWG.music.audioCtx;
             var ctime = audioCtx.currentTime;
             var nextBeat = Math.ceil(ctime/(60/self.musicBPM)) * (60/self.musicBPM);
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
-                Math.seedrandom(self.noteIndex%8 + (self.inZone ? self.inZone.id : 0));
-                new BSWG.noteSample().play(self.scene === BSWG.SCENE_TITLE ? 0.01 : 0.007, Math.floor(Math.random()*8) + Math.floor(self.noteIndex/4)%4, 1 + (self.noteIndex%2) * 1, musicHappy, nextBeat);
+                Math.seedrandom(self.noteIndex%8 + ~~(time/(60/self.musicBPM*16)));
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
                 self.lastNote = nextBeat;
                 self.noteIndex += 1;
                 Math.seedrandom();
@@ -1365,8 +1365,6 @@ BSWG.game = new function(){
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
 
-                        toZ /= Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*0.1, 1.5);
-
                         var ccs = BSWG.componentList.allCCs();
                         var avgDist = 0.0;
                         var avgP = new b2Vec2(0, 0);
@@ -1375,32 +1373,34 @@ BSWG.game = new function(){
                         avgP.y *= w;
                         for (var i=0; i<ccs.length; i++) {
                             var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
-                            if (dist < 0.1) {
-                                continue;
+                            if (dist < 1) {
+                                dist = 1;
                             }
                             avgDist += dist;
                             var tw = 1;
                             if (dist > 20) {
-                                tw = 1 / (1+(dist-20)/10);
+                                tw = 1 / ((1+dist-20)/5);
                             }
-                            avgP.x += ccs[i].p().x * tw;
-                            avgP.y += ccs[i].p().y * tw;
+                            avgP.x += ccs[i].p().x * tw + ccs[i].obj.body.GetLinearVelocity().x * 2 * tw;
+                            avgP.y += ccs[i].p().y * tw + ccs[i].obj.body.GetLinearVelocity().y * 2 * tw;
                             w += tw;
                         }
+
                         if (w>0.1) {
                             avgP.x /= w;
                             avgP.y /= w;
                             avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
                             toZ /= Math.max(Math.log(avgDist), 1.0);
                             toZ = Math.max(toZ, 0.007);
-                            self.cam.panTo(0.75*dt*(self.ccblock.anchored ? 0.15 : 1.0)*Math.clamp(self.battleTime*2.5, 0., 1.), avgP);
+                            self.cam.panTo(0.75*dt*(self.ccblock.anchored ? 0.15 : 1.0), avgP);
                         }
 
+                        ccs = null;
+
                         self.cam.zoomTo(dt*2.5, toZ);
+                        self.cam.zoomTo(dt*0.5, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.1 : 0.15), 1.75));
+
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-                        var p = ccp.clone();
-                        p.x += self.ccblock.obj.body.GetLinearVelocity().x * 4;
-                        p.y += self.ccblock.obj.body.GetLinearVelocity().y * 4;
 
                         var bfr = BSWG.camVelLookBfr * viewport.w;
                         var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
@@ -1408,8 +1408,6 @@ BSWG.game = new function(){
                         var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
                         var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
                         var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
-
-                        self.cam.panTo(2.0*dt*(self.ccblock.anchored ? 0.15 : 1.0), p);
 
                         var tx = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
                         var ty = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
@@ -1711,7 +1709,7 @@ BSWG.game = new function(){
                     }
 
                     if (B.wet > 0) {
-                        desc.density = Math.pow(Math.clamp(B.wet*Math.random(), 0, 1), 2.0);
+                        desc.density = Math.pow(Math.clamp(B.wet*Math.random(), 0, 1), 1.0);
                         if (desc.density < 0.1) {
                             desc.density = 0.0;
                         }
@@ -1723,9 +1721,9 @@ BSWG.game = new function(){
                         }
                         desc.color.w = Math.clamp(desc.color.w * desc.density * 2.0, 0., 1.);
                         if (desc.density > 0.2) {
-                            desc.tint.set(.15, .15, .15, Math.clamp(desc.density*6, 0., 0.9));
+                            desc.tint.set(.3, .3, .3, Math.clamp(desc.density*20, 0., 0.9));
                         }
-                        desc.wet = Math.clamp(B.wet, 0., 1.) * 0.35;
+                        desc.wet = Math.clamp(B.wet, 0., 1.) * 0.2;
                         desc.tint.z = Math.clamp(desc.tint.z + desc.wet * 0.25, 0., 1.);
                     }
                     else {
@@ -1743,7 +1741,7 @@ BSWG.game = new function(){
                         desc.color.w = 0.65;
                     }
 
-                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.3, 0., 1.), 2.5) * 0.5;
+                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.3, 0., 1.), 2.5) * 0.35;
 
                     desc.tint.x *= (1 - dark);
                     desc.tint.y *= (1 - dark);

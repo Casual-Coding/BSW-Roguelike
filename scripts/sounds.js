@@ -194,7 +194,7 @@ BSWG.noteSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
-    play: function (amp, interval, oct, happy, time) {
+    play: function (amp, interval, oct, happy, time, offset) {
     
         var audioCtx = this.audioCtx = BSWG.music.audioCtx;
 
@@ -216,7 +216,7 @@ BSWG.noteSample = BSWG.soundBase({
         this.source = audioCtx.createBufferSource();
         this.source.loop = false;
         this.source.buffer = BSWG.soundBuffers['e2-distorted'];
-        this.source.playbackRate.value = BSWG.music_NoteFreq(oct, note) / BSWG.music_NoteFreq(2, 8);
+        this.source.playbackRate.value = BSWG.music_NoteFreq(oct, note+(offset||0)) / BSWG.music_NoteFreq(2, 8);
 
         this.gain = audioCtx.createGain();
         this.gain.gain.value = amp * 0.5;
@@ -276,7 +276,8 @@ BSWG.soundLoad = function (onload) {
         { name: 'levelup', url: 'sounds/levelup.wav' },
         { name: 'raindrop', url: 'sounds/raindrop.wav' },
         { name: 'swirl', url: 'sounds/swirl.wav' },
-        { name: 'e2-distorted', url: 'sounds/e2-distorted.wav' }
+        { name: 'e2-distorted', url: 'sounds/e2-distorted.wav' },
+        { name: 'e2-clean', url: 'sounds/e2-clean.wav' }
     ];
 
     var urls = [];

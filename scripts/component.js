@@ -1626,22 +1626,12 @@ BSWG.componentList = new function () {
             }
         }
 
-        var x1 = this.sHashXY(_x1), y1 = this.sHashXY(_y1),
-            x2 = this.sHashXY(_x2), y2 = this.sHashXY(_y2);
-
-        for (var x=x1; x<=x2; x++) {
-            for (var y=y1; y<=y2; y++) {
-                var key = this.sHashKey2(x,y);
-                var list = this.staticHash[key];
-                if (list) {
-                    for (var i=0; i<list.length; i++) {
-                        if (!found[list[i].id] && !list[i].removed) {
-                            found[list[i].id] = true;
-                            fn(list[i]);
-                        }
-                    }
-                }
-            }
+        if (BSWG.game.map && BSWG.game.map.colInBox(_x1, _y1, _x2, _y2)) {
+            fn({
+                id: 10000000,
+                isStatic: true,
+                takeDamage: function() {}
+            });
         }
 
         found = null;

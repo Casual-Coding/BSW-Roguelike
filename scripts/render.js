@@ -536,6 +536,7 @@ BSWG.render = new function() {
             this.cam3D.aspect = this.viewport.w / this.viewport.h;
             this.cam3D.updateProjectionMatrix();
             this.resized = true;
+            this.renderer.setPixelRatio( window.devicePixelRatio );
         }
         else {
             this.resized = false;
@@ -623,6 +624,9 @@ BSWG.render = new function() {
                 }
             }
 
+            var tmp = Math.random;
+            Math.random = Math._random;
+
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
 
@@ -664,6 +668,8 @@ BSWG.render = new function() {
             //self.ctx.fillText(self.renderer.info.memory.textures + '', 15, 15);
 
             BSWG.input.newFrame();
+
+            Math.random = tmp;
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
@@ -804,11 +810,8 @@ BSWG.render = new function() {
 
     var lastRandomValue = null;
     this.newMaterial = function (vertexID, fragmentID, data, blendMode, side) {
-        var rand = Math.random();
-        if (lastRandomValue === rand) { // using seed random other places can lead to materials with duplicate UUIDs
-            Math.seedrandom();
-        }
-        lastRandomValue = rand;
+        var __tmp = Math.random;
+        Math.random = Math._random;
 
         data = data || {};
         var attr = {};
@@ -836,6 +839,8 @@ BSWG.render = new function() {
         if (blendMode || blendMode === 0) {
             material.blending = blendMode;
         }
+
+        Math.random = __tmp;
 
         //material.needsUpdate = true;
 

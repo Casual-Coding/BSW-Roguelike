@@ -160,22 +160,19 @@ BSWG.component_CommandCenter = {
 
     warpOut: function(slow) {
 
-        if (slow && BSWG.game.ccblock && !(BSWG.game.ccblock.destroyed)) {
+        /*if (slow && BSWG.game.ccblock && !(BSWG.game.ccblock.destroyed)) {
             if (!this.escapeFrom) {
                 this.escapeFrom = BSWG.game.ccblock.obj.body.GetWorldCenter().clone();
                 this.escapeT = 0.0;
             }
             return;
-        }
+        }*/
 
         var len = BSWG.componentList.compList.length;
         for (var i=0; i<len; i++) {
             var C = BSWG.componentList.compList[i];
             if (C && ((C.onCC && C.onCC.id === this.id) || (C.id === this.id))) {
-                C.onCC = null;
-                C.hp = 0;
-                C.destroyed = true;
-                C.removeSafe();
+                C.takeDamage(1000000, null, true, true);
             }
         }
     },
@@ -204,7 +201,7 @@ BSWG.component_CommandCenter = {
         this.dispKeys['forward'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.UP);
         this.dispKeys['reverse'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.DOWN);
 
-        if (this.escapeFrom) {
+        /*if (this.escapeFrom) {
             this.escapeT += dt;
             var v = this.obj.body.GetWorldCenter().clone();
             v.x -= this.escapeFrom.x;
@@ -222,7 +219,7 @@ BSWG.component_CommandCenter = {
                     C.obj.body.SetLinearVelocity(v.clone());
                 }
             }
-        }
+        }*/
 
         this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
 

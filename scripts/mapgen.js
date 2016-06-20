@@ -719,6 +719,21 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         return this.colMap[x] && this.colMap[x][y];
     };
 
+    ret.colInBox = function(x1, y1, x2, y2) {
+        var ax = Math.floor(x1/BSWG.tileSizeWorld);
+        var ay = Math.floor(y1/BSWG.tileSizeWorld);
+        var bx = Math.floor(x2/BSWG.tileSizeWorld);
+        var by = Math.floor(y2/BSWG.tileSizeWorld);
+        for (var x=ax; x<=bx; x++) {
+            for (var y=ay; y<=by; y++) {
+                if (this.colMap[x] && this.colMap[x][y]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     ret.getZone = function(p) {
         p = new b2Vec2(
             p.x / this.gridSize,
