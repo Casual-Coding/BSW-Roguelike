@@ -82,7 +82,7 @@ BSWG.component_Thruster = {
     render: function(ctx, cam, dt) {
 
         this.meshObj.update([0.1, 0.75, 0.8, 1], 1/0.75, BSWG.compAnchored(this));
-        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
     },
 

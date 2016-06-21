@@ -155,7 +155,7 @@ BSWG.component_CommandCenter = {
         var l = (this.moveT/0.3) * 0.25 + 0.35;
         this.meshObj2.update([l, 0.8, 0.9, 1], 3.0, BSWG.compAnchored(this));
 
-        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
     },
 
     warpOut: function(slow) {

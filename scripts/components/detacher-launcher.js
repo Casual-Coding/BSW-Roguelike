@@ -86,7 +86,7 @@ BSWG.component_DetacherLauncher = {
 
         this.meshObj.update([0.5, 0.7, 0.7, 1], 2, BSWG.compAnchored(this));
         this.meshObj2.update([1.0, 0.5, 0.2, 1], 3, BSWG.compAnchored(this));
-        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
     },
 

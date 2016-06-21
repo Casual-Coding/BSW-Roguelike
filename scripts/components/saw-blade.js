@@ -100,7 +100,7 @@ BSWG.component_SawBlade = {
 
     render: function(ctx, cam, dt) {
 
-        var selClr = [0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0];
+        var selClr = [0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)];
         var toothClr = [0.4, 0.4, 0.4, 1];
         var wheelClr = [1.0, 0.6, 0.05, 1];
         for (var i=0; i<this.meshObjs.length; i++) {

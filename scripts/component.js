@@ -16,10 +16,9 @@ BSWG.defenceBias = 2.0;
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
 
-BSWG.compExpireTime = 7.5 * 60.0;
-
 BSWG.orphanDefense = 8.0;
-BSWG.orphanTimeLive = 300.0;
+BSWG.orphanTimeLive = 3 * 60;
+BSWG.compExpireTime = BSWG.orphanTimeLive;
 
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -56,6 +55,19 @@ BSWG.componentHoverFn = function(self) {
         return false;
     }
     return true;
+};
+
+BSWG.componentHoverFnAlpha = function(self) {
+    if (!BSWG.game.editMode && BSWG.game.storeMode && BSWG.game.scene === BSWG.SCENE_GAME1 && !self.onCC) {
+        return BSWG.componentList.mouseOver === self ? 0.4 : 0.175;
+    }
+    if (!BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
+        return 0.0;
+    }
+    if (self.onCC && !self.hasConfig && !self.canMoveAttached) {
+        return 0.0;
+    }
+    return BSWG.componentList.mouseOver === self ? 0.4 : 0.175;
 };
 
 BSWG.compAnchored = function(self) {

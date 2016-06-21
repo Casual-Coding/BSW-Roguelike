@@ -82,8 +82,8 @@ BSWG.component_ChainLink = {
 
     render: function(ctx, cam, dt) {
 
-        this.selMeshObj1.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
-        this.selMeshObj2.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+        this.selMeshObj1.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
+        this.selMeshObj2.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
         this.meshObj1.update([0.5, 0.6, 0.5, 1], 2, BSWG.compAnchored(this));
         this.meshObj2.update([0.5, 0.5, 0.5, 1], 4, BSWG.compAnchored(this));

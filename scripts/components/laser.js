@@ -50,7 +50,7 @@ BSWG.component_Laser = {
         this.kickBack = 0.0;
 
         BSWG.bpmReflect = 0.6;
-        BSWG.bpmSmoothNormals = true;
+        //BSWG.bpmSmoothNormals = true;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[1].x+verts[5].x)*0.5, 0.2));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
@@ -83,7 +83,7 @@ BSWG.component_Laser = {
         }
 
         this.meshObj.update([1.0, 0.6, 0.35, 1], 4, BSWG.compAnchored(this));
-        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFn(this) ? 0.4 : 0.0]);
+        this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
         
         //BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
         BSWG.drawBlockPolyOffset = null;
