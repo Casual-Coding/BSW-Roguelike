@@ -19,7 +19,7 @@ BSWG.arch_hashSize = 25.0;
 BSWG.compExpireTime = 7.5 * 60.0;
 
 BSWG.orphanDefense = 8.0;
-BSWG.orphanTimeLive = 90.0;
+BSWG.orphanTimeLive = 300.0;
 
 BSWG.generateTag = function () {
     var chars1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1330,10 +1330,10 @@ BSWG.componentList = new function () {
         }
 
         if (C.obj && C.obj.body) {
-            var zone = BSWG.game.map ? BSWG.game.map.getZone(C.obj.body.GetWorldCenter()) : null;
+            /*var zone = BSWG.game.map ? BSWG.game.map.getZone(C.obj.body.GetWorldCenter()) : null;
             if (zone && !zone.safe && C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {
                 return true;
-            }
+            }*/
 
             if (C.type !== 'cc' && Math.distVec2(C.obj.body.GetWorldCenter(), new b2Vec2(BSWG.game.cam.x, BSWG.game.cam.y)) > BSWG.archiveRange) {
                 o.push(C);
@@ -1356,6 +1356,8 @@ BSWG.componentList = new function () {
     };
 
     this.render = function (ctx, cam, dt) {
+
+        ctx.save();
 
         var p = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
         var pw = BSWG.render.unproject3D(p, 0.0);
@@ -1406,6 +1408,8 @@ BSWG.componentList = new function () {
                 this.compList[i].ai.__update_sensors(BSWG.ai.consoleDiv && BSWG.ai.showDebug ? ctx : null, dt);
             }
         }
+
+        ctx.restore();
     };
 
     this.atPoint = function (p, only) {
@@ -1642,6 +1646,7 @@ BSWG.componentList = new function () {
         this.withinBox(p.x-r, p.y-r, p.x+r, p.y+r, function(C){
             if (C.isStatic) {
                 ret.push(C);
+                return;
             }
             var p2 = C.obj.body.GetWorldCenter();
             var dist = Math.pow(p2.x - p.x, 2.0) +
@@ -1767,7 +1772,7 @@ BSWG.componentList = new function () {
 
             var pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
 
-            if (BSWG.game && BSWG.game.map && timeCheck/* && (BSWG.game.map.mapTime - C.mapTime) > BSWG.orphanTimeLive*/) {
+            if (BSWG.game && BSWG.game.map && timeCheck && (BSWG.game.map.mapTime - C.mapTime) > BSWG.orphanTimeLive) {
                 var zone = BSWG.game.map.getZone(pos);
                 if (!zone || !zone.safe) {
                     continue;

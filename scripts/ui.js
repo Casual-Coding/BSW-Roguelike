@@ -1134,7 +1134,7 @@ BSWG.control_CompPalette = {
 
         var toX = 2048;
 
-        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode && BSWG.game.safeZone)) {
+        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode && !BSWG.game.battleMode)) {
             toX = BSWG.render.viewport.w - (this.w);
         }
 

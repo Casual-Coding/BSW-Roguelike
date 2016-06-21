@@ -613,7 +613,7 @@ BSWG.game = new function(){
                         color: [0.5, 0.0, 0.0],
                         reflect: 0.2,
                         normalMapAmp: 4.0,
-                        normalMapScale: 2.0,
+                        normalMapScale: 2.0
                     },
                     'tileset-below': {
                         map: function(x,y) {
@@ -666,7 +666,7 @@ BSWG.game = new function(){
 
                 if (args.load) {
                     this.map = BSWG.genMap(args.load.map);
-                    this.tileMap = new BSWG.tileMap(this.map.tm_desc);
+                    this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
                     this.ccblock = BSWG.componentList.load(args.load.comp);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
@@ -678,7 +678,7 @@ BSWG.game = new function(){
                     Math.seedrandom();
                     this.noDefault = false;
                     this.map = BSWG.genMap(162, 35, 8);
-                    this.tileMap = new BSWG.tileMap(this.map.tm_desc);
+                    this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
                     this.xpInfo = new BSWG.playerStats();
                     startPos = this.map.planets[0].worldP.clone();
                 }
@@ -1187,6 +1187,7 @@ BSWG.game = new function(){
                         click: function (me) {
                             var win = BSWG.render.win;
                             win.toggleFullscreen();
+                            win.setAlwaysOnTop(win.isFullscreen);
                         }
                     }),
                     new BSWG.uiControl(BSWG.control_Button, {
@@ -1259,8 +1260,8 @@ BSWG.game = new function(){
             var ctime = audioCtx.currentTime;
             var nextBeat = Math.ceil(ctime/(60/self.musicBPM)) * (60/self.musicBPM);
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
-                Math.seedrandom(self.noteIndex%8 + ~~(time/(60/self.musicBPM*16)));
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
+                Math.seedrandom(Math.floor((self.noteIndex%8)/4) + Math.floor(time/(60/self.musicBPM*16)));
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
                 self.lastNote = nextBeat;
                 self.noteIndex += 1;
                 Math.seedrandom();
@@ -1621,7 +1622,7 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && self.safeZone && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1) {
+            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1) {
                 if (!self.saveHealAdded) {
                     self.saveBtn.add();
                     self.saveHealAdded = true;
@@ -1634,7 +1635,7 @@ BSWG.game = new function(){
                 }
             }
             if (self.storeBtn) {
-                self.storeBtn.text = self.safeZone ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
+                self.storeBtn.text = !self.battleMode ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
             }
 
             if (self.scene === BSWG.SCENE_GAME2) {

@@ -381,7 +381,7 @@ BSWG.input = new function(){
                     win.toggleFullscreen();
                     win.setAlwaysOnTop(fs);
                 }
-                if (e.which === BSWG.KEY['F12']) {
+                else if (e.which === BSWG.KEY['F12']) {
                     win.showDevTools();
                 }
             }

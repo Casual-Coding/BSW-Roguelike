@@ -463,6 +463,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             color: [1.0, 1.0, 1.0],
             reflect: 0.2,
             normalMapAmp: 3.5,
+            zscale: 2.0
         },
         'tileset-land': {
             map: function(x,y) {

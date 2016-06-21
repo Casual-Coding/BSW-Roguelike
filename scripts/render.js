@@ -139,7 +139,7 @@ BSWG.initCanvasContext = function(ctx) {
             total += widths[i];
         }
 
-        var oalign = ctx.textAlign;
+        var oalign = ctx.textAlign || 'left';
 
         if (ctx.textAlign === 'center') {
             x -= total * 0.5;
@@ -181,7 +181,7 @@ BSWG.initCanvasContext = function(ctx) {
 
 };
 
-BSWG.shadowMapSize = 4096;
+BSWG.shadowMapSize = 2048;
 
 BSWG.render = new function() {
 
@@ -409,6 +409,23 @@ BSWG.render = new function() {
 
         cbk(ctx, w, h);
 
+        /*if (!noTexture) {
+            var x = w;
+            while (x > 1) {
+                x /= 2;
+            }
+            if (Math.floor(x) !== x) {
+                console.log('!! w: ' + w);
+            }
+            x = h;
+            while (x > 1) {
+                x /= 2;
+            }
+            if (Math.floor(x) !== x) {
+                console.log('!! h: ' + h);
+            }
+        }*/
+
         if (!noTexture) {
 
             canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
@@ -576,8 +593,15 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
-            var frameTime = Date.timeStamp();
-            self.actualDt = frameTime - self.lastFrameTime;
+            var frameTime;
+            while (true) {
+                frameTime = Date.timeStamp();
+                self.actualDt = frameTime - self.lastFrameTime;
+                if (self.actualDt >= (1/60)) {
+                    break;
+                }
+            }
+
             if (self.actualDt > 1/10) {
                 self.actualDt = 1/10;
             }
@@ -615,7 +639,9 @@ BSWG.render = new function() {
             }
 
             if (self.renderCbk) {
+                self.ctx.save();
                 self.renderCbk(self.dt, self.time, self.ctx);
+                self.ctx.restore();
             }
 
             if (self.textObjs) {
