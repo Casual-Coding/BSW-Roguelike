@@ -621,7 +621,7 @@ BSWG.render = new function() {
             }
             avg /= last60dt.length + 1;
 
-            var targetDt = 1/(Math.floor((1/avg)/5)*5);
+            var targetDt = 1/(Math.round((1/avg)/5)*5);
             sumDt += self.actualDt;
 
             while (sumDt >= targetDt) {

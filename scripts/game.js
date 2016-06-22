@@ -1445,9 +1445,10 @@ BSWG.game = new function(){
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
 
-                    if (self.storeMode && !self.editMode && BSWG.input.MOUSE_RELEASED('left') && BSWG.componentList.mouseOver) {
+                    if (self.storeMode && !self.editMode && BSWG.input.MOUSE('left') && BSWG.componentList.mouseOver) {
                         var comp = BSWG.componentList.mouseOver;
-                        if (!comp.onCC) {
+                        if (!comp.onCC && !comp.salvaged) {
+                            comp.salvaged = true;
                             self.xpInfo.addStore(comp, 1);
                             comp.takeDamage(1000000, null, true, true);
                         }
