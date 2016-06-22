@@ -1328,7 +1328,7 @@ BSWG.game = new function(){
                     var minC = null, minLen = 1000;
                     for (var i=0; i<cl.length; i++) {
                         var C = cl[i];
-                        if (C && C.obj && C.obj.body && !C.onCC) {
+                        if (C && C.obj && C.obj.body) {
                             var vec = mp.clone();
                             var vec2 = C.obj.body.GetWorldCenter();
                             vec.x -= vec2.x;
@@ -1340,24 +1340,26 @@ BSWG.game = new function(){
                             }
                         }
                     }
-                    if (minC && minLen > 0.05 && BSWG.input.MOUSE('left')) {
-                        var vec = mp.clone();
-                        var vec2 = minC.obj.body.GetWorldCenter();
-                        vec.x -= vec2.x;
-                        vec.y -= vec2.y;
-                        vec.x /= len;
-                        vec.y /= len;
-                        var f = BSWG.attractorForce * minC.obj.body.GetMass();
-                        vec.x *= f;
-                        vec.y *= f;
-                        minC.obj.body.ApplyForceToCenter(vec);
-                        self.attractorOn = minC;
-                        self.attractorShowing = true;
-                        self.attractorHover = minC;
-                    }
-                    else if (minC && minLen > 0.05) {
-                        self.attractorShowing = true;
-                        self.attractorHover = minC;
+                    if (minC && !minC.onCC) {
+                        if (minLen > 0.05 && BSWG.input.MOUSE('left')) {
+                            var vec = mp.clone();
+                            var vec2 = minC.obj.body.GetWorldCenter();
+                            vec.x -= vec2.x;
+                            vec.y -= vec2.y;
+                            vec.x /= len;
+                            vec.y /= len;
+                            var f = BSWG.attractorForce * minC.obj.body.GetMass();
+                            vec.x *= f;
+                            vec.y *= f;
+                            minC.obj.body.ApplyForceToCenter(vec);
+                            self.attractorOn = minC;
+                            self.attractorShowing = true;
+                            self.attractorHover = minC;
+                        }
+                        else if (minLen > 0.05) {
+                            self.attractorShowing = true;
+                            self.attractorHover = minC;
+                        }
                     }
                 }
             }
