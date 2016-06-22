@@ -5,6 +5,8 @@ BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 BSWG.camVelLookBfr         = 0.22; // * viewport.w
 BSWG.lookRange             = 45.0;
 BSWG.grabSpeed             = 2.75;
+BSWG.attractorRange        = 4.0;
+BSWG.attractorForce        = 5.0;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -1316,6 +1318,39 @@ BSWG.game = new function(){
             var my = BSWG.input.MOUSE('y');
             var mps = new b2Vec2(mx, my);
             var mp = BSWG.render.unproject3D(mps, 0.0);
+
+            if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
+                if (!self.grabbedBlock && self.ccblock && BSWG.input.MOUSE('left') && (self.editMode || self.storeMode) && !BSWG.ui.mouseBlock) {
+                    var cl = BSWG.componentList.withinRadius(mp.clone(), BSWG.attractorRange);
+                    var minC = null, minLen = 1000;
+                    for (var i=0; i<cl.length; i++) {
+                        var C = cl[i];
+                        if (C && C.obj && C.obj.body && !C.onCC) {
+                            var vec = mp.clone();
+                            var vec2 = C.obj.body.GetWorldCenter();
+                            vec.x -= vec2.x;
+                            vec.y -= vec2.y;
+                            var len = Math.lenVec2(vec, vec2);
+                            if (!minC || len < minLen) {
+                                minC = C;
+                                minLen = len;
+                            }
+                        }
+                    }
+                    if (minC && minLen > 0.05) {
+                        var vec = mp.clone();
+                        var vec2 = minC.obj.body.GetWorldCenter();
+                        vec.x -= vec2.x;
+                        vec.y -= vec2.y;
+                        vec.x /= len;
+                        vec.y /= len;
+                        var f = BSWG.attractorForce * minC.obj.body.GetMass();
+                        vec.x *= f;
+                        vec.y *= f;
+                        minC.obj.body.ApplyForceToCenter(vec);
+                    }
+                }
+            }
 
             if (self.battleMode) {
                 if (!self.battleTime) {
