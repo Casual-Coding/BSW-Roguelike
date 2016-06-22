@@ -1319,8 +1319,11 @@ BSWG.game = new function(){
             var mps = new b2Vec2(mx, my);
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
+            self.attractorShowing = false;
+            self.attractorOn = null;
+            self.attractorHover = null;
             if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
-                if (!self.grabbedBlock && self.ccblock && BSWG.input.MOUSE('left') && (self.editMode || self.storeMode) && !BSWG.ui.mouseBlock) {
+                if (!self.grabbedBlock && self.ccblock && (self.editMode || self.storeMode) && !BSWG.ui.mouseBlock) {
                     var cl = BSWG.componentList.withinRadius(mp.clone(), BSWG.attractorRange);
                     var minC = null, minLen = 1000;
                     for (var i=0; i<cl.length; i++) {
@@ -1337,7 +1340,7 @@ BSWG.game = new function(){
                             }
                         }
                     }
-                    if (minC && minLen > 0.05) {
+                    if (minC && minLen > 0.05 && BSWG.input.MOUSE('left')) {
                         var vec = mp.clone();
                         var vec2 = minC.obj.body.GetWorldCenter();
                         vec.x -= vec2.x;
@@ -1348,6 +1351,13 @@ BSWG.game = new function(){
                         vec.x *= f;
                         vec.y *= f;
                         minC.obj.body.ApplyForceToCenter(vec);
+                        self.attractorOn = minC;
+                        self.attractorShowing = true;
+                        self.attractorHover = minC;
+                    }
+                    else if (minC && minLen > 0.05) {
+                        self.attractorShowing = true;
+                        self.attractorHover = minC;
                     }
                 }
             }
@@ -1619,6 +1629,41 @@ BSWG.game = new function(){
                         ctx.fill();
                         ctx.lineWidth = 1.0;
 
+                    }
+                    else if (self.attractorOn) {
+
+                        var gpw = self.attractorOn.p();
+                        if (gpw && self.ccblock.obj && self.ccblock.obj.body) {
+                            var gp = BSWG.render.project3D(gpw);
+
+                            var ccl = new b2Vec2(0.0, 0.6);
+                            var ccw = self.ccblock.getWorldPoint(ccl);
+                            var cc = BSWG.render.project3D(ccw);
+
+                            ctx.lineWidth = 2.0;
+                            ctx.strokeStyle = 'rgba(192, 255, 192, 0.75)';
+                            ctx.beginPath();
+                            ctx.moveTo(cc.x, cc.y);
+                            ctx.lineTo(gp.x, gp.y);
+                            ctx.lineTo(mps.x, mps.y);
+                            ctx.stroke();
+                            
+                            ctx.fillStyle = ctx.strokeStyle;
+
+                            ctx.beginPath();
+                            ctx.arc(cc.x, cc.y, 5, 0, 2*Math.PI);
+                            ctx.fill();
+
+                            ctx.beginPath();
+                            ctx.arc(gp.x, gp.y, 5, 0, 2*Math.PI);
+                            ctx.fill();
+
+                            ctx.beginPath();
+                            ctx.arc(mps.x, mps.y, 5, 0, 2*Math.PI);
+                            ctx.fill();
+                            ctx.lineWidth = 1.0;
+                        }
+                      
                     }
 
                     self.exitBtn.p.x = self.hudX(self.hudBtn[12][0]) + 2;

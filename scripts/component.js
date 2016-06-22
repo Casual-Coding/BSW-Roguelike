@@ -58,6 +58,12 @@ BSWG.componentHoverFn = function(self) {
 };
 
 BSWG.componentHoverFnAlpha = function(self) {
+    if (BSWG.game.attractorOn === self || BSWG.game.grabbedBlock === self) {
+        return 0.6;
+    }
+    if (BSWG.game.attractorHover === self) {
+        return 0.4;
+    }
     if (!BSWG.game.editMode && BSWG.game.storeMode && BSWG.game.scene === BSWG.SCENE_GAME1 && !self.onCC) {
         return BSWG.componentList.mouseOver === self ? 0.4 : 0.175;
     }
@@ -476,6 +482,16 @@ BSWG.component.prototype.p = function (v) {
 };
 
 BSWG.component.prototype.remove = function() {
+
+    if (BSWG.game.attractorOn === this) {
+        BSWG.game.attractorOn = null;
+    }
+    if (BSWG.game.attractorHover === this) {
+        BSWG.game.attractorHover = null;
+    }
+    if (BSWG.game.grabbedBlock === this) {
+        BSWG.game.grabbedBlock = null;
+    }
 
     BSWG.componentList.remove(this);
 
@@ -1401,6 +1417,9 @@ BSWG.componentList = new function () {
             else {
                 BSWG.render.setCustomCursor(true, 2);
             }
+        }
+        else if (BSWG.game.attractorShowing) {
+            BSWG.render.setCustomCursor(true, 5);
         }
         else {
             BSWG.render.setCustomCursor(true);
