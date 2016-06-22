@@ -1621,7 +1621,7 @@ BSWG.componentList = new function () {
 
     };
 
-    this.withinBox = function (_x1, _y1, _x2, _y2, fn) {
+    this.withinBox = function (_x1, _y1, _x2, _y2, fn, static) {
         var x1 = this.hashXY(_x1), y1 = this.hashXY(_y1),
             x2 = this.hashXY(_x2), y2 = this.hashXY(_y2);
 
@@ -1642,7 +1642,7 @@ BSWG.componentList = new function () {
             }
         }
 
-        if (BSWG.game.map && BSWG.game.map.colInBox(_x1, _y1, _x2, _y2)) {
+        if (static && BSWG.game.map && BSWG.game.map.colInBox(_x1, _y1, _x2, _y2)) {
             fn({
                 id: 10000000,
                 isStatic: true,
@@ -1653,11 +1653,13 @@ BSWG.componentList = new function () {
         found = null;
     };
 
-    this.withinRadius = function (p, r) {
+    this.withinRadius = function (p, r, static) {
         var ret = [];
         this.withinBox(p.x-r, p.y-r, p.x+r, p.y+r, function(C){
             if (C.isStatic) {
-                ret.push(C);
+                if (static) {
+                    ret.push(C);
+                }
                 return;
             }
             var p2 = C.obj.body.GetWorldCenter();
@@ -1666,7 +1668,7 @@ BSWG.componentList = new function () {
             if (dist < Math.pow(r+C.obj.radius, 2.0)) {
                 ret.push(C);
             }
-        });
+        }, static);
         return ret;
     };
 
@@ -1760,7 +1762,7 @@ BSWG.componentList = new function () {
             }
             var pos = new b2Vec2(C.pos.x + offset.x, C.pos.y + offset.y);
             if (archRadCheck) {
-                var lst = this.withinRadius(pos, 4);
+                var lst = this.withinRadius(pos, 4, true);
                 if (lst && lst.length) {
                     for (var j=0; j<lst.length; j++) {
                         if (lst[j].onCC) {
@@ -1770,7 +1772,7 @@ BSWG.componentList = new function () {
                 }
             }
             else {
-                if (this.withinRadius(pos, 6).length) {
+                if (this.withinRadius(pos, 6, true).length) {
                     return null;
                 }               
             }

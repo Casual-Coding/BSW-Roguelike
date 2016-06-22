@@ -461,7 +461,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             },
             collision: true,
             color: [1.0, 1.0, 1.0],
-            reflect: 0.2,
+            reflect: 0.1,
             normalMapAmp: 3.5,
             zscale: 2.0
         },
@@ -470,7 +470,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
             },
             color: [0.4, 0.75, 0.2],
-            relfect: 0.2,
+            relfect: 0.1,
             normalMapAmp: 3.0,
         },
         'tileset-sand': {
@@ -478,7 +478,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
             },
             color: [1.5, 1.0, 0.5],
-            reflect: 0.3,
+            reflect: 0.1,
             normalMap: BSWG.render.images['water_nm'].texture,
             normalMapScale: 3.0,
             normalMapAmp: 1.0,
@@ -496,7 +496,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
             color: [2.25, 2.25, 2.25],
-            reflect: 0.3,
+            reflect: 0.225,
             normalMap: BSWG.render.images['water_nm'].texture,
             normalMapScale: 2.5,
             normalMapAmp: 0.75,
@@ -507,7 +507,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             },
             color: [0.75, 0.75, 0.20],
             isBelow: true,
-            reflect: 0.5,
+            reflect: 0.25,
             normalMapAmp: 1.5
         },
         'water': {
