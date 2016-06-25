@@ -6,7 +6,7 @@ BSWG.camVelLookBfr         = 0.22; // * viewport.w
 BSWG.lookRange             = 45.0;
 BSWG.grabSpeed             = 2.75;
 BSWG.attractorRange        = 4.0;
-BSWG.attractorForce        = 5.0;
+BSWG.attractorForce        = 2.5;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -1319,49 +1319,74 @@ BSWG.game = new function(){
             var mps = new b2Vec2(mx, my);
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
-            self.attractorShowing = false;
-            self.attractorOn = null;
-            self.attractorHover = null;
             if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
                 if (!self.grabbedBlock && self.ccblock && (self.editMode || self.storeMode) && !BSWG.ui.mouseBlock) {
-                    var cl = BSWG.componentList.withinRadius(mp.clone(), BSWG.attractorRange);
-                    var minC = null, minLen = 1000;
-                    for (var i=0; i<cl.length; i++) {
-                        var C = cl[i];
-                        if (C && C.obj && C.obj.body) {
-                            var vec = mp.clone();
-                            var vec2 = C.obj.body.GetWorldCenter();
-                            vec.x -= vec2.x;
-                            vec.y -= vec2.y;
-                            var len = Math.lenVec2(vec, vec2);
-                            if (!minC || len < minLen) {
-                                minC = C;
-                                minLen = len;
+                    if (self.attractorOn && self.attractorOn.obj && self.attractorOn.obj.body && BSWG.input.MOUSE('left')) {
+                        var vec = mp.clone();
+                        var vec2 = self.attractorOn.obj.body.GetWorldCenter();
+                        vec.x -= vec2.x;
+                        vec.y -= vec2.y;
+                        var len = Math.lenVec2(vec);
+                        vec.x /= len;
+                        vec.y /= len;
+                        var f = BSWG.attractorForce * self.attractorOn.obj.body.GetMass();
+                        vec.x *= f;
+                        vec.y *= f;
+                        self.attractorOn.obj.body.ApplyForceToCenter(vec);
+                    }
+                    else {
+                        self.attractorShowing = false;
+                        self.attractorOn = null;
+                        self.attractorHover = null;
+                        var cl = BSWG.componentList.withinRadius(mp.clone(), BSWG.attractorRange);
+                        var minC = null, minLen = 1000;
+                        for (var i=0; i<cl.length; i++) {
+                            var C = cl[i];
+                            if (C && C.obj && C.obj.body) {
+                                var vec = mp.clone();
+                                var vec2 = C.obj.body.GetWorldCenter();
+                                vec.x -= vec2.x;
+                                vec.y -= vec2.y;
+                                var len = Math.lenVec2(vec);
+                                if (!minC || len < minLen) {
+                                    minC = C;
+                                    minLen = len;
+                                }
+                            }
+                        }
+                        if (minC && !minC.onCC) {
+                            if (minLen > 0.05 && BSWG.input.MOUSE('left')) {
+                                var vec = mp.clone();
+                                var vec2 = minC.obj.body.GetWorldCenter();
+                                vec.x -= vec2.x;
+                                vec.y -= vec2.y;
+                                vec.x /= minLen;
+                                vec.y /= minLen;
+                                var f = BSWG.attractorForce * minC.obj.body.GetMass();
+                                vec.x *= f;
+                                vec.y *= f;
+                                minC.obj.body.ApplyForceToCenter(vec);
+                                self.attractorOn = minC;
+                                self.attractorShowing = true;
+                                self.attractorHover = minC;
+                            }
+                            else if (minLen > 0.05) {
+                                self.attractorShowing = true;
+                                self.attractorHover = minC;
                             }
                         }
                     }
-                    if (minC && !minC.onCC) {
-                        if (minLen > 0.05 && BSWG.input.MOUSE('left')) {
-                            var vec = mp.clone();
-                            var vec2 = minC.obj.body.GetWorldCenter();
-                            vec.x -= vec2.x;
-                            vec.y -= vec2.y;
-                            vec.x /= len;
-                            vec.y /= len;
-                            var f = BSWG.attractorForce * minC.obj.body.GetMass();
-                            vec.x *= f;
-                            vec.y *= f;
-                            minC.obj.body.ApplyForceToCenter(vec);
-                            self.attractorOn = minC;
-                            self.attractorShowing = true;
-                            self.attractorHover = minC;
-                        }
-                        else if (minLen > 0.05) {
-                            self.attractorShowing = true;
-                            self.attractorHover = minC;
-                        }
-                    }
                 }
+                else {
+                    self.attractorShowing = false;
+                    self.attractorOn = null;
+                    self.attractorHover = null;
+                }
+            }
+            else {
+                self.attractorShowing = false;
+                self.attractorOn = null;
+                self.attractorHover = null;               
             }
 
             if (self.battleMode) {

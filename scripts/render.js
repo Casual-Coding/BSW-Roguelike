@@ -664,6 +664,8 @@ BSWG.render = new function() {
             self.renderer.render(self.scene, self.cam3D);
             self.renderer.context.finish();
 
+            self.ctx.save();
+
             if (self.customCursor && !self.dlgOpen) {
                 document.body.style.cursor = 'none';
                 if (BSWG.input.MOUSE('mousein')) {
@@ -696,6 +698,8 @@ BSWG.render = new function() {
             BSWG.input.newFrame();
 
             Math.random = tmp;
+
+            self.ctx.restore();
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
