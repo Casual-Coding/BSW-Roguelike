@@ -74,11 +74,22 @@ BSWG.soundMixerClass.prototype.setVolume = function (val) {
 
 BSWG.mixer = null;
 
+BSWG.maxSounds = 168;
+BSWG.curSounds = 0;
+
 BSWG.soundSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
     play: function (name, pos, amp, rate, loop, delay) {
+
+        if (BSWG.curSounds >= BSWG.maxSounds) {
+            if (!loop) {
+                return;
+            }
+        }
+
+        BSWG.curSounds += 1;
 
         delay = delay || 0.0;
      
@@ -164,6 +175,8 @@ BSWG.soundSample = BSWG.soundBase({
     },
  
     stop: function ( ) {
+
+        BSWG.curSounds -= 1;
 
         this.audioCtx = null;
         this.source.onended = null;

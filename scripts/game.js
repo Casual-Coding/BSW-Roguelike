@@ -1312,7 +1312,7 @@ BSWG.game = new function(){
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
             
-            document.title = "BlockShip Wars: Roguelike - " + Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + ") " + BSWG.componentList.compList.length;
+            document.title = "BlockShip Wars: Roguelike - " + Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds;
 
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');

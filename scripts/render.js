@@ -181,7 +181,7 @@ BSWG.initCanvasContext = function(ctx) {
 
 };
 
-BSWG.shadowMapSize = 2048;
+BSWG.shadowMapSize = 1024 * 4;
 
 BSWG.render = new function() {
 
