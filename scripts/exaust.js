@@ -89,7 +89,7 @@ BSWG.exaust.prototype.destroy = function () {
     }
 
     if (this.smesh) {
-        BSWG.render.scene.remove(this.smesh);
+        BSWG.render.sceneS.remove(this.smesh);
         this.smesh = null;
     }
 
