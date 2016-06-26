@@ -324,7 +324,34 @@ BSWG.component_CommandCenter = {
             }
 
             var keys = new Object();
-            try {
+            if (BSWG.game.scene === BSWG.SCENE_GAME2) {
+                try {
+                    if (cmd && cmd.type === 'hold') {
+                        for (var k in this.aiLastKeys) {
+                            keys[k] = this.aiLastKeys[k];
+                        }
+                    }
+                    else if (cmd && cmd.type === 'pause') {
+                        // keys should be empty
+                    }
+                    else if (cmd && cmd.type === 'sub') {
+                        if (cmd.fn(dt, keys, cmd.t0)) {
+                            cmd.t = 0;
+                        }
+                    }
+                    else {
+                        this.ai.update(dt, keys);
+                        this.aiLastKeys = keys;
+                    }
+                    return keys;
+                } catch (e) {
+                    BSWG.ai.logError("Error in AI script frame update:");
+                    BSWG.ai.logError(e.stack);
+                    this.aiPaused = true;
+                    return null;
+                }
+            }
+            else {
                 if (cmd && cmd.type === 'hold') {
                     for (var k in this.aiLastKeys) {
                         keys[k] = this.aiLastKeys[k];
@@ -342,12 +369,7 @@ BSWG.component_CommandCenter = {
                     this.ai.update(dt, keys);
                     this.aiLastKeys = keys;
                 }
-                return keys;
-            } catch (e) {
-                BSWG.ai.logError("Error in AI script frame update:");
-                BSWG.ai.logError(e.stack);
-                this.aiPaused = true;
-                return null;
+                return keys;                
             }
 
         }
