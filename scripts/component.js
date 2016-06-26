@@ -827,6 +827,8 @@ BSWG.component.prototype.baseUpdate = function(dt) {
                         new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (ma / 2.5));
                         new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (mb / 2.5));
                         p = null;
+                        BSWG.physics.endMouseDrag();
+                        BSWG.game.grabbedBlock = null;
                     }
 
                     BSWG.input.EAT_MOUSE('left');

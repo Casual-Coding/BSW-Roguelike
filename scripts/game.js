@@ -6,7 +6,7 @@ BSWG.camVelLookBfr         = 0.22; // * viewport.w
 BSWG.lookRange             = 45.0;
 BSWG.grabSpeed             = 2.75;
 BSWG.attractorRange        = 4.0;
-BSWG.attractorForce        = 2.5;
+BSWG.attractorForce        = 6.5;
 
 BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
@@ -1321,7 +1321,7 @@ BSWG.game = new function(){
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
             if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
-                if (!self.grabbedBlock && self.ccblock && (self.editMode || self.storeMode)) {
+                if (!self.grabbedBlock && self.ccblock && !self.editMode && self.storeMode) {
                     if (self.attractorOn && self.attractorOn.obj && self.attractorOn.obj.body && BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
                         var vec = mp.clone();
                         var vec2 = self.attractorOn.obj.body.GetWorldCenter();
