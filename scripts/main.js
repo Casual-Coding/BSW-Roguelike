@@ -144,6 +144,7 @@ var BSWG = new function(){
             'basicFragment',
             'basicFragment2',
             'exaustFragment',
+            'exaustFragmentShadow',
             'bgFragment',
             'bgFragment2',
             'fgFragment',

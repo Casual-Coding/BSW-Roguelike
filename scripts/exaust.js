@@ -44,9 +44,12 @@ BSWG.exaust = function (body, local, size, angle, z, palette) {
         this.mat.uniforms.clrm.value.copy(palette[1]);
         this.mat.uniforms.clro.value.copy(palette[2]);
         this.mat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
+        this.mat.__shadowMat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
         this.mesh = new THREE.Mesh(this.geom, this.mat);
         this.mesh.renderOrder = 1600.0;
         BSWG.render.scene.add(this.mesh);
+        this.smesh = new THREE.Mesh(this.geom, this.mat.__shadowMat);
+        BSWG.render.sceneS.add(this.smesh);
     }
 
     BSWG.exaustList.add(this);
@@ -59,16 +62,19 @@ BSWG.exaust.prototype.render = function (dt) {
 
     if (this.mat) {
         this.mat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
+        this.mat.__shadowMat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
     }
 
     if (this.mesh && this.body) {
         var wp = (this.body instanceof b2Vec2) ? this.body : BSWG.physics.localToWorld(this.local, this.body);
         var a = this.angle + (this.body.GetAngle ? this.body.GetAngle() : 0.0);
-
        
         this.mesh.position.set(wp.x, wp.y, this.z);
         this.mesh.rotation.set(0., 0., a, 'ZXY');
         this.mesh.scale.set(this.size * 15, this.size * 3.5, 1.);
+        this.smesh.position.set(wp.x, wp.y, this.z);
+        this.smesh.rotation.set(0., 0., a, 'ZXY');
+        this.smesh.scale.set(this.size * 15, this.size * 3.5, 1.);
 
         wp = null;
     }
@@ -80,6 +86,11 @@ BSWG.exaust.prototype.destroy = function () {
     if (this.mesh) {
         BSWG.render.scene.remove(this.mesh);
         this.mesh = null;
+    }
+
+    if (this.smesh) {
+        BSWG.render.scene.remove(this.smesh);
+        this.smesh = null;
     }
 
     if (this.mat) {
@@ -171,6 +182,12 @@ BSWG.exaustList = (new function () {
                 }
             }, THREE.NormalBlending, THREE.DoubleSide);
             this.mat[i].__used = false;
+            this.mat[i].__shadowMat = BSWG.render.newMaterial("basicVertex", "exaustFragmentShadow", {
+                extra: {
+                    type: 'v4',
+                    value: new THREE.Vector4(0, 0, 0, 0) // strength, time, ?, ?
+                }
+            }, THREE.NormalBlending, THREE.DoubleSide);
         }
 
     }
