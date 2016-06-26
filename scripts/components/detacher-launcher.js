@@ -76,6 +76,10 @@ BSWG.component_DetacherLauncher = {
             this.sound.stop();
             this.sound = null;
         }
+        if (this.exaust) {
+            this.exaust.remove();
+            this.exaust = null;
+        }
         this.meshObj.destroy();
         this.meshObj2.destroy();
         this.selMeshObj.destroy();
@@ -121,9 +125,25 @@ BSWG.component_DetacherLauncher = {
 
     update: function(dt) {
 
-        if (!this.sound) {
-            this.sound = new BSWG.soundSample();
-            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
+        if (this.fireT > 0.01) {
+            if (!this.sound) {
+                this.sound = new BSWG.soundSample();
+                this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
+            }
+            if (!this.exaust) {
+                this.exaust = new BSWG.exaust(this.obj.body, new b2Vec2(0.2 * this.size, 0.0), 0.5 * this.size, 0.0, 0.125, BSWG.exaustBlue);
+            }
+            this.exaust.strength = Math.clamp(Math.clamp(this.fireT-6,0,1)*3.0, 0, 1);
+        }
+        else {
+            if (this.sound) {
+                this.sound.stop();
+                this.sound = null;
+            }
+            if (this.exaust) {
+                this.exaust.remove();
+                this.exaust = null;
+            }
         }
 
         if (this.dispKeys) {
@@ -142,7 +162,7 @@ BSWG.component_DetacherLauncher = {
             var T = Math.clamp(this.fireT - 6, 0.0, 0.3);
 
             if (T > 0.01) {
-                BSWG.render.boom.palette = chadaboom3D.blue_bright;
+                /*BSWG.render.boom.palette = chadaboom3D.blue_bright;
                 BSWG.render.boom.add(
                     p.particleWrap(0.025),
                     1.0*T*5.0*this.size,
@@ -152,7 +172,7 @@ BSWG.component_DetacherLauncher = {
                     v.THREE(Math._random()*2.0),
                     null,
                     false
-                );
+                );*/
                 var a = this.obj.body.GetAngle() + Math.PI;
                 var accel = 20.0 * [1,3,7][this.size-1];
                 this.obj.body.SetAwake(true);
@@ -166,8 +186,10 @@ BSWG.component_DetacherLauncher = {
         else
             this.fireT = 0.0;
 
-        this.sound.volume(Math.clamp(this.fireT-6,0,1) * (this.size/2) * 3.25);
-        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        if (this.sound) {
+            this.sound.volume(Math.clamp(this.fireT-6,0,1) * (this.size/2) * 3.25);
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        }
     },
 
     handleInput: function(keys) {

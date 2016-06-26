@@ -1150,7 +1150,7 @@ BSWG.control_CompPalette = {
 
                 var B = this.buttons[i];
 
-                if (mx >= B.x && my >= B.y && mx < (B.x + B.w) && my < (B.y + B.h) && !BSWG.game.grabbedBlock)
+                if (mx >= B.x && my >= B.y && mx < (B.x + B.w) && my < (B.y + B.h) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
                     B.mouseIn = true;
                 else
                     B.mouseIn = false;
@@ -1161,12 +1161,12 @@ BSWG.control_CompPalette = {
                     }
                 }
 
-                if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock)
+                if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
                 {
                     this.clickInner(this, B);
                 }
 
-                B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock;
+                B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
 
             }
 
@@ -1424,17 +1424,17 @@ BSWG.uiControl = function (desc, args) {
             mx += this.w * 0.5;
         }
 
-        if (mx >= this.p.x && my >= this.p.y && mx < (this.p.x + this.w) && my < (this.p.y + this.h) && !BSWG.game.grabbedBlock)
+        if (mx >= this.p.x && my >= this.p.y && mx < (this.p.x + this.w) && my < (this.p.y + this.h) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
             this.mouseIn = true;
         else
             this.mouseIn = false;
 
-        if (this.click && ((this.mouseIn && BSWG.input.MOUSE_RELEASED('left')) || (this.clickKey && BSWG.input.KEY_PRESSED(this.clickKey))) && !BSWG.game.grabbedBlock)
+        if (this.click && ((this.mouseIn && BSWG.input.MOUSE_RELEASED('left')) || (this.clickKey && BSWG.input.KEY_PRESSED(this.clickKey))) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
         {
             this.click(this);
         }
 
-        this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock;
+        this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
 
         this.update();
 

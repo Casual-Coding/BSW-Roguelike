@@ -48,6 +48,10 @@ BSWG.component_Missile = {
             this.sound.stop();
             this.sound = null;
         }
+        if (this.exaust) {
+            this.exaust.remove();
+            this.exaust = null;
+        }
         this.meshObj.destroy();
         this.meshObj = null;
 
@@ -70,6 +74,11 @@ BSWG.component_Missile = {
             this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+1.5/this.size, true);
         }
 
+        if (!this.exaust) {
+            this.exaust = new BSWG.exaust(this.obj.body, new b2Vec2(0.15, 0.0), 0.35, 0, 0.05, BSWG.exaustFire);
+        }
+        this.exaust.strength = Math.clamp(this.fireT*3.0, 0, 1);
+
         if (this.fireT > 0 && (this.obj.body.__lastForce||0.0) < 0.01 && !this.nextDestroy) {
 
             var p = Math.rotVec2(new b2Vec2(this.size * 0.6, 0.0));
@@ -82,7 +91,7 @@ BSWG.component_Missile = {
             var T = Math.clamp(this.fireT, 0.0, 0.3);
 
             if (T > 0.01) {
-                BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                /*BSWG.render.boom.palette = chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
                     p.particleWrap(0.025),
                     1.0*T*4.0*this.size,
@@ -90,7 +99,7 @@ BSWG.component_Missile = {
                     0.7*T*1.25,
                     4.0,
                     v.THREE(Math._random()*2.0)
-                );
+                );*/
                 var a = this.obj.body.GetAngle() + Math.PI;
                 var accel = 3.75 * [1,3,7][this.size-1];
                 this.obj.body.SetAwake(true);

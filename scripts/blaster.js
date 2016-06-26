@@ -4,6 +4,13 @@ BSWG.blasterList = new function () {
 
     this.list = [];
     this.clear = function () {
+        while (this.list.length > 0) {
+            if (this.list[0].exaust) {
+                this.list[0].exaust.remove();
+                this.list[0].exaust = null;
+            }
+            this.list.splice(0, 1);
+        }
         this.list.length = 0;
     };
 
@@ -56,6 +63,10 @@ BSWG.blasterList = new function () {
                         );
                     }
                     B.source = null;
+                    if (B.exaust) {
+                        B.exaust.remove();
+                        B.exaust = null;
+                    }
                     this.list.splice(i, 1);
                     i -= 1;
                     continue;
@@ -66,7 +77,14 @@ BSWG.blasterList = new function () {
 
             var p = cam.toScreen(BSWG.render.viewport, B.p);
 
-            BSWG.render.boom.palette = chadaboom3D.blue_bright;
+            if (!B.exaust) {
+                B.exaust = new BSWG.exaust(B.p, null, 0.25, 0, 0.05, BSWG.exaustBlue);
+            }
+
+            B.exaust.strength = Math.clamp(t * 3.0, 0., 1.);
+            B.exaust.angle = Math.atan2(B.p.y - oy, B.p.x - ox) + Math.PI;
+
+            /*BSWG.render.boom.palette = chadaboom3D.blue_bright;
             BSWG.render.boom.add(
                 new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
                 1.5,
@@ -74,7 +92,7 @@ BSWG.blasterList = new function () {
                 0.125,
                 1.5,
                 new b2Vec2(B.v.x*0.85, B.v.y*0.85).THREE(0.0)
-            );
+            );*/
 
             /*ctx.lineWidth = 2.5;
             ctx.globalAlpha = t * 0.75;

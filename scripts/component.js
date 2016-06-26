@@ -1193,16 +1193,7 @@ BSWG.componentList = new function () {
 
     this.update = function (dt) {
 
-        for (var key in this.hash) {
-            var list = this.hash[key];
-            for (var i=0; i<list.length; i++) {
-                list[i] = null;
-            }
-            list.length = 0;
-            list = null;
-            this.hash[key] = null;
-            delete this.hash[key];
-        }
+        this.hash = {};
 
         this.playerComps.length = 0;
 
@@ -1751,7 +1742,7 @@ BSWG.componentList = new function () {
     };
 
     this.autoWelds = null;
-    this.load = function(obj, spawn, noArch, archRadCheck, timeCheck) {
+    this.load = function(obj, spawn, noArch, archRadCheck, timeCheck, noCheck) {
 
         var comps = obj.list;
         var cc = null;
@@ -1790,7 +1781,7 @@ BSWG.componentList = new function () {
                     }
                 }
             }
-            else {
+            else if (!noCheck) {
                 if (this.withinRadius(pos, 6, true).length) {
                     return null;
                 }               

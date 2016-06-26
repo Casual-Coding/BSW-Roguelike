@@ -419,6 +419,7 @@ BSWG.game = new function(){
         BSWG.ai.init();
         BSWG.xpDisplay.clear();
         BSWG.render.weather.clear();
+        BSWG.exaustList.init();
         
         this.aiBtn = null;
 
@@ -669,7 +670,7 @@ BSWG.game = new function(){
                 if (args.load) {
                     this.map = BSWG.genMap(args.load.map);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
-                    this.ccblock = BSWG.componentList.load(args.load.comp);
+                    this.ccblock = BSWG.componentList.load(args.load.comp, null, null, null, null, true);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
                     this.cam.y = p.y;
@@ -1320,8 +1321,8 @@ BSWG.game = new function(){
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
             if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
-                if (!self.grabbedBlock && self.ccblock && (self.editMode || self.storeMode) && !BSWG.ui.mouseBlock) {
-                    if (self.attractorOn && self.attractorOn.obj && self.attractorOn.obj.body && BSWG.input.MOUSE('left')) {
+                if (!self.grabbedBlock && self.ccblock && (self.editMode || self.storeMode)) {
+                    if (self.attractorOn && self.attractorOn.obj && self.attractorOn.obj.body && BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
                         var vec = mp.clone();
                         var vec2 = self.attractorOn.obj.body.GetWorldCenter();
                         vec.x -= vec2.x;
@@ -1606,6 +1607,7 @@ BSWG.game = new function(){
             BSWG.render.boom.render(dt);
             BSWG.render.weather.render(dt);
             BSWG.xpDisplay.updateRender(ctx, self.cam, dt);
+            BSWG.exaustList.render(dt);
 
             if (self.tileMap) {
                 self.tileMap.update(dt);

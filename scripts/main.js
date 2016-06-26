@@ -23,6 +23,7 @@ var BSWG = new function(){
         'sounds.js',
         'xpdisplay.js',
         'weather.js',
+        'exaust.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
@@ -142,6 +143,7 @@ var BSWG = new function(){
         'fragment': [
             'basicFragment',
             'basicFragment2',
+            'exaustFragment',
             'bgFragment',
             'bgFragment2',
             'fgFragment',

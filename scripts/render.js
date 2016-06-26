@@ -125,6 +125,16 @@ BSWG.initCanvasContext = function(ctx) {
             return;
         }
 
+        text = '' + text;
+
+        ctx.lineWidth = 3.5;
+        if (!noBorder) {
+            ctx.strokeText(text, x, y);
+        }
+        ctx.fillText(text, x, y);
+        
+        return;
+
         var widths = new Array(text.length);
         var total = 0.0;
         for (var i=0; i<widths.length; i++) {

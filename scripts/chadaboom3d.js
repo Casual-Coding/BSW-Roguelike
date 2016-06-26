@@ -163,10 +163,10 @@ chadaboom3D.prototype.init = function () {
     this.mat = BSWG.render.newMaterial("expVertex", "expFragment", uniforms, THREE.AdditiveBlending);
     this.mat.depthWrite = false;
 
-    this.mat.blending = THREE.CustomBlending;
+    /*this.mat.blending = THREE.CustomBlending;
     this.mat.blendSrc = THREE.SrcAlphaFactor;
     this.mat.blendDst = THREE.OneMinusSrcAlphaFactor;
-    this.mat.blendEquation = THREE.AddEquation;
+    this.mat.blendEquation = THREE.AddEquation;*/
 
     mesh = new THREE.Mesh( geom, this.mat );
     mesh.frustumCulled = false;

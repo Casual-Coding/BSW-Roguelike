@@ -72,6 +72,10 @@ BSWG.component_Thruster = {
             this.sound.stop();
             this.sound = null;
         }
+        if (this.exaust) {
+            this.exaust.remove();
+            this.exaust = null;
+        }
         this.meshObj.destroy();
         this.selMeshObj.destroy();
         this.meshObj = null;
@@ -88,9 +92,25 @@ BSWG.component_Thruster = {
 
     update: function(dt) {
 
-        if (!this.sound) {
-            this.sound = new BSWG.soundSample();
-            this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+0.5/this.size, true);
+        if (this.onCC) {
+            if (!this.sound) {
+                this.sound = new BSWG.soundSample();
+                this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+0.5/this.size, true);
+            }
+            if (!this.exaust) {
+                this.exaust = new BSWG.exaust(this.obj.body, new b2Vec2(0.0, -0.2 * this.size), 0.5 * this.size, -Math.PI*0.5, 0.125, BSWG.exaustFire);
+            }
+            this.exaust.strength = Math.clamp(this.soundT*7.0, 0, 1);
+        }
+        else {
+            if (this.sound) {
+                this.sound.stop();
+                this.sound = null;
+            }
+            if (this.exaust) {
+                this.exaust.remove();
+                this.exaust = null;
+            }
         }
 
         if (this.dispKeys) {
@@ -98,9 +118,10 @@ BSWG.component_Thruster = {
             this.dispKeys['thrust'][2] = BSWG.input.KEY_DOWN(this.thrustKey);
         }
 
+
         if (this.thrustT > 0) {
 
-            var p = Math.rotVec2(new b2Vec2(0.0, -0.55 * this.size));
+            /*var p = Math.rotVec2(new b2Vec2(0.0, -0.55 * this.size));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);
             var a = this.obj.body.GetAngle() + Math.PI/2.0 + Math._random()*Math.PI/8.0 - Math.PI/16.0;
             v.x -= Math.cos(a) * 6 * this.size;
@@ -117,7 +138,7 @@ BSWG.component_Thruster = {
                 v.THREE(Math._random()*2.0)
             );
 
-            p = v = null;
+            p = v = null;*/
 
             this.thrustT -= dt;
 
@@ -127,8 +148,10 @@ BSWG.component_Thruster = {
 
         this.soundT += (this.thrustT - this.soundT) * dt * 4.0;
 
-        this.sound.volume(Math.clamp(this.soundT,0,1) * (this.size/2) * 2.0);
-        this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        if (this.sound) {
+            this.sound.volume(Math.clamp(this.soundT,0,1) * (this.size/2) * 2.0);
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        }
 
     },
 
