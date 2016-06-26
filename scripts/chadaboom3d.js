@@ -77,8 +77,8 @@ chadaboom3D.prototype.init = function () {
 
     this.hasInit = true;
 
-    this.MAX_PRT = 1024 * 64;
-    this.MPT = 1024 * 48;
+    this.MAX_PRT = 1024 * 24;
+    this.MPT = 1024 * 16;
     // 0: startPosition.x
     // 1: startPosition.y
     // 2: startPosition.z
