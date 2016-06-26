@@ -711,6 +711,7 @@ BSWG.render = new function() {
 
             self.ctx.restore();
 
+
             self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
 
