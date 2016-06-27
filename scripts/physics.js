@@ -1,7 +1,7 @@
 // BlockShip Wars Physics
 
-BSWG.hitDmg  = 0.01;
-BSWG.meleDmg = 4.5;
+BSWG.hitDmg  = 0.001;
+BSWG.meleDmg = 30.0;
 BSWG.meleDef = 10.0;
 
 BSWG.physics = new function(){

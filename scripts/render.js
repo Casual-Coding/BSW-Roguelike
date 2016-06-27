@@ -626,11 +626,11 @@ BSWG.render = new function() {
             last60dt[l60ptr] = self.actualDt;
             l60ptr = (l60ptr+1) % last60dt.length;
 
-            var avg = 1/60.0;
+            var avg = 0.0;
             for (var i=0; i<last60dt.length; i++) {
                 avg += last60dt[i];
             }
-            avg /= last60dt.length + 1;
+            avg /= last60dt.length;
 
             var targetDt = 1/(Math.round((1/avg)/5)*5);
             sumDt += self.actualDt;
