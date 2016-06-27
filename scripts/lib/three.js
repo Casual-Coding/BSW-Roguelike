@@ -25708,7 +25708,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		var materialDefaultAttributeValues = material.defaultAttributeValues;
 
-		for ( var name in programAttributes ) {
+        var keys = Object.keys(programAttributes);
+
+        for ( var i = 0; i < keys.length; i++ ) {
+
+            var name = keys[i];
 
 			var programAttribute = programAttributes[ name ];
 
@@ -28966,8 +28970,10 @@ THREE.WebGLObjects = function ( gl, properties, info ) {
 
 		}
 
-		for ( var name in attributes ) {
+        var keys = Object.keys(attributes);
+        for ( var i = 0; i < keys.length; i++ ) {
 
+        	var name = keys[i];
 			updateAttribute( attributes[ name ], gl.ARRAY_BUFFER );
 
 		}
@@ -28976,8 +28982,10 @@ THREE.WebGLObjects = function ( gl, properties, info ) {
 
 		var morphAttributes = geometry.morphAttributes;
 
-		for ( var name in morphAttributes ) {
+		var keys = Object.keys(morphAttributes);
+        for ( var i = 0; i < keys.length; i++ ) {
 
+        	var name = keys[i];
 			var array = morphAttributes[ name ];
 
 			for ( var i = 0, l = array.length; i < l; i ++ ) {

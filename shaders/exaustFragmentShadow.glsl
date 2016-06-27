@@ -34,8 +34,8 @@ void main() {
     float a = mod(z, 1.0);
     float b = mod(floor(z)/256.0, 1.0);
     float c = floor(z/256.0)/256.0;
-    gl_FragColor = clamp(vec4(c, b, a, clamp(str*0.4, 0., 1.)*0.5), 0., 1.);
-    if (gl_FragColor.a < 0.01) {
+    gl_FragColor = clamp(vec4(c, b, a, clamp(str*0.275, 0., 1.)*0.5), 0., 1.);
+    if (gl_FragColor.a < 0.1) {
         discard;
     }
 

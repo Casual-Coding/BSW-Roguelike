@@ -104,7 +104,9 @@ BSWG.updateOnCC = function () {
         n.onCC = cc;
 
         if (n.welds) {
-            for (var key in n.welds) {
+            var keys = Object.keys(n.welds);
+            for (var i=0; i<keys.length; i++) {
+                var key = keys[i];
                 if (n.welds[key]) {
                     mark(n.welds[key].other, cc, u);
                 }
