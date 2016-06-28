@@ -652,6 +652,7 @@ BSWG.render = new function() {
             if (self.renderCbk) {
                 self.ctx.save();
                 self.renderCbk(self.dt, self.time, self.ctx);
+                self.checkCanvas();
                 self.ctx.restore();
             }
 
@@ -710,6 +711,7 @@ BSWG.render = new function() {
 
             Math.random = tmp;
 
+            self.checkCanvas();
             self.ctx.restore();
 
 
@@ -717,6 +719,17 @@ BSWG.render = new function() {
         };
 
         self.animFrameID = window.requestAnimationFrame(renderFrame);
+    };
+
+    this.checkCanvas = function () {
+
+        /*for (var key in this.ctx) {
+            var value = this.ctx[key];
+            if (!isFinite(value) && (typeof value) !== 'function') {
+                console.log(key + ': ' + value);
+            }
+        }*/
+
     };
 
     this.updateCam3D = function ( cam, offset ) {
@@ -917,12 +930,17 @@ BSWG.render = new function() {
                 font:           this.font3D,
                 size:           4,
                 height:         (depth/size)*4,
-                curveSegments:  lowDetial ? 2 : 12,
+                curveSegments:  lowDetial ? 2 : 4,
                 bevelEnabled:   true,
                 bevelThickness: 4 * 0.05,
                 bevelSize:      4 * 0.05
             }
         );
+
+        var bgeom = new THREE.BufferGeometry();
+        bgeom.fromGeometry(geom);
+        geom = bgeom;
+        bgeom = null;
 
         geom.computeBoundingBox();
         geom.computeFaceNormals();

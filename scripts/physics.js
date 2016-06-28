@@ -7,8 +7,8 @@ BSWG.meleDef = 10.0;
 BSWG.physics = new function(){
 
     this.physicsDT          = 1.0/60.0; // not used
-    this.positionIterations = 32;
-    this.velocityIterations = 32;
+    this.positionIterations = 48;
+    this.velocityIterations = 48;
     this.world              = null;
     this.maxWeldForce       = 15000.0;
     this.welds              = [];

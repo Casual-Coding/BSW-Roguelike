@@ -11,7 +11,7 @@ uniform vec4 envMapTint, envMapParam;
 void main() {
 
     if ((vAttr1.x+0.0001) > density || length(vUv) > 0.5) {
-        gl_FragColor.a = 0.0;
+        discard;
     }
     else {
         gl_FragColor = color;

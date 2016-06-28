@@ -338,6 +338,11 @@ BSWG.component = function (desc, args) {
 
     BSWG.componentList.add(this);
 
+    this.cacheJPW();
+    this.updateJCache();
+    this.baseUpdate(1/60);
+    this.update(1/60);
+
 };
 
 BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
@@ -501,6 +506,7 @@ BSWG.component.prototype.remove = function() {
 
 BSWG.component.prototype.removeSafe = function() {
 
+    this.removing = true;
     BSWG.componentList.compRemove.push(this);
 
 };
