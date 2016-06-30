@@ -9,13 +9,14 @@ var getNW = function (run, dbg) {
 
     var files = [ 'package.json', 'index.html', 'scripts/**', 'shaders/*', 'images/*', 'fonts/*', 'css/*', 'sounds/*', 'music/*' ];
 
-    files.push('node_modules/lowdb/**');
-    files.push('node_modules/open/**');
+    //files.push('node_modules/lowdb/**');
+    //files.push('node_modules/open/**');
 
     var nw = new NwBuilder({
         version: '0.16.0-beta2',
         files: glob(files),
-        platforms: run ? (dbg ? ['win64dbg'] : ['win64']) : ['win64', 'osx64', 'linux64'] // change this to 'win' for/on windows
+        platforms: run ? (dbg ? ['win64dbg'] : ['win64']) : ['win64', 'osx64'/*, 'linux64'*/ ], // change this to 'win' for/on windows
+        zip: true
     });
 
     // Log stuff you want

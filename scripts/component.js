@@ -293,6 +293,7 @@ BSWG.component = function (desc, args) {
     this.welds = {};
     this.onCC = null;
     this.tag = BSWG.generateTag();
+    this.__if = new Map();
     if (this.type === 'cc') {
         this.onCC = this;
     }

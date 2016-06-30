@@ -1,14 +1,14 @@
 // BlockShip Wars Physics
 
-BSWG.hitDmg  = 0.001;
-BSWG.meleDmg = 30.0;
-BSWG.meleDef = 10.0;
+BSWG.hitDmg  = 0.00035;
+BSWG.meleDmg = 75.0;
+BSWG.meleDef = 100.0;
 
 BSWG.physics = new function(){
 
-    this.physicsDT          = 1.0/60.0; // not used
-    this.positionIterations = 48;
-    this.velocityIterations = 48;
+    this.physicsDT          = 1.0/60.0;
+    this.positionIterations = 16;
+    this.velocityIterations = 16;
     this.world              = null;
     this.maxWeldForce       = 15000.0;
     this.welds              = [];
@@ -53,7 +53,7 @@ BSWG.physics = new function(){
         this.world = new b2World( new b2Vec2(0.0, 0.0) );
         this.ground = this.world.CreateBody(new b2BodyDef());
         this.chandler = new b2ContactListener();
-        this.chandler.PreSolve = this.collisionCallbackPre;
+        //this.chandler.PreSolve = this.collisionCallbackPre;
         this.chandler.PostSolve = this.collisionCallback;
         this.world.SetContactListener(this.chandler);
 
@@ -583,12 +583,9 @@ BSWG.physics = new function(){
     this.reset = function (){
 
         for (var i=0; i<this.scrapes.length; i++) {
-            this.scrapes[i].a.stop();
-            this.scrapes[i].b.stop();
-            this.scrapes[i].a = null;
-            this.scrapes[i].b = null;
-            delete this.scrapes[i].a;
-            delete this.scrapes[i].b;
+            this.scrapes[i].s.stop();
+            this.scrapes[i].s = null;
+            delete this.scrapes[i].s;
             this.scrapes[i] = null;
         }
         this.scrapes = [];
@@ -613,6 +610,8 @@ BSWG.physics = new function(){
     this.lastDT = 1.0/60.0;
 
     this.framen = 0;
+
+    this.dtACC = 0.0;
 
     this.update = function (dt){
 
@@ -647,7 +646,98 @@ BSWG.physics = new function(){
             this.welds[i].age += 1;
         }
 
-        this.world.Step(dt, this.positionIterations, this.velocityIterations);
+        this.physicsDT = dt;
+        //this.dtACC += dt;
+        //var count = Math.floor(this.dtACC / this.physicsDT);
+        //while (this.dtACC >= this.physicsDT) {
+        this.world.Step(this.physicsDT, this.positionIterations, this.velocityIterations);
+        //    this.dtACC -= this.physicsDT;
+        //}
+
+        if (!(this.framen % 3)) {
+
+            var CL = BSWG.componentList.compList;
+            var len = CL.length;
+            var keys = null;
+            var M = new Map();
+            for (var i=0; i<len; i++) {
+                var C = CL[i];
+                M.set(C.id, C);
+            }
+            for (var i=0; i<len; i++) {
+                var C = CL[i];
+                if (!C.__hs) {
+                    C.__hs = new Map();
+                }
+                if (!C.__if) {
+                    C.__if = new Map();
+                }
+                if (C.obj && C.obj.body && C.__if) {
+                    for (var [K, V] of C.__if.entries()) {
+                        var forceMe = V.f;
+                        var cp = V.p;
+                        if (forceMe > 0.5) {
+                            var ba = C.obj.body;
+                            if (M.has(K)) {
+                                var CB = M.get(K);
+                                var bb = CB.obj ? CB.obj.body : null;
+                                if (bb) {
+                                    C.takeDamage(forceMe * (ba.__mele ? 1/BSWG.meleDef : 1) * (bb.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, CB);
+                                    if (Math._random() < 1/2) {
+                                        var a = Math._random() * Math.PI * 2.0;
+                                        var v = ba.GetLinearVelocityFromWorldPoint(cp);
+                                        BSWG.render.boom.palette = chadaboom3D.fire_bright;
+                                        BSWG.render.boom.add(
+                                            cp.particleWrap(0.0),
+                                            0.35*Math.pow(forceMe, 0.125),
+                                            32,
+                                            0.1*Math.pow(forceMe, 0.33),
+                                            4.0,
+                                            new b2Vec2(Math.cos(a)*forceMe*0.005+v.x, Math.sin(a)*forceMe*0.005+v.y).THREE(Math._random()*3.0)
+                                        );
+                                        v = null;
+                                    }                                
+                                }
+                            }
+                        }
+                        if (C.obj && C.obj.body) {
+                            if (!C.__hs.has(K)) {
+                                var S = {
+                                    s: new BSWG.soundSample(),
+                                    lframe: this.framen,
+                                    v: Math.clamp(forceMe / 2, 0, 1.75)*0.8/3,
+                                    r: (0.35 / (C.obj.body.GetMass() / 2.5)) / 2.0,
+                                    lp: cp.THREE(0.2),
+                                    K: K,
+                                    C: C
+                                };
+                                S.s.play('scrape', S.lp, S.v, S.r, true);
+                                new BSWG.soundSample().play('bump', S.lp, S.v/1.5, S.r);
+                                this.scrapes.push(S);
+                                C.__hs.set(K, S);
+                                S = null;
+                            }
+                            else {
+                                S = C.__hs.get(K);
+                                S.lframe = this.framen;
+                                S.v = Math.clamp(forceMe / 2, 0, 1.75)*0.8/3;
+                                S.r = (0.35 / (C.obj.body.GetMass() / 2.5)) / 2.0;
+                                S.lp.set(cp.x, cp.y, 0.2);
+                                S.s.volume(S.v);
+                                S.s.rate(S.r);
+                                S.s.position(S.lp);
+                                p = null;
+                                S = null;
+                            }
+                        }
+                    }
+                }
+                C.__if.clear();
+            }
+            M = CL = null;
+
+        }
+
         this.world.ClearForces();
         this.updateMouseDrag();
 
@@ -659,21 +749,21 @@ BSWG.physics = new function(){
 
         for (var i=0; i<this.scrapes.length; i++) {
             var S = this.scrapes[i];
-            if ((S.lframe + 2) < this.framen) {
-                S.a.stop();
-                S.b.stop();
-                S.a = null;
-                S.b = null;
+            if ((S.lframe + 3) < this.framen) {
+                S.s.stop();
+                S.s = null;
                 S.lp = null;
                 delete S.lp;
-                delete S.a;
-                delete S.b;
+                delete S.s;
                 delete S.lframe;
-                var contact = S.parent;
-                contact._sound = null;
-                delete contact._sound;
-                S.parent = null;
-                delete S.parent;
+                var C = S.C;
+                var K = S.K;
+                delete S.C;
+                delete S.K;
+                if (C.__hs) {
+                    C.__hs.delete(K);
+                }
+                C = K = null;
                 this.scrapes[i] = null;
                 this.scrapes.splice(i, 1);
             }
@@ -686,108 +776,64 @@ BSWG.physics = new function(){
 
     var wm = null;
 
-    this.collisionCallbackPre = function(contact) {
+    /*this.collisionCallbackPre = function(contact) {
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
         ba.__lastForce = 0;
         bb.__lastForce = 0;
         ba = bb = contact = null;
-    }
+    }*/
 
     var self = this;
 
     this.collisionCallback = function(contact, _impulse) {
 
-        var impulse = 0;
-        for (var i=0; i<_impulse.normalImpulses.length; i++) {
-            impulse = Math.max(impulse, _impulse.normalImpulses[i]);
-        }
-
-        if (!wm) {
-             wm = new b2WorldManifold();
-        }
-
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
-        contact.GetWorldManifold(wm);
-        var p = wm.m_points[0];
-        var ta = ba.GetLinearVelocityFromWorldPoint(p);
-        var tb = bb.GetLinearVelocityFromWorldPoint(p);
 
-        var ma = ba.GetMass(), mb = bb.GetMass();
+        if (ba.__comp && bb.__comp) {
 
-        var forceA = impulse / self.lastDT;
-        var forceB = impulse / self.lastDT;
-
-        var p3 = p.THREE(0.2);
-        var S = contact._sound || null;
-        var newSound = !S;
-
-        if (newSound) {
-            S = contact._sound = {
-                a: new BSWG.soundSample(),
-                b: new BSWG.soundSample(),
-                lframe: self.framen,
-                parent: contact,
-                va: 0, vb: 0, ra: 0, rb: 0, lp: p3
+            var impulse = 0;
+            for (var i=0; i<_impulse.normalImpulses.length; i++) {
+                impulse = Math.max(impulse, _impulse.normalImpulses[i]);
             }
-            S.a.play('scrape', p3, 1.0, 1.0, true);
-            S.b.play('scrape', p3, 1.0, 1.0, true);
-            self.scrapes.push(S);
+
+            var forceA = impulse / self.physicsDT;
+            var forceB = impulse / self.physicsDT;
+
+            if (!wm) { wm = new b2WorldManifold(); }
+            contact.GetWorldManifold(wm);
+            var p = wm.m_points[0].clone();
+
+            var A = ba.__comp, B = bb.__comp;
+            if (!A.__if) { A.__if = new Map(); }
+            if (!B.__if) { B.__if = new Map(); }
+            if (!A.__if.has(B.id)) {
+                A.__if.set(B.id, {
+                    f: forceA,
+                    p: p
+                });
+            }
+            else {
+                var t = A.__if.get(B.id);
+                t.f += forceA;
+                t.p = p;
+            }
+            if (!B.__if.has(A.id)) {
+                B.__if.set(A.id, {
+                    f: forceB,
+                    p: p
+                });
+            }
+            else {
+                var t = B.__if.get(A.id);
+                t.f += forceB;
+                t.p = p;
+            }
         }
 
-        if (S.a && S.b) {
-            S.a.volume((S.va = Math.clamp(forceA / 2, 0, 1.75))*0.8);
-            S.b.volume((S.vb = Math.clamp(forceB / 2, 0, 1.75))*0.8);
-            S.a.rate((S.ra = 0.35 / (ma / 2.5)) / 2.0);
-            S.b.rate((S.rb = 0.35 / (mb / 2.5)) / 2.0);
-            S.a.position(p3);
-            S.b.position(p3);
-        }
-        S.lframe = self.framen;
-        S.lp.set(p3.x, p3.y, p3.z);
-
-        if (newSound) {
-            new BSWG.soundSample().play('bump', S.lp, S.va/1.5, S.ra);
-            new BSWG.soundSample().play('bump', S.lp, S.vb/1.5, S.rb);               
-        }
-
-        p3 = null;
-        S = null;
-
-        var tforce = forceA + forceB;
-
-        ba.__lastForce += forceA;
-        bb.__lastForce += forceB;
         ba.__lastHit = bb;
         bb.__lastHit = ba;
-
-        if (tforce > 1.0) {
-
-            if (ba.__comp && bb.__comp) {
-                ba.__comp.takeDamage(forceA * (ba.__mele ? 1/BSWG.meleDef : 1)
-                                            * (bb.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, bb.__comp);
-                bb.__comp.takeDamage(forceB * (bb.__mele ? 1/BSWG.meleDef : 1)
-                                            * (ba.__mele ? BSWG.meleDmg : 1) * BSWG.hitDmg, ba.__comp);
-            }
-
-            if (Math._random() < 1/2) {
-                var a = Math._random() * Math.PI * 2.0;
-                var v = [ta, tb][Math.floor(Math._random()*10000) % 2];
-                BSWG.render.boom.palette = chadaboom3D.fire_bright;
-                BSWG.render.boom.add(
-                    p.particleWrap(0.0),
-                    0.35*Math.pow(tforce, 0.125),
-                    32,
-                    0.1*Math.pow(tforce, 0.33),
-                    4.0,
-                    new b2Vec2(Math.cos(a)*tforce*0.005+v.x, Math.sin(a)*tforce*0.005+v.y).THREE(Math._random()*3.0)
-                );
-                v = null;
-            }
-        }
-
-        ta = tb = ba = bb = contact = null;
 
     };
 
