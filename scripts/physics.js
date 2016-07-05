@@ -7,8 +7,8 @@ BSWG.meleDef = 100.0;
 BSWG.physics = new function(){
 
     this.physicsDT          = 1.0/60.0;
-    this.positionIterations = 16;
-    this.velocityIterations = 16;
+    this.positionIterations = 32;
+    this.velocityIterations = 12;
     this.world              = null;
     this.maxWeldForce       = 15000.0;
     this.welds              = [];
@@ -711,6 +711,7 @@ BSWG.physics = new function(){
                                     K: K,
                                     C: C
                                 };
+                                S.v = Math.min(S.v, 1/S.r);
                                 S.s.play('scrape', S.lp, S.v, S.r, true);
                                 new BSWG.soundSample().play('bump', S.lp, S.v/1.5, S.r);
                                 this.scrapes.push(S);
@@ -722,6 +723,7 @@ BSWG.physics = new function(){
                                 S.lframe = this.framen;
                                 S.v = Math.clamp(forceMe / 2, 0, 1.75)*0.8/3;
                                 S.r = (0.35 / (C.obj.body.GetMass() / 2.5)) / 2.0;
+                                S.v = Math.min(S.v, 1/S.r);
                                 S.lp.set(cp.x, cp.y, 0.2);
                                 S.s.volume(S.v);
                                 S.s.rate(S.r);
