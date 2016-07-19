@@ -736,6 +736,8 @@ BSWG.render = new function() {
     };
 
     this.addScreenShake = function(pos, size) {
+        if (!BSWG.game.battleMode && BSWG.game.editMode) {
+        }
         var dx = pos.x - this.cam3D.position.x,
             dy = pos.y - this.cam3D.position.y,
             dz = pos.z - this.cam3D.position.z;
