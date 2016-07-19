@@ -112,7 +112,13 @@ BSWG.orb.prototype.destroy = function () {
 
 BSWG.orb.prototype.updateRender = function (dt) {
 
-    this.time += dt * this.activeT;
+    var dt2 = dt;
+
+    if (BSWG.game.lastSave) {
+        dt2 *= Math.max(1, 1/(0.1 + (Date.timeStamp() - BSWG.game.lastSave) / 10.0));
+    }
+
+    this.time += dt2 * this.activeT;
     var z = Math.sin(this.time) * 0.5 + BSWG.orbZ;
 
     this.mesh.position.z  = z;
