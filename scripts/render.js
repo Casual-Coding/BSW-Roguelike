@@ -216,6 +216,7 @@ BSWG.render = new function() {
     this.resized = true;
     this.envMapTint = new THREE.Vector4(0,0,0,0);
     this.envMapParam = new THREE.Vector4(0,0,0,0);
+    this.screenShake = 0.0;
 
     var maxRes = null; //{ w: 1920, h: 1080 };
 
@@ -235,6 +236,7 @@ BSWG.render = new function() {
         }
         this.envMapTint.set(0,0,0,0);
         this.envMapParam.set(0,0,0,0);
+        this.screenShake = 0.0;
 
     };
 
@@ -714,6 +716,7 @@ BSWG.render = new function() {
             self.checkCanvas();
             self.ctx.restore();
 
+            self.screenShake -= Math.min(self.dt * 2.0, 1) * self.screenShake;
 
             self.animFrameID = window.requestAnimationFrame(renderFrame);
         };
@@ -732,6 +735,14 @@ BSWG.render = new function() {
 
     };
 
+    this.addScreenShake = function(pos, size) {
+        var dx = pos.x - this.cam3D.position.x,
+            dy = pos.y - this.cam3D.position.y,
+            dz = pos.z - this.cam3D.position.z;
+        var dist = (1 + Math.sqrt(dx*dx + dy*dy + dz*dz));
+        this.screenShake += size / dist;
+    };
+
     this.updateCam3D = function ( cam, offset ) {
         if (!offset) {
             offset = new b2Vec2(0, 0);
@@ -739,8 +750,11 @@ BSWG.render = new function() {
 
         if (cam) {
             var f = Math.min(this.viewport.h / this.viewport.w, this.viewport.w / this.viewport.h) * 0.54;
-            this.cam3D.position.set(cam.x+offset.x, cam.y+offset.y, f/cam.z);
-            this.cam3D.lookAt(new THREE.Vector3(cam.x, cam.y, 0.0));
+            var rx = (Math.random() - 0.5) * 0.5 * this.screenShake,
+                ry = (Math.random() - 0.5) * 0.5 * this.screenShake,
+                rz = 0; //(Math.random() - 0.5) * 0.1 * this.screenShake;
+            this.cam3D.position.set(cam.x+offset.x + rx, cam.y+offset.y + ry, f/cam.z + rz);
+            this.cam3D.lookAt(new THREE.Vector3(cam.x + rx, cam.y + ry, 0.0));
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld(true);

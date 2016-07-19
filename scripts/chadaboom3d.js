@@ -327,7 +327,7 @@ chadaboom3D.blue = 2;
 chadaboom3D.blue_bright = 3;
 chadaboom3D.green = 4;
 
-chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub, makeSound) {
+chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSub, makeSound, noShake) {
 
     if (!res || !life || !attack || !isFinite(res) || !isFinite(life) || ! isFinite(attack)) {
         return false;
@@ -397,6 +397,10 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
     var idx = this.particleIdx;
 
     var rot = Math._random() * Math.PI * 2.0;
+
+    if (size > 1 && makeSound && !noShake) {
+        BSWG.render.addScreenShake(pos, size*1.0);
+    }
 
     size *= 0.45;
 

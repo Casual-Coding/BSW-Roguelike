@@ -714,6 +714,7 @@ BSWG.physics = new function(){
                                 S.v = Math.min(S.v, 1/S.r);
                                 S.s.play('scrape', S.lp, S.v, S.r, true);
                                 new BSWG.soundSample().play('bump', S.lp, S.v/1.5, S.r);
+                                BSWG.render.addScreenShake(S.lp, S.v*C.obj.body.GetMass()*10.0);
                                 this.scrapes.push(S);
                                 C.__hs.set(K, S);
                                 S = null;

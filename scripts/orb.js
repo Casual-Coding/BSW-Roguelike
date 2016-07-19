@@ -119,7 +119,7 @@ BSWG.orb.prototype.updateRender = function (dt) {
     }
 
     this.time += dt2 * this.activeT;
-    var z = Math.sin(this.time) * 0.5 + BSWG.orbZ;
+    var z = Math.sin(this.time) * 1.0 + BSWG.orbZ - 0.5;
 
     this.mesh.position.z  = z;
     this.smesh.position.z = z;
@@ -155,7 +155,8 @@ BSWG.orb.prototype.updateRender = function (dt) {
                 2.0,
                 new THREE.Vector3(0, 0, 1),
                 null,
-                Math.random() < 0.05
+                Math.random() < 0.05,
+                true
             );
         }
 
