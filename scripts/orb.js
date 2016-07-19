@@ -2,7 +2,7 @@ BSWG.orbRes      = 3;
 BSWG.orbReflect  = 0.15;
 BSWG.orbZ        = -0.5 - 3.5;
 BSWG.orbScale    = 2.5;
-BSWG.orbZoneSize = 25.0;
+BSWG.orbZoneSize = 32.0;
 
 BSWG.orb = function (pos, zone) {
 
@@ -135,17 +135,17 @@ BSWG.orb.prototype.updateRender = function (dt) {
     this.active = false;
     if (Math.abs(this.pos.x - BSWG.game.cam.x) < 100 && Math.abs(this.pos.y - BSWG.game.cam.y) < 100 && !BSWG.game.battleMode) {
         for (var k=0; k<8; k++) {
-            /*var a = (this.time + Math.random() * dt) * 3.0;
+            var a = (this.time + Math.random() * dt) * 3.0;
             if (Math.random() < 0.5) {
                 a += Math.PI;
-            }*/
-            var a = Math.random() * Math.PI * 2.0;
+            }
+            //var a = Math.random() * Math.PI * 2.0;
             BSWG.render.boom.palette = chadaboom3D.green;
             BSWG.render.boom.add(
                 new b2Vec2(this.pos.x + Math.cos(a) * BSWG.orbZoneSize, this.pos.y + Math.sin(a) * BSWG.orbZoneSize).particleWrap(z + 3.5),
                 3.0 * (Math.random()*0.5 + 0.5),
                 64,
-                1,
+                0.6,
                 2.0,
                 new THREE.Vector3(0, 0, 1),
                 null,
@@ -185,6 +185,41 @@ BSWG.orbList = new (function(){
         this.list.push(orb);
         orb.addMesh();
         return orb;
+    };
+
+    this.atPlayer = function () {
+
+        var zone = BSWG.game.inZone || null;
+
+        if (zone) {
+            var orb = zone.orb;
+            if (orb && BSWG.game.ccblock && BSWG.game.ccblock.obj && BSWG.game.ccblock.obj.body) {
+                if (Math.distVec2(orb.pos, BSWG.game.ccblock.obj.body.GetWorldCenter()) < BSWG.orbZoneSize) {
+                    return orb;
+                }
+                else {
+                    return null;
+                }
+            }
+            else {
+                return null;
+            }
+        }
+
+        return null;
+
+    };
+
+    this.atSafe = function () {
+
+        var orb = this.atPlayer();
+        if (orb) {
+            return orb.active;
+        }
+        else {
+            return false;
+        }
+
     };
 
     this.remove = function (orb) {

@@ -1738,7 +1738,7 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1) {
+            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
                 if (!self.saveHealAdded) {
                     self.saveBtn.add();
                     self.saveHealAdded = true;
@@ -2101,13 +2101,16 @@ BSWG.game = new function(){
                     var zone = self.map.zones[i];
                     if (zone.discovered) {
                         var p = zone.p;
-                        ctx.fillStyle = '#000';
-                        ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
-                        ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
-                        ctx.fillStyle = '#ff0';
-                        ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
-                        ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
-                        ctx.globalAlpha = 1.0;                        
+                        var X = Math.floor(p.x), Y = Math.floor(p.y);
+                        if (self.map.disMap[X] && self.map.disMap[X][Y]) {
+                            ctx.fillStyle = '#000';
+                            ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
+                            ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
+                            ctx.fillStyle = '#ff0';
+                            ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
+                            ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
+                            ctx.globalAlpha = 1.0;
+                        }
                     }
                 }
 

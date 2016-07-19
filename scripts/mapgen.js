@@ -3,7 +3,7 @@ BSWG.map_minZoneEdgeDist = 20; // Minimum distance allowed from a zone center to
 BSWG.map_gridSize        = 24.0; // overwritte as BSWG.tileSizeWorld
 BSWG.map_flPlanetDist    = 0.9; // * size
 BSWG.map_minPlanetDist   = 60; // Minimum distance allowed between planets
-BSWG.map_planetSafeDist  = 3; // Size of zone surrounding planet
+BSWG.map_planetSafeDist  = 4; // Size of zone surrounding planet
 
 BSWG.enemySettings_compToStr = function (obj) {
     var str = obj.type;
@@ -783,6 +783,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             if (zone !== lastBattleZone) {
                 return 'escape';
             }
+            return null;
+        }
+
+        if (BSWG.orbList.atSafe()) {
             return null;
         }
 
