@@ -420,6 +420,7 @@ BSWG.game = new function(){
         BSWG.xpDisplay.clear();
         BSWG.render.weather.clear();
         BSWG.exaustList.init();
+        BSWG.orbList.init();
         
         this.aiBtn = null;
 
@@ -1608,6 +1609,7 @@ BSWG.game = new function(){
             BSWG.render.weather.render(dt);
             BSWG.xpDisplay.updateRender(ctx, self.cam, dt);
             BSWG.exaustList.render(dt);
+            BSWG.orbList.updateRender(dt);
 
             if (self.tileMap) {
                 self.tileMap.update(dt);
@@ -1805,13 +1807,13 @@ BSWG.game = new function(){
                     }
 
                     if (B.heat > 0 && (B.wet < 0 || desc.density < 0.3)) {
-                        desc.tint.x = Math.clamp(desc.tint.x + B.heat * 0.8, 0., 1.);
-                        desc.tint.y = Math.clamp(desc.tint.x + B.heat * 0.2, 0., 1.);
+                        desc.tint.x = Math.clamp(desc.tint.x + B.heat * 1.6, 0., 1.);
+                        desc.tint.y = Math.clamp(desc.tint.y + B.heat * 0.5, 0., 1.);
                     }
                     else {
                         desc.tint.x = Math.clamp(desc.tint.x + -B.heat, 0., 1.);
-                        desc.tint.y = Math.clamp(desc.tint.x + -B.heat, 0., 1.);
-                        desc.tint.z = Math.clamp(desc.tint.x + -B.heat, 0., 1.);
+                        desc.tint.y = Math.clamp(desc.tint.y + -B.heat, 0., 1.);
+                        desc.tint.z = Math.clamp(desc.tint.z + -B.heat, 0., 1.);
                         desc.tint.w *= (1 + B.heat) * 0.5 + 0.5;
                         desc.speed = 0.1;
                         desc.size *= 1.35;

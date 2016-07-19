@@ -27,7 +27,7 @@
   "dependencies": {
   },
   "js-flags": "",
-  "chromium-args": "--enable-gpu-debugging --enable-webgl-draft-extensions",
+  "chromium-args": "",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",

@@ -24,6 +24,7 @@ var BSWG = new function(){
         'xpdisplay.js',
         'weather.js',
         'exaust.js',
+        'orb.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/block.js',
