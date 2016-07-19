@@ -10,11 +10,13 @@ BSWG.orb = function (pos, zone) {
 
     this.zone = zone || null;
     this.pos = pos.clone();
+    this.activeT = 0.0;
+    this.active = false;
 
     this.mat = BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
         clr: {
             type: 'v4',
-            value: new THREE.Vector4(1.0, 1.0, 1.0, 1.0)
+            value: new THREE.Vector4(0.3, 1.0, 0.5, 1.0)
         },
         light: {
             type: 'v4',
@@ -105,12 +107,13 @@ BSWG.orb.prototype.destroy = function () {
     this.smat = null;
     this.mesh = null;
     this.smesh = null;
+    this.zone = null;
 };
 
 BSWG.orb.prototype.updateRender = function (dt) {
 
-    this.time += dt;
-    var z = Math.sin(dt) * 1 + BSWG.orbZ;
+    this.time += dt * this.activeT;
+    var z = Math.sin(this.time) * 0.5 + BSWG.orbZ;
 
     this.mesh.position.z  = z;
     this.smesh.position.z = z;
@@ -129,17 +132,19 @@ BSWG.orb.prototype.updateRender = function (dt) {
     this.mat.uniforms.light.value.y = lp.y;
     this.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
 
-    if (Math.abs(this.pos.x - BSWG.game.cam.x) < 100 && Math.abs(this.pos.y - BSWG.game.cam.y) < 100) {
+    this.active = false;
+    if (Math.abs(this.pos.x - BSWG.game.cam.x) < 100 && Math.abs(this.pos.y - BSWG.game.cam.y) < 100 && !BSWG.game.battleMode) {
         for (var k=0; k<8; k++) {
-            var a = (this.time + Math.random() * dt) * 3.0;
+            /*var a = (this.time + Math.random() * dt) * 3.0;
             if (Math.random() < 0.5) {
                 a += Math.PI;
-            }
+            }*/
+            var a = Math.random() * Math.PI * 2.0;
             BSWG.render.boom.palette = chadaboom3D.green;
             BSWG.render.boom.add(
                 new b2Vec2(this.pos.x + Math.cos(a) * BSWG.orbZoneSize, this.pos.y + Math.sin(a) * BSWG.orbZoneSize).particleWrap(z + 3.5),
                 3.0 * (Math.random()*0.5 + 0.5),
-                256,
+                64,
                 1,
                 2.0,
                 new THREE.Vector3(0, 0, 1),
@@ -147,7 +152,26 @@ BSWG.orb.prototype.updateRender = function (dt) {
                 Math.random() < 0.05
             );
         }
+
+        this.activeT += dt;
+        this.activeT = Math.clamp(this.activeT, 0, 1);
+
+        this.active = true;
     }
+    else {
+        this.activeT -= dt;
+        this.activeT = Math.clamp(this.activeT, 0, 1);        
+    }
+
+    var t = this.activeT * (Math.sin(this.time*6.0)*0.5+0.5);
+    this.mat.uniforms.clr.value.set(
+        (0.3 * (1-t) + 4.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
+        (1.0 * (1-t) + 4.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
+        (0.5 * (1-t) + 4.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
+        1.0
+    );
+
+    this.mat.uniforms.extra.value.x = 4.0;
 
 };
 

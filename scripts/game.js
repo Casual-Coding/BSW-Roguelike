@@ -689,6 +689,10 @@ BSWG.game = new function(){
                 BSWG.xpDisplay.xpInfo = this.xpInfo;
                 this.mapImage = this.tileMap.minimap.image;
                 this.tileMap.addCollision(0, 0, this.map.size, this.map.size);
+                for (var i=0; i<this.map.zones.length; i++) {
+                    var zone = this.map.zones[i];
+                    zone.orb = new BSWG.orb(new b2Vec2(zone.p.x * this.map.gridSize, zone.p.y * this.map.gridSize), zone);
+                }
 
             case BSWG.SCENE_GAME2:
 
@@ -2092,6 +2096,20 @@ BSWG.game = new function(){
                 ctx.fillStyle = 'rgba(0,0,0,0.0)';
                 ctx.fillRect(x, y, w, h);
                 ctx.drawImage(self.mapImage, 0, 0, self.mapImage.width, self.mapImage.height, x, y, w, h);
+
+                for (var i=0; i<self.map.zones.length; i++) {
+                    var zone = self.map.zones[i];
+                    if (zone.discovered) {
+                        var p = zone.p;
+                        ctx.fillStyle = '#000';
+                        ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
+                        ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
+                        ctx.fillStyle = '#ff0';
+                        ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
+                        ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
+                        ctx.globalAlpha = 1.0;                        
+                    }
+                }
 
                 if (self.ccblock && !self.ccblock.destroyed) {
                     var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
