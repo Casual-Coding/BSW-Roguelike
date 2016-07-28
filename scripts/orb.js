@@ -252,7 +252,7 @@ BSWG.orbList = new (function(){
 
     this.clear = function () {
         while (this.list.length) {
-            this.remove(this.list[i]).destroy();
+            this.remove(this.list[0]).destroy();
         }
     };
 

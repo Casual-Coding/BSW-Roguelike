@@ -1549,7 +1549,7 @@ BSWG.game = new function(){
                             }
                         }
 
-                        if (grabbedBlock && (grabbedBlock.destroyed || !grabbedBlock.obj || !grabbedBlock.obj.body)) {
+                        if (grabbedBlock && (grabbedBlock.destroyed || !grabbedBlock.obj || !grabbedBlock.obj.body || !BSWG.input.MOUSE('left'))) {
                             grabbedBlock = null;
                             grabbedLocal = null;
                             BSWG.physics.endMouseDrag();

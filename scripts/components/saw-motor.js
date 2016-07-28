@@ -86,11 +86,11 @@ BSWG.component_SawMotor = {
         BSWG.componentList.makeQueryable(this, this.meshObj1.mesh);
         BSWG.bpmReflect = 0.5;
         this.meshObj2 = BSWG.generateBlockPolyMesh({ verts: this.cverts, body: this.obj.body, comp: this }, 0.7, this.motorC, -0.1, 0.225);
-        this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body }, this.motorC);
+        this.selMeshObj2 = BSWG.genereteBlockPolyOutline({ verts: this.cverts, body: this.obj.body, comp: this }, this.motorC);
         BSWG.componentList.makeQueryable(this, this.meshObj2.mesh);
         BSWG.bpmReflect = 0.5;
         this.meshObj3 = BSWG.generateBlockPolyMesh({ verts: this.averts, body: this.obj.body, comp: this }, 0.7, new b2Vec2(cjp.x*0.5, cjp.y), -0.2, 0.15);
-        this.selMeshObj3 = BSWG.genereteBlockPolyOutline({ verts: this.averts, body: this.obj.body });
+        this.selMeshObj3 = BSWG.genereteBlockPolyOutline({ verts: this.averts, body: this.obj.body, comp: this });
         BSWG.componentList.makeQueryable(this, this.meshObj3.mesh);
 
         this.xpBase = 0.025 * this.size;
