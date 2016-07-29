@@ -15,7 +15,7 @@ var getNW = function (run, dbg) {
     var nw = new NwBuilder({
         version: '0.16.0',
         files: glob(files),
-        platforms: run ? (dbg ? ['win64dbg'] : ['win64']) : ['win64', 'osx64'/*, 'linux64'*/ ], // change this to 'win' for/on windows
+        platforms: run ? (dbg ? ['win64dbg'] : ['win64']) : ['win64', 'osx64', 'linux64' ], // change this to 'win' for/on windows
         zip: true
     });
 
