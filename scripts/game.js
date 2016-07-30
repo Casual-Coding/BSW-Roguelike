@@ -405,7 +405,15 @@ BSWG.game = new function(){
 
         this.cam = new BSWG.camera();
 
-        BSWG.render.envMap = BSWG.render.images['env-map-1'];
+        BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-1'];
+
+        if (scene === BSWG.SCENE_TITLE) {
+            BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-2'];
+        }
+        else {
+            BSWG.render.envMap = BSWG.render.images['env-map-1'];
+            BSWG.render.envMap2 = BSWG.render.images['env-map-3'];            
+        }
 
         BSWG.render.clearScene();
         BSWG.jpointRenderer.readd();
@@ -490,8 +498,6 @@ BSWG.game = new function(){
 
         switch (scene) {
             case BSWG.SCENE_TITLE:
-
-                BSWG.render.envMap = BSWG.render.images['env-map-2'];
 
                 this.cam.z *= 1.0;
 
@@ -695,8 +701,6 @@ BSWG.game = new function(){
                 }
 
             case BSWG.SCENE_GAME2:
-
-                BSWG.render.envMap = BSWG.render.images['env-map-1'];
 
                 if (scene === BSWG.SCENE_GAME2) {
                     this.noDefault = false;
@@ -1841,7 +1845,7 @@ BSWG.game = new function(){
                         if (desc.density > 0.2) {
                             desc.tint.set(.3, .3, .3, Math.clamp(desc.density*20, 0., 0.9));
                         }
-                        desc.wet = Math.clamp(B.wet, 0., 1.) * 0.2;
+                        desc.wet = Math.clamp(B.wet, 0., 1.) * 0.1;
                         desc.tint.z = Math.clamp(desc.tint.z + desc.wet * 0.25, 0., 1.);
                     }
                     else {
@@ -1861,10 +1865,10 @@ BSWG.game = new function(){
 
                     var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.15, 0., 1.), 1.5) * 0.5;
 
-                    desc.tint.x *= (1 - dark);
-                    desc.tint.y *= (1 - dark);
-                    desc.tint.z *= (1 - dark);
-                    desc.tint.w = Math.clamp(desc.tint.w + dark, 0., 1.);
+                    desc.envMapT = Math.pow(dark, 0.3);
+                    desc.dark = desc.envMapT;
+
+                    desc.tint.w = Math.clamp(desc.tint.w, 0., 1.);
 
                     BSWG.render.weather.transition(desc, 0.5);
 

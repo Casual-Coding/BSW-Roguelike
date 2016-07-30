@@ -12,6 +12,8 @@ BSWG.tMask = {
 
 BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale, nmapAmp, reflect, zscale) {
 
+    var _color = [ color[0], color[1], color[2], color[3] ];
+
     if (!reflect && reflect !== 0.0) {
         reflect = 0.125;
     }
@@ -229,6 +231,14 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 't',
                 value: BSWG.render.envMap.texture
             },
+            envMap2: {
+                type: 't',
+                value: BSWG.render.envMap2.texture
+            },
+            envMapT: {
+                type: 'f',
+                value: BSWG.render.envMapT
+            },
             shadowMap: {
                 type: 't',
                 value: BSWG.render.shadowMap.texture
@@ -256,7 +266,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             envMapTint: {
                 type: 'v4',
                 value: BSWG.render.envMapTint
-            },            
+            },
             envMapParam: {
                 type: 'v4',
                 value: BSWG.render.envMapParam
@@ -272,6 +282,14 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             envMap: {
                 type: 't',
                 value: BSWG.render.envMap.texture
+            },
+            envMap2: {
+                type: 't',
+                value: BSWG.render.envMap2.texture
+            },
+            envMapT: {
+                type: 'f',
+                value: BSWG.render.envMapT
             },
             vreflect: {
                 type: 'f',
@@ -327,11 +345,20 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
         this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
         this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
+        this.mat.uniforms.envMapT.value = BSWG.render.envMapT;
+        var darkt = 1 - 0.90 * BSWG.render.tileDark;
+        color[0] = _color[0] * darkt;
+        color[1] = _color[1] * darkt;
+        color[2] = _color[2] * darkt;
+        color[3] = _color[3] * darkt;
         //this.mat.uniforms.shadowMatrix.needsUpdate = true;
         //this.mat.uniforms.shadowMatrix.value.needsUpdate = true;
         if (this.flashColor) {
             var t = Math.pow(Math.sin(this.time*3.5)*0.5+0.5, 3.0);
             this.mat.uniforms.clr.value.set(color[0]*(1-t)+this.flashColor[0]*t, color[1]*(1-t)+this.flashColor[1]*t, color[2]*(1-t)+this.flashColor[2]*t, 1.0);
+        }
+        else {
+            this.mat.uniforms.clr.value.set(color[0], color[1], color[2], water ? color[3] : 1);
         }
         //this.mat.needsUpdate = true;
         this.time += dt;

@@ -9,7 +9,9 @@ varying mat3 vNormalMatrix;
 uniform sampler2D exMap;
 uniform vec4 light, clr, extra;
 
-uniform sampler2D shadowMap, envMap;
+uniform sampler2D shadowMap;
+uniform sampler2D envMap, envMap2;
+uniform float envMapT;
 uniform vec2 viewport;
 uniform vec3 cam;
 uniform float vreflect;
@@ -60,7 +62,7 @@ void main() {
     vec2 envCoord = reflected.xy*0.5;
     envCoord.y *= viewport.y/viewport.x;
     envCoord += vec2(0.5, 0.5);
-    vec3 envClr = texture2D(envMap, envCoord).rgb;
+    vec3 envClr = mix(texture2D(envMap, envCoord).rgb, texture2D(envMap2, envCoord).rgb, envMapT);
     envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
     //gl_FragColor.rgb = clamp(gl_FragColor.rgb + gl_FragColor.rgb * envClr * vreflect * 4.0, 0., 1.);
     gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 1.));

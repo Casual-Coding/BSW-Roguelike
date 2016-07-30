@@ -58,6 +58,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                         type: 't',
                         value: BSWG.render.envMap.texture
                     },
+                    envMap2: {
+                        type: 't',
+                        value: BSWG.render.envMap2.texture
+                    },
+                    envMapT: {
+                        type: 'f',
+                        value: BSWG.render.envMapT
+                    },
                     viewport: {
                         type: 'v2',
                         value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
@@ -248,6 +256,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     type: 't',
                     value: BSWG.render.envMap.texture
                 },
+                envMap2: {
+                    type: 't',
+                    value: BSWG.render.envMap2.texture
+                },
+                envMapT: {
+                    type: 'f',
+                    value: BSWG.render.envMapT
+                },
                 viewport: {
                     type: 'v2',
                     value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
@@ -348,6 +364,8 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         self.mat.uniforms.extra.value.w = dmg;
         self.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+
+        self.mat.uniforms.envMapT.value = BSWG.render.envMapT;
 
         if (obj && obj.comp && obj.comp.p && dmg > 0.25) {
             if (Math.pow(Math._random(), 0.25) < dmg) {

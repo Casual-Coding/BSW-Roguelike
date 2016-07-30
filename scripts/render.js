@@ -216,6 +216,7 @@ BSWG.render = new function() {
     this.resized = true;
     this.envMapTint = new THREE.Vector4(0,0,0,0);
     this.envMapParam = new THREE.Vector4(0,0,0,0);
+    this.envMapT = this.tileDark = 0.0;
     this.screenShake = 0.0;
 
     var maxRes = null; //{ w: 1920, h: 1080 };
@@ -236,6 +237,7 @@ BSWG.render = new function() {
         }
         this.envMapTint.set(0,0,0,0);
         this.envMapParam.set(0,0,0,0);
+        this.envMapT = this.tileDark = 0.0;
         this.screenShake = 0.0;
 
     };
@@ -987,6 +989,14 @@ BSWG.render = new function() {
                 type: 't',
                 value: BSWG.render.envMap.texture
             },
+            envMap2: {
+                type: 't',
+                value: BSWG.render.envMap2.texture
+            },
+            envMapT: {
+                type: 'f',
+                value: BSWG.render.envMapT
+            },
             envMapTint: {
                 type: 'v4',
                 value: BSWG.render.envMapTint
@@ -1086,6 +1096,7 @@ BSWG.render = new function() {
                 }
 
                 this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+                this.mat.uniforms.envMapT.value = BSWG.render.envMapT;
 
                 if (this.clr) {
                     this.mat.uniforms.clr.value.set(this.clr[0], this.clr[1], this.clr[2], this.clr[3]);

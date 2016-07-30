@@ -79,6 +79,7 @@ var BSWG = new function(){
         'damage_nm': 'damage-nm.png',
         'env-map-1': 'env-map-1.png',
         'env-map-2': 'env-map-2.png',
+        'env-map-3': 'env-map-3.png',
         'cursor-normal': 'cursor-normal.png',
         'cursor-pressed': 'cursor-pressed.png',
         'cursor-pressed-right': 'cursor-pressed-right.png',

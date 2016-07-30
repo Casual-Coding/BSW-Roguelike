@@ -54,6 +54,14 @@ BSWG.orb = function (pos, zone) {
             type: 't',
             value: BSWG.render.envMap.texture
         },
+        envMap2: {
+            type: 't',
+            value: BSWG.render.envMap2.texture
+        },
+        envMapT: {
+            type: 'f',
+            value: BSWG.render.envMapT
+        },
         viewport: {
             type: 'v2',
             value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
@@ -137,6 +145,7 @@ BSWG.orb.prototype.updateRender = function (dt) {
     this.mat.uniforms.light.value.x = lp.x;
     this.mat.uniforms.light.value.y = lp.y;
     this.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
+    this.mat.uniforms.envMapT.value = BSWG.render.envMapT;
 
     this.active = false;
     if (Math.abs(this.pos.x - BSWG.game.cam.x) < 100 && Math.abs(this.pos.y - BSWG.game.cam.y) < 100 && !BSWG.game.battleMode) {

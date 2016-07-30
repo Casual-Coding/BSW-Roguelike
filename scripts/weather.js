@@ -13,7 +13,9 @@ BSWG.weather = function() {
         swirl: 0.0,
         contrast: 1.0,
         wet: 0.0,
-        tintSpeed: 5.0
+        tintSpeed: 5.0,
+        envMapT: 0.0,
+        dark: 0.0
     };
 
     this.time = 0.0;
@@ -27,6 +29,8 @@ BSWG.weather = function() {
     this.wind.set(this.defaults.wind.x, this.defaults.wind.y, this.defaults.wind.z);
     this.color.set(this.defaults.color.x, this.defaults.color.y, this.defaults.color.z, this.defaults.color.w);
     this.tint.set(this.defaults.tint.x, this.defaults.tint.y, this.defaults.tint.z, this.defaults.tint.w);
+    this.envMapT = this.defaults.envMapT;
+    this.dark = this.defaults.dark;
     this.lightning.set(this.defaults.lightning.x, this.defaults.lightning.y, this.defaults.lightning.z, this.defaults.lightning.w);
     this.lightningFreq = this.defaults.lightningFreq;
     this.size = this.defaults.size;
@@ -131,6 +135,14 @@ BSWG.weather = function() {
             type: 't',
             value: BSWG.render.envMap ? BSWG.render.envMap.texture : null
         },
+        envMap2: {
+            type: 't',
+            value: BSWG.render.envMap2 ? BSWG.render.envMap2.texture : null
+        },
+        envMapT: {
+            type: 'f',
+            value: BSWG.render.envMapT
+        },
         envMapTint: {
             type: 'v4',
             value: BSWG.render.envMapTint
@@ -227,6 +239,8 @@ BSWG.weather.prototype.render = function(dt) {
     }
 
     this.time += dt * this.speed;
+    BSWG.render.envMapT = this.envMapT;
+    BSWG.render.tileDark = this.dark;
     this.mat.uniforms.time.value = this.time;
     this.mat.uniforms.density.value = this.density;
     this.mat.uniforms.wind.value.set(this.wind.x, this.wind.y, this.wind.z);
@@ -237,6 +251,7 @@ BSWG.weather.prototype.render = function(dt) {
     this.mat.uniforms.swirl.value = this.swirl;
     this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
     this.mat.uniforms.cam.value.set(BSWG.game.cam.x, BSWG.game.cam.y, BSWG.game.cam.z);
+    this.mat.uniforms.envMapT.value = BSWG.render.envMapT;
     if (Math._random() < this.lightningFreq) {
         this.tint.set(this.lightning.x, this.lightning.y, this.lightning.z, this.lightning.w);
         new BSWG.soundSample().play('explosion', new THREE.Vector3(Math._random()*25-12.5+BSWG.game.cam.x, Math._random()*25-12.5+BSWG.game.cam.y, 40), 1.0*Math._random(), 0.35 * (Math._random()*0.1+0.9));
