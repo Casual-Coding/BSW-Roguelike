@@ -290,8 +290,8 @@ BSWG.game = new function(){
                                 return function() {
                                     if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
                                         var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                                        v.x *= 0.85;
-                                        v.y *= 0.85;
+                                        v.x *= 0.65;
+                                        v.y *= 0.65;
                                         ais.setVelAll(v);
                                     }
                                     ais.reloadAI();
@@ -2108,10 +2108,10 @@ BSWG.game = new function(){
                         var X = Math.floor(p.x), Y = Math.floor(p.y);
                         if (self.map.disMap[X] && self.map.disMap[X][Y]) {
                             ctx.fillStyle = '#000';
-                            ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
+                            ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 1.5) * 0.5 + 0.5;
                             ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
                             ctx.fillStyle = '#ff0';
-                            ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
+                            ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 1.5 + Math.PI*0.5) * 0.5 + 0.5;
                             ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
                             ctx.globalAlpha = 1.0;
                         }
@@ -2121,10 +2121,10 @@ BSWG.game = new function(){
                 if (self.ccblock && !self.ccblock.destroyed) {
                     var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
                     ctx.fillStyle = '#000';
-                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3) * 0.5 + 0.5;
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 5) * 0.5 + 0.5;
                     ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
                     ctx.fillStyle = '#fff';
-                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 3 + Math.PI*0.5) * 0.5 + 0.5;
+                    ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 5 + Math.PI*0.5) * 0.5 + 0.5;
                     ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
                     ctx.globalAlpha = 1.0;
                 }
