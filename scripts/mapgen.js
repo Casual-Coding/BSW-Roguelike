@@ -63,14 +63,15 @@ BSWG.enemySettings = [
                     friend: false,
                     text: [
                         "I hear you've been destroying my drone ships!",
-                        "I'm going to destroy you!!!"
+                        "I'm going to destroy you!"
                     ]
                 },
                 wdialog: {
                     who: 161,
                     friend: false,
                     text: [
-                        "Arrrrrrrrrggggg!!!!!! ..... Zefs will have our revenge!!!!",
+                        "Arrrrrrrrrggggg!!!!!!",
+                        "The Zef Collective will have revenge on you!",
                     ]
                 }
             },
