@@ -243,7 +243,7 @@ BSWG.game = new function(){
 
     this.spawnCount = 0;
 
-    this.spawnEnemies = function (list) {
+    this.spawnEnemies = function (list, boss) {
 
         if (this.scene !== BSWG.SCENE_TITLE && (!this.ccblock || this.ccblock.destroyed)) {
             return;
@@ -252,11 +252,23 @@ BSWG.game = new function(){
         var p = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetWorldCenter().clone() : new b2Vec2(0, 0);
         var arange = Math.PI;
         var minr = 27.5, maxr = 42.5;
+
+        if (boss) {
+            p = new b2Vec2(this.inZone.worldP.x, this.inZone.worldP.y);
+            arange = Math.PI * 2.0;
+            minr = 0.0;
+            maxr = 32.5;
+        }
+
         if (this.scene === BSWG.SCENE_TITLE) {
             minr = maxr = 0;
         }
         var v = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetLinearVelocity().clone() : new b2Vec2(0, 0);
         var a = Math.atan2(v.y, v.x);
+
+        if (boss) {
+            a = 0.0;
+        }
 
         var self = this;
 
@@ -289,10 +301,12 @@ BSWG.game = new function(){
                             window.setTimeout(function(ais){
                                 return function() {
                                     if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                                        var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                                        v.x *= 0.65;
-                                        v.y *= 0.65;
-                                        ais.setVelAll(v);
+                                        if (!boss) {
+                                            var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
+                                            v.x *= 0.65;
+                                            v.y *= 0.65;
+                                            ais.setVelAll(v);                                           
+                                        }
                                     }
                                     ais.reloadAI();
                                 };
@@ -1267,6 +1281,9 @@ BSWG.game = new function(){
 
             // hacked together real time music generator
             self.musicBPM = (self.scene === BSWG.SCENE_TITLE || self.battleMode) ? 30 : 15;
+            if (self.bossFight) {
+                self.musicBPM = ~~(self.musicBPM * 1.5);
+            }
             var musicHappy = (self.scene === BSWG.SCENE_GAME2 || (self.inZone && self.inZone.safe));
             var audioCtx = BSWG.music.audioCtx;
             var ctime = audioCtx.currentTime;
@@ -1865,7 +1882,14 @@ BSWG.game = new function(){
 
                     var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.15, 0., 1.), 1.5) * 0.5;
 
-                    desc.envMapT = Math.pow(dark, 0.3);
+                    if (dark < 0.5) {
+                        dark = Math.pow(dark, 2.0);
+                    }
+                    else {
+                        dark = Math.pow(dark, 0.5);
+                    }
+
+                    desc.envMapT = dark;
                     desc.dark = desc.envMapT;
 
                     desc.tint.w = Math.clamp(desc.tint.w, 0., 1.);
@@ -1993,7 +2017,11 @@ BSWG.game = new function(){
                 if (self.battleMode && self.spawnCount === 0) {
                     var ccs = BSWG.componentList.allCCs();
                     if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
+                        if (self.bossFight && self.inZone === self.bossZone) {
+                            self.bossZone.bossDefeated = true;
+                        }
                         self.battleMode = false;
+                        self.bossFight = false;
                         //window.gc();
                     }
                     for (var i=0; i<ccs.length; i++) {
@@ -2015,29 +2043,48 @@ BSWG.game = new function(){
                     }
                 }
                 else if (typeof ret !== 'string') {
-                    var enemies = [];
-                    var e = BSWG.getEnemy(ret.type);
-                    if (e && e.obj) {
-                        enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
-                        //ret.max = 4;
-                        if (ret.max && ret.max > 0) {
-                            for (var i=0; i<(ret.max-1); i++) {
-                                if (Math.random() < 0.5) {
-                                    enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
-                                }
+                    if (self.inZone.boss) {
+                        var enemies = [];
+                        for (var i=0; i<ret.length; i++) {
+                            var e = BSWG.getEnemy(ret[i].type);
+                            if (e && e.obj) {
+                                enemies.push([
+                                    e.obj,
+                                    BSWG.pickEnemyLevel(self.inZone, ret[i])
+                                ]);
                             }
                         }
-                        if (ret.with && ret.with.length) {
-                            for (var i=0; i<ret.with.length; i++) {
-                                var ew = BSWG.getEnemy(ret.with[i]);
-                                if (ew && ew.obj) {
-                                    enemies.push([ew.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
-                                }
-                            }
-                        }
+                        self.battleMode = true;
+                        self.bossFight = true;
+                        self.bossZone = self.inZone;
+                        self.spawnEnemies(enemies, true);
                     }
-                    self.battleMode = true;
-                    self.spawnEnemies(enemies);
+                    else {
+                        var enemies = [];
+                        var e = BSWG.getEnemy(ret.type);
+                        if (e && e.obj) {
+                            enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
+                            //ret.max = 4;
+                            if (ret.max && ret.max > 0) {
+                                for (var i=0; i<(ret.max-1); i++) {
+                                    if (Math.random() < 0.5) {
+                                        enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
+                                    }
+                                }
+                            }
+                            if (ret.with && ret.with.length) {
+                                for (var i=0; i<ret.with.length; i++) {
+                                    var ew = BSWG.getEnemy(ret.with[i]);
+                                    if (ew && ew.obj) {
+                                        enemies.push([ew.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
+                                    }
+                                }
+                            }
+                        }
+                        self.battleMode = true;
+                        self.bossFight = false;
+                        self.spawnEnemies(enemies);
+                    }
                 }
             }
 

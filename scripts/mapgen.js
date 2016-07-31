@@ -786,12 +786,17 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             return null;
         }
 
-        if (BSWG.orbList.atSafe()) {
+        if (BSWG.orbList.atSafe() || zone.bossDefeated) {
             return null;
         }
 
         if (zone !== lastZone) {
-            distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+            if (zone.boss && !zone.bossDefeated) {
+                distanceLeft = this.gridSize * 2.5;
+            }
+            else {
+                distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+            }
         }
 
         if (lastP) {
@@ -801,7 +806,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         if (!lastBattleP || Math.distVec2(lastBattleP, p) > this.gridSize) {
 
             if (zone.hasPlanet && zone.boss) {
-
+                this.escapeDistance = this.gridSize * 1000.0;
+                lastBattleZone = zone;
+                distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+                return zone.boss;
             }
             else if (zone.enemies && zone.enemies.length) {
                 if (distanceLeft <= 0) {
@@ -1019,6 +1027,10 @@ BSWG.genMap_LoadMusicSettings_Zone = function(zone, eInfo) {
 };
 
 BSWG.pickEnemyLevel = function(zone, E) {
+    if (zone.boss) {
+        return Math.floor((zone.maxLevel + zone.minLevel) * 0.5) + E.levelInc;
+    }
+
     var possible = new Array();
     for (var j=0; j<E.levels.length; j++) {
         if (E.levels[j] >= zone.minLevel && E.levels[j] <= zone.maxLevel) {
