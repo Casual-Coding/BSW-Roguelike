@@ -1519,7 +1519,7 @@ BSWG.game = new function(){
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
-                    if (self.ccblock && !self.ccblock.destroyed) {
+                    if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause)) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
 
@@ -1573,6 +1573,21 @@ BSWG.game = new function(){
                         self.cam.panTo(8.*dt, new b2Vec2(tx, ty));
 
                         p = p1 = pc = p2 = null;
+                    }
+                    else if (self.bossFight && self.dialogPause) {
+
+                        var ccs = BSWG.componentList.allCCs();
+
+                        for (var i=0; i<ccs.length; i++) {
+                            if (ccs[i] !== self.ccblock && ccs[i].obj && ccs[i].obj.body) {
+                                self.cam.panTo(3.*dt, ccs[i].obj.body.GetWorldCenter().clone());
+                                self.cam.zoomTo(dt*0.5, 0.015);
+                                break;
+                            }
+                        }
+
+                        ccs = null;
+
                     }
 
                     break;
@@ -2091,7 +2106,7 @@ BSWG.game = new function(){
                         if (self.bossFight && self.inZone === self.bossZone) {
                             self.bossZone.bossDefeated = true;
                             if (self.inZone.boss.wdialog) {
-                                BSWG.game.linearDialog(self.inZone.boss.wdialog, true);
+                                BSWG.game.linearDialog(self.inZone.boss.wdialog, false);
                             }
                         }
                         self.battleMode = false;
@@ -2249,6 +2264,21 @@ BSWG.game = new function(){
                     ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
                     ctx.globalAlpha = 1.0;
                 }
+
+                var ccs = BSWG.componentList.allCCs();
+                for (var i=0; i<ccs.length; i++) {
+                    if (ccs[i] !== self.ccblock && !ccs[i].destroyed) {
+                        var p = self.map.worldToMap(ccs[i].obj.body.GetWorldCenter());
+                        ctx.fillStyle = '#000';
+                        ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 7) * 0.5 + 0.5;
+                        ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                        ctx.fillStyle = '#f00';
+                        ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 7 + Math.PI*0.5) * 0.5 + 0.5;
+                        ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                        ctx.globalAlpha = 1.0;                        
+                    }
+                }
+                ccs = null;
 
                 if (self.inZone) {
                     var x = self.hudX(self.hudBtn[11][0])+1,

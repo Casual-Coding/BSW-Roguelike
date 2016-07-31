@@ -213,6 +213,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             break;
         }
     }
+    var reflect = BSWG.bpmReflect;
     if (matIdx < 0) {
         BSWG.bpmMatCache.push({
             mat: BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
@@ -403,8 +404,20 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         if (self.lclr) {
             var t = self.enemyT * 0.5;
             var clr2 = self.mat.uniforms.clr.value;
-            clr2.set(self.lclr[0] * (1-t) + t * 1, self.lclr[1] * (1-t), self.lclr[2] * (1-t), self.lclr[3]);
+            var r = 1, g = 0, b = 0;
+            if (BSWG.game.bossFight) {
+                r = 0.2;
+                g = b = -0.07;
+                self.mat.uniforms.vreflect.value = reflect * 0.125;
+            }
+            else {
+                self.mat.uniforms.vreflect.value = reflect;
+            }
+            clr2.set(self.lclr[0] * (1-t) + t * r, self.lclr[1] * (1-t) + t * g, self.lclr[2] * (1-t) + t * b, self.lclr[3]);
         }
+        else {
+            self.mat.uniforms.vreflect.value = reflect;
+        } 
 
         //self.mat.needsUpdate = true;
 
