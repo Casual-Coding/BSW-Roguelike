@@ -290,7 +290,8 @@ BSWG.soundLoad = function (onload) {
         { name: 'raindrop', url: 'sounds/raindrop.wav' },
         { name: 'swirl', url: 'sounds/swirl.wav' },
         { name: 'e2-distorted', url: 'sounds/e2-distorted.wav' },
-        { name: 'e2-clean', url: 'sounds/e2-clean.wav' }
+        { name: 'e2-clean', url: 'sounds/e2-clean.wav' },
+        { name: 'dialog', url: 'sounds/dialog.wav' }
     ];
 
     var urls = [];

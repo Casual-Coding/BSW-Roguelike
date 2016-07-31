@@ -227,7 +227,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
     };
 
     this.do_flashing = function ( ) {
-        var t = Math.sin(BSWG.render.time * Math.PI) * 0.5 + 0.5;
+        var t = Math.sin(BSWG.render.time * Math.PI * 3) * 0.5 + 0.5;
         this.hudMat.uniforms.clr.value.set(
             this.clr[0] * t + 1.5 * (1-t),
             this.clr[1] * t + 1.5 * (1-t),
@@ -866,11 +866,11 @@ BSWG.control_Dialogue = {
                 ctx.drawImage(img, 0, 0, img.width, img.height, x, y, w, h);
 
                 var x = hx(this.hudBtn[1][0])+12,
-                    y = hy(this.hudBtn[1][1])+20;
+                    y = hy(this.hudBtn[1][1])+20+8;
                 var w = hx(this.hudBtn[1][2])-x-6,
                     h = hy(this.hudBtn[1][3])-y-12;
 
-                var fs = Math.min(~~(h * 0.3), 12);
+                var fs = Math.min(~~(h * 0.3), 20);
                 ctx.font = fs + 'px Orbitron';
                 ctx.textAlign = 'left';
                 if (this.friend) {
@@ -883,6 +883,13 @@ BSWG.control_Dialogue = {
                 }
 
                 var text = this.text.substring(0, Math.min(~~((Date.timeStamp() - this.startTime) * 30), this.text.length));
+                if (this.lastText !== text && text.length > 0) {
+                    var ch = text.charAt(text.length-1);
+                    if (ch !== ' ' && ch !== '\n' && ch !== '\t' && ch !== '.') {
+                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                    }
+                }
+                this.lastText = text;
                 var lines = text.split('\n');
                 var y1 = y;
                 for (var i=0; i<lines.length; i++) {

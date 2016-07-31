@@ -37,14 +37,31 @@ BSWG.enemySettings = [
             { type: 'spikes', size: 3, pike: false, minLevel: 5, alwaysLevel: 8,  minProb: 0.9 },
             { type: 'chainlink',                    minLevel: 3, alwaysLevel: 5,  minProb: 0.6 }
         ],
+        intro: {
+            who: -1,
+            friend: true,
+            text: [
+                "Are you there?",
+                "Your sister took the pictures of miss wiskers with her when we all moved out! .... All 20 billion of them!",
+                "Will you be a dear and find her and get the pictures back for me? With all of you moved out, and your father gone they're really the only thing I have!",
+                "I'd ask her myself, but I don't know how to contact her. She was angry when she left, she must have felt like I didn't do enough for your brother Zef.",
+                "From what I've been told Zef has taken to cloning himself, he's created a small army and is slowly taking over the system. Watch out for his clones when you're out there.",
+                { text: "What's that? You deconstructed your ship? Well hurry up and build it up again! There should be some components in your store for that.", btnHighlight: "store" },
+                { text: "You can take components out and put them in from anywhere, just be careful about leaving them around, they might disappear!", btnHighlight: "store" },
+                { text: "Go into build mode to attach components to your ship, you can drag them around with left mouse, and weld them together by clicking the weld points.", btnHighlight: "build" },
+                { text: "Some components are activated by keypress, for those ones you can right click them when they're attached to your ship and press a key to bind to that component.", btnHighlight: "keys" },
+                { text: "If it's safe, you can save your progress at orbs like the one here. I don't understand how it works exactly, something to do with time travel.", btnHighlight: "save" },
+                "I think that's everything... be safe and good luck! ...... Oh, and could you pick me up some chocolate chips on the way? There's no chocolate on this planet, and I'd really love to make some cookies for us!"
+            ]
+        },
         bosses: [ // ordered by difficulty
-            [ { type: 'missile-boss', levelInc: 2 } ],
-            [ { type: 'mele-boss', levelInc: 2 } ],
-            [ { type: 'big-flail', levelInc: 2 } ],
-            [ { type: 'mele-boss', levelInc: 2 }, { type: 'brute', levelInc: 1 } ],
-            [ { type: 'big-flail', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 } ],
-            [ { type: 'crippler', levelInc: 2 }, { type: 'little-cruncher', levelInc: 1 } ],
-            [ { type: 'cruncher-boss', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 }, { type: 'heavy-fighter', levelInc: 1 } ], // TODO
+            { enemies: [ { type: 'missile-boss', levelInc: 2 } ] },
+            { enemies: [ { type: 'mele-boss', levelInc: 2 } ] },
+            { enemies: [ { type: 'big-flail', levelInc: 2 } ] },
+            { enemies: [ { type: 'mele-boss', levelInc: 2 }, { type: 'brute', levelInc: 1 } ] },
+            { enemies: [ { type: 'big-flail', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 } ] },
+            { enemies: [ { type: 'crippler', levelInc: 2 }, { type: 'little-cruncher', levelInc: 1 } ] },
+            { enemies: [ { type: 'cruncher-boss', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 }, { type: 'heavy-fighter', levelInc: 1 } ] }, // TODO
         ],
         enemies: [
             { type: 'big-flail',        levels: [8,9,10] },
@@ -809,7 +826,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 this.escapeDistance = this.gridSize * 1000.0;
                 lastBattleZone = zone;
                 distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-                return zone.boss;
+                return zone.boss.enemies;
             }
             else if (zone.enemies && zone.enemies.length) {
                 if (distanceLeft <= 0) {

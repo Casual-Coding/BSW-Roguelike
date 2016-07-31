@@ -343,6 +343,56 @@ BSWG.game = new function(){
     };
 
     this.dialogObj = null;
+    this.dialogBtnHighlight = null;
+
+    this.linearDialog = function (desc, anchor) {
+
+        var self = this;
+
+        this.dialogPause = !!anchor;
+
+        var desc2 = {};
+
+        for (var i=0; i<desc.text.length; i++) {
+            var text = desc.text[i];
+            var obj = null;
+            if (typeof text === 'object') {
+                obj = text;
+            }
+            if (obj) {
+                text = obj.text;
+                if (i === 0) {
+                    this.dialogBtnHighlight = obj.btnHighlight || null;
+                }
+            }
+            desc2[i] = {
+                who: desc.who,
+                text: text,
+                friend: !!desc.friend,
+                buttons: [
+                    {
+                        text: 'Ok',
+                        click: function (idx, ob) {
+                            return function (fns) {
+                                if ((idx+1) < desc.text.length) {
+                                    self.dialogBtnHighlight = desc.text[idx+1].btnHighlight || null;
+                                    fns.change(idx+1);
+                                }
+                                else {
+                                    fns.close();
+                                    self.dialogPause = false;
+                                    self.dialogBtnHighlight = null;
+                                }
+                            };
+                        }(i, obj)
+                    }
+                ]
+            }
+        }
+
+        this.openDialog(desc2, 0);
+
+    };
 
     this.openDialog = function (desc, start) {
 
@@ -428,6 +478,8 @@ BSWG.game = new function(){
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
             BSWG.render.envMap2 = BSWG.render.images['env-map-3'];            
         }
+
+        this.dialogPause = false;
 
         BSWG.render.clearScene();
         BSWG.jpointRenderer.readd();
@@ -1279,6 +1331,11 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            if (self.scene === BSWG.SCENE_GAME1 && !(self.map.introNext > self.map.areaNo)) {
+                self.map.introNext = self.map.areaNo + 1;
+                self.linearDialog(BSWG.enemySettings[self.map.areaNo].intro, true);
+            }
+
             // hacked together real time music generator
             self.musicBPM = (self.scene === BSWG.SCENE_TITLE || self.battleMode) ? 30 : 15;
             if (self.bossFight) {
@@ -1773,6 +1830,19 @@ BSWG.game = new function(){
             }
             if (self.storeBtn) {
                 self.storeBtn.text = !self.battleMode ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
+            }
+
+            if (self.saveBtn) {
+                self.saveBtn.flashing = self.dialogBtnHighlight === 'save';
+            }
+            if (self.storeBtn) {
+                self.storeBtn.flashing = self.dialogBtnHighlight === 'store';
+            }
+            if (self.editBtn) {
+                self.editBtn.flashing = self.dialogBtnHighlight === 'build';
+            }
+            if (self.showControlsBtn) {
+                self.showControlsBtn.flashing = self.dialogBtnHighlight === 'keys';
             }
 
             if (self.scene === BSWG.SCENE_GAME2) {

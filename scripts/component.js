@@ -77,7 +77,7 @@ BSWG.componentHoverFnAlpha = function(self) {
 };
 
 BSWG.compAnchored = function(self) {
-    return ((self.onCC && self.onCC.anchored) || self.anchored) ? true : false;
+    return ((self.onCC && self.onCC.anchored) || self.anchored || BSWG.game.dialogPause) ? true : false;
 };
 
 BSWG.updateOnCC = function () {
