@@ -56,6 +56,7 @@ BSWG.enemySettings = [
         },
         bosses: [ // ordered by difficulty
             {
+                who: 161,
                 enemies: [ { type: 'missile-boss', levelInc: 2 } ],
                 dialog: {
                     who: 161,
@@ -69,7 +70,7 @@ BSWG.enemySettings = [
                     who: 161,
                     friend: false,
                     text: [
-                        "Arrg!!! Zefs will have our revenge!!!!",
+                        "Arrrrrrrrrggggg!!!!!! ..... Zefs will have our revenge!!!!",
                     ]
                 }
             },

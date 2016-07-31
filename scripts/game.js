@@ -304,8 +304,8 @@ BSWG.game = new function(){
                                     if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
                                         if (!boss) {
                                             var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                                            v.x *= 0.65;
-                                            v.y *= 0.65;
+                                            v.x *= 0.85;
+                                            v.y *= 0.85;
                                             ais.setVelAll(v);                                           
                                         }
                                     }
@@ -1339,9 +1339,9 @@ BSWG.game = new function(){
 
             // hacked together real time music generator
             self.musicBPM = (self.scene === BSWG.SCENE_TITLE || self.battleMode) ? 30 : 15;
-            if (self.bossFight) {
-                self.musicBPM = ~~(self.musicBPM * 1.5);
-            }
+            //if (self.bossFight) {
+                //self.musicBPM = ~~(self.musicBPM * 1.5);
+            //}
             var musicHappy = (self.scene === BSWG.SCENE_GAME2 || (self.inZone && self.inZone.safe)) && !self.bossFight;
             var audioCtx = BSWG.music.audioCtx;
             var ctime = audioCtx.currentTime;
@@ -1580,7 +1580,7 @@ BSWG.game = new function(){
 
                         for (var i=0; i<ccs.length; i++) {
                             if (ccs[i] !== self.ccblock && ccs[i].obj && ccs[i].obj.body) {
-                                self.cam.panTo(3.*dt, ccs[i].obj.body.GetWorldCenter().clone());
+                                self.cam.panTo(4.5*dt, ccs[i].obj.body.GetWorldCenter().clone());
                                 self.cam.zoomTo(dt*0.5, 0.015);
                                 break;
                             }
@@ -2136,6 +2136,8 @@ BSWG.game = new function(){
                         var enemies = [];
                         for (var i=0; i<ret.length; i++) {
                             var e = BSWG.getEnemy(ret[i].type);
+                            var title = self.inZone.boss.who < 0 ? 'Mom' : ('Zef #' + (self.inZone.boss.who+1));
+                            e.obj.title = title + ' ( ' + e.obj.title + ' )';
                             if (e && e.obj) {
                                 enemies.push([
                                     e.obj,
