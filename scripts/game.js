@@ -1284,13 +1284,13 @@ BSWG.game = new function(){
             if (self.bossFight) {
                 self.musicBPM = ~~(self.musicBPM * 1.5);
             }
-            var musicHappy = (self.scene === BSWG.SCENE_GAME2 || (self.inZone && self.inZone.safe));
+            var musicHappy = (self.scene === BSWG.SCENE_GAME2 || (self.inZone && self.inZone.safe)) && !self.bossFight;
             var audioCtx = BSWG.music.audioCtx;
             var ctime = audioCtx.currentTime;
             var nextBeat = Math.ceil(ctime/(60/self.musicBPM)) * (60/self.musicBPM);
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
                 Math.seedrandom(Math.floor((self.noteIndex%8)/4) + Math.floor(time/(60/self.musicBPM*16)));
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
                 self.lastNote = nextBeat;
                 self.noteIndex += 1;
                 Math.seedrandom();
@@ -2209,7 +2209,14 @@ BSWG.game = new function(){
                         }
                     }
                     else {
-                        ctx.fillTextB(self.inZone.name + ' - Lvl. ' + self.inZone.minLevel + '-' + self.inZone.maxLevel, x + 15, y + 10 + 18);
+                        var lStr = self.inZone.minLevel + '-' + self.inZone.maxLevel;
+                        if (self.inZone.minLevel === self.inZone.maxLevel) {
+                            lStr = '' + self.inZone.minLevel;
+                        }
+                        if (self.inZone.boss) {
+                            lStr = '' + (self.inZone.maxLevel + 1);
+                        }
+                        ctx.fillTextB(self.inZone.name + ' - Lvl. ' + lStr, x + 15, y + 10 + 18);
                     }
                 }
             }
