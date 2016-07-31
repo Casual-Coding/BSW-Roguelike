@@ -55,6 +55,7 @@ BSWG.game = new function(){
                     var hh = bfr*2 + bsz*2;
 
                     self.hudBottomYT = h-(bfr*2 + bsz);
+                    self.hudBottomYT2 = h-(bfr*2 + mmsize);
                     self.hudDlgX1 = mmsize*sc;
                     self.hudDlgX2 = w/2-(bfr+bsz*2);
 
@@ -2089,6 +2090,9 @@ BSWG.game = new function(){
                     if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
                         if (self.bossFight && self.inZone === self.bossZone) {
                             self.bossZone.bossDefeated = true;
+                            if (self.inZone.boss.wdialog) {
+                                BSWG.game.linearDialog(self.inZone.boss.wdialog, true);
+                            }
                         }
                         self.battleMode = false;
                         self.bossFight = false;

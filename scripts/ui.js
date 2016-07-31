@@ -760,15 +760,15 @@ BSWG.control_Dialogue = {
 
     render: function (ctx, viewport) {
 
-        if (this.modal) {
+        /*if (this.modal) {
             this.p.x = BSWG.render.viewport.w / 2 - this.w / 2;
             this.p.y = BSWG.render.viewport.h / 2 - this.h / 2;
         }
-        else {
-            this.p.x = BSWG.game.hudX(BSWG.game.hudDlgX1);
-            this.p.y = BSWG.game.hudY(BSWG.game.hudBottomYT) - this.h;
-            this.w = BSWG.game.hudX(BSWG.game.hudDlgX2) - this.p.x;
-        }
+        else {*/
+            this.p.x = BSWG.game.hudX(BSWG.game.hudDlgX1/2);
+            this.p.y = BSWG.game.hudY(BSWG.game.hudBottomYT2) - this.h;
+            //this.w = BSWG.game.hudX(BSWG.game.hudDlgX2) - this.p.x;
+        //}
 
         if (this.hidden) {
             this.p.y += (1.0 - Math.pow(Math.clamp(((0.5 - (Date.timeStamp() - this.hiddenTime)) / 0.5), 0.0, 1.0), 3.0)) * (BSWG.render.viewport.h - this.p.y);

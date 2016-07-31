@@ -43,9 +43,9 @@ BSWG.enemySettings = [
             text: [
                 "Are you there?",
                 "Your sister took the pictures of miss wiskers with her when we all moved out! .... All 20 billion of them!",
-                "Will you be a dear and find her and get the pictures back for me? With all of you moved out, and your father gone they're really the only thing I have!",
-                "I'd ask her myself, but I don't know how to contact her. She was angry when she left, she must have felt like I didn't do enough for your brother Zef.",
-                "From what I've been told Zef has taken to cloning himself, he's created a small army and is slowly taking over the system. Watch out for his clones when you're out there.",
+                "Will you be a dear and find her and get the pictures back for me? With all of you moved out.... and your father gone.... they're really the only thing I have.",
+                "I'd ask her myself, but I don't know how to contact her. She was angry when she left, .... she must have felt like I didn't do enough for your brother Zef.",
+                "From what I've been told Zef has taken to cloning himself, he's created a small army and is slowly taking over the system.... Watch out for his clones when you're out there!",
                 { text: "What's that? You deconstructed your ship? Well hurry up and build it up again! There should be some components in your store for that.", btnHighlight: "store" },
                 { text: "You can take components out and put them in from anywhere, just be careful about leaving them around, they might disappear!", btnHighlight: "store" },
                 { text: "Go into build mode to attach components to your ship, you can drag them around with left mouse, and weld them together by clicking the weld points.", btnHighlight: "build" },
@@ -55,7 +55,24 @@ BSWG.enemySettings = [
             ]
         },
         bosses: [ // ordered by difficulty
-            { enemies: [ { type: 'missile-boss', levelInc: 2 } ] },
+            {
+                enemies: [ { type: 'missile-boss', levelInc: 2 } ],
+                dialog: {
+                    who: 161,
+                    friend: false,
+                    text: [
+                        "I hear you've been destroying my drone ships!",
+                        "I'm going to destroy you!!!"
+                    ]
+                },
+                wdialog: {
+                    who: 161,
+                    friend: false,
+                    text: [
+                        "Arrg!!! Zefs will have our revenge!!!!",
+                    ]
+                }
+            },
             { enemies: [ { type: 'mele-boss', levelInc: 2 } ] },
             { enemies: [ { type: 'big-flail', levelInc: 2 } ] },
             { enemies: [ { type: 'mele-boss', levelInc: 2 }, { type: 'brute', levelInc: 1 } ] },
@@ -177,8 +194,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }*/
 
+        var bn = 0;
         for (var i=0; i<ret.zones.length; i++) {
             BSWG.genMap_LoadMusicSettings_Zone(ret.zones[i], ret.eInfo);
+            BSWG.genMap_updateBosses(ret, BSWG.enemySettings[ret.areaNo]);
         }
 
         size       = ret.size;
@@ -826,6 +845,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 this.escapeDistance = this.gridSize * 1000.0;
                 lastBattleZone = zone;
                 distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+                if (zone.boss.dialog) {
+                    BSWG.game.linearDialog(zone.boss.dialog, true);
+                }
                 return zone.boss.enemies;
             }
             else if (zone.enemies && zone.enemies.length) {
@@ -915,6 +937,24 @@ BSWG.map_genBiome = function() {
     ret.dark = Math.pow(Math.random(), 0.5);
 
     return ret;
+};
+
+BSWG.genMap_updateBosses = function(ret, eInfo) {
+
+    var withBoss = new Array();
+    for (var i=0; i<ret.zones.length; i++) {
+        if (ret.zones[i].boss) {
+            withBoss.push(ret.zones[i]);
+        }
+    }
+
+    withBoss.sort(function(a,b){
+        return ((a.minLevel + a.maxLevel) * 0.5) - ((b.minLevel + b.maxLevel) * 0.5);
+    });
+
+    for (var i=0; i<withBoss.length && i<eInfo.bosses.length; i++) {
+        withBoss[i].boss = eInfo.bosses[i];
+    }
 };
 
 BSWG.genMap_EnemyPlacement = function(ret, eInfo) {

@@ -529,10 +529,12 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
                 var text = info[0];
                 var rot = 0.0;
 
+                ctx.font = '11px Orbitron';
+
                 var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
-                var w = Math.floor(8 * 2 + ctx.textWidthB(text)+1.0);
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = info[2] ? '#777' : '#fff';
+                var w = Math.floor(6 + ctx.textWidth(text));
+                ctx.globalAlpha = 0.75;
+                ctx.fillStyle = info[2] ? '#777' : '#444';
                 ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
 
                 ctx.save();
@@ -541,9 +543,8 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
                 ctx.rotate(rot);
                 ctx.translate(0, 3);
 
-                ctx.font = '11px Orbitron';
                 ctx.globalAlpha = 1.0;
-                ctx.fillStyle = info[2] ? '#fff' : '#000';
+                ctx.fillStyle = info[2] ? '#6f6' : '#fff';
                 ctx.textAlign = 'center';
                 ctx.fillText(text, 0, 0);
                 ctx.textAlign = 'left';

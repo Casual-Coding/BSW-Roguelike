@@ -103,6 +103,9 @@ BSWG.camera = function() {
 BSWG.initCanvasContext = function(ctx) {
 
     ctx.fontSpacing = 1.0;
+    ctx.textWidth = function(text) {
+        return ctx.measureText(text).width;
+    };
     ctx.textWidthB = function(text) {
         var total = 0.0;
         for (var i=0; i<text.length; i++) {
