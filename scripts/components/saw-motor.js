@@ -15,9 +15,9 @@ BSWG.component_SawMotor = {
     ],
 
     sbadd: [
-        { title: 'Size 1', size: 1, value: 10 },
-        { title: 'Size 2', size: 2, value: 20 },
-        { title: 'Size 3', size: 3, value: 40 }
+        { title: 'Size 1', size: 1, value: 5 },
+        { title: 'Size 2', size: 2, value: 10 },
+        { title: 'Size 3', size: 3, value: 20 }
     ],
 
     sbkey: [

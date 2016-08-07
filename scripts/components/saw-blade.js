@@ -20,9 +20,9 @@ BSWG.component_SawBlade = {
     ],
 
     sbadd: [
-        { title: 'Size 1', size: 1, value: 20 },
-        { title: 'Size 2', size: 2, value: 40 },
-        { title: 'Size 3', size: 3, value: 80 }
+        { title: 'Size 1', size: 1, value: 10 },
+        { title: 'Size 2', size: 2, value: 20 },
+        { title: 'Size 3', size: 3, value: 40 }
     ],
 
     init: function(args) {

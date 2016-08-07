@@ -1121,12 +1121,16 @@ BSWG.pickEnemyLevel = function(zone, E) {
 BSWG.genMap_ComputeCompCount = function(zone, eInfo) {
 
     zone.compHist = {};
+    zone.compHistBoss = {};
 
-    var addEnemy = function(type) {
+    var addEnemy = function(type, boss) {
         var stats = BSWG.getEnemyStats(type); // cached
         for (var key in stats) {
             if (key.split(',')[0] !== 'cc') {
                 zone.compHist[key] = (zone.compHist[key] ? zone.compHist[key] : 0) + stats[key];
+                if (boss) {
+                    zone.compHistBoss[key] = (zone.compHistBoss[key] ? zone.compHistBoss[key] : 0) + stats[key];
+                }
             }
         }
     };
@@ -1134,7 +1138,7 @@ BSWG.genMap_ComputeCompCount = function(zone, eInfo) {
     if (zone.boss) {
         if (zone.boss.enemies) {
             for (var i=0; i<zone.boss.enemies.length; i++) {
-                addEnemy(zone.boss.enemies[i].type);
+                addEnemy(zone.boss.enemies[i].type, true);
             }
         }
     }
@@ -1169,6 +1173,7 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
     var maxLevel = zone.maxLevel + 1;
 
     var compHist = {};
+    var compHistBoss = {};
 
     for (var i=0; i<all.length; i++) {
         var Z = all[i];
@@ -1177,6 +1182,9 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
                 for (var key in Z.compHist) {
                     compHist[key] = (compHist[key] ? compHist[key] : 0) + Z.compHist[key];
                 }
+                for (var key in Z.compHistBoss) {
+                    compHistBoss[key] = (compHistBoss[key] ? compHistBoss[key] : 0) + Z.compHistBoss[key];
+                }
             }
         }
     }
@@ -1184,11 +1192,14 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
     var compVal = {};
     for (var key in compHist) {
         compVal[key] = BSWG.componentList.compStrValue(key);
+        if (compHistBoss[key] === compHist[key]) {
+            compVal[key] *= 1.75;
+        }
     }
 
     var list = [];
     for (var key in compHist) {
-        list.push([key, compVal[key] / Math.pow(compHist[key], 0.75), compVal[key], compHist[key]]);
+        list.push([key, compVal[key] / Math.pow(Math.max(compHist[key] - (compHistBoss[key] || 0.0), 1), 0.75), compVal[key], compHist[key]]);
     }
 
     list.sort(function(a,b){
@@ -1203,30 +1214,43 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
             cost: list[i][1],
             trade: []
         };
-        var cost = ex.cost;
-        for (var j=i+1; j<list.length; j++) {
-            if (ex.trade.length >= 3) {
+        Math.seedrandom(ex.key);
+        for (var k=0; k<100; k++) {
+            ex.trade = [];
+            var cost = ex.cost;
+            for (var j=i+1; j<list.length; j++) {
+                if (compHistBoss[list[j][0]] === compHist[list[j][0]]) {
+                    continue;
+                }
+                if (Math.random() > 0.5) {
+                    continue;
+                }
+                if (ex.trade.length >= 3) {
+                    break;
+                }
+                if (list[j][1] > cost*0.95) {
+                    continue;
+                }
+                var subex = {
+                    key: list[j][0],
+                    count: 0
+                };
+                while (cost >= list[j][1] && cost > (0.01 * ex.cost) && subex.count < 10) {
+                    cost -= list[j][1];
+                    subex.count += 1;
+                }
+                if (subex.count > 0) {
+                    ex.trade.push(subex);
+                }
+            }
+            if (cost < (ex.cost*0.25)) {
+                zone.exchanges.push(ex);
                 break;
             }
-            if (list[j][1] > cost*0.25) {
-                continue;
-            }
-            var subex = {
-                key: list[j][0],
-                count: 0
-            };
-            while (cost >= list[j][1] && cost > (0.01 * ex.cost) && subex.count < 10) {
-                cost -= list[j][1];
-                subex.count += 1;
-            }
-            if (subex.count > 0) {
-                ex.trade.push(subex);
-            }
-        }
-        if (ex.trade.length > 0) {
-            zone.exchanges.push(ex);
         }
     }
+
+    console.log(zone.exchanges);
 
 };
 
