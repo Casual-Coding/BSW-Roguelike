@@ -13,10 +13,14 @@ BSWG.component_Thruster = {
         'thrustKey',
         'size'
     ],
+    
+    sbkey: [
+        'size',
+    ],
 
     sbadd: [
-        { title: 'Size 1', size: 1 },
-        { title: 'Size 2', size: 2 },
+        { title: 'Size 1', size: 1, value: 4 },
+        { title: 'Size 2', size: 2, value: 20 },
     ],
 
     frontOffset: -Math.PI/2,

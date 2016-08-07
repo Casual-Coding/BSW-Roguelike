@@ -16,7 +16,7 @@ BSWG.component_Laser = {
     ],
 
     sbadd: [
-        { title: 'Add' }
+        { title: 'Add', value: 50 }
     ],
 
     frontOffset: Math.PI/2,

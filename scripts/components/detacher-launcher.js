@@ -14,10 +14,14 @@ BSWG.component_DetacherLauncher = {
         'launchKey'
     ],
 
+    sbkey: [
+        'size'
+    ],
+
     sbadd: [
-        { title: 'Size 1', size: 1 },
-        { title: 'Size 2', size: 2 },
-        { title: 'Size 3', size: 3 }
+        { title: 'Size 1', size: 1, value: 10 },
+        { title: 'Size 2', size: 2, value: 20 },
+        { title: 'Size 3', size: 3, value: 40 }
     ],
 
     frontOffset: Math.PI,

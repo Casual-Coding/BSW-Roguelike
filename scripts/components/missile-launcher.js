@@ -16,7 +16,7 @@ BSWG.component_MissileLauncher = {
     ],
 
     sbadd: [
-        { title: 'Add' }
+        { title: 'Add', value: 25 }
     ],
 
     frontOffset: Math.PI/2,

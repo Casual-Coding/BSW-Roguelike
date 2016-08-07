@@ -13,15 +13,20 @@ BSWG.component_Spikes = {
         'pike'
     ],
 
+    sbkey: [
+        'size',
+        'pike'
+    ],
+
     attStrength: 2.0,
 
     sbadd: [
-        { title: 'Spikes 1', size: 1, pike: false },
-        { title: 'Spikes 2', size: 2, pike: false },
-        { title: 'Spikes 3', size: 3, pike: false },
-        { title: 'Pike 1', size: 1, pike: true },
-        { title: 'Pike 2', size: 2, pike: true },
-        { title: 'Pike 3', size: 3, pike: true }
+        { title: 'Spikes 1', size: 1, pike: false, value: 5 },
+        { title: 'Spikes 2', size: 2, pike: false, value: 20 },
+        { title: 'Spikes 3', size: 3, pike: false, value: 50 },
+        { title: 'Pike 1', size: 1, pike: true, value: 5 },
+        { title: 'Pike 2', size: 2, pike: true, value: 20 },
+        { title: 'Pike 3', size: 3, pike: true, value: 50 }
     ],
 
     frontOffset: Math.PI/2 - Math.PI/16 - Math.PI/50,

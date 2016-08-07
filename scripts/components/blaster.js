@@ -16,7 +16,7 @@ BSWG.component_Blaster = {
     ],
 
     sbadd: [
-        { title: 'Add' }
+        { title: 'Add', value: 10 }
     ],
 
     frontOffset: Math.PI/2,

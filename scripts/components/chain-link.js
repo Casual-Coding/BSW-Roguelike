@@ -15,7 +15,7 @@ BSWG.component_ChainLink = {
     ],
 
     sbadd: [
-        { title: 'Add' }
+        { title: 'Add', value: 5 }
     ],
 
     frontOffset: 0.0,

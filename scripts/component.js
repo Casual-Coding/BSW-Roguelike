@@ -1723,6 +1723,33 @@ BSWG.componentList = new function () {
         return [];
     };
 
+    this.compStrValue = function(str) {
+        var tok = str.split(',');
+        var type = tok[0];
+        var desc = {};
+        for (var i=1; i<tok.length; i++) {
+            var tok2 = tok[i].split('=');
+            desc[tok2[0]] = eval(tok2[1]); // JSON.parse doesn't like strings?
+        }
+        var value = 0;
+        var tdesc = this.typeMap[type];
+        var found = false;
+        for (var k=0; k<tdesc.sbadd.length && !found; k++) {
+            var any = false;
+            for (var i=0; tdesc.sbkey && i<tdesc.sbkey.length && !any; i++) {
+                var key = tdesc.sbkey[i];
+                if (tdesc.sbadd[k][key] !== desc[key]) {
+                    any = true;
+                }
+            }
+            if (!any) {
+                found = true;
+                value = tdesc.sbadd[k].value || 0;
+            }
+        }
+        return value;
+    }
+
     this.loadScan = function(obj) {
 
         var ret = {};
@@ -1737,9 +1764,9 @@ BSWG.componentList = new function () {
             var key = C.type;
 
             var desc = this.typeMap[C.type];
-            if (desc.serialize) {
-                for (var j=0; j<desc.serialize.length; j++) {
-                    var k2 = desc.serialize[j];
+            if (desc.sbkey) {
+                for (var j=0; j<desc.sbkey.length; j++) {
+                    var k2 = desc.sbkey[j];
                     if (C.args[k2] || C.args[k2] == false) {
                         key += ',' + k2 + '=' + C.args[k2];
                     }

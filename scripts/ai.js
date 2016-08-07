@@ -1,5 +1,14 @@
 BSWG.enemyStats = {};
-BSWG.getEnemy = function(type) {
+BSWG.getEnemyStats = function(type) {
+    return BSWG.getEnemy(type, true);
+};
+BSWG.getEnemy = function(type, statsOnly) {
+
+    if (statsOnly) {
+        if (BSWG.enemyStats[type]) {
+            return BSWG.enemyStats[type];
+        }
+    }
 
     var estr = BSWG['ais_' + type];
     var eobj = estr ? JSON.parse(estr) : null;
@@ -8,6 +17,10 @@ BSWG.getEnemy = function(type) {
     if (BSWG.componentList && !stats && eobj) {
         stats = BSWG.componentList.loadScan(eobj);
         BSWG.enemyStats[type] = stats;
+    }
+
+    if (statsOnly) {
+        return stats;
     }
 
     var title = 'Unkown Enemy';

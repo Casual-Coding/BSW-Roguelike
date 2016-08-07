@@ -16,22 +16,29 @@ BSWG.component_Block = {
         'triangle'
     ],
 
+    sbkey: [
+        'width',
+        'height',
+        'armour',
+        'triangle'
+    ],
+
     sbadd: [
-        { title: 'Box 1x1', width: 1, height: 1, triangle: 0 },
-        { title: 'Box 2x2', width: 2, height: 2, triangle: 0 },
-        { title: 'Box 3x3', width: 3, height: 3, triangle: 0 },
-        { title: 'Box 1x2', width: 1, height: 2, triangle: 0 },
-        { title: 'Box 1x3', width: 1, height: 3, triangle: 0 },
-        { title: 'Box 2x3', width: 2, height: 3, triangle: 0 },
-        { title: 'Tri 1x1', width: 1, height: 1, triangle: 1 },
-        { title: 'Tri 2x2', width: 2, height: 2, triangle: 1 },
-        { title: 'Tri 3x3', width: 3, height: 3, triangle: 1 },
-        { title: 'Tri 1x2', width: 1, height: 2, triangle: 1 },
-        { title: 'Tri 2x1', width: 2, height: 1, triangle: 1 },
-        { title: 'Tri 1x3', width: 1, height: 3, triangle: 1 },
-        { title: 'Tri 3x1', width: 3, height: 1, triangle: 1 },
-        { title: 'Tri 2x3', width: 2, height: 3, triangle: 1 },
-        { title: 'Tri 3x2', width: 3, height: 2, triangle: 1 }
+        { title: 'Box 1x1', width: 1, height: 1, triangle: 0, armour: false, value: 1 },
+        { title: 'Box 2x2', width: 2, height: 2, triangle: 0, armour: false, value: 4 },
+        { title: 'Box 3x3', width: 3, height: 3, triangle: 0, armour: false, value: 9 },
+        { title: 'Box 1x2', width: 1, height: 2, triangle: 0, armour: false, value: 2 },
+        { title: 'Box 1x3', width: 1, height: 3, triangle: 0, armour: false, value: 3 },
+        { title: 'Box 2x3', width: 2, height: 3, triangle: 0, armour: false, value: 6 },
+        { title: 'Tri 1x1', width: 1, height: 1, triangle: 1, armour: false, value: 1 },
+        { title: 'Tri 2x2', width: 2, height: 2, triangle: 1, armour: false, value: 2 },
+        { title: 'Tri 3x3', width: 3, height: 3, triangle: 1, armour: false, value: 9 },
+        { title: 'Tri 1x2', width: 1, height: 2, triangle: 1, armour: false, value: 2 },
+        { title: 'Tri 2x1', width: 2, height: 1, triangle: 1, armour: false, value: 2 },
+        { title: 'Tri 1x3', width: 1, height: 3, triangle: 1, armour: false, value: 3 },
+        { title: 'Tri 3x1', width: 3, height: 1, triangle: 1, armour: false, value: 3 },
+        { title: 'Tri 2x3', width: 2, height: 3, triangle: 1, armour: false, value: 6 },
+        { title: 'Tri 3x2', width: 3, height: 2, triangle: 1, armour: false, value: 6 }
     ],
 
     init: function(args) {

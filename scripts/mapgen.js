@@ -63,15 +63,21 @@ BSWG.enemySettings = [
                     friend: false,
                     text: [
                         "I hear you've been destroying my drone ships!",
-                        "I'm going to destroy you!"
+                        "Have you heard that I'm going to kill you?",
+                        "Because I'm going to kill you!",
+                        "PREPARE TO DIE!"
                     ]
                 },
                 wdialog: {
                     who: 161,
-                    friend: false,
+                    friend: true,
                     text: [
-                        "Arrrrrrrrrggggg!!!!!!",
-                        "The Zef Collective will have revenge on you!",
+                        "Ouch... Good thing I escaped my ship just in time...",
+                        "What? There's only one of you? Damn, I almost killed you...",
+                        "You really should make clones of yourself... no?",
+                        "Why not? The universe is a dangerous place! Look what happened to dad...",
+                        "I guess owe you, you know, for allmost whiping you out...",
+                        { text: "Tell you what, come here any time and I'll trade with you... Just don't tell any other Zef you were here!", btnHighlight: "trade" }
                     ]
                 }
             },
@@ -875,6 +881,13 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         ret.enemies_placed = true;
     }
 
+    for (var i=0; i<ret.zones.length; i++) {
+        BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo);
+    }
+    for (var i=0; i<ret.zones.length; i++) {
+        BSWG.genMap_ComputeTrading(ret.zones[i], ret.zones, ret.eInfo);
+    }
+
     return ret;
 
 };
@@ -1103,6 +1116,87 @@ BSWG.pickEnemyLevel = function(zone, E) {
     else {
         return possible[(~~(Math.random()*1000000)) % possible.length];
     }
+};
+
+BSWG.genMap_ComputeCompCount = function(zone, eInfo) {
+
+    zone.compHist = {};
+
+    var addEnemy = function(type) {
+        var stats = BSWG.getEnemyStats(type); // cached
+        for (var key in stats) {
+            if (key.split(',')[0] !== 'cc') {
+                zone.compHist[key] = (zone.compHist[key] ? zone.compHist[key] : 0) + stats[key];
+            }
+        }
+    };
+
+    if (zone.boss) {
+        if (zone.boss.enemies) {
+            for (var i=0; i<zone.boss.enemies.length; i++) {
+                addEnemy(zone.boss.enemies[i].type);
+            }
+        }
+    }
+    else if (zone.enemies) {
+        for (var i=0; i<zone.enemies.length; i++) {
+            var E = zone.enemies[i];
+            if (E.max) {
+                for (var j=0; j<E.max; j++) {
+                    addEnemy(E.type);
+                }
+            }
+            else {
+                addEnemy(E.type);
+            }
+            if (E.with) {
+                for (var j=0; j<E.with.length; j++) {
+                    addEnemy(E.with[j]);
+                }
+            }
+        }
+    }
+
+};
+
+BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
+
+    if (!zone.boss && !zone.safe) {
+        return;
+    }
+
+    var minLevel = Math.max(zone.minLevel - 2, 0);
+    var maxLevel = zone.maxLevel + 1;
+
+    var compHist = {};
+
+    for (var i=0; i<all.length; i++) {
+        var Z = all[i];
+        if (Z.maxLevel >= minLevel && Z.minLevel <= maxLevel) {
+            if (Z.compHist) {
+                for (var key in Z.compHist) {
+                    compHist[key] = (compHist[key] ? compHist[key] : 0) + Z.compHist[key];
+                }
+            }
+        }
+    }
+
+    var compVal = {};
+    for (var key in compHist) {
+        compVal[key] = BSWG.componentList.compStrValue(key);
+    }
+
+    var list = [];
+    for (var key in compHist) {
+        list.push([key, compVal[key] / compHist[key], compVal[key], compHist[key]]);
+    }
+
+    list.sort(function(a,b){
+        return b[1] - a[1];
+    });
+
+    console.log(list);
+
 };
 
 BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {

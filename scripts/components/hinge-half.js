@@ -15,11 +15,16 @@ BSWG.component_HingeHalf = {
         'motor'
     ],
 
+    sbkey: [
+        'size',
+        'motor'
+    ],
+
     sbadd: [
-        { title: 'Motor 1', size: 1, motor: true },
-        { title: 'Motor 2', size: 2, motor: true },
-        { title: 'Hinge 1', size: 1, motor: false },
-        { title: 'Hinge 2', size: 2, motor: false }
+        { title: 'Motor 1', size: 1, motor: true, value: 10 },
+        { title: 'Motor 2', size: 2, motor: true, value: 20 },
+        { title: 'Hinge 1', size: 1, motor: false, value: 5 },
+        { title: 'Hinge 2', size: 2, motor: false, value: 10 }
     ],
 
     frontOffset: Math.PI,
