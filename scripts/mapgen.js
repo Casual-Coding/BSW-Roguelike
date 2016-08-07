@@ -1188,14 +1188,45 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
 
     var list = [];
     for (var key in compHist) {
-        list.push([key, compVal[key] / compHist[key], compVal[key], compHist[key]]);
+        list.push([key, compVal[key] / Math.pow(compHist[key], 0.75), compVal[key], compHist[key]]);
     }
 
     list.sort(function(a,b){
         return b[1] - a[1];
     });
 
-    console.log(list);
+    zone.exchanges = [];
+
+    for (var i=0; i<list.length; i++) {
+        var ex = {
+            key: list[i][0],
+            cost: list[i][1],
+            trade: []
+        };
+        var cost = ex.cost;
+        for (var j=i+1; j<list.length; j++) {
+            if (ex.trade.length >= 3) {
+                break;
+            }
+            if (list[j][1] > cost*0.25) {
+                continue;
+            }
+            var subex = {
+                key: list[j][0],
+                count: 0
+            };
+            while (cost >= list[j][1] && cost > (0.01 * ex.cost) && subex.count < 10) {
+                cost -= list[j][1];
+                subex.count += 1;
+            }
+            if (subex.count > 0) {
+                ex.trade.push(subex);
+            }
+        }
+        if (ex.trade.length > 0) {
+            zone.exchanges.push(ex);
+        }
+    }
 
 };
 
