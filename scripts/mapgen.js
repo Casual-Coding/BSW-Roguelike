@@ -1206,7 +1206,20 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
         return b[1] - a[1];
     });
 
-    zone.exchanges = [];
+    zone.compValList = [];
+    for (var i=0; i<list.length; i++) {
+        zone.compValList.push({
+            key: list[0],
+            value: list[1],
+            rare: compHist[list[0]] && (compHistBoss[list[0]] === compHist[list[0]])
+        });
+    }
+    zone.compValLookup = {};
+    for (var i=0; i<zone.compValList.length; i++) {
+        zone.compValLookup[zone.compValList[i].key] = zone.compValList[i];
+    }
+
+    /*zone.exchanges = [];
 
     for (var i=0; i<list.length; i++) {
         var ex = {
@@ -1250,7 +1263,7 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
         }
     }
 
-    console.log(zone.exchanges);
+    console.log(zone.exchanges);*/
 
 };
 

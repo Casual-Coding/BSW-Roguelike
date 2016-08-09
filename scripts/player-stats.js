@@ -417,6 +417,10 @@ BSWG.playerStats = function(load) {
         }
     }
 
+    var EQ = function(a,b) {
+        return (a === b) || (typeof a === 'undefined') || (typeof b === 'undefined');
+    };
+
     this.addStore = function (comp, inc) {
         inc = inc || 1;
         var sbt = BSWG.componentList.sbTypes;
@@ -428,12 +432,10 @@ BSWG.playerStats = function(load) {
                 var obj = sbt[i].sbadd[j];
                 var nobj = {};
                 var eq = true;
-                for (var key in obj) {
-                    if (key !== 'title' && key !== 'count') {
-                        if (obj[key] !== comp[key]) {
-                            eq = false;
-                        }
-                        nobj[key] = obj[key];
+                for (var k=0; sbt[i].sbkey && k<sbt[i].sbkey.length; k++) {
+                    var key = sbt[i].sbkey[k];
+                    if (!EQ(obj[key], comp[key])) {
+                        eq = false;
                     }
                 }
                 if (eq) {
@@ -446,8 +448,9 @@ BSWG.playerStats = function(load) {
                         for (var k=0; k<this.store.length; k++) {
                             if (this.store[k].type === comp.type) {
                                 var eq2 = true;
-                                for (var key in obj) {
-                                    if (key !== 'title' && key !== 'count' && obj[key] !== this.store[k][key]) {
+                                for (var k2=0; sbt[i].sbkey && k2<sbt[i].sbkey.length; k2++) {
+                                    var key = sbt[i].sbkey[k2];
+                                    if (!EQ(obj[key], this.store[k][key])) {
                                         eq2 = false;
                                     }
                                 }
