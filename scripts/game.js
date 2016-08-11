@@ -828,12 +828,19 @@ BSWG.game = new function(){
                         click: function (me) {
                             me.selected = !me.selected;
                             self.storeMode = me.selected;
+                            if (self.storeMode && self.tradeMode) {
+                                self.tradeMode = false;
+                                self.tradeBtn.selected = false;
+                                if (self.tradeWin) {
+                                    self.tradeWin.reset();
+                                }
+                            }
                         }
                     });
                     this.tradeBtn = new BSWG.uiControl(BSWG.control_Button, {
                         x: 10, y: 10,
                         w: 64, h: 65,
-                        text: BSWG.render.images['store-mode'],
+                        text: '',
                         selected: this.tradeMode,
                         click: function (me) {
                             me.selected = !me.selected;
