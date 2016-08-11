@@ -1209,9 +1209,9 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
     zone.compValList = [];
     for (var i=0; i<list.length; i++) {
         zone.compValList.push({
-            key: list[0],
-            value: list[1],
-            rare: compHist[list[0]] && (compHistBoss[list[0]] === compHist[list[0]])
+            key: list[i][0],
+            value: list[i][1],
+            rare: compHist[list[i][0]] && (compHistBoss[list[i][0]] === compHist[list[i][0]])
         });
     }
     zone.compValLookup = {};

@@ -421,6 +421,18 @@ BSWG.playerStats = function(load) {
         return (a === b) || (typeof a === 'undefined') || (typeof b === 'undefined');
     };
 
+    this.addStoreKey = function (key, inc) {
+        var tok = key.split(',');
+        var type = tok[0];
+        var comp = {};
+        for (var i=1; i<tok.length; i++) {
+            var tok2 = tok[i].split('=');
+            comp[tok2[0]] = eval(tok2[1]); // JSON.parse doesn't like strings?
+        }
+        comp.type = type;
+        this.addStore(comp, inc);
+    };
+
     this.addStore = function (comp, inc) {
         inc = inc || 1;
         var sbt = BSWG.componentList.sbTypes;
@@ -437,6 +449,7 @@ BSWG.playerStats = function(load) {
                     if (!EQ(obj[key], comp[key])) {
                         eq = false;
                     }
+                    nobj[key] = comp[key];
                 }
                 if (eq) {
                     nobj.type = comp.type;

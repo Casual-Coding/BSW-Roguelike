@@ -1139,7 +1139,7 @@ BSWG.control_CompPalette = {
 
     update: function () {
 
-        var toX = 2048;
+        var toX = BSWG.render.viewport.w+1;
 
         if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode && !BSWG.game.battleMode)) {
             toX = BSWG.render.viewport.w - (this.w);
@@ -1193,6 +1193,689 @@ BSWG.control_CompPalette = {
     },
 
 };
+
+BSWG.control_TradeWindow = {
+
+    init: function (args) {
+
+    },
+
+    destroy: function () {
+        if (this.mtButton) {
+            this.mtButton.remove();
+            this.mtButton.destroy();
+            this.mtButton = null;
+        }
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
+    render: function (ctx, viewport) {
+
+        var aw = this.w, ah = this.h;
+
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+            }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            var self = this;
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var H = BSWG.ui_HM(w, h, aw, ah);
+
+                var _w = H.r(0) - H.l(0);
+                var _h = H.b(0) - H.t(0);
+
+                var bfr = _w * 0.01;
+                var topSize = _h * 0.2;
+                var bsize = 32;
+
+                H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+                H.plate(H.l(bfr), H.t(bfr), H.l(bfr+topSize) - H.l(bfr), H.t(bfr+topSize)-H.t(bfr), 0.35, 0.15); // 0 (Portrait)
+                H.plate(H.l(bfr+topSize), H.t(bfr), H.r(bfr) - H.l(bfr+topSize), H.t(bfr+topSize*2/3)-H.t(bfr), 0.35, 0.2); // 1 (Message box)
+                H.plate(H.l(bfr+topSize), H.t(bfr+topSize*2/3), H.r(bfr) - H.l(bfr+topSize), H.t(bfr+topSize)-H.t(bfr+topSize*2/3), 0.35, 0.2); // 2 (Value meter)
+                H.plate(H.l(bfr), H.t(bfr+topSize+bfr/2), H.l(_w/2-bfr/2) - H.l(bfr), H.b(bfr+bsize+bfr) - H.t(bfr+topSize+bfr), 0.35, 0.225); // 3 (Left pane)
+                H.plate(H.l(_w/2), H.t(bfr+topSize+bfr/2), H.r(bfr) - H.l(_w/2), H.b(bfr+bsize+bfr) - H.t(bfr+topSize+bfr), 0.35, 0.225); // 4 (Right pane)
+                H.plate(H.l(_w/2-_w*0.08), H.b(bfr+bsize+bfr+bfr/2), _w*0.16, bsize+bfr+bfr, 0.35, 0.2); // 5 (Make trade button)
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
+
+                self.hudBtn = H.hudBtn;
+                self.hudHM = H;
+
+            });
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.05, // z
+                [1.1,1.1,1.1,1], // color
+                false, // split
+                true // moving
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+            ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
+        }
+
+        if (this.hudBtn && this.hudHM && this.compValList && this.compValLookup) {
+            var self = this;
+            var hx = function(v) {
+                var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));
+                return self.w*t + self.p.x;
+            };
+            var hy = function(v) {
+                var t = (v - self.hudHM.t(0)) / (self.hudHM.b(0) - self.hudHM.t(0));
+                return self.h*t + self.p.y;
+            };
+
+            if (this.portrait) {
+                ctx.drawImage(this.portrait, 0, 0, this.portrait.width, this.portrait.height,
+                              hx(this.hudBtn[0][0]) + 6, hy(this.hudBtn[0][1]) + 6,
+                              hx(this.hudBtn[0][2]) - hx(this.hudBtn[0][0]) - 12,
+                              hy(this.hudBtn[0][3]) - hy(this.hudBtn[0][1]) - 12);
+            }
+
+
+            var x = hx(this.hudBtn[1][0])+12,
+                y = hy(this.hudBtn[1][1])+20+8;
+            var w = hx(this.hudBtn[1][2])-x-6,
+                h = hy(this.hudBtn[1][3])-y-12;
+
+            var fs = Math.min(~~(h * 0.3), 20);
+            ctx.font = fs + 'px Orbitron';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#88f';
+            ctx.strokeStyle = '#226';
+
+            var text = this.text.substring(0, Math.min(~~((Date.timeStamp() - this.startTime) * 30), this.text.length));
+            if (this.lastText !== text && text.length > 0) {
+                var ch = text.charAt(text.length-1);
+                if (ch !== ' ' && ch !== '\n' && ch !== '\t' && ch !== '.') {
+                    new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                }
+            }
+            this.lastText = text;
+            var lines = text.split('\n');
+            var y1 = y;
+            for (var i=0; i<lines.length; i++) {
+                var words = lines[i].split(' ');
+                var csent = new Array();
+                for (var j=0; j<words.length; j++) {
+                    var t2 = csent.join(' ');
+                    var t3 = t2 + ' ' + words[j];
+                    if (ctx.textWidthB(t3) >= w) {
+                        ctx.fillTextB(t2, x, y1);
+                        y1 += fs + 4;
+                        csent.length = 0;
+                    }
+                    csent.push(words[j]);
+                }
+                if (csent.length) {
+                    ctx.fillTextB(csent.join(' '), x, y1);
+                }
+                y1 += fs + 4;
+            }
+
+            var x = hx(this.hudBtn[2][0])+4,
+                y = hy(this.hudBtn[2][1])+4;
+            var w = hx(this.hudBtn[2][2])-x-8,
+                h = hy(this.hudBtn[2][3])-y-8;
+
+            this.percent += (this.toPercent - this.percent) * Math.min(1, BSWG.render.dt) * 4.0;
+
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+            ctx.fillRect(x+8, y+8, (w-16) * Math.min(this.percent / 100, 1), h-8);
+
+            var fs = Math.min(~~(h * 0.5), 20);
+            ctx.font = fs + 'px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#8f8';
+            ctx.strokeStyle = '#666';
+
+            ctx.fillTextB(Math.floor(this.percent*10+0.5)/10 + '%', x + w/2, y + h - fs*0.325);
+
+            var x = hx(this.hudBtn[3][0])+4,
+                y = hy(this.hudBtn[3][1])+4;
+            var w = hx(this.hudBtn[3][2])-x-8,
+                h = hy(this.hudBtn[3][3])-y-8;
+
+            var sh = h / 8;
+
+            if (this.want) {
+
+                var y0 = y + 2;
+                for (var i=this.scrollLeft; i<(this.give.length+1) && i<(this.scrollLeft+8); i++) {
+                    if (this.hoverLeft === i && this.hoverLeft !== null) {
+                        ctx.fillStyle = '#888';
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                    }
+                    if ((i === this.scrollLeft && i > 0) || (i === (this.scrollLeft+7) && i<(this.give.length))) {
+                        ctx.fillStyle = 'rgba(64, 64, 64, 0.5)';
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        var fs = Math.min(~~(sh * 0.35), 20);
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#fff';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillTextB('More', x+w/2, y0 + sh - fs*1.25);
+                    }
+                    else {
+                        var it = i === 0 ? this.want : this.give[i-1];
+                        ctx.fillStyle = 'rgba(255, 127, 0, 0.5)';
+                        if (!it.rare) {
+                            var t = Math.pow(Math.clamp(it.value / 100, 0, 1), 0.135);
+                            ctx.fillStyle = 'rgba(' + Math.floor(255*t) + ',0,' + Math.floor(255*(1-t)) + ',0.5)';
+                        }
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        var fs = Math.min(~~(sh * 0.35), 20);
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = '#fff';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = '#bbb';
+                        var count = i === 0 ? this.wantCount : it.count;
+                        ctx.fillTextB('' + count + 'x', x+w-18, y0 + sh - fs*1.25)
+                        if (i > 0) {
+                            ctx.textAlign = 'right';
+                            ctx.fillStyle = '#ffb';
+                            ctx.fillTextB(Math.clamp(Math.floor(count*100*it.value/this.want.value * 10 + 0.5) / 10, 0, 100*100) + '%', x+w-18-fs*6, y0 + sh - fs*1.25);
+                        }
+                        else {
+                            ctx.textAlign = 'right';
+                            ctx.fillStyle = '#fbb';
+                            ctx.fillTextB('Cancel', x+w-18-fs*6, y0 + sh - fs*1.25);   
+                        }
+                        if (count <= 0) {
+                            ctx.fillStyle = 'rgba(0,0,0,.35)';
+                            ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        }
+                        if (i === 0) {
+                            ctx.strokeStyle = '#aaa';
+                            ctx.beginPath();
+                            ctx.moveTo(x+8, y0+sh+2);
+                            ctx.lineTo(x+8+w-12, y0+sh+2);
+                            ctx.closePath();
+                            ctx.stroke();
+                        }
+                    }
+                    y0 += sh;
+                }
+            }
+            else {
+
+                var y0 = y + 2;
+                for (var i=this.scrollLeft; i<this.compValList.length && i<(this.scrollLeft+8); i++) {
+                    if (this.hoverLeft === i && this.hoverLeft !== null) {
+                        ctx.fillStyle = '#888';
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                    }
+                    if ((i === this.scrollLeft && i > 0) || (i === (this.scrollLeft+7) && i<(this.compValList.length-1))) {
+                        ctx.fillStyle = 'rgba(64, 64, 64, 0.5)';
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        var fs = Math.min(~~(sh * 0.35), 20);
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#fff';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillTextB('More', x+w/2, y0 + sh - fs*1.25);
+                    }
+                    else {
+                        var it = this.compValList[i];
+                        ctx.fillStyle = 'rgba(255, 127, 0, 0.5)';
+                        if (!it.rare) {
+                            var t = Math.pow(Math.clamp(it.value / 100, 0, 1), 0.135);
+                            ctx.fillStyle = 'rgba(' + Math.floor(255*t) + ',0,' + Math.floor(255*(1-t)) + ',0.5)';
+                        }
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        var fs = Math.min(~~(sh * 0.35), 20);
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = '#fff';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
+                    }
+                    y0 += sh;
+                }
+            }
+
+            var x = hx(this.hudBtn[4][0])+4,
+                y = hy(this.hudBtn[4][1])+4;
+            var w = hx(this.hudBtn[4][2])-x-8,
+                h = hy(this.hudBtn[4][3])-y-8;
+
+            var sh = h / 8;
+
+            if (this.want) {
+
+                var y0 = y + 2;
+                for (var i=this.scrollRight; i<this.playerCompList.length && i<(this.scrollRight+8); i++) {
+                    if (this.hoverRight === i && this.hoverRight !== null) {
+                        ctx.fillStyle = '#888';
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                    }
+                    if ((i === this.scrollRight && i > 0) || (i === (this.scrollRight+7) && i<(this.playerCompList.length-1))) {
+                        ctx.fillStyle = 'rgba(64, 64, 64, 0.5)';
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        var fs = Math.min(~~(sh * 0.35), 20);
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#fff';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillTextB('More', x+w/2, y0 + sh - fs*1.25);
+                    }
+                    else {
+                        var it = this.playerCompList[i];
+                        ctx.fillStyle = 'rgba(255, 127, 0, 0.5)';
+                        if (!it.rare) {
+                            var t = Math.pow(Math.clamp(it.value / 100, 0, 1), 0.135);
+                            ctx.fillStyle = 'rgba(' + Math.floor(255*t) + ',0,' + Math.floor(255*(1-t)) + ',0.5)';
+                        }
+                        ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        var fs = Math.min(~~(sh * 0.35), 20);
+                        ctx.font = fs + 'px Orbitron';
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = '#fff';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = '#bbb';
+                        ctx.fillTextB('' + it.count + 'x', x+w-18, y0 + sh - fs*1.25)
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = '#ffb';
+                        ctx.fillTextB(Math.clamp(Math.floor(100*it.value/this.want.value * 10 + 0.5) / 10, 0, 100*100) + '%', x+w-18-fs*6, y0 + sh - fs*1.25);
+                        if (it.count <= 0) {
+                            ctx.fillStyle = 'rgba(0,0,0,.35)';
+                            ctx.fillRect(x+8, y0+4, w-12, sh-8);
+                        }
+                    }
+                    y0 += sh;
+                }
+            }
+
+        }
+
+        ctx.font = '16px Orbitron';
+
+        ctx.fillStyle = 'rgba(50,50,50,0.5)';
+
+        ctx.lineWidth = 1.0;
+
+        ctx.textAlign = 'left';
+
+        ctx.globalAlpha = 1.0;
+
+    },
+
+    update: function () {
+
+        var self = this;
+        if (!this.mtButton) {
+            this.mtButton = new BSWG.uiControl(BSWG.control_Button, {
+                x: 10, y: 10,
+                w: 64, h: 65,
+                text: 'Make trade!',
+                selected: true,
+                click: function (me) {
+                    if (self.willTrade && self.wantCount) {
+                        self.makeTrade();
+                    }
+                }
+            });
+        }
+
+        var toY = 2048;
+
+        if (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.tradeMode) {
+            toY = BSWG.game.hudY(BSWG.game.tradeWindowPos[1]);
+        }
+
+        this.p.x = BSWG.game.hudX(BSWG.game.tradeWindowPos[0]);
+        this.p.y += (toY - this.p.y) * BSWG.render.dt * 32.0;
+
+        this.w = BSWG.game.hudX(BSWG.game.tradeWindowPos[2]) - BSWG.game.hudX(BSWG.game.tradeWindowPos[0]);
+        this.h = BSWG.game.hudY(BSWG.game.tradeWindowPos[3]) - BSWG.game.hudY(BSWG.game.tradeWindowPos[1]);
+
+        this.hoverLeft = this.hoverRight = null;
+
+        if (this.hudBtn && this.hudHM && this.compValList && this.compValLookup) {
+            var self = this;
+            var hx = function(v) {
+                var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));
+                return self.w*t + self.p.x;
+            };
+            var hy = function(v) {
+                var t = (v - self.hudHM.t(0)) / (self.hudHM.b(0) - self.hudHM.t(0));
+                return self.h*t + self.p.y;
+            };
+
+            this.mtButton.p.x = hx(this.hudBtn[5][0]);
+            this.mtButton.p.y = hy(this.hudBtn[5][1]);
+            this.mtButton.w = hx(this.hudBtn[5][2]) - this.mtButton.p.x;
+            this.mtButton.h = hy(this.hudBtn[5][3]) - this.mtButton.p.y;
+
+            if (this.mouseIn) {
+
+                var mx = BSWG.input.MOUSE('x');// - this.p.x;
+                var my = BSWG.input.MOUSE('y');// - this.p.y;
+
+                var x = hx(this.hudBtn[3][0])+4,
+                    y = hy(this.hudBtn[3][1])+4;
+                var w = hx(this.hudBtn[3][2])-x-8,
+                    h = hy(this.hudBtn[3][3])-y-8;
+
+                var sh = h / 8;
+
+                if (this.want) {
+
+                    var y0 = y + 2;
+                    for (var i=this.scrollLeft; i<(this.give.length+1) && i<(this.scrollLeft+8); i++) {
+                        if (mx >= (x+8) && mx < (x+8+w-12) && my >= (y0+4) && my < (y0+4+sh-8)) {
+                            this.hoverLeft = i;
+                            if (BSWG.input.MOUSE_RELEASED('left')) {
+                                if ((i === this.scrollLeft && i > 0) || (i === (this.scrollLeft+7) && i<(this.give.length))) {
+                                    this.lastScrollLeft = Date.timeStamp();
+                                    if (i === this.scrollLeft && i > 0) {
+                                        this.scrollLeft -= 6;
+                                        if (this.scrollLeft < 0)  {
+                                            this.scrollLeft = 0;
+                                        }
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                    }
+                                    else {
+                                        this.scrollLeft += 6;
+                                        if (this.scrollLeft > this.give.length-6) {
+                                            this.scrollLeft = Math.max(this.give.length-6, 0);
+                                        }
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                    }
+                                }
+                                else if (!this.lastScrollLeft || (Date.timeStamp() - this.lastScrollLeft) > 0.75) {
+                                    new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                    if (i === 0) {
+                                        this.want = null;
+                                        this.scrollLeft = this.lScrollLeft;
+                                        this.setPercent(0.0);
+                                        this.say(this.initMsgs[(~~(Math.random()*100000)) % this.initMsgs.length]);
+                                    }
+                                    else {
+                                        var it = this.give[i-1];
+                                        if (it) {
+                                            it.count -= 1;
+                                            for (var j=0; j<this.playerCompList.length; j++) {
+                                                if (this.playerCompList[j].key === it.key) {
+                                                    this.playerCompList[j].count += 1;
+                                                    break;
+                                                }
+                                            }
+                                            if (it.count <= 0) {
+                                                this.give.splice(i-1, 1);
+                                                if (this.scrollLeft > this.give.length-6) {
+                                                    this.scrollLeft = Math.max(this.give.length-6, 0);
+                                                }
+                                                this.updateValue();
+                                                break;
+                                            }
+                                            this.updateValue();
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        y0 += sh;
+                    }
+
+                }
+                else {
+
+                    var y0 = y + 2;
+                    for (var i=this.scrollLeft; i<this.compValList.length && i<(this.scrollLeft+8); i++) {
+                        if (mx >= (x+8) && mx < (x+8+w-12) && my >= (y0+4) && my < (y0+4+sh-8)) {
+                            this.hoverLeft = i;
+                            if (BSWG.input.MOUSE_RELEASED('left')) {
+                                if ((i === this.scrollLeft && i > 0) || (i === (this.scrollLeft+7) && i<(this.compValList.length-1))) {
+                                    this.lastScrollLeft = Date.timeStamp();
+                                    if (i === this.scrollLeft && i > 0) {
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                        this.scrollLeft -= 6;
+                                        if (this.scrollLeft < 0)  {
+                                            this.scrollLeft = 0;
+                                        }
+                                    }
+                                    else {
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                        this.scrollLeft += 6;
+                                        if (this.scrollLeft > this.compValList.length-7) {
+                                            this.scrollLeft = this.compValList.length-7;
+                                        }
+                                    }
+                                }
+                                else if (!this.lastScrollLeft || (Date.timeStamp() - this.lastScrollLeft) > 0.75) {
+                                    this.want = this.compValList[i];
+                                    this.lScrollLeft = this.scrollLeft;
+                                    this.scrollLeft = 0;
+                                    this.give = [];
+                                    this.resetPCL();
+                                    this.say((this.want.rare ? "Excellent choice, w" : "W") + "hat are you willing to trade?");
+                                    new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                }
+                            }
+                            break;
+                        }
+                        y0 += sh;
+                    }
+                }
+
+                var x = hx(this.hudBtn[4][0])+4,
+                    y = hy(this.hudBtn[4][1])+4;
+                var w = hx(this.hudBtn[4][2])-x-8,
+                    h = hy(this.hudBtn[4][3])-y-8;
+
+                var sh = h / 8;
+
+                if (this.want) {
+                    var y0 = y + 2;
+                    for (var i=this.scrollRight; i<this.playerCompList.length && i<(this.scrollRight+8); i++) {
+                        if (mx >= (x+8) && mx < (x+8+w-12) && my >= (y0+4) && my < (y0+4+sh-8)) {
+                            this.hoverRight = i;
+                            if (BSWG.input.MOUSE_RELEASED('left')) {
+                                if ((i === this.scrollRight && i > 0) || (i === (this.scrollRight+7) && i<(this.playerCompList.length-1))) {
+                                    this.lastScrollRight = Date.timeStamp();
+                                    if (i === this.scrollRight && i > 0) {
+                                        this.scrollRight -= 6;
+                                        if (this.scrollRight < 0)  {
+                                            this.scrollRight = 0;
+                                        }
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                    }
+                                    else {
+                                        this.scrollRight += 6;
+                                        if (this.scrollRight > this.playerCompList.length-7) {
+                                            this.scrollRight = this.playerCompList.length-7;
+                                        }
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                    }
+                                }
+                                else if (!this.lastScrollRight || (Date.timeStamp() - this.lastScrollRight) > 0.75) {
+                                    var it = this.playerCompList[i];
+                                    if (it && it.count > 0) {
+                                        it.count -= 1;
+                                        var ob = null;
+                                        for (var j=0; j<this.give.length; j++) {
+                                            if (this.give[j].key === it.key) {
+                                                ob = this.give[j];
+                                            }
+                                        }
+                                        if (!ob) {
+                                            ob = deepcopy(it);
+                                            this.give.push(ob);
+                                            ob.count = 0;
+                                        }
+                                        ob.count += 1;
+                                        new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
+                                        this.updateValue();
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        y0 += sh;
+                    }             
+                }
+            }
+        }
+
+        if (this.mtButton && this.willTrade) {
+            this.mtButton.flashing = true;
+        }
+        else {
+            this.mtButton.p.y = BSWG.render.viewport.h + 2;
+            this.mtButton.flashing = false;
+        }
+
+    },
+
+    initMsgs: [
+        "How can I help you?",
+        "Need anything?",
+        "I've got just the thing...",
+        "Anything you need, we can trade for it!"
+    ],
+
+    say: function(text) {
+
+        this.text = text;
+        this.startTime = Date.timeStamp();
+
+    },
+
+    setPercent: function(per) {
+
+        this.toPercent = per;
+
+    },
+
+    makeTrade: function () {
+        if (this.willTrade && this.wantCount && this.give && this.want && this.give.length && BSWG.game.xpInfo) {
+            new BSWG.soundSample().play('trade', null, 0.15, (Math.random() * 0.01 + 0.99));
+            BSWG.game.xpInfo.addStoreKey(this.want.key, this.wantCount);
+            for (var i=0; i<this.give.length; i++) {
+                BSWG.game.xpInfo.addStoreKey(this.give[i].key, -this.give[i].count);
+            }
+            this.reset("Thank you! Need anything else?");
+        }
+    },
+
+    updateValue: function () {
+
+        var owt = this.willTrade;
+        var lcount = this.wantCount;
+        this.willTrade = false;
+
+        var value = 0.0;
+        for (var i=0; i<this.give.length; i++) {
+            value += this.give[i].count * this.give[i].value;
+        }
+        if (this.want) {
+            var percent = value / this.want.value;
+            var count = Math.floor(percent);
+            this.wantCount = Math.clamp(count, 1, 100);
+            this.setPercent(Math.clamp(percent*100, 0, 100*100));
+
+            if (percent >= 1) {
+                this.willTrade = true;
+            }
+
+            if (owt !== this.willTrade || lcount !== this.wantCount) {
+                if (this.willTrade) {
+                    if (count > 1) {
+                        this.say("I'll give you " + this.wantCount + '!');
+                    }
+                    else {
+                        this.say("Looks like a good trade to me!");
+                    }
+                }
+                else {
+                    this.say("Going to need more than that.");
+                }
+            }
+        }
+        else {
+            this.setPercent(0);
+        }
+
+    },
+
+    resetPCL: function () {
+        this.playerCompList = [];
+        for (var i=0; i<this.compValList.length; i++) {
+            var it = this.compValList[i];
+            var count = BSWG.componentList.compStrCount(it.key);
+            if (count > 0) {
+                var ob = deepcopy(it);
+                ob.count = count;
+                this.playerCompList.push(ob);
+            }
+        }
+        this.give = [];
+        this.setPercent(0.0);
+        this.willTrade = false;
+    },
+
+    reset: function (msg) {
+
+        this.compValList = (BSWG.game.inZone ? BSWG.game.inZone.compValList : null) || [];
+        this.compValLookup = (BSWG.game.inZone ? BSWG.game.inZone.compValLookup : null) || [];
+        this.compName = {};
+        for (var i=0; i<this.compValList.length; i++) {
+            var it = this.compValList[i];
+            this.compName[it.key] = BSWG.componentList.compStrName(it.key);
+        }
+        this.resetPCL();
+        this.scrollLeft = this.scrollRight = 0;
+        this.hoverLeft = this.hoverRight = null;
+        this.want = null;
+        this.wantCount = 1;
+        this.give = [];
+        this.percent = 0;
+        this.willTrade = false;
+        this.setPercent(0.0);
+        this.say(msg ? msg : this.initMsgs[(~~(Math.random()*100000)) % this.initMsgs.length]);
+
+    }
+
+};
+
 
 BSWG.ui_3dScreen = function(p, z) {
     return BSWG.render.unproject3D(p, z || 0.0).THREE(z || 0.0);

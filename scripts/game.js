@@ -59,6 +59,20 @@ BSWG.game = new function(){
                     self.hudDlgX1 = mmsize*sc;
                     self.hudDlgX2 = w/2-(bfr+bsz*2);
 
+                    self.tradeWindowPos = [
+                        mmsize*sc + bfr,
+                        48 + bfr,
+                        w - (mmsize*sc + bfr),
+                        h - hh - bfr
+                    ];
+                    self.tradeButtonPos = [
+                        w/2-(bfr+bsz*2) - bsz,
+                        h-(bsz+bfr*2) - bsz,
+                        0, 0
+                    ];
+                    self.tradeButtonPos[2] = self.tradeButtonPos[0] + bsz;
+                    self.tradeButtonPos[3] = self.tradeButtonPos[1] + bsz;
+
                     H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
                     H.hudBtn.push([-1000, -1000, 10, 10]); // 1
 
@@ -508,6 +522,7 @@ BSWG.game = new function(){
         BSWG.render.updateCam3D(this.cam);
         this.editMode = false;
         this.storeMode = false;
+        this.tradeMode = false;
         this.showControls = false;
 
         if (this.tileMap) {
@@ -815,6 +830,22 @@ BSWG.game = new function(){
                             self.storeMode = me.selected;
                         }
                     });
+                    this.tradeBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: 10,
+                        w: 64, h: 65,
+                        text: BSWG.render.images['store-mode'],
+                        selected: this.tradeMode,
+                        click: function (me) {
+                            me.selected = !me.selected;
+                            self.tradeMode = me.selected;
+                            if (self.tradeMode) {
+                                self.storeBtn.selected = self.storeMode = false;
+                                if (self.tradeWin) {
+                                    self.tradeWin.reset();
+                                }
+                            }
+                        }
+                    });
                     this.statsBtn = new BSWG.uiControl(BSWG.control_Button, {
                         x: 10, y: 10,
                         w: 65, h: 65,
@@ -842,6 +873,7 @@ BSWG.game = new function(){
                     this.statsBtn = null;
                     this.specialsBtn = null;
                     this.levelUpBtn = null;
+                    this.tradeBtn = null;
                 }
 
                 /*this.healBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -895,9 +927,19 @@ BSWG.game = new function(){
                                 break;
                             }
                         }
-                    });                    
+                    });
                 }
 
+                if (scene === BSWG.SCENE_GAME1) {
+                    if (!this.tradeWindowPos) {
+                        this.tradeWindowPos = [];
+                    }
+                    this.tradeWin = new BSWG.uiControl(BSWG.control_TradeWindow, {
+                        x: this.hudX(this.tradeWindowPos[0] || 0), y: BSWG.render.viewport.y+1,
+                        w: this.hudX(this.tradeWindowPos[2] || 1024) - this.hudX(this.tradeWindowPos[0] || 0),
+                        h: this.hudY(this.tradeWindowPos[3] || 512) - this.hudY(this.tradeWindowPos[1] || 0)
+                    });                    
+                }
 
                 if (scene === BSWG.SCENE_GAME2) {
                     this.loadBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -1331,6 +1373,10 @@ BSWG.game = new function(){
         BSWG.input.emulateMouseWheel([BSWG.KEY['-'], BSWG.KEY['NUMPAD -']], [BSWG.KEY['='], BSWG.KEY['NUMPAD +']], 2);
 
         BSWG.render.startRenderer(function(dt, time){
+
+            if (self.inZone && self.inZone.bossDefeated) {
+                self.inZone.safe = true;
+            }
 
             if (self.scene === BSWG.SCENE_GAME1 && !(self.map.introNext > self.map.areaNo)) {
                 self.map.introNext = self.map.areaNo + 1;
@@ -1857,6 +1903,9 @@ BSWG.game = new function(){
             if (self.editBtn) {
                 self.editBtn.flashing = self.dialogBtnHighlight === 'build';
             }
+            if (self.tradeBtn) {
+                self.tradeBtn.flashing = !self.tradeBtn.selected;//self.dialogBtnHighlight === 'trade';
+            }
             if (self.showControlsBtn) {
                 self.showControlsBtn.flashing = self.dialogBtnHighlight === 'keys';
             }
@@ -1933,7 +1982,7 @@ BSWG.game = new function(){
                     }
 
                     if (B.wet > 0) {
-                        desc.density = Math.pow(Math.clamp(B.wet*Math.random(), 0, 1), 1.5);
+                        desc.density = Math.pow(Math.clamp(B.wet*Math.random()*(Math.sin(Date.timeStamp()/(Math.PI*3*60))*0.5+0.5), 0, 1), 2.5);
                         if (desc.density < 0.1) {
                             desc.density = 0.0;
                         }
@@ -1966,7 +2015,7 @@ BSWG.game = new function(){
                         desc.color.w = 0.65;
                     }
 
-                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.15, 0., 1.), 1.5) * 0.5;
+                    var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.15, 0., 1.), 2.5) * 0.5;
 
                     if (dark < 0.5) {
                         dark = Math.pow(dark, 2.0);
@@ -2048,6 +2097,23 @@ BSWG.game = new function(){
                 self.storeBtn.p.y = self.hudY(self.hudBtn[10][1]) + 2;
                 self.storeBtn.w = self.hudX(self.hudBtn[10][2]) - self.storeBtn.p.x - 4;
                 self.storeBtn.h = self.hudY(self.hudBtn[10][3]) - self.storeBtn.p.y - 4;
+            }
+
+            if (self.tradeWin && self.tradeBtn && self.inZone.safe && self.inZone.compValList && self.inZone.compValList.length) {
+                if (self.tradeBtn.text === '') {
+                    self.tradeBtn.text = BSWG.character.getPortrait(self.inZone.boss ? self.inZone.boss.who : -1, true);
+                }
+                self.tradeWin.portrait = self.tradeBtn.text;
+                self.tradeBtn.p.x = self.hudX(self.tradeButtonPos[0]) + 2;
+                self.tradeBtn.p.y = self.hudY(self.tradeButtonPos[1]) + 2;
+                self.tradeBtn.w = self.hudX(self.tradeButtonPos[2]) - self.tradeBtn.p.x - 4;
+                self.tradeBtn.h = self.hudY(self.tradeButtonPos[3]) - self.tradeBtn.p.y - 4;
+            }
+            else if (self.tradeBtn) {
+                self.tradeBtn.text = '';
+                self.tradeBtn.selected = false;
+                self.tradeMode = false;
+                self.tradeBtn.p.y = 1000000;
             }
 
             if (self.anchorBtn) {
