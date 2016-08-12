@@ -81,8 +81,63 @@ BSWG.enemySettings = [
                     ]
                 }
             },
-            { enemies: [ { type: 'mele-boss', levelInc: 2 } ] },
-            { enemies: [ { type: 'big-flail', levelInc: 2 } ] },
+            {
+                who: 54,
+                enemies: [ { type: 'mele-boss', levelInc: 2 } ],
+                dialog: {
+                    who: 54,
+                    friend: false,
+                    text: [
+                        "I've been trying to find you,",
+                        "And now you're here!",
+                        "I'm going to slash and grind you",
+                        "MY NAME IS FEAR!"
+                    ]
+                },
+                wdialog: {
+                    who: 54,
+                    friend: true,
+                    text: [
+                        "Allright allright! I get the point!",
+                        "This is just like when we were little... always scrapping...",
+                        "Mom hated it when we fought, always tried to break it up...",
+                        "If it was just Dad around though he wouldn't do it unless our fights went too far... He knew we needed to... to make us strong...",
+                        "But it still wasn't enough! If only we had been stronger, he'd still be here.",
+                        { text: "Help you find sister? Nah, I have to stay here, a Zef never abandons his post... But come back here whenever you want, I'll try to help you if I can.", btnHighlight: "trade"} 
+                    ]
+                }                
+            },
+            {
+                who: 77,
+                enemies: [ { type: 'big-flail', levelInc: 2 } ],
+                dialog: {
+                    who: 77,
+                    friend: false,
+                    text: [
+                        "Smash crash!",
+                        "Smash bash!",
+                        "Slice dice!",
+                        "...",
+                        "...",
+                        "Damnit, I suck at poetry...",
+                        "BUT I DON'T NEED POEMS TO DESTROY YOU!"
+                    ]
+                },
+                wdialog: {
+                    who: 77,
+                    friend: true,
+                    text: [
+                        "Seems like a suck at being a warlord too...",
+                        "Maybe I should become a merchant like Dad?",
+                        "It runs in the blood after all!",
+                        "You know the day before dad died I'd never seen him so scared...",
+                        "I overheard him talking to mother, he refused to sell components to someone...",
+                        "Something about not supporting evil.. You know if I was him I would sell to anyone!",
+                        "No sense in getting yourself killed over some blocks! I mean, what if you had children to support and you were killed?",
+                        { text: "Haha, yes that means I'll sell to you! Just don't let any other Zef see you here! They're my main customers!" }
+                    ]
+                }
+            },
             { enemies: [ { type: 'mele-boss', levelInc: 2 }, { type: 'brute', levelInc: 1 } ] },
             { enemies: [ { type: 'big-flail', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 } ] },
             { enemies: [ { type: 'crippler', levelInc: 2 }, { type: 'little-cruncher', levelInc: 1 } ] },
