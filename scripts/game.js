@@ -843,7 +843,12 @@ BSWG.game = new function(){
                         text: '',
                         selected: this.tradeMode,
                         click: function (me) {
-                            me.selected = !me.selected;
+                            if (self.bossFight || self.dialogPause) {
+                                me.selected = false;
+                            }
+                            else {
+                                me.selected = !me.selected;
+                            }
                             self.tradeMode = me.selected;
                             if (self.tradeMode) {
                                 self.storeBtn.selected = self.storeMode = false;
@@ -2106,7 +2111,7 @@ BSWG.game = new function(){
                 self.storeBtn.h = self.hudY(self.hudBtn[10][3]) - self.storeBtn.p.y - 4;
             }
 
-            if (self.tradeWin && self.tradeBtn && self.inZone.safe && self.inZone.compValList && self.inZone.compValList.length) {
+            if (self.tradeWin && self.tradeBtn && self.inZone.safe && self.inZone.compValList && self.inZone.compValList.length && (!self.dialogPause || self.dialogBtnHighlight === 'trade')) {
                 if (self.tradeBtn.text === '') {
                     self.tradeBtn.text = BSWG.character.getPortrait(self.inZone.boss ? self.inZone.boss.who : -1, true);
                 }

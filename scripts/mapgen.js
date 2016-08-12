@@ -51,7 +51,7 @@ BSWG.enemySettings = [
                 { text: "Go into build mode to attach components to your ship, you can drag them around with left mouse, and weld them together by clicking the weld points.", btnHighlight: "build" },
                 { text: "Some components are activated by keypress, for those ones you can right click them when they're attached to your ship and press a key to bind to that component.", btnHighlight: "keys" },
                 { text: "If it's safe, you can save your progress at orbs like the one here. I don't understand how it works exactly, something to do with time travel.", btnHighlight: "save" },
-                "I think that's everything... be safe and good luck! ...... Oh, and could you pick me up some chocolate chips on the way? There's no chocolate on this planet, and I'd really love to make some cookies for us!"
+                { text: "I think that's everything... be safe and good luck! ...... Oh, and come back here any time if you need something for your ship... I don't have much, but I'll help you if I can!", btnHighlight: "trade" }
             ]
         },
         bosses: [ // ordered by difficulty
@@ -1182,8 +1182,10 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
                 for (var key in Z.compHist) {
                     compHist[key] = (compHist[key] ? compHist[key] : 0) + Z.compHist[key];
                 }
-                for (var key in Z.compHistBoss) {
-                    compHistBoss[key] = (compHistBoss[key] ? compHistBoss[key] : 0) + Z.compHistBoss[key];
+                if (Z === zone) {
+                    for (var key in Z.compHistBoss) {
+                        compHistBoss[key] = (compHistBoss[key] ? compHistBoss[key] : 0) + Z.compHistBoss[key];
+                    }
                 }
             }
         }
