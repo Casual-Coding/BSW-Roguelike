@@ -125,6 +125,9 @@ BSWG.component_MissileLauncher = {
                         self.fireKeyAlt = key;
                     }
                     else {
+                        if (self.fireKey === self.fireKeyAlt) {
+                            self.fireKeyAlt = key;
+                        }
                         self.fireKey = key;
                     }
                 }

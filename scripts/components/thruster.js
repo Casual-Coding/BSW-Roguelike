@@ -186,6 +186,9 @@ BSWG.component_Thruster = {
                         self.thrustKeyAlt = key;
                     }
                     else {
+                        if (self.thrustKey === self.thrustKeyAlt) {
+                            self.thrustKeyAlt = key;
+                        }
                         self.thrustKey = key;
                     }
                 }

@@ -124,6 +124,9 @@ BSWG.component_DetacherLauncher = {
                         self.launchKeyAlt = key;
                     }
                     else {
+                        if (self.launchKey === self.launchKeyAlt) {
+                            self.launchKeyAlt = key;
+                        }
                         self.launchKey = key;
                     }
                 }

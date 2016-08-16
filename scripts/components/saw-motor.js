@@ -155,6 +155,9 @@ BSWG.component_SawMotor = {
                         self.rotKeyAlt = key;
                     }
                     else {
+                        if (self.rotKey === self.rotKeyAlt) {
+                            self.rotKeyAlt = key;
+                        }
                         self.rotKey = key;
                     }
                 }
