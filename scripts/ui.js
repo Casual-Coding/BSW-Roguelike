@@ -1983,16 +1983,26 @@ BSWG.control_KeyConfig = {
     init: function (args) {
 
         var self = this;
-        this.close = function (key) {
+        this.close = function (key, alt) {
             self.key = key;
-            args.close(key);
+            args.close(key, alt);
             self.remove();
         };
 
         this.title = args.title || 'Keybinding';
 
-        this.key = args.key;
+        this.alt = BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT);
 
+        if (this.alt) {
+            this.title += ' (Alternate key)';
+        }
+        this.key = args.key;
+        if (this.alt) {
+            if (this.key !== args.altKey) {
+                this.okey = this.key;
+            }
+            this.key = args.altKey;
+        }
     },
 
     render: function (ctx, viewport) {
@@ -2025,8 +2035,8 @@ BSWG.control_KeyConfig = {
         ctx.fillTextB("Bound to ", this.p.x + 16, this.p.y + 25 + 25);
         ctx.fillStyle = '#afa';
         ctx.fillTextB("" + BSWG.KEY_NAMES[this.key].toTitleCase(), this.p.x + 16 + 93, this.p.y + 25 + 25);
-        ctx.fillStyle = '#aaf';
-        ctx.fillTextB("Press a key to bind", this.p.x + 16, this.p.y + 25 + 44);
+        ctx.fillStyle = '#d8d8f';
+        ctx.fillTextB("Press a key to bind" + (this.okey ? ", " + BSWG.KEY_NAMES[this.okey].toTitleCase() + ' to remove alt.' : ''), this.p.x + 16, this.p.y + 25 + 44);
 
         ctx.textAlign = 'left';
 
@@ -2038,7 +2048,7 @@ BSWG.control_KeyConfig = {
         if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left') || !BSWG.game.editMode) {
             BSWG.input.EAT_KEY(BSWG.KEY.ESC);
             BSWG.input.EAT_MOUSE('left');
-            this.close(null);
+            this.close(null, this.alt);
             return;
         }
 
@@ -2046,7 +2056,7 @@ BSWG.control_KeyConfig = {
             k = parseInt(k);
             if (keys[k] === true && k !== BSWG.KEY.ALT && k !== BSWG.KEY.WINDOWS && k !== BSWG.KEY.SHIFT && k !== BSWG.KEY.CTRL && k !== BSWG.KEY['RIGHT CLICK']) {
                 BSWG.input.EAT_KEY(k);
-                this.close(parseInt(k));
+                this.close(parseInt(k), this.alt);
                 return;
             }
         }

@@ -88,6 +88,7 @@ var BSWG = new function(){
         'cursor-custom-3': 'cursor-settings.png',
         'cursor-custom-4': 'cursor-store.png',
         'cursor-custom-5': 'cursor-attractor.png',
+        'cursor-custom-6': 'cursor-settings-alt.png',
         'anchor': 'anchor.png',
         'build-mode': 'build-mode.png',
         'store-mode': 'store-mode.png',

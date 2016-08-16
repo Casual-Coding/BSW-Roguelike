@@ -11,6 +11,7 @@ BSWG.component_Thruster = {
 
     serialize: [
         'thrustKey',
+        'thrustKeyAlt',
         'size'
     ],
     
@@ -52,6 +53,7 @@ BSWG.component_Thruster = {
         this.jpoints = [ new b2Vec2(0.0, 0.5 * this.size) ];
 
         this.thrustKey = args.thrustKey || BSWG.KEY.UP;
+        this.thrustKeyAlt = args.thrustKeyAlt || this.thrustKey;
         this.thrustT = 0.0;
 
         //BSWG.blockPolySmooth = 0.1;
@@ -118,8 +120,13 @@ BSWG.component_Thruster = {
         }
 
         if (this.dispKeys) {
-            this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase();
-            this.dispKeys['thrust'][2] = BSWG.input.KEY_DOWN(this.thrustKey);
+            if (this.thrustKey !== this.thrustKeyAlt) {
+                this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.thrustKeyAlt].toTitleCase();
+            }
+            else {
+                this.dispKeys['thrust'][0] = BSWG.KEY_NAMES[this.thrustKey].toTitleCase();
+            }
+            this.dispKeys['thrust'][2] = BSWG.input.KEY_DOWN(this.thrustKey) || BSWG.input.KEY_DOWN(this.thrustKeyAlt);
         }
 
 
@@ -169,12 +176,19 @@ BSWG.component_Thruster = {
         var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 350, h: 50+32,
+            w: 450, h: 50+32,
             key: this.thrustKey,
+            altKey: this.thrustKeyAlt,
             title: 'Thruster fire',
-            close: function (key) {
-                if (key)
-                    self.thrustKey = key;
+            close: function (key, alt) {
+                if (key) {
+                    if (alt) {
+                        self.thrustKeyAlt = key;
+                    }
+                    else {
+                        self.thrustKey = key;
+                    }
+                }
             }
         });
 
@@ -188,7 +202,7 @@ BSWG.component_Thruster = {
 
         var accel = 0;
 
-        if (keys[this.thrustKey]) accel += 1;
+        if (keys[this.thrustKey] || keys[this.thrustKeyAlt]) accel += 1;
 
         if (accel && this.thrustT < 0.025) { // add shockwave
             for (var i=-10; i<=10; i++) {

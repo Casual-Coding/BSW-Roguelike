@@ -11,7 +11,8 @@ BSWG.component_DetacherLauncher = {
 
     serialize: [
         'size',
-        'launchKey'
+        'launchKey',
+        'launchKeyAlt'
     ],
 
     sbkey: [
@@ -30,6 +31,7 @@ BSWG.component_DetacherLauncher = {
 
         this.size      = args.size || 2;
         this.launchKey = args.launchKey || BSWG.KEY.F;
+        this.launchKeyAlt = args.launchKeyAlt || this.launchKey;
         this.dispKeys = {
             'launch': [ '', new b2Vec2(0.0, 0.0) ],
         };
@@ -112,12 +114,19 @@ BSWG.component_DetacherLauncher = {
         var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 350, h: 50+32,
+            w: 450, h: 50+32,
             key: this.launchKey,
+            altKey: this.launchKeyAlt,
             title: 'Launch',
-            close: function (key) {
-                if (key)
-                    self.launchKey = key;
+            close: function (key, alt) {
+                if (key) {
+                    if (alt) {
+                        self.launchKeyAlt = key;
+                    }
+                    else {
+                        self.launchKey = key;
+                    }
+                }
             }
         });
 
@@ -151,8 +160,13 @@ BSWG.component_DetacherLauncher = {
         }
 
         if (this.dispKeys) {
-            this.dispKeys['launch'][0] = BSWG.KEY_NAMES[this.launchKey].toTitleCase();
-            this.dispKeys['launch'][2] = BSWG.input.KEY_DOWN(this.launchKey);
+            if (this.launchKey !== this.launchKeyAlt) {
+                this.dispKeys['launch'][0] = BSWG.KEY_NAMES[this.launchKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.launchKeyAlt].toTitleCase();
+            }
+            else {
+                this.dispKeys['launch'][0] = BSWG.KEY_NAMES[this.launchKey].toTitleCase();
+            }
+            this.dispKeys['launch'][2] = BSWG.input.KEY_DOWN(this.launchKey) || BSWG.input.KEY_DOWN(this.launchKeyAlt);
         }
         if (this.fireT > 0) {
 
@@ -198,7 +212,7 @@ BSWG.component_DetacherLauncher = {
 
     handleInput: function(keys) {
 
-        if (keys[this.launchKey] && !this.fireT) {
+        if ((keys[this.launchKey] || keys[this.launchKeyAlt]) && !this.fireT) {
 
             for (var k=0; k<this.jpoints.length; k++) {
                 if (this.welds[k] && k !== 3) {

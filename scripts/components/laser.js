@@ -12,7 +12,8 @@ BSWG.component_Laser = {
     hasConfig: true,
 
     serialize: [
-        'fireKey'
+        'fireKey',
+        'fireKeyAlt'
     ],
 
     sbadd: [
@@ -40,6 +41,7 @@ BSWG.component_Laser = {
         });
 
         this.fireKey = args.fireKey || BSWG.KEY.SPACE;
+        this.fireKeyAlt = args.fireKeyAlt || this.fireKey;
         this.dispKeys = {
             'fire': [ '', new b2Vec2(0.0, 0.0) ],
         };
@@ -93,8 +95,13 @@ BSWG.component_Laser = {
     update: function(dt) {
 
         if (this.dispKeys) {
-            this.dispKeys['fire'][0] = BSWG.KEY_NAMES[this.fireKey].toTitleCase();
-            this.dispKeys['fire'][2] = BSWG.input.KEY_DOWN(this.fireKey);
+            if (this.fireKey !== this.fireKeyAlt) {
+                this.dispKeys['fire'][0] = BSWG.KEY_NAMES[this.fireKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.fireKeyAlt].toTitleCase();
+            }
+            else {
+                this.dispKeys['fire'][0] = BSWG.KEY_NAMES[this.fireKey].toTitleCase();
+            }
+            this.dispKeys['fire'][2] = BSWG.input.KEY_DOWN(this.fireKey) || BSWG.input.KEY_DOWN(this.fireKeyAlt);
         }
 
         if (this.laser && !this.onCC) {
@@ -114,12 +121,19 @@ BSWG.component_Laser = {
         var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 350, h: 50+32,
+            w: 450, h: 50+32,
             key: this.fireKey,
+            altKey: this.fireKeyAlt,
             title: 'Laser fire',
-            close: function (key) {
-                if (key)
-                    self.fireKey = key;
+            close: function (key, alt) {
+                if (key) {
+                    if (alt) {
+                        self.fireKeyAlt = key;
+                    }
+                    else {
+                        self.fireKey = key;
+                    }
+                }
             }
         });
 
@@ -133,7 +147,7 @@ BSWG.component_Laser = {
 
         var accel = 0;
 
-        if (keys[this.fireKey]) {
+        if (keys[this.fireKey] || keys[this.fireKeyAlt]) {
 
             accel = 1;
 

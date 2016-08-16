@@ -1415,7 +1415,7 @@ BSWG.componentList = new function () {
                 BSWG.render.setCustomCursor(true, 4);
             }
             else if (this.mouseOver.hasConfig && this.mouseOver.onCC && BSWG.game.editMode && !BSWG.ui.mouseBlock) {
-                BSWG.render.setCustomCursor(true, 3);
+                BSWG.render.setCustomCursor(true, BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT) ? 6 : 3);
             }
             else {
                 BSWG.render.setCustomCursor(true, 2);

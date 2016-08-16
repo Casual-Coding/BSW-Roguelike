@@ -11,7 +11,8 @@ BSWG.component_SawMotor = {
 
     serialize: [
         'size',
-        'rotKey'
+        'rotKey',
+        'rotKeyAlt'
     ],
 
     sbadd: [
@@ -32,7 +33,8 @@ BSWG.component_SawMotor = {
 
         this.size   = args.size || 1;
         this.motor  = true;
-        this.rotKey = BSWG.KEY.G;
+        this.rotKey = args.rotKey || BSWG.KEY.G;
+        this.rotKeyAlt = args.rotKeyAlt || this.rotKey;
 
         this.maxHP = this.size * 70 / 3;
 
@@ -143,12 +145,19 @@ BSWG.component_SawMotor = {
         var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 350, h: 50+32,
+            w: 450, h: 50+32,
             key: this.rotKey,
+            altKey: this.rotKeyAlt,
             title: 'Blade spin',
-            close: function (key) {
-                if (key)
-                    self.rotKey = key;
+            close: function (key, alt) {
+                if (key) {
+                    if (alt) {
+                        self.rotKeyAlt = key;
+                    }
+                    else {
+                        self.rotKey = key;
+                    }
+                }
             }
         });
 
@@ -191,8 +200,15 @@ BSWG.component_SawMotor = {
             }
         }
 
-        this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
-        this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
+        if (this.dispKeys) {
+            if (this.rotKey !== this.rotKeyAlt) {
+                this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.rotKeyAlt].toTitleCase();
+            }
+            else {
+                this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
+            }
+            this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey) || BSWG.input.KEY_DOWN(this.rotKeyAlt);
+        }
     },
 
     handleInput: function(keys) {
@@ -206,7 +222,7 @@ BSWG.component_SawMotor = {
         }
 
         if (robj) {
-            if (keys[this.rotKey]) {
+            if (keys[this.rotKey] || keys[this.rotKeyAlt]) {
                 this.motorAccel = 33.0;
             }
         }

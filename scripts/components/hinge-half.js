@@ -11,6 +11,7 @@ BSWG.component_HingeHalf = {
 
     serialize: [
         'rotKey',
+        'rotKeyAlt',
         'size',
         'motor'
     ],
@@ -34,6 +35,7 @@ BSWG.component_HingeHalf = {
         this.size   = args.size || 1;
         this.motor  = args.motor || false;
         this.rotKey = args.rotKey ? args.rotKey : (this.motor ? BSWG.KEY.A : BSWG.KEY.D);
+        this.rotKeyAlt = args.rotKeyAlt || this.rotKey;
 
         this.maxHP = this.size * 80 / 2;
 
@@ -141,12 +143,19 @@ BSWG.component_HingeHalf = {
         var self = this;
         BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
             x: p.x-150, y: p.y-25,
-            w: 350, h: 50+32,
+            w: 450, h: 50+32,
             key: this.rotKey,
+            altKey: this.rotKeyAlt,
             title: this.motor ? 'Hinge rotate' : 'Hinge rotate reverse',
-            close: function (key) {
-                if (key)
-                    self.rotKey = key;
+            close: function (key, alt) {
+                if (key) {
+                    if (alt) {
+                        self.rotKeyAlt = key;
+                    }
+                    else {
+                        self.rotKey = key;
+                    }
+                }
             }
         });
 
@@ -163,10 +172,15 @@ BSWG.component_HingeHalf = {
             this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
         }
 
-        //if (this.dispKeys) {
-            this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
-            this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey);
-        //}
+        if (this.dispKeys) {
+            if (this.rotKey !== this.rotKeyAlt) {
+                this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.rotKeyAlt].toTitleCase();
+            }
+            else {
+                this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase();
+            }
+            this.dispKeys['rotate'][2] = BSWG.input.KEY_DOWN(this.rotKey) || BSWG.input.KEY_DOWN(this.rotKeyAlt);
+        }
 
         var robj = null;
         for (var k in this.welds) {
@@ -205,7 +219,7 @@ BSWG.component_HingeHalf = {
         }
 
         if (robj) {
-            if (keys[this.rotKey]) {
+            if (keys[this.rotKey] || keys[this.rotKeyAlt]) {
                 robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1.5 : 1.5));
                 robj.joint.__ms = 1.0;
             }

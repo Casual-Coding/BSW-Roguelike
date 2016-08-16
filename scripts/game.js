@@ -1457,13 +1457,6 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
-            if (BSWG.input.KEY_PRESSED(BSWG.KEY['ESC'])) {
-                var mode = self.popMode();
-                if (mode && self.modeBtns && self.modeBtns[mode] && self.modeBtns[mode].click) {
-                    self.modeBtns[mode].click(self.modeBtns[mode]);
-                }
-            }
-
             if (self.inZone && self.inZone.bossDefeated) {
                 self.inZone.safe = true;
             }
@@ -1744,6 +1737,14 @@ BSWG.game = new function(){
             BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
+
+            if (BSWG.input.KEY_PRESSED(BSWG.KEY['ESC'])) {
+                var mode = self.popMode();
+                if (mode && self.modeBtns && self.modeBtns[mode] && self.modeBtns[mode].click) {
+                    self.modeBtns[mode].click(self.modeBtns[mode]);
+                }
+            }
+           
             //BSWG.planets.render(dt);
 
             switch (self.scene) {
