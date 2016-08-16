@@ -1362,9 +1362,9 @@ BSWG.control_TradeWindow = {
 
             ctx.fillTextB(Math.floor(this.percent*10+0.5)/10 + '%', x + w/2, y + h - fs*0.325);
 
-            var x = hx(this.hudBtn[3][0])+4,
+            var x = hx(this.hudBtn[3][0])+2,
                 y = hy(this.hudBtn[3][1])+4;
-            var w = hx(this.hudBtn[3][2])-x-8,
+            var w = hx(this.hudBtn[3][2])-x-4,
                 h = hy(this.hudBtn[3][3])-y-8;
 
             var sh = h / 8;
@@ -1468,9 +1468,9 @@ BSWG.control_TradeWindow = {
                 }
             }
 
-            var x = hx(this.hudBtn[4][0])+4,
+            var x = hx(this.hudBtn[4][0])+2,
                 y = hy(this.hudBtn[4][1])+4;
-            var w = hx(this.hudBtn[4][2])-x-8,
+            var w = hx(this.hudBtn[4][2])-x-4,
                 h = hy(this.hudBtn[4][3])-y-8;
 
             var sh = h / 8;
@@ -1588,9 +1588,9 @@ BSWG.control_TradeWindow = {
                 var mx = BSWG.input.MOUSE('x');// - this.p.x;
                 var my = BSWG.input.MOUSE('y');// - this.p.y;
 
-                var x = hx(this.hudBtn[3][0])+4,
+                var x = hx(this.hudBtn[3][0])+2,
                     y = hy(this.hudBtn[3][1])+4;
-                var w = hx(this.hudBtn[3][2])-x-8,
+                var w = hx(this.hudBtn[3][2])-x-4,
                     h = hy(this.hudBtn[3][3])-y-8;
 
                 var sh = h / 8;
@@ -1696,9 +1696,9 @@ BSWG.control_TradeWindow = {
                     }
                 }
 
-                var x = hx(this.hudBtn[4][0])+4,
+                var x = hx(this.hudBtn[4][0])+2,
                     y = hy(this.hudBtn[4][1])+4;
-                var w = hx(this.hudBtn[4][2])-x-8,
+                var w = hx(this.hudBtn[4][2])-x-4,
                     h = hy(this.hudBtn[4][3])-y-8;
 
                 var sh = h / 8;

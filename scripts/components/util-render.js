@@ -396,6 +396,12 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             self.mat.uniforms.warpIn.value = 0.0;
         }
 
+        if (BSWG.game.storeMode && !BSWG.game.editMode && obj && obj.comp && obj.comp.onCC === null && obj.comp.type !== 'missile') {
+            if (self.mat.uniforms.warpIn.value < 0.25) {
+                self.mat.uniforms.warpIn.value += 0.6;
+            }
+        }
+
         if (clr) {
             self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
             self.lclr = clr;

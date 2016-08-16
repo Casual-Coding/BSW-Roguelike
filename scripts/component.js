@@ -1422,7 +1422,7 @@ BSWG.componentList = new function () {
             }
         }
         else if (BSWG.game.attractorShowing) {
-            BSWG.render.setCustomCursor(true, 5);
+            BSWG.render.setCustomCursor(true, 4);
         }
         else {
             BSWG.render.setCustomCursor(true);

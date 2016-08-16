@@ -468,6 +468,36 @@ BSWG.game = new function(){
 
     };
 
+    this.pushMode = function (mode) {
+
+        this.removeMode(mode);
+        this.modeHistory.push(mode);
+
+    };
+
+    this.removeMode = function (mode) {
+
+        for (var i=0; i<this.modeHistory.length; i++) {
+            if (this.modeHistory[i] === mode) {
+                this.modeHistory.splice(i, 1);
+                break;
+            }
+        }
+
+    };
+
+    this.popMode = function () {
+
+        if (!this.modeHistory.length) {
+            return null;
+        }
+
+        var ret = this.modeHistory[this.modeHistory.length-1];
+        this.modeHistory.splice(this.modeHistory.length-1, 1);
+        return ret;
+
+    };
+
     this.initScene = function (scene, args)
     {
         // Init game state
@@ -510,6 +540,8 @@ BSWG.game = new function(){
         BSWG.render.weather.clear();
         BSWG.exaustList.init();
         BSWG.orbList.init();
+
+        this.modeHistory = [];
         
         this.aiBtn = null;
 
@@ -524,6 +556,7 @@ BSWG.game = new function(){
         this.storeMode = false;
         this.tradeMode = false;
         this.showControls = false;
+        this.modeBtns = null;
 
         if (this.tileMap) {
             this.tileMap.destroy();
@@ -795,6 +828,12 @@ BSWG.game = new function(){
                     click: function (me) {
                         me.selected = !me.selected;
                         self.editMode = me.selected;
+                        if (self.editMode) {
+                            self.pushMode('edit');
+                        }
+                        else {
+                            self.removeMode('edit');
+                        }
                     }
                 });
                 this.anchorBtn = new BSWG.uiControl(BSWG.control_Button, {
@@ -806,6 +845,12 @@ BSWG.game = new function(){
                         if (self.ccblock) {
                             self.ccblock.anchored = !self.ccblock.anchored;
                             me.selected = self.ccblock.anchored;
+                            if (self.ccblock.anchored) {
+                                self.pushMode('anchor');
+                            }
+                            else {
+                                self.removeMode('anchor');
+                            }
                         }
                     }
                 });
@@ -817,6 +862,12 @@ BSWG.game = new function(){
                     click: function (me) {
                         me.selected = !me.selected;
                         self.showControls = me.selected;
+                        if (self.showControls) {
+                            self.pushMode('controls');
+                        }
+                        else {
+                            self.removeMode('controls');
+                        }
                     }
                 });
                 if (scene === BSWG.SCENE_GAME1) {
@@ -834,6 +885,12 @@ BSWG.game = new function(){
                                 if (self.tradeWin) {
                                     self.tradeWin.reset();
                                 }
+                            }
+                            if (self.storeMode) {
+                                self.pushMode('store');
+                            }
+                            else {
+                                self.removeMode('store');
                             }
                         }
                     });
@@ -855,6 +912,12 @@ BSWG.game = new function(){
                                 if (self.tradeWin) {
                                     self.tradeWin.reset();
                                 }
+                            }
+                            if (self.tradeMode) {
+                                self.pushMode('trade');
+                            }
+                            else {
+                                self.removeMode('trade');
                             }
                         }
                     });
@@ -907,7 +970,7 @@ BSWG.game = new function(){
                             for (var k=1000; k>=0; k--) {
                                 var p = self.ccblock.obj.body.GetWorldCenter();
                                 var a = Math.random() * Math.PI * 2.0;
-                                var r = 6 + Math.pow(Math.random(), 2.0) * vr;
+                                var r = 3 + Math.pow(Math.random(), 2.0) * vr;
                                 p = new b2Vec2(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r);
                                 var any = false;
                                 for (var i=0; i<BSWG.componentList.compList.length && !any; i++) {
@@ -917,7 +980,7 @@ BSWG.game = new function(){
                                     }
                                 }
                                 if (any) {
-                                    vr += 1.0;
+                                    vr += 0.1;
                                     p = null;
                                     continue;
                                 }
@@ -1075,6 +1138,14 @@ BSWG.game = new function(){
                         }
                     }
                 });
+
+                this.modeBtns = {
+                    'edit': this.editBtn,
+                    'anchor': this.anchorBtn,
+                    'controls': this.showControlsBtn,
+                    'store': this.storeBtn,
+                    'trade': this.tradeBtn
+                };
 
                 this.saveHealAdded = false;
 
@@ -1301,7 +1372,7 @@ BSWG.game = new function(){
             w: 100, h: 65,
             text: BSWG.render.images['menu'],
             selected: false,
-            clickKey: BSWG.KEY.ESC,
+            //clickKey: BSWG.KEY.ESC,
             click: function (me) {
                 if (self.escMenu) {
                     self.escMenu.remove();
@@ -1386,6 +1457,13 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            if (BSWG.input.KEY_PRESSED(BSWG.KEY['ESC'])) {
+                var mode = self.popMode();
+                if (mode && self.modeBtns && self.modeBtns[mode] && self.modeBtns[mode].click) {
+                    self.modeBtns[mode].click(self.modeBtns[mode]);
+                }
+            }
+
             if (self.inZone && self.inZone.bossDefeated) {
                 self.inZone.safe = true;
             }
@@ -1463,9 +1541,9 @@ BSWG.game = new function(){
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
             if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
-                if (!self.grabbedBlock && self.ccblock && !self.editMode && self.storeMode) {
+                if (!self.grabbedBlock && self.ccblock && !self.editMode && self.storeMode && !BSWG.ui.mouseBlock) {
                     if (self.attractorOn && self.attractorOn.obj && self.attractorOn.obj.body && BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
-                        var vec = mp.clone();
+                        /*var vec = mp.clone();
                         var vec2 = self.attractorOn.obj.body.GetWorldCenter();
                         vec.x -= vec2.x;
                         vec.y -= vec2.y;
@@ -1475,7 +1553,7 @@ BSWG.game = new function(){
                         var f = BSWG.attractorForce * self.attractorOn.obj.body.GetMass();
                         vec.x *= f;
                         vec.y *= f;
-                        self.attractorOn.obj.body.ApplyForceToCenter(vec);
+                        self.attractorOn.obj.body.ApplyForceToCenter(vec);*/
                     }
                     else {
                         self.attractorShowing = false;
@@ -1675,8 +1753,8 @@ BSWG.game = new function(){
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
 
-                    if (self.storeMode && !self.editMode && BSWG.input.MOUSE('left') && BSWG.componentList.mouseOver) {
-                        var comp = BSWG.componentList.mouseOver;
+                    if (self.storeMode && !self.editMode && BSWG.input.MOUSE_PRESSED('left') && self.attractorHover) {
+                        var comp = self.attractorHover;
                         if (!comp.onCC && !comp.salvaged) {
                             comp.salvaged = true;
                             self.xpInfo.addStore(comp, 1);
