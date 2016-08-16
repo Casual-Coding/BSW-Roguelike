@@ -426,10 +426,20 @@ BSWG.game = new function(){
         fns.current = start;
         fns.desc = desc;
         fns.change = function(name) {
-            self.openDialog(this.desc, name);
+            if (self.dialogObj.textFinished) {
+                self.openDialog(this.desc, name);
+            }
+            else {
+                self.dialogObj.skipText();
+            }
         };
         fns.close = function () {
-            self.closeDialog();
+            if (self.dialogObj.textFinished) {
+                self.closeDialog();
+            }
+            else {
+                self.dialogObj.skipText();
+            }
         };
 
         for (var i=0; i<tdesc.buttons.length; i++) {
@@ -1744,7 +1754,7 @@ BSWG.game = new function(){
                     self.modeBtns[mode].click(self.modeBtns[mode]);
                 }
             }
-           
+
             //BSWG.planets.render(dt);
 
             switch (self.scene) {

@@ -696,6 +696,7 @@ BSWG.control_Dialogue = {
         this.text = args.text || "";
         this.title = args.title || "";
         this.noEat = false;
+        this.textFinished = false;
 
         if (this.buttons) {
             for (var i=0; i<this.buttons.length; i++) {
@@ -883,6 +884,7 @@ BSWG.control_Dialogue = {
                 }
 
                 var text = this.text.substring(0, Math.min(~~((Date.timeStamp() - this.startTime) * 30), this.text.length));
+                this.textFinished = this.text === text;
                 if (this.lastText !== text && text.length > 0) {
                     var ch = text.charAt(text.length-1);
                     if (ch !== ' ' && ch !== '\n' && ch !== '\t' && ch !== '.') {
@@ -943,6 +945,10 @@ BSWG.control_Dialogue = {
             }
         }
 
+    },
+
+    skipText: function () {
+        this.startTime -= 10000;
     },
 
     update: function () {
