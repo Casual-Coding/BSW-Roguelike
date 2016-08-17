@@ -41,19 +41,17 @@ void main() {
     float l = min(l0 * ((l1*0.8-l1d*0.6*dmg+0.6) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(max(l, 0.), 2.5) + 0.2;
 
-    if (extra.y <= 0.0) {
-        gl_FragColor = vec4(clr.rgb*l, 1.0);
-    }
-    else {
-        float al = (sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5) * extra.y * 0.5;
-        gl_FragColor = vec4(clr.rgb*vec3(al*1.0+(1.0-al), al*0.5+(1.0-al), 0.25*al+(1.0-al))*l, 1.0);
-    }
-
     if (warpIn > 0.9) {
         gl_FragColor = vec4(1., 1., 1., 1.0 - (warpIn - 0.9) / 0.1);
     }
     else {
         gl_FragColor = mix(gl_FragColor, vec4(1.,1.,1.,1.), (warpIn - 0.1) / 0.9);
+    }
+
+    gl_FragColor = vec4(clr.rgb*l, 1.0);
+    if (extra.y > 0.0) {
+        float al = pow(sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5, 0.75) * extra.y * 0.75;
+        gl_FragColor = vec4(al*1.0+(1.0-al)*gl_FragColor.r, al*1.0+(1.0-al)*gl_FragColor.g, 0.0*al+(1.0-al)*gl_FragColor.b, 1.0);
     }
 
     vec3 envNormal = (vNormalMatrix * mix(tNormal, tNormald, dmg)).xyz;

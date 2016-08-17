@@ -792,53 +792,96 @@ BSWG.component.prototype.baseUpdate = function(dt) {
         for (var i=0; i<this.jmatch.length; i++) {
             if (((this.jmatch[i][0] === this.jmhover || this.jmatch[i][5]) && this.jmatch[i][1].id > this.id)) {
                 if (!this.welds[this.jmatch[i][0]]) {
-                    var obj = BSWG.physics.createWeld(this.obj.body, this.jmatch[i][1].obj.body,
-                                                      this.jpoints[this.jmatch[i][0]],
-                                                      this.jmatch[i][1].jpoints[this.jmatch[i][2]],
-                                                      true,
-                                                      this.jpointsNormals[this.jmatch[i][0]],
-                                                      this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
-                                                      this.jmatch[i][3],
-                                                      this.jmatch[i][4],
-                                                      [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
-                                                      );
 
-                    if (this.onCC && !this.jmatch[i][1].onCC) {
-                        this.jmatch[i][1].onCC = this.onCC;
+                    var makeWeld = function(self, args, args2) {
+                        return function() {
+                            if (!self || !self.obj || !self.obj.body) {
+                                args.length = args2.length = 0;
+                                args = args2 = self = null;
+                                return;
+                            }
+                            if (!args2[0] || !args2[0][1] || !args2[0][1].obj || !args2[0][1].obj.body) {
+                                args.length = args2.length = 0;
+                                args = args2 = self = null;
+                                return;
+                            }
+
+                            var obj = BSWG.physics.createWeld(args[0], args[1], args[2], args[3], args[4],
+                                                              args[5], args[6], args[7], args[8], args[9], args[10]);
+
+                            if (self.onCC && !args2[0][1].onCC) {
+                                args2[0][1].onCC = this.onCC;
+                            }
+                            if (!self.onCC && args2[0][1].onCC) {
+                                self.onCC = args2[0][1].onCC;
+                            }
+
+                            self.welds[args2[0][0]] = { obj: obj, other: args2[0][1] };
+                            args2[0][1].welds[args2[0][2]] = { obj: obj, other: self };
+
+                            BSWG.updateOnCC(self, args2[0][1]);
+
+                            var p2 = args2[0][1].jpointsw[args2[0][2]];
+                            var p1 = self.jpointsw[args2[0][0]];
+
+                            if (!autos && p2 && p1) {
+                                var p = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2);
+                                new BSWG.soundSample().play('store', p, 0.31, 2.0);
+                                BSWG.render.boom.palette = chadaboom3D.blue;
+                                BSWG.render.boom.add(
+                                    p,
+                                    0.75,
+                                    32,
+                                    0.4,
+                                    1.0,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                var ma = self.obj.body.GetMass(),
+                                    mb = args2[0][1].obj.body.GetMass();
+                                new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (ma / 2.5));
+                                new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (mb / 2.5));
+                                p = null;
+                                BSWG.physics.endMouseDrag();
+                                BSWG.game.grabbedBlock = null;
+                            }                            
+
+                            args.length = args2.length = 0;
+                            args = args2 = self = null;
+                        }
                     }
-                    if (!this.onCC && this.jmatch[i][1].onCC) {
-                        this.onCC = this.jmatch[i][1].onCC;
-                    }
+                    (
+                        this,
+                        [
+                            this.obj.body, this.jmatch[i][1].obj.body,
+                            this.jpoints[this.jmatch[i][0]],
+                            this.jmatch[i][1].jpoints[this.jmatch[i][2]],
+                            true,
+                            this.jpointsNormals[this.jmatch[i][0]],
+                            this.jmatch[i][1].jpointsNormals[this.jmatch[i][2]],
+                            this.jmatch[i][3],
+                            this.jmatch[i][4],
+                            [13,14,15,23,24,25,61].indexOf(this.jmatch[i][3]) >= 0
+                        ],
+                        [
+                            [ this.jmatch[i][0], this.jmatch[i][1], this.jmatch[i][2] ]
+                        ]
+                    );
 
-                    this.welds[this.jmatch[i][0]] = { obj: obj, other: this.jmatch[i][1] };
-                    this.jmatch[i][1].welds[this.jmatch[i][2]] = { obj: obj, other: this };
-
-                    BSWG.updateOnCC(this, this.jmatch[i][1]);
-
-                    var p2 = this.jmatch[i][1].jpointsw[this.jmatch[i][2]];
-                    var p1 = this.jpointsw[this.jmatch[i][0]];
-
-                    if (!autos) {
-                        var p = new b2Vec2((p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5).particleWrap(0.2);
-                        new BSWG.soundSample().play('store', p, 0.31, 2.0);
-                        BSWG.render.boom.palette = chadaboom3D.blue;
-                        BSWG.render.boom.add(
-                            p,
-                            0.75,
-                            32,
-                            0.4,
-                            1.0,
-                            null,
-                            null,
-                            false
+                    if (!autos) { // player action
+                        BSWG.physics.playerWeld(
+                            makeWeld, // weldCbk
+                            this, // objA
+                            this.jmatch[i][1], // objB
+                            this.jpoints[this.jmatch[i][0]], // anchorA
+                            this.jmatch[i][1].jpoints[this.jmatch[i][2]], // anchorB
+                            i, // jpA
+                            this.jmatch[i][2] // jpB
                         );
-                        var ma = this.obj.body.GetMass(),
-                            mb = this.jmatch[i][1].obj.body.GetMass();
-                        new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (ma / 2.5));
-                        new BSWG.soundSample().play('bump', p, 0.5, 0.35 / (mb / 2.5));
-                        p = null;
-                        BSWG.physics.endMouseDrag();
-                        BSWG.game.grabbedBlock = null;
+                    }
+                    else {
+                        makeWeld();
                     }
 
                     BSWG.input.EAT_MOUSE('left');

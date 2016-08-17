@@ -3,6 +3,8 @@
 BSWG.hitDmg  = 0.00035;
 BSWG.meleDmg = 75.0;
 BSWG.meleDef = 100.0;
+BSWG.pweldDistSq = Math.pow(0.01, 2.0);
+BSWG.pweldVel = 10.0; // * mass
 
 BSWG.physics = new function(){
 
@@ -14,6 +16,7 @@ BSWG.physics = new function(){
     this.welds              = [];
     this.objects            = [];
     this.baseDamping        = 0.225;
+    this.pwelds             = [];
 
     this.init = function (){
 
@@ -76,8 +79,123 @@ BSWG.physics = new function(){
 
     };
 
+    this.updatePWelds = function (dt) {
+
+        for (var i=0; i<this.pwelds.length; i++) {
+            var PW = this.pwelds[i];
+            PW.t -= dt;
+            if (PW.t <= 0 || !PW.objA || !PW.objA.obj || !PW.objA.obj.body
+                          || !PW.objB || !PW.objB.obj || !PW.objB.obj.body) {
+                this.destroyPWeld(PW);
+                PW = null;
+                i --;
+                continue;
+            }
+
+            var bA = PW.objA.obj.body;
+            var bB = PW.objB.obj.body;
+
+            var pA = bA.GetWorldPoint(PW.anchorA),
+                pB = bB.GetWorldPoint(PW.anchorB);
+
+            var dx = pA.x - pB.x,
+                dy = pA.y - pB.y;
+            var lenSq = dx * dx + dy * dy;
+            if (lenSq <= BSWG.pweldDistSq) {
+                PW.cbk();
+                PW.t = -1000;
+                PW = bA = bB = pA = pB = null;
+                continue;
+            }
+
+            var len = Math.sqrt(lenSq);
+            dx /= len; dy /= len;
+
+            var mA = bA.GetMass(),
+                mB = bB.GetMass();
+
+            var fA = new b2Vec2(
+                -dx * BSWG.pweldVel * mA,
+                -dy * BSWG.pweldVel * mA
+            );
+            var fB = new b2Vec2(
+                dx * BSWG.pweldVel * mB,
+                dy * BSWG.pweldVel * mB
+            );
+
+            bA.ApplyForce(fA, pA);
+            bB.ApplyForce(fB, pB);
+
+            PW = bA = bB = pA = pB = fA = fB = null;
+        }
+
+    };
+
+    this.playerWeld = function (weldCbk, objA, objB, anchorA, anchorB, jpA, jpB) {
+
+        if (objA.id > objB.id) {
+            var tmp;
+
+            tmp = objA;
+            objA = objB;
+            objB = tmp;
+
+            tmp = anchorA;
+            anchorA = anchorB;
+            anchorB = tmp;
+
+            tmp = jpA;
+            jpA = jpB;
+            jpB = tmp;
+
+            tmp = null;
+        }
+
+        var key = objA.id + ',' + objB.id + ',' + jpA + ',' + jpB;
+
+        for (var i=0; i<this.pwelds.length; i++) {
+            if (this.pwelds[i].key === key) {
+                this.destroyPWeld(this.pwelds[i]);
+                return false;
+            }
+        }
+
+        var obj = {
+            key: key,
+            cbk: weldCbk,
+            objA: objA,
+            objB: objB,
+            anchorA: anchorA,
+            anchorB: anchorB,
+            t: 1.0
+        };
+
+        this.pwelds.push(obj);
+
+        return true;
+
+    };
+
+    this.destroyPWeld = function (obj) {
+
+        obj.cbk = null;
+        obj.objA = null;
+        obj.objB = null;
+        obj.anchorA = null;
+        obj.anchorB = null;
+
+        for (var i=0; i<this.pwelds.length; i++) {
+            if (this.pwelds[i] === obj) {
+                this.pwelds.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
+
+    };
+
     this.weldID = 1;
-    this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB, motorA, motorB, noMotor) {
+    this.createWeld = function (bodyA, bodyB, anchorA, anchorB, noCollide, normalA, normalB, motorA, motorB, noMotor, playerAction) {
 
         var obj = {
             jointDef: null,
@@ -88,7 +206,8 @@ BSWG.physics = new function(){
             noMotor:  !!noMotor,
             objA:     null,
             objB:     null,
-            id:       this.weldID++
+            id:       this.weldID++,
+            player:   playerAction
         };
 
         for (var i=0; i<this.objects.length; i++) {
@@ -582,6 +701,10 @@ BSWG.physics = new function(){
 
     this.reset = function (){
 
+        while (this.pwelds.length) {
+            this.destroyPWeld(this.pwelds[0]);
+        }
+
         for (var i=0; i<this.scrapes.length; i++) {
             this.scrapes[i].s.stop();
             this.scrapes[i].s = null;
@@ -614,6 +737,8 @@ BSWG.physics = new function(){
     this.dtACC = 0.0;
 
     this.update = function (dt){
+
+        this.updatePWelds(dt);
 
         this.lastDT = dt;
 
