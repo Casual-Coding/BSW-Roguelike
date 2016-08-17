@@ -40,7 +40,8 @@ var BSWG = new function(){
         'components/missile.js',
         'components/laser.js',
         'components/util-jpoints.js',
-        'components/util-render.js'
+        'components/util-render.js',
+        'specials/specials_base.js'
     ];
     var images = {
         /*'nebula_0': 'nebula-512-0.png',

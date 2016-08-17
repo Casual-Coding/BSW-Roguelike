@@ -348,6 +348,7 @@ BSWG.game = new function(){
             obj.map = this.map.serialize();
             obj.comp = BSWG.componentList.serialize(null, true);
             obj.xpInfo = this.xpInfo.serialize();
+            obj.specials = BSWG.specialList.serialize();
 
             localStorage.game_save = JSON.stringify(obj);
 
@@ -550,6 +551,7 @@ BSWG.game = new function(){
         BSWG.render.weather.clear();
         BSWG.exaustList.init();
         BSWG.orbList.init();
+        BSWG.specialList.init();
 
         this.modeHistory = [];
         
@@ -807,6 +809,7 @@ BSWG.game = new function(){
                     this.cam.x = p.x;
                     this.cam.y = p.y;
                     this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
+                    BSWG.specialList.load(args.load.specials || null);
                     this.noDefault = true;
                 }
                 else {
@@ -1855,6 +1858,7 @@ BSWG.game = new function(){
             BSWG.xpDisplay.updateRender(ctx, self.cam, dt);
             BSWG.exaustList.render(dt);
             BSWG.orbList.updateRender(dt);
+            BSWG.specialList.updateRender(ctx, dt);
 
             if (self.tileMap) {
                 self.tileMap.update(dt);
