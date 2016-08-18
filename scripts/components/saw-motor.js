@@ -33,7 +33,7 @@ BSWG.component_SawMotor = {
 
         this.size   = args.size || 1;
         this.motor  = true;
-        this.rotKey = args.rotKey || BSWG.KEY.G;
+        this.rotKey = args.rotKey || BSWG.KEY.SPACE;
         this.rotKeyAlt = args.rotKeyAlt || this.rotKey;
 
         this.maxHP = this.size * 70 / 3;

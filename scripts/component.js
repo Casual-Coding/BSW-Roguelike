@@ -1952,6 +1952,12 @@ BSWG.componentList = new function () {
             }
             args.pos = pos;
             args.angle = C.angle;
+            if (C.type === 'cc') {
+                args.leftKey = args.leftKey || BSWG.KEY.LEFT;
+                args.rightKey = args.rightKey || BSWG.KEY.RIGHT;
+                args.upKey = args.upKey || BSWG.KEY.UP;
+                args.downKey = args.downKey || BSWG.KEY.DOWN;
+            }
             var OC = new BSWG.component(this.typeMap[C.type], args);
             if (OC.type === 'cc') {
                 cc = OC;

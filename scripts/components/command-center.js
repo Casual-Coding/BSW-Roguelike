@@ -13,10 +13,18 @@ BSWG.component_CommandCenter = {
 
     sortOrder: 2,
 
-    hasConfig: false,
+    hasConfig: true,
 
     serialize: [
-        'aiStr'
+        'aiStr',
+        'leftKey',
+        'rightKey',
+        'upKey',
+        'downKey',
+        'leftKeyAlt',
+        'rightKeyAlt',
+        'upKeyAlt',
+        'downKeyAlt'
     ],
 
     frontOffset: -Math.PI/2,
@@ -36,11 +44,20 @@ BSWG.component_CommandCenter = {
             smooth: 0.02
         });
 
+        this.leftKey = args.leftKey || BSWG.KEY.A;
+        this.rightKey = args.rightKey || BSWG.KEY.D;
+        this.upKey = args.upKey || BSWG.KEY.W;
+        this.downKey = args.downKey || BSWG.KEY.S;
+        this.leftKeyAlt = args.leftKeyAlt || args.leftKey;
+        this.rightKeyAlt = args.rightKeyAlt || args.rightKey;
+        this.upKeyAlt = args.upKeyAlt || args.upKey;
+        this.downKeyAlt = args.downKeyAlt || args.downKey;
+
         this.totalMass = this.obj.body.GetMass();
 
         this.dispKeys = {
-            'left': [ 'Left', new b2Vec2(-0.3 * this.width, 0.0) ],
-            'right': [ 'Right', new b2Vec2(0.3 * this.width, 0.0) ],
+            'left': [ 'Left', new b2Vec2(0.3 * this.width, 0.0) ],
+            'right': [ 'Right', new b2Vec2(-0.3 * this.width, 0.0) ],
             'forward': [ 'Up', new b2Vec2(0.0, -this.height * 0.4) ],
             'reverse': [ 'Down', new b2Vec2(0.0, this.height * 0.4) ]
         };
@@ -84,6 +101,73 @@ BSWG.component_CommandCenter = {
         this.onCC = this;
 
         this.xpBase = 0.1;
+    },
+
+    openConfigMenu: function() {
+
+        if (BSWG.compActiveConfMenu)
+            BSWG.compActiveConfMenu.remove();
+
+        var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
+
+        var mps = new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y'));
+        var mp = BSWG.render.unproject3D(mps, 0.0);
+        var dp = this.obj.body.GetLocalPoint(mp);
+
+        var dir = null, dirName = null;
+        var left = Math.abs(this.width*0.5 - dp.x);
+        var right = Math.abs(-this.width*0.5 - dp.x)
+        var up = Math.abs(-this.height*0.5 - dp.y);
+        var down = Math.abs(this.height*0.5 - dp.y);
+
+        var mv = Math.min(Math.min(Math.min(left, right), up), down);
+        if (left <= mv) {
+            dir = 'left';
+            dirName = 'Rotate Left';
+        }
+        else if (right <= mv) {
+            dir = 'right';
+            dirName = 'Rotate Right';
+        }
+        else if (up <= mv) {
+            dir = 'up';
+            dirName = 'Forward';
+        }
+        else if (down <= mv) {
+            dir = 'down';
+            dirName = 'Reverse';
+        }
+
+        if (!dir) {
+            return;
+        }
+
+        var self = this;
+        BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+            x: p.x-150, y: p.y-25,
+            w: 450, h: 50+32,
+            key: this[dir + 'Key'],
+            altKey: this[dir + 'KeyAlt'],
+            title: 'CC Impulse ' + dirName,
+            close: function (key, alt) {
+                if (key) {
+                    if (alt) {
+                        self[dir + 'KeyAlt'] = key;
+                    }
+                    else {
+                        if (self[dir + 'Key'] === self[dir + 'KeyAlt']) {
+                            self[dir + 'KeyAlt'] = key;
+                        }
+                        self[dir + 'Key'] = key;
+                    }
+                }
+            }
+        });
+
+    },
+
+    closeConfigMenu: function() {
+
     },
 
     level: function() {
@@ -196,10 +280,27 @@ BSWG.component_CommandCenter = {
             this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 0.2, 0.1, true);
         }
 
-        this.dispKeys['left'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.LEFT);
-        this.dispKeys['right'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.RIGHT);
-        this.dispKeys['forward'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.UP);
-        this.dispKeys['reverse'][2] = BSWG.input.KEY_DOWN(BSWG.KEY.DOWN);
+        this.dispKeys['left'][2] = BSWG.input.KEY_DOWN(this.leftKey) || BSWG.input.KEY_DOWN(this.leftKeyAlt);
+        this.dispKeys['right'][2] = BSWG.input.KEY_DOWN(this.rightKey) || BSWG.input.KEY_DOWN(this.rightKeyAlt);
+        this.dispKeys['forward'][2] = BSWG.input.KEY_DOWN(this.upKey) || BSWG.input.KEY_DOWN(this.upKeyAlt);
+        this.dispKeys['reverse'][2] = BSWG.input.KEY_DOWN(this.downKey) || BSWG.input.KEY_DOWN(this.downKeyAlt);
+
+        this.dispKeys['left'][0] = BSWG.KEY_NAMES[this.leftKey].toTitleCase();
+        if (this.leftKeyAlt !== this.leftKey) {
+            this.dispKeys['left'][0] += ' / ' + BSWG.KEY_NAMES[this.leftKeyAlt].toTitleCase();
+        }
+        this.dispKeys['right'][0] = BSWG.KEY_NAMES[this.rightKey].toTitleCase();
+        if (this.rightKeyAlt !== this.rightKey) {
+            this.dispKeys['right'][0] += ' / ' + BSWG.KEY_NAMES[this.rightKeyAlt].toTitleCase();
+        }
+        this.dispKeys['forward'][0] = BSWG.KEY_NAMES[this.upKey].toTitleCase();
+        if (this.upKeyAlt !== this.upKey) {
+            this.dispKeys['forward'][0] += ' / ' + BSWG.KEY_NAMES[this.upKeyAlt].toTitleCase();
+        }
+        this.dispKeys['reverse'][0] = BSWG.KEY_NAMES[this.downKey].toTitleCase();
+        if (this.downKeyAlt !== this.downKey) {
+            this.dispKeys['reverse'][0] += ' / ' + BSWG.KEY_NAMES[this.downKeyAlt].toTitleCase();
+        }
 
         /*if (this.escapeFrom) {
             this.escapeT += dt;
@@ -383,11 +484,11 @@ BSWG.component_CommandCenter = {
         var rot = 0;
         var accel = 0;
 
-        if (keys[BSWG.KEY.LEFT]) rot -= 1;
-        if (keys[BSWG.KEY.RIGHT]) rot += 1;
+        if (keys[this.leftKey] || keys[this.leftKeyAlt]) rot -= 1;
+        if (keys[this.rightKey] || keys[this.rightKeyAlt]) rot += 1;
 
-        if (keys[BSWG.KEY.UP]) accel -= 1;
-        if (keys[BSWG.KEY.DOWN]) accel += 1;
+        if (keys[this.upKey] || keys[this.upKeyAlt]) accel -= 1;
+        if (keys[this.downKey] || keys[this.downKeyAlt]) accel += 1;
 
         if (BSWG.uberFastCC) {
             rot *= 2.0;

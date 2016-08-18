@@ -34,7 +34,7 @@ BSWG.component_HingeHalf = {
 
         this.size   = args.size || 1;
         this.motor  = args.motor || false;
-        this.rotKey = args.rotKey ? args.rotKey : (this.motor ? BSWG.KEY.A : BSWG.KEY.D);
+        this.rotKey = args.rotKey ? args.rotKey : (this.motor ? BSWG.KEY.Q : BSWG.KEY.E);
         this.rotKeyAlt = args.rotKeyAlt || this.rotKey;
 
         this.maxHP = this.size * 80 / 2;

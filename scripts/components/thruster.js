@@ -52,7 +52,7 @@ BSWG.component_Thruster = {
 
         this.jpoints = [ new b2Vec2(0.0, 0.5 * this.size) ];
 
-        this.thrustKey = args.thrustKey || BSWG.KEY.UP;
+        this.thrustKey = args.thrustKey || BSWG.KEY.W;
         this.thrustKeyAlt = args.thrustKeyAlt || this.thrustKey;
         this.thrustT = 0.0;
 
