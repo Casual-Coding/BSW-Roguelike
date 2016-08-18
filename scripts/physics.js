@@ -114,6 +114,15 @@ BSWG.physics = new function(){
             var mA = bA.GetMass(),
                 mB = bB.GetMass();
 
+            if (PW.objA.onCC && !PW.objB.onCC) {
+                mA /= 4.0;
+                mB *= 1.0;
+            }
+            else if (!PW.objA.onCC && PW.objB.onCC) {
+                mB /= 4.0;
+                mA *= 1.0;
+            }
+
             var fA = new b2Vec2(
                 -dx * BSWG.pweldVel * mA,
                 -dy * BSWG.pweldVel * mA
