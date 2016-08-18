@@ -86,6 +86,15 @@ BSWG.physics = new function(){
             PW.t -= dt;
             if (PW.t <= 0 || !PW.objA || !PW.objA.obj || !PW.objA.obj.body
                           || !PW.objB || !PW.objB.obj || !PW.objB.obj.body) {
+                if (PW.cbk) {
+                    var bA = PW.objA.obj.body;
+                    var bB = PW.objB.obj.body;
+                    var pA = bA.GetWorldPoint(PW.anchorA),
+                        pB = bB.GetWorldPoint(PW.anchorB);
+                    var p = new b2Vec2((pA.x+pB.x)*0.5, (pA.y+pB.y)*0.5);
+                    new BSWG.soundSample().play('error', p.THREE(0.2), 1.0, 1.5);
+                    bA = bB = pA = pB = p = null;
+                }
                 this.destroyPWeld(PW);
                 PW = null;
                 i --;
@@ -94,7 +103,6 @@ BSWG.physics = new function(){
 
             var bA = PW.objA.obj.body;
             var bB = PW.objB.obj.body;
-
             var pA = bA.GetWorldPoint(PW.anchorA),
                 pB = bB.GetWorldPoint(PW.anchorB);
 
@@ -103,6 +111,7 @@ BSWG.physics = new function(){
             var lenSq = dx * dx + dy * dy;
             if (lenSq <= BSWG.pweldDistSq) {
                 PW.cbk();
+                PW.cbk = null;
                 PW.t = -1000;
                 PW = bA = bB = pA = pB = null;
                 continue;
@@ -113,32 +122,36 @@ BSWG.physics = new function(){
 
             var mA = bA.GetMass(),
                 mB = bB.GetMass();
+            var mA2 = mA, mB2 = mB;
 
             if (PW.objA.onCC && !PW.objB.onCC) {
-                mA /= 4.0;
-                mB *= 1.0;
+                mA2 = 0.0;
+                //mB2 *= 1.0;
             }
             else if (!PW.objA.onCC && PW.objB.onCC) {
-                mB /= 4.0;
-                mA *= 1.0;
+                mB2 = 0.0;
+                //mA2 *= 1.0;
             }
 
+            var vA = bA.GetLinearVelocityFromWorldPoint(pA),
+                vB = bB.GetLinearVelocityFromWorldPoint(pB);
+
             var fA = new b2Vec2(
-                -dx * BSWG.pweldVel * mA,
-                -dy * BSWG.pweldVel * mA
+                -dx * BSWG.pweldVel * mA2 + (vB.x - vA.x) * mA * BSWG.pweldVel,
+                -dy * BSWG.pweldVel * mA2 + (vB.y - vA.y) * mA * BSWG.pweldVel
             );
             var fB = new b2Vec2(
-                dx * BSWG.pweldVel * mB,
-                dy * BSWG.pweldVel * mB
+                dx * BSWG.pweldVel * mB2 + (vA.x - vB.x) * mB * BSWG.pweldVel,
+                dy * BSWG.pweldVel * mB2 + (vA.y - vB.y) * mB * BSWG.pweldVel
             );
 
-            bA.ApplyForce(fA, pA);
-            bB.ApplyForce(fB, pB);
+            bA.ApplyForceToCenter(fA);//, pA);
+            bB.ApplyForceToCenter(fB);//, pB);
 
             PW = bA = bB = pA = pB = fA = fB = null;
         }
 
-    };
+    };  
 
     this.playerWeld = function (weldCbk, objA, objB, anchorA, anchorB, jpA, jpB) {
 

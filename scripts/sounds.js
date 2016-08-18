@@ -292,7 +292,8 @@ BSWG.soundLoad = function (onload) {
         { name: 'e2-distorted', url: 'sounds/e2-distorted.wav' },
         { name: 'e2-clean', url: 'sounds/e2-clean.wav' },
         { name: 'dialog', url: 'sounds/dialog.wav' },
-        { name: 'trade', url: 'sounds/trade.wav' }
+        { name: 'trade', url: 'sounds/trade.wav' },
+        { name: 'error', url: 'sounds/error.wav' }
     ];
 
     var urls = [];
