@@ -48,10 +48,10 @@ BSWG.component_CommandCenter = {
         this.rightKey = args.rightKey || BSWG.KEY.D;
         this.upKey = args.upKey || BSWG.KEY.W;
         this.downKey = args.downKey || BSWG.KEY.S;
-        this.leftKeyAlt = args.leftKeyAlt || args.leftKey;
-        this.rightKeyAlt = args.rightKeyAlt || args.rightKey;
-        this.upKeyAlt = args.upKeyAlt || args.upKey;
-        this.downKeyAlt = args.downKeyAlt || args.downKey;
+        this.leftKeyAlt = args.leftKeyAlt || this.leftKey;
+        this.rightKeyAlt = args.rightKeyAlt || this.rightKey;
+        this.upKeyAlt = args.upKeyAlt || this.upKey;
+        this.downKeyAlt = args.downKeyAlt || this.downKey;
 
         this.totalMass = this.obj.body.GetMass();
 

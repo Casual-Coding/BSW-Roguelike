@@ -137,12 +137,12 @@ BSWG.physics = new function(){
                 vB = bB.GetLinearVelocityFromWorldPoint(pB);
 
             var fA = new b2Vec2(
-                -dx * BSWG.pweldVel * mA2 + (vB.x - vA.x) * mA * BSWG.pweldVel,
-                -dy * BSWG.pweldVel * mA2 + (vB.y - vA.y) * mA * BSWG.pweldVel
+                -dx * BSWG.pweldVel * mA2 + (vB.x - vA.x) * mA2 * BSWG.pweldVel,
+                -dy * BSWG.pweldVel * mA2 + (vB.y - vA.y) * mA2 * BSWG.pweldVel
             );
             var fB = new b2Vec2(
-                dx * BSWG.pweldVel * mB2 + (vA.x - vB.x) * mB * BSWG.pweldVel,
-                dy * BSWG.pweldVel * mB2 + (vA.y - vB.y) * mB * BSWG.pweldVel
+                dx * BSWG.pweldVel * mB2 + (vA.x - vB.x) * mB2 * BSWG.pweldVel,
+                dy * BSWG.pweldVel * mB2 + (vA.y - vB.y) * mB2 * BSWG.pweldVel
             );
 
             bA.ApplyForceToCenter(fA);//, pA);
