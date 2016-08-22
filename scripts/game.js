@@ -509,6 +509,11 @@ BSWG.game = new function(){
 
     };
 
+    this.berrorMsg = function (text) {
+        this.beMsg = text || null;
+        this.beMsgTime = Date.timeStamp();
+    };
+
     this.initScene = function (scene, args)
     {
         // Init game state
@@ -556,6 +561,7 @@ BSWG.game = new function(){
         this.modeHistory = [];
         
         this.aiBtn = null;
+        this.beMsg = null;
 
         this.removeHUD();
 
@@ -1356,6 +1362,9 @@ BSWG.game = new function(){
 
                     while (BSWG.componentList.compList.length) {
                         var comp = BSWG.componentList.compList[0];
+                        if (self.map) {
+                            self.map.updateMinLevelComp(comp, 0);
+                        }
                         self.xpInfo.addStore(comp);
                         comp.remove();
                     }
@@ -2501,6 +2510,14 @@ BSWG.game = new function(){
             ctx.globalAlpha = 1.0;
 
             BSWG.ui.render(ctx, viewport);
+            if (self.beMsg && (self.beMsgTime + 3) > Date.timeStamp()) {
+                ctx.fillStyle = '#f00';
+                ctx.strokeStyle = '#000';
+                ctx.textAlign = 'center';
+                ctx.font = '26px Orbitron';
+                ctx.fillTextB(self.beMsg, viewport.w/2, self.hudY(self.hudBottomYT2));
+                ctx.textAlign = 'left';
+            }
 
             ctx.globalAlpha = 1.0;
 

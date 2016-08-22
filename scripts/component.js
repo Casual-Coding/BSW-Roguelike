@@ -346,6 +346,23 @@ BSWG.component = function (desc, args) {
 
 };
 
+BSWG.component.prototype.getKey = function () {
+    
+    var key = this.type;
+    var desc = BSWG.componentList.typeMap[this.type];
+    if (desc.sbkey) {
+        for (var j=0; j<desc.sbkey.length; j++) {
+            var k2 = desc.sbkey[j];
+            if (this[k2] || this[k2] == false) {
+                key += ',' + k2 + '=' + this[k2];
+            }
+        }
+    }
+
+    return key;
+
+};
+
 BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
 
     if (BSWG.game.scene === BSWG.SCENE_TITLE || this.type === 'missile') {
@@ -520,6 +537,17 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
 
     if (!this.jpointsw) {
         return;
+    }
+
+    if (!this.onCC && BSWG.game.editMode && !this.canEquip && ('minLevelEquip' in this)) {
+        ctx.font = '15px Orbitron';
+        ctx.fillStyle = '#f00';
+        ctx.strokeStyle = '#000';
+        ctx.textAlign = 'center';
+        var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+        ctx.fillTextB("Lvl. " + this.minLevelEquip, p.x, p.y+7);
+        ctx.textAlign = 'left';
+        p = null;
     }
 
     if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
@@ -728,6 +756,18 @@ BSWG.component.prototype.updateJCache = function() {
 
 BSWG.component.prototype.baseUpdate = function(dt) {
 
+    this.canEquip = true;
+
+    if (BSWG.game.map && !('minLevelEquip' in this)) {
+        this.minLevelEquip = BSWG.game.map.minLevelComp(this);
+    }
+
+    if (BSWG.game.xpInfo && ('minLevelEquip' in this)) {
+        if (this.minLevelEquip > BSWG.game.xpInfo.level && !this.onCC) {
+            this.canEquip = false;
+        }
+    }
+
     this.orphanTimeLeft = 0.0;
     if (BSWG.game.scene === BSWG.SCENE_GAME1 && !this.onCC && this.obj && this.obj.body && this.type !== 'missile') {
         var zone = BSWG.game.map ? BSWG.game.map.getZone(this.obj.body.GetWorldCenter()) : null;
@@ -870,15 +910,21 @@ BSWG.component.prototype.baseUpdate = function(dt) {
                     );
 
                     if (!autos) { // player action
-                        BSWG.physics.playerWeld(
-                            makeWeld, // weldCbk
-                            this, // objA
-                            this.jmatch[i][1], // objB
-                            this.jpoints[this.jmatch[i][0]], // anchorA
-                            this.jmatch[i][1].jpoints[this.jmatch[i][2]], // anchorB
-                            i, // jpA
-                            this.jmatch[i][2] // jpB
-                        );
+                        if (this.canEquip && this.jmatch[i][1].canEquip) {
+                            BSWG.physics.playerWeld(
+                                makeWeld, // weldCbk
+                                this, // objA
+                                this.jmatch[i][1], // objB
+                                this.jpoints[this.jmatch[i][0]], // anchorA
+                                this.jmatch[i][1].jpoints[this.jmatch[i][2]], // anchorB
+                                i, // jpA
+                                this.jmatch[i][2] // jpB
+                            );
+                        }
+                        else {
+                            new BSWG.soundSample().play('error', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, 1.5);
+                            BSWG.game.berrorMsg('Insufficient level');
+                        }
                     }
                     else {
                         makeWeld();

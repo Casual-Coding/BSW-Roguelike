@@ -860,6 +860,36 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         return this.zones[best];
     };
 
+    ret.mlMap = {};
+
+    ret.minLevelComp = function(key) {
+
+        if (typeof key !== 'string') {
+            key = key.getKey();
+        }
+        if (key in this.mlMap) {
+            return this.mlMap[key];
+        }
+        else {
+            return this.eInfo.maxLevel+1;
+        }
+
+    };
+
+    ret.updateMinLevelComp = function(key, level) {
+
+        if (typeof key !== 'string') {
+            key = key.getKey();
+        }
+
+        level = level || 0;
+
+        if (!(key in this.mlMap) || (this.mlMap[key] > level)) {
+            this.mlMap[key] = level;
+        }
+
+    };
+
     var lastP = null;
     var lastBattleP = null;
     var lastBattleZone = null;
@@ -938,6 +968,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
     for (var i=0; i<ret.zones.length; i++) {
         BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo);
+        for (var key in ret.zones[i].compHist) {
+            ret.updateMinLevelComp(key, ret.zones[i].maxLevel);
+        }
     }
     for (var i=0; i<ret.zones.length; i++) {
         BSWG.genMap_ComputeTrading(ret.zones[i], ret.zones, ret.eInfo);

@@ -984,9 +984,18 @@ BSWG.control_CompPalette = {
             var x2 = x;
             var w = ~~((this.w-20) / 3);
             for (var j=0; j<SBL.length; j++) {
+                var key = CL[i].type;
+                for (var k=0; CL[i].sbkey && k<CL[i].sbkey.length; k++) {
+                    var k2 = CL[i].sbkey[k];
+                    if (SBL[j][k2] || SBL[j][k2] == false) {
+                        key += ',' + k2 + '=' + SBL[j][k2];
+                    }
+                }
+
                 buttons.push({
                     args: SBL[j],
                     text: SBL[j].title,
+                    key: key,
                     comp: CL[i],
                     x: x2, y: y,
                     w: w, h: 18,
@@ -1133,6 +1142,12 @@ BSWG.control_CompPalette = {
                     ctx.textAlign = 'right';
                     ctx.fillStyle = '#0f0';
                     ctx.fillText(this.buttons[i].args.count + '', B.x + this.p.x + B.w - 4, B.y + this.p.y + B.h*0.5+4);
+                }
+                if (BSWG.game.map && BSWG.game.xpInfo) {
+                    if (BSWG.game.map.minLevelComp(this.buttons[i].key) > BSWG.game.xpInfo.level) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, .35)';
+                        ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
+                    }
                 }
             }
 
@@ -1406,7 +1421,16 @@ BSWG.control_TradeWindow = {
                         ctx.textAlign = 'left';
                         ctx.fillStyle = '#fff';
                         ctx.strokeStyle = '#000';
-                        ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
+                        var name = this.compName[it.key];
+                        if (BSWG.game.map) {
+                            var lvl = BSWG.game.map.minLevelComp(it.key);
+                            name += ' (L.' + lvl + ')';
+                            if (BSWG.game.xpInfo && lvl > BSWG.game.xpInfo.level) {
+                                ctx.fillStyle = '#f00';
+                            }
+                        }
+                        ctx.fillTextB(name, x+24, y0 + sh - fs*1.25);
+                        //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                         ctx.textAlign = 'right';
                         ctx.fillStyle = '#bbb';
                         var count = i === 0 ? this.wantCount : it.count;
@@ -1419,7 +1443,7 @@ BSWG.control_TradeWindow = {
                         else {
                             ctx.textAlign = 'right';
                             ctx.fillStyle = '#fbb';
-                            ctx.fillTextB('Cancel', x+w-18-fs*6, y0 + sh - fs*1.25);   
+                            ctx.fillTextB('Cancel', x+w-18-fs*4, y0 + sh - fs*1.25);   
                         }
                         if (count <= 0) {
                             ctx.fillStyle = 'rgba(0,0,0,.35)';
@@ -1468,7 +1492,15 @@ BSWG.control_TradeWindow = {
                         ctx.textAlign = 'left';
                         ctx.fillStyle = '#fff';
                         ctx.strokeStyle = '#000';
-                        ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
+                        var name = this.compName[it.key];
+                        if (BSWG.game.map) {
+                            var lvl = BSWG.game.map.minLevelComp(it.key);
+                            name += ' (L.' + lvl + ')';
+                            if (BSWG.game.xpInfo && lvl > BSWG.game.xpInfo.level) {
+                                ctx.fillStyle = '#f00';
+                            }
+                        }
+                        ctx.fillTextB(name, x+24, y0 + sh - fs*1.25);
                     }
                     y0 += sh;
                 }
@@ -1692,7 +1724,14 @@ BSWG.control_TradeWindow = {
                                     this.scrollLeft = 0;
                                     this.give = [];
                                     this.resetPCL();
-                                    this.say((this.want.rare ? "Excellent choice, w" : "W") + "hat are you willing to trade?");
+                                    var text = (this.want.rare ? "Excellent choice, w" : "W") + "hat are you willing to trade?";
+                                    if (BSWG.game.map) {
+                                        var lvl = BSWG.game.map.minLevelComp(this.want.key);
+                                        if (BSWG.game.xpInfo && lvl > BSWG.game.xpInfo.level) {
+                                            text += ' I have to warn you though, you won\'t be able to use this until you get to level ' + lvl + '!';
+                                        }
+                                    }
+                                    this.say(text);
                                     new BSWG.soundSample().play('dialog', null, 0.075, (Math.random() * 0.1 + 0.9) * (this.portraitId < 0 ? 2.0 : 1.1));
                                 }
                             }

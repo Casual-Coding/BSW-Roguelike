@@ -93,6 +93,7 @@ BSWG.physics = new function(){
                         pB = bB.GetWorldPoint(PW.anchorB);
                     var p = new b2Vec2((pA.x+pB.x)*0.5, (pA.y+pB.y)*0.5);
                     new BSWG.soundSample().play('error', p.THREE(0.2), 1.0, 1.5);
+                    BSWG.game.berrorMsg('Unable to weld');
                     bA = bB = pA = pB = p = null;
                 }
                 this.destroyPWeld(PW);
