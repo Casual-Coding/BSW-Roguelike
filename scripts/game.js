@@ -14,6 +14,56 @@ BSWG.SCENE_GAME2 = 3;
 
 BSWG.game = new function(){
 
+    this.initComponents = [
+        "hingehalf,size=1,motor=true",
+        "hingehalf,size=1,motor=false",
+        "hingehalf,size=1,motor=true",
+        "hingehalf,size=1,motor=false",
+        "spikes,size=1,pike=false",
+        "spikes,size=1,pike=true",
+        "spikes,size=1,pike=false",
+        "spikes,size=1,pike=true",
+        "thruster,size=1",
+        "thruster,size=1",
+        "thruster,size=1",
+        "thruster,size=1",
+        "thruster,size=1",
+        "thruster,size=1",
+        "blaster",
+        "blaster",
+        "blaster",
+        "block,width=2,height=2,armour=false,triangle=0",
+        "block,width=2,height=2,armour=false,triangle=0",
+        "block,width=1,height=2,armour=false,triangle=0",
+        "block,width=1,height=2,armour=false,triangle=0",
+        "block,width=1,height=2,armour=false,triangle=1",
+        "block,width=1,height=2,armour=false,triangle=1",
+        "block,width=2,height=1,armour=false,triangle=1",
+        "block,width=2,height=1,armour=false,triangle=1",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=2,height=2,armour=false,triangle=1",
+        "block,width=2,height=2,armour=false,triangle=1",
+        "block,width=2,height=2,armour=false,triangle=0",
+        "block,width=2,height=2,armour=false,triangle=0",
+        "block,width=1,height=2,armour=false,triangle=0",
+        "block,width=1,height=2,armour=false,triangle=0",
+        "block,width=1,height=2,armour=false,triangle=1",
+        "block,width=1,height=2,armour=false,triangle=1",
+        "block,width=2,height=1,armour=false,triangle=1",
+        "block,width=2,height=1,armour=false,triangle=1",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=0",
+        "block,width=2,height=2,armour=false,triangle=1",
+        "block,width=2,height=2,armour=false,triangle=1",
+        "block,width=2,height=2,armour=false,triangle=0",
+        "block,width=2,height=2,armour=false,triangle=0"
+    ];
+
     this.curSong = null;
     this.lastSong = null;
     this.hudBtn = new Array();
@@ -826,6 +876,9 @@ BSWG.game = new function(){
                     this.xpInfo = new BSWG.playerStats();
                     startPos = this.map.planets[0].worldP.clone();
                 }
+                for (var i=0; i<this.initComponents.length; i++) {
+                    this.map.updateMinLevelComp(this.initComponents[i], 0);
+                }
                 BSWG.xpDisplay.xpInfo = this.xpInfo;
                 this.mapImage = this.tileMap.minimap.image;
                 this.tileMap.addCollision(0, 0, this.map.size, this.map.size);
@@ -1228,145 +1281,10 @@ BSWG.game = new function(){
                         //this.tileMap.addCollision(-14, -14, 28, 28);
                     }
 
-                    var count = scene === BSWG.SCENE_GAME1 ? 44+3 : 145+3;
-
-                    var pastPositions = [ new b2Vec2(0, 0) ];
-                    for (var i=0; i<count; i++) {
-
-                        var p = null;
-                        for (var k=0; k<500; k++)
-                        {
-                            var a = Math.random() * Math.PI * 2.0;
-                            var r;
-                            if (scene === BSWG.SCENE_GAME1) {
-                                r = Math.random() * 10 + 12;
-                            }
-                            else {
-                                r = Math.random() * 26 + 12;
-                            }
-                            p = new b2Vec2(Math.cos(a)*r+startPos.x, Math.sin(a)*r+startPos.y);
-                            for (var j=0; j<pastPositions.length && p; j++) {
-                                var jp = pastPositions[j];
-                                if (Math.pow(jp.x - p.x, 2.0) + Math.pow(jp.y - p.y, 2.0) < 4*4)
-                                    p = null;
-                            }
-                            if (p)
-                                break;
+                    if (this.xpInfo) {
+                        for (var i=0; i<this.initComponents.length; i++) {
+                            this.xpInfo.addStoreKey(this.initComponents[i], 1);
                         }
-
-                        if (!p)
-                            continue;
-
-                        pastPositions.push(p);
-
-                        if (scene === BSWG.SCENE_GAME1) {
-
-                            if (i<4)
-                                new BSWG.component(BSWG.component_HingeHalf, {
-
-                                    pos: p,
-                                    angle: Math.random()*Math.PI*2.0,
-                                    size: 1,
-                                    motor: Math.floor(i%2) === 0,
-
-                                });
-                            else if (i<(4+4)) {
-                                new BSWG.component(BSWG.component_Spikes, {
-
-                                    pos: p,
-                                    angle: Math.random()*Math.PI*2.0,
-                                    size: 1,
-                                    pike: !!Math.floor(i%2)
-
-                                });
-                            }
-                            else if (i<(4+4+6)) {
-                                new BSWG.component(BSWG.component_Thruster, {
-
-                                    pos: p,
-                                    angle: Math.random()*Math.PI*2.0,
-
-                                });
-                            }
-                            else if (i<(4+4+6+3)) {
-                                new BSWG.component(BSWG.component_Blaster, {
-
-                                    pos: p,
-                                    angle: Math.random()*Math.PI*2.0,
-
-                                });
-                            }
-                            /*else if (i<(4+4+6+3+4)) {
-                                new BSWG.component(i%2 ? BSWG.component_Laser : BSWG.component_MissileLauncher, {
-
-                                    pos: p,
-                                    angle: Math.random()*Math.PI*2.0,
-
-                                });
-                            }*/
-                            else {
-                                var k = (i - (4+6+3+4)) % 14;
-                                switch (k) {
-                                    case 0:
-                                    case 1:
-                                        new BSWG.component(BSWG.component_Block, {
-                                            pos: p, angle: Math.random()*Math.PI*2.0,
-                                            width: 2, height: 2, triangle: 0,
-                                        });
-                                        break;
-                                    case 2:
-                                    case 3:
-                                        new BSWG.component(BSWG.component_Block, {
-                                            pos: p, angle: Math.random()*Math.PI*2.0,
-                                            width: 1, height: 2, triangle: 0,
-                                        });
-                                        break;
-                                    case 4:
-                                    case 5:
-                                        new BSWG.component(BSWG.component_Block, {
-                                            pos: p, angle: Math.random()*Math.PI*2.0,
-                                            width: 1, height: 2, triangle: 1,
-                                        });
-                                        break;
-                                    case 6:
-                                    case 7:
-                                        new BSWG.component(BSWG.component_Block, {
-                                            pos: p, angle: Math.random()*Math.PI*2.0,
-                                            width: 2, height: 1, triangle: 1,
-                                        });
-                                        break;
-                                    case 8:
-                                    case 9:
-                                    case 10:
-                                    case 11:
-                                        new BSWG.component(BSWG.component_Block, {
-                                            pos: p, angle: Math.random()*Math.PI*2.0,
-                                            width: 1, height: 1, triangle: 0,
-                                        });
-                                        break;                
-                                    case 12:
-                                    case 13:
-                                        new BSWG.component(BSWG.component_Block, {
-                                            pos: p, angle: Math.random()*Math.PI*2.0,
-                                            width: 2, height: 2, triangle: 1,
-                                        });
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                        else {
-                        }
-                    }
-
-                    while (BSWG.componentList.compList.length) {
-                        var comp = BSWG.componentList.compList[0];
-                        if (self.map) {
-                            self.map.updateMinLevelComp(comp, 0);
-                        }
-                        self.xpInfo.addStore(comp);
-                        comp.remove();
                     }
 
                     this.ccblock = new BSWG.component(BSWG.component_CommandCenter, {

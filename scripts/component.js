@@ -539,7 +539,7 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
         return;
     }
 
-    if (!this.onCC && BSWG.game.editMode && !this.canEquip && ('minLevelEquip' in this)) {
+    if (!this.onCC && this.type !== 'missile' && BSWG.game.editMode && !this.canEquip && ('minLevelEquip' in this)) {
         ctx.font = '15px Orbitron';
         ctx.fillStyle = '#f00';
         ctx.strokeStyle = '#000';

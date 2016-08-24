@@ -967,11 +967,12 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     }
 
     for (var i=0; i<ret.zones.length; i++) {
-        BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo);
+        BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo, ret.zones[i] === ret.planets[0].zone);
         for (var key in ret.zones[i].compHist) {
             ret.updateMinLevelComp(key, ret.zones[i].maxLevel);
         }
     }
+
     for (var i=0; i<ret.zones.length; i++) {
         BSWG.genMap_ComputeTrading(ret.zones[i], ret.zones, ret.eInfo);
     }
@@ -1206,7 +1207,7 @@ BSWG.pickEnemyLevel = function(zone, E) {
     }
 };
 
-BSWG.genMap_ComputeCompCount = function(zone, eInfo) {
+BSWG.genMap_ComputeCompCount = function(zone, eInfo, isFirst) {
 
     zone.compHist = {};
     zone.compHistBoss = {};
@@ -1222,6 +1223,13 @@ BSWG.genMap_ComputeCompCount = function(zone, eInfo) {
             }
         }
     };
+
+    if (isFirst) {
+        for (var i=0; i<BSWG.game.initComponents.length; i++) {
+            var key = BSWG.game.initComponents[i];
+            zone.compHist[key] = (zone.compHist[key] ? zone.compHist[key] : 0) + 4;
+        }
+    }
 
     if (zone.boss) {
         if (zone.boss.enemies) {
