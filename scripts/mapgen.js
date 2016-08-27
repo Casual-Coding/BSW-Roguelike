@@ -1,8 +1,8 @@
-BSWG.map_minZoneDist     = 20; // Minimum distance allowed between two zones
+BSWG.map_minZoneDist     = 15; // Minimum distance allowed between two zones
 BSWG.map_minZoneEdgeDist = 20; // Minimum distance allowed from a zone center to edge of map
 BSWG.map_gridSize        = 24.0; // overwritte as BSWG.tileSizeWorld
 BSWG.map_flPlanetDist    = 0.9; // * size
-BSWG.map_minPlanetDist   = 60; // Minimum distance allowed between planets
+BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
 BSWG.map_planetSafeDist  = 4; // Size of zone surrounding planet
 
 BSWG.enemySettings_compToStr = function (obj) {
@@ -334,14 +334,15 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 }
             }
             if (k >= 1000) {
-                numZones = i;
+                return BSWG.genMap(size, numZones, numPlanets);
+                /*numZones = i;
                 ret.zones.length = numZones;
                 if (i === 0) {
                     console.log('Map generation error: Number of zones forced to 0');
                 }
                 if (i < numPlanets) {
                     console.log('Map generation error: Number of zones forced to less than number of planets')
-                }
+                }*/
                 break;
             }
         }
@@ -392,8 +393,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 }
             }
             if (k >= 1000) {
-                numPlanets = i;
-                ret.planets.length = numPlanets;
+                return BSWG.genMap(size, numZones, numPlanets);
+                //numPlanets = i;
+                //ret.planets.length = numPlanets;
             }
         }
 
