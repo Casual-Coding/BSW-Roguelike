@@ -140,8 +140,8 @@ BSWG.enemySettings = [
             },
             { enemies: [ { type: 'mele-boss', levelInc: 2 }, { type: 'brute', levelInc: 1 } ] },
             { enemies: [ { type: 'big-flail', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 } ] },
-            { enemies: [ { type: 'crippler', levelInc: 2 }, { type: 'little-cruncher', levelInc: 1 } ] },
-            { enemies: [ { type: 'cruncher-boss', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 }, { type: 'heavy-fighter', levelInc: 1 } ] }, // TODO
+            { enemies: [ { type: 'crippler', levelInc: 2 }, { type: 'cruncher-boss', levelInc: 1 } ] },
+            { enemies: [ { type: 'goliath', levelInc: 2 }, { type: 'heavy-fighter', levelInc: 1 }, { type: 'heavy-fighter', levelInc: 1 } ] }, // TODO
         ],
         enemies: [
             { type: 'big-flail',        levels: [8,9,10] },

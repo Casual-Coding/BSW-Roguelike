@@ -26,6 +26,7 @@ BSWG.getEnemy = function(type, statsOnly) {
     var title = 'Unkown Enemy';
 
     switch (type) {
+        case 'goliath':         title = 'Goliath'; break;
         case 'big-flail':       title = 'Big Flail'; break;
         case 'big-spinner':     title = 'Big Spinner'; break;
         case 'brute':           title = 'Brute'; break; 

@@ -172,6 +172,7 @@ var BSWG = new function(){
         ]
     };
     var ai = [
+        'goliath',
         'big-flail',
         'big-spinner',
         'brute',
