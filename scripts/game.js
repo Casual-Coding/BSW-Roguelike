@@ -860,6 +860,9 @@ BSWG.game = new function(){
                 if (args.load) {
                     this.map = BSWG.genMap(args.load.map);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
+                    for (var i=0; i<this.initComponents.length; i++) {
+                        this.map.updateMinLevelComp(this.initComponents[i], 0);
+                    }
                     this.ccblock = BSWG.componentList.load(args.load.comp, null, null, null, null, true);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;

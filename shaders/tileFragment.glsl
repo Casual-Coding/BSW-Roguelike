@@ -53,7 +53,7 @@ void main() {
     float l1 = pow(max(dot(normalize((normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7) * extra.z;
     float l2 = (pow(max(dot(normalize(N), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
-    l = pow(max(l, 0.0), 2.0) + 0.3;
+    l = pow(max(l, 0.0), 2.5) + 0.3;
 
     gl_FragColor = vec4(clr.rgb*l, 1.0);
 

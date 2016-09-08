@@ -578,7 +578,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
             },
-            color: [1.5, 1.0, 0.5],
+            color: [1.75, 1.25, 0.1],
             reflect: 0.1,
             normalMap: BSWG.render.images['water_nm'].texture,
             normalMapScale: 3.0,
@@ -588,7 +588,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
             },
-            color: [0.75/3, 0.5/3, 0.5/3],
+            color: [0.75/3, 0.6/3, 0.6/3],
             reflect: 0.15,
             normalMapAmp: 5.0,
         },
@@ -596,7 +596,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
-            color: [2.25, 2.25, 2.25],
+            color: [2.25, 2.3, 2.5],
             reflect: 0.225,
             normalMap: BSWG.render.images['water_nm'].texture,
             normalMapScale: 2.5,
