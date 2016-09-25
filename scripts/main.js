@@ -81,6 +81,7 @@ var BSWG = new function(){
         'env-map-1': 'env-map-1.png',
         'env-map-2': 'env-map-2.png',
         'env-map-3': 'env-map-3.png',
+        'env-map-4': 'env-map-4.png',
         'cursor-normal': 'cursor-normal.png',
         'cursor-pressed': 'cursor-pressed.png',
         'cursor-pressed-right': 'cursor-pressed-right.png',
@@ -123,6 +124,7 @@ var BSWG = new function(){
         'tileset-sand': 'tileset-sand-512.png',
         'tileset-snow': 'tileset-snow-512.png',
         'tileset-rockland': 'tileset-rockland-512.png'
+        //'dc-logo': 'dc-logo.png'
     };
     var makeTexture = [
         'test_nm',
@@ -130,7 +132,9 @@ var BSWG = new function(){
         'water_nm',
         'damage_nm',
         'env-map-1',
-        'env-map-2'
+        'env-map-2',
+        'env-map-3',
+        'env-map-4'
     ];
     var shaders = {
         'vertex': [

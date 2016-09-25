@@ -724,7 +724,7 @@ BSWG.ai = new function() {
         this.closeEditor();
 
         this.editorCC = ccblock;
-        this.showDebug = true;
+        this.showDebug = false;
 
         this.addEditor();
 

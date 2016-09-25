@@ -123,22 +123,43 @@ BSWG.game = new function(){
                     self.tradeButtonPos[2] = self.tradeButtonPos[0] + bsz;
                     self.tradeButtonPos[3] = self.tradeButtonPos[1] + bsz;
 
-                    H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
-                    H.hudBtn.push([-1000, -1000, 10, 10]); // 1
+                    if (scene === BSWG.SCENE_GAME1) {
+                        H.plate(w/2-(bfr+bsz*2), h-hh, bfr*2+bsz*4, hh, 0.25, 0.5);
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 1
+                        H.plate(w/2-(bfr+bsz*2)+bfr, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 2
+                        H.plate(w/2-(bfr+bsz*2)+bfr+bsz, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 3
+                        H.plate(w/2-(bfr+bsz*2)+bfr+bsz*2, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 4
+                        H.plate(w/2-(bfr+bsz*2)+bfr+bsz*3, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 5
+                    }
+                    else {
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 1
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 2
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 3
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 4
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 5
+                    }
 
-                    H.plate(w/2-(bfr+bsz*2)+bfr, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 2
-                    H.plate(w/2-(bfr+bsz*2)+bfr+bsz, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 3
-                    H.plate(w/2-(bfr+bsz*2)+bfr+bsz*2, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 4
-                    H.plate(w/2-(bfr+bsz*2)+bfr+bsz*3, h-(bsz+bfr), bsz, bsz, 0.5, 0.25); // 5
+                    if (scene === BSWG.SCENE_GAME2) {
+                        H.plate(w/2-(bsz*2.5), h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 6
+                        H.plate(w/2-(bsz*2.5)+bsz, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 7
+                        H.plate(w/2-(bsz*2.5)+bsz*2, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 8
+                        H.plate(w/2-(bsz*2.5)+bsz*3, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 9
+                        H.plate(w/2-(bsz*2.5)+bsz*4, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 10
+                    }
+                    else {
+                        H.plate(w/2+(bfr+bsz*2)+bfr, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 6
+                        H.plate(w/2+(bfr+bsz*2)+bfr+bsz, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 7
+                        H.plate(w/2+(bfr+bsz*2)+bfr+bsz*2, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 8
+                        H.plate(w/2+(bfr+bsz*2)+bfr+bsz*3, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 9
+                        H.plate(w/2+(bfr+bsz*2)+bfr+bsz*4, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 10
+                    }
 
-                    H.plate(w/2+(bfr+bsz*2)+bfr, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 6
-                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 7
-                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz*2, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 8
-                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz*3, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 9
-                    H.plate(w/2+(bfr+bsz*2)+bfr+bsz*4, h-bfr-bsz, bsz, bsz, 0.5, 0.35); // 10
-
-                    H.plate(mmsize*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-mmsize*sc-bfr*2, bsz, 0.5, 0.15); // 11
-
+                    if (scene === BSWG.SCENE_GAME1) {
+                        H.plate(mmsize*sc+bfr, h-(bsz+bfr), w/2-(bfr+bsz*2)-mmsize*sc-bfr*2, bsz, 0.5, 0.15); // 11
+                    }
+                    else {
+                        H.hudBtn.push([-1000, -1000, 10, 10]);
+                    }
                 }
                 else {
                     for (var i=0; i<12; i++) {
@@ -163,7 +184,7 @@ BSWG.game = new function(){
                     }                    
                 }
 
-                if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
+                if (scene === BSWG.SCENE_GAME1) {
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr, (bfr*2+bsz*4)-bfr*2, bsz/3, 0.5, 0.25); // 17 (xp meter)
                     var sz2 = ((bfr*2+bsz*4)-bfr*2) / 3;
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 18 (stats button: bosses beaten, zones discovered, etc)
@@ -584,6 +605,9 @@ BSWG.game = new function(){
 
         if (scene === BSWG.SCENE_TITLE) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-2'];
+        }
+        else if (scene === BSWG.SCENE_GAME2) {
+            BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
         }
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
@@ -1228,60 +1252,65 @@ BSWG.game = new function(){
 
                     if (scene === BSWG.SCENE_GAME2) {
                         var desc = {
-                            'tileset-mountain': {
-                                map: function(x,y) {
-                                    return false;
-                                    /*
-                                    var d = ~~(Math.sqrt(x*x+y*y));
-                                    return (Math.max(Math.abs(x), Math.abs(y)) > 12) ||
-                                           (d == 6 && Math.abs(x) > 1 && Math.abs(y) > 1);*/
-                                },
-                                collision: true,
-                                color: [1.0, 1.0, 1.0]
-                            },
-                            'tileset-land': {
-                                map: function(x,y) { return (Math.abs(x) > 1 || Math.abs(y) > 1) && BSWG.mapPerlin(x,y); },
-                                color: [0.4, 0.75, 0.2],
-                                relfect: 0.2,
-                                normalMapAmp: 3.0,
-                            },
-                            'tileset-below': {
-                                map: function(x,y) {
-                                    return true;
-                                },
-                                color: [0.75, 0.75, 0.20],
-                                isBelow: true,
-                                reflect: 0.5,
-                                normalMapAmp: 1.5
-                            },
                             'city-tiles': {
                                 decals: BSWG.makeCityTiles(1),
                                 normalMap: BSWG.render.images['test_nm'].texture,
                                 normalMapScale: 24.0,
                                 normalMapAmp: 5.0,
                                 map: function(x, y) {
-                                    if (!x && !y) {
-                                        return 9;
+                                    if (!BSWG.mapPerlinSparse(x+100,y+414) &&
+                                        BSWG.mapPerlinSparse(x-100,y-414)) {
+                                        return ~~(Math.random2d(x, y) * 9) + 1;
                                     }
                                     else {
                                         return 0;
                                     }
                                 },
-                                color: [0.5, 0.5, 1.5],
-                                flashColor: [1.1, 1.1, 1.5],
+                                color: [1.5, 0.5, 0.5],
+                                flashColor: [1.5, 1.1, 1.0],
                                 reflect: 0.75
                             },
-                            'water': {
+                            'tileset-mountain': {
+                                map: BSWG.mapPerlinSparse,
+                                color: [0.0, 0.15, 0.5],
+                                reflect: 0.2,
+                                normalMapAmp: 4.0,
+                                normalMapScale: 2.0
+                            },
+                            'tileset-below': {
                                 map: function(x,y) {
                                     return true
                                 },
-                                color: [0.05*0.5, 0.4*0.25, 0.75*0.5, 0.65],
-                                level: 0.20,
+                                color: [0.0, 0.2, 0.6],
+                                normalMapAmp: 1.5,
+                                normalMapScale: 0.5,
+                                isBelow: true
+                            },
+                            'water': {
+                                color: [0, 0, 0, 0.65],
+                                map: function(x,y) {
+                                    return true;
+                                },
+                                level: 0.15,
+                                normalMapScale: 0.5,
                                 isWater: true
                             }
                         };
-                        this.tileMap = new BSWG.tileMap(desc);
+                        this.tileMap = new BSWG.tileMap(desc, -10);
                         //this.tileMap.addCollision(-14, -14, 28, 28);
+
+                        BSWG.render.weather.transition({
+                            density:        1,
+                            size:           0.15,
+                            color:          new THREE.Vector4(.5, .5, .1, .6),
+                            speed:          0.05,
+                            lightning:      new THREE.Vector4(1, 1, 1, 1),
+                            lightningFreq:  0.001,
+                            wet:            0.175,
+                            tint:           new THREE.Vector4(0, 0, 1, .125),
+                            swirl:          5.0,
+                            dark:           0.0
+                        }, 5);
                     }
 
                     if (this.xpInfo) {
@@ -2429,6 +2458,54 @@ BSWG.game = new function(){
             }
 
             ctx.globalAlpha = 1.0;
+
+            /*if (true) { // demo camp timer mode
+
+                var img = BSWG.render.images['dc-logo'];
+                var h = BSWG.render.viewport.h * 0.03;
+                var w = (img.width / img.height) * h;
+                var text = "";
+                var timeLeft = 5*60;
+                ctx.drawImage(img, 0, 0, img.width, img.height, BSWG.render.viewport.w - w - 10, BSWG.render.viewport.h * 0.05, w, h);
+
+                if (self.dcTimer) {
+                    var time = Date.timeStamp() - self.dcTimer;
+                    var min = Math.floor(time / 60);
+                    var sec = Math.floor(time) % 60;
+                    timeLeft = 5*60 - min*60 - sec;
+                    if ((self.dcSoundT !== (min*60+sec)) && (min >= 1 && sec === 0 || min === 4 && sec === 30)) {
+                        self.dcSound = new BSWG.soundSample().play('levelup', null, 0.5, 1.0);
+                        self.dcSoundT = min*60+sec;
+                    }
+                    text = min + ':';
+                    if (sec < 10) {
+                        text += '0'
+                    }
+                    text += sec;
+                }
+                else if (BSWG.input.KEY_DOWN(BSWG.KEY.Z)) {
+                    self.dcTimer = Date.timeStamp();
+                }
+                else {
+                    text = "Press Z";
+                }
+
+                if (timeLeft > 1*60) {
+                    ctx.fillStyle = '#0f0';
+                }
+                else if (timeLeft > 30) {
+                    ctx.fillStyle = '#ff0';
+                }
+                else {
+                    ctx.fillStyle = '#f00';
+                }
+                ctx.strokeStyle = '#000';
+                ctx.textAlign = 'left';
+                ctx.font = Math.floor(h*.65) + 'px Orbitron';
+                ctx.fillTextB(text, BSWG.render.viewport.w - w - 10 + w * 0.02, BSWG.render.viewport.h * 0.05 + h * 1.65);
+
+            } // end demo camp timer mode
+            */
 
             BSWG.ui.render(ctx, viewport);
             if (self.beMsg && (self.beMsgTime + 3) > Date.timeStamp()) {
