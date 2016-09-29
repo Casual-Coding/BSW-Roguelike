@@ -598,6 +598,7 @@ BSWG.game = new function(){
         }
 
         this.spawnCount = 0;
+        this.xpInfo = null;
 
         this.cam = new BSWG.camera();
 
@@ -1834,11 +1835,12 @@ BSWG.game = new function(){
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
 
-                    if (grabbedBlock) {
+                    if (grabbedBlock && grabbedBlock.obj && grabbedBlock.obj.body) {
 
                         self.ccblock.grabT = 0.19;
 
                         var gpw = grabbedBlock.getWorldPoint(grabbedLocal);
+                        var gpc = BSWG.render.project3D(grabbedBlock.obj.body.GetWorldCenter());
                         var gp = BSWG.render.project3D(gpw);
 
                         var ccl = new b2Vec2(0.0, 0.6);
@@ -1849,11 +1851,16 @@ BSWG.game = new function(){
                         ctx.strokeStyle = 'rgba(192, 192, 255, ' + (BSWG.input.MOUSE('shift') ? 0.3 : 0.75) + ')';
                         ctx.beginPath();
                         ctx.moveTo(cc.x, cc.y);
+                        ctx.lineTo(gpc.x, gpc.y);
                         ctx.lineTo(gp.x, gp.y);
                         ctx.lineTo(mps.x, mps.y);
                         ctx.stroke();
                         
                         ctx.fillStyle = ctx.strokeStyle;
+
+                        ctx.beginPath();
+                        ctx.arc(gpc.x, gpc.y, 5, 0, 2*Math.PI);
+                        ctx.fill();
 
                         ctx.beginPath();
                         ctx.arc(cc.x, cc.y, 5, 0, 2*Math.PI);
