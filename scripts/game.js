@@ -1835,6 +1835,21 @@ BSWG.game = new function(){
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
 
+                    if (!grabbedBlock && BSWG.componentList.mouseOver && BSWG.componentList.mouseOver.obj && BSWG.componentList.mouseOver.obj.body) {
+
+                        var comp = BSWG.componentList.mouseOver;
+
+                        if (comp.type !== 'cc' && !(comp.onCC && (!comp.canMoveAttached || comp.onCC !== self.ccblock)) || comp.distanceTo(self.ccblock) > BSWG.maxGrabDistance) {
+                            var gpc = BSWG.render.project3D(comp.obj.body.GetWorldCenter());
+                            ctx.beginPath();
+                            ctx.arc(gpc.x, gpc.y, 5, 0, 2*Math.PI);
+                            ctx.fill();
+                            gpc = null;
+                        }
+
+                        comp = null;
+                    }
+
                     if (grabbedBlock && grabbedBlock.obj && grabbedBlock.obj.body) {
 
                         self.ccblock.grabT = 0.19;
