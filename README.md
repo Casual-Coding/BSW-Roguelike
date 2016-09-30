@@ -5,6 +5,7 @@ BlockShip Wars: Roguelike
  * Devblog: http://chadams77.tumblr.com/
  * Facebook: https://www.facebook.com/BSWRoguelike
  * Live demo: http://blockshipwars.com/roguelike-demo/ (outdated)
+ * Standalone builds: http://www.blockshipwars.com/alpha-test-r/ (updated semi-regularily)
 
 # License
 See LICENSE
