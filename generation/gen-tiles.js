@@ -148,10 +148,10 @@ var genRipples = function(sz, min, max, exSmooth) {
 
 };
 
-var genPerlin = function(sz, min, max, k, off, exSmooth, bleedF) {
+var genPerlin = function(sz, min, max, k, off, exSmooth, bleedF, iszf) {
     var ret = newArr(sz, 0.0);
     var h = max - min;
-    var sz2 = sz / 4;
+    var sz2 = sz / (iszf || 4);
     var l = 0.5;
     while (k--) {
         for (var x=0; x<sz; x++) {
@@ -228,8 +228,9 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 1.5,
+        taperPower: 2.0,
         bleedF: 25.0,
+        iszF: 1.5,
         texType: 'perlin',
         taperComb: function(a,b) {
             return a*b;
@@ -244,7 +245,8 @@ var tileTypes = {
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
-        taperPower: 2.0,
+        iszF: 1.0,
+        taperPower: 1.5,
         texType: 'perlin',
         taperComb: function(a,b) {
             return a*b;
@@ -252,11 +254,11 @@ var tileTypes = {
         perlinFilter: function(v) {
             return Math.pow(v, 2.1);
         },
-        smooth: 2
+        smooth: 32
     },
     'rockland': {
         minHeight: 0.28,
-        maxHeight: 0.475,
+        maxHeight: 0.575,
         transitionTo: 0.0,
         downTransition: true,
         insideVariations: 4,
@@ -284,7 +286,7 @@ var tileTypes = {
         perlinFilter: function(v) {
             return Math.pow(v, 0.5);
         },
-        smooth: 8
+        smooth: 16
     },
     'snow': {
         minHeight: 0.28,
@@ -300,7 +302,7 @@ var tileTypes = {
         perlinFilter: function(v) {
             return Math.pow(v, 0.5);
         },
-        smooth: 5
+        smooth: 16
     },
     'below': {
         minHeight: 0.01,
@@ -570,7 +572,7 @@ var P = null;
 if (tInfo.texType == 'ripples') {
     P = genRipples(tileSize, 0.0, 1.0, tInfo.smooth||0);
 } else { // 'perlin'
-    P = genPerlin(tileSize, 0.0, 1.0, k, Math.random()*100000.0, tInfo.smooth||0, tInfo.bleedF||0);
+    P = genPerlin(tileSize, 0.0, 1.0, k, Math.random()*100000.0, tInfo.smooth||0, tInfo.bleedF||0, tInfo.iszF);
 }
 for (var x=0; x<tileSize; x++) {
     for (var y=0; y<tileSize; y++) {

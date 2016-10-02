@@ -67,21 +67,26 @@ void main() {
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
     float Z = vPosition.z / vPosition.w;
-    float zval = Z-0.01;
+    float zval = Z-0.05;
     if (svp.x > 0. && svp.y > 0. && svp.x < 1. && svp.y < 1.) {
-        svec = (texture2D(shadowMap, svp) * 0.75
-             + texture2D(shadowMap, svp - vec2(1./2048., 0.)) * 0.0625 
-             + texture2D(shadowMap, svp + vec2(1./2048., 0.)) * 0.0625
-             + texture2D(shadowMap, svp - vec2(0., 1./2048.)) * 0.0625
-             + texture2D(shadowMap, svp + vec2(0., 1./2048.)) * 0.0625);
-        zval = (svec.r * 65536.0 + svec.g * 256.0 + svec.b) / 256.0 - 256.0;
-        zval -= 0.05;
+        vec4 SA = texture2D(shadowMap, svp);
+        vec4 SB = texture2D(shadowMap, svp - vec2(1./2048., 0.)); 
+        vec4 SC = texture2D(shadowMap, svp + vec2(1./2048., 0.));
+        vec4 SD = texture2D(shadowMap, svp - vec2(0., 1./2048.));
+        vec4 SE = texture2D(shadowMap, svp + vec2(0., 1./2048.));
+        float ZA = (SA.r * 65536.0 + SA.g * 256.0 + SA.b) / 256.0 - 256.0;
+        float ZB = (SB.r * 65536.0 + SB.g * 256.0 + SB.b) / 256.0 - 256.0;
+        float ZC = (SC.r * 65536.0 + SC.g * 256.0 + SC.b) / 256.0 - 256.0;
+        float ZD = (SD.r * 65536.0 + SD.g * 256.0 + SD.b) / 256.0 - 256.0;
+        float ZE = (SE.r * 65536.0 + SE.g * 256.0 + SE.b) / 256.0 - 256.0;
+        zval = (ZA+ZB+ZC+ZD+ZE) / 5.0 - 0.05;
+        svec.a = (SA.a + SB.a + SC.a + SD.a + SE.a) / 5.0;
     }
-    if (zval > (Z-0.01)) {
+    if (zval > Z) {
         gl_FragColor.rgb *= (1.0 - svec.a) * 0.85 + 0.15;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*15.+1.0)) * 0.85 + 0.15;
+        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*50.+1.0)) * 0.85 + 0.15;
     }
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
 }

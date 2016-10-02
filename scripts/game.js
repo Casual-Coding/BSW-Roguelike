@@ -612,7 +612,7 @@ BSWG.game = new function(){
         }
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
-            BSWG.render.envMap2 = BSWG.render.images['env-map-3'];            
+            BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
         }
 
         this.dialogPause = false;
@@ -1658,7 +1658,7 @@ BSWG.game = new function(){
                         ccs = null;
 
                         self.cam.zoomTo(dt*1.25, toZ);
-                        self.cam.zoomTo(dt*0.25, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.1 : 0.15), 1.75));
+                        self.cam.zoomTo(dt*0.25, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.75));
 
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 
@@ -2067,6 +2067,23 @@ BSWG.game = new function(){
                         desc.color.x = desc.color.y = desc.color.z = 1.0;
                     }
 
+                    var t = Math.pow(B.grassF, 0.3);
+                    desc.tint.r = t * 0.0 + (1.0 - t) * desc.tint.r;
+                    desc.tint.g = t * 1.0 + (1.0 - t) * desc.tint.g;
+                    desc.tint.b = t * 0.0 + (1.0 - t) * desc.tint.b;
+                    var t = Math.pow(B.sandF, 0.3);
+                    desc.tint.r = t * 1.0 + (1.0 - t) * desc.tint.r;
+                    desc.tint.g = t * 0.7 + (1.0 - t) * desc.tint.g;
+                    desc.tint.b = t * 0.0 + (1.0 - t) * desc.tint.b;
+                    var t = Math.pow(B.snowF, 0.3);
+                    desc.tint.r = t * 0.5 + (1.0 - t) * desc.tint.r;
+                    desc.tint.g = t * 0.7 + (1.0 - t) * desc.tint.g;
+                    desc.tint.b = t * 1.0 + (1.0 - t) * desc.tint.b;
+                    var t = Math.pow(B.rockF, 0.3);
+                    desc.tint.r = t * 0.5 + (1.0 - t) * desc.tint.r;
+                    desc.tint.g = t * 0.5 + (1.0 - t) * desc.tint.g;
+                    desc.tint.b = t * 0.0 + (1.0 - t) * desc.tint.b;
+
                     if (B.wet > 0) {
                         desc.density = Math.pow(Math.clamp(B.wet*Math.random()*(Math.sin(Date.timeStamp()/(Math.PI*3*60))*0.5+0.5), 0, 1), 2.5);
                         if (desc.density < 0.1) {
@@ -2103,11 +2120,11 @@ BSWG.game = new function(){
 
                     var dark = Math.pow(Math.clamp(B.dark * (Math.random()*0.5+0.5) + B.wet*0.15, 0., 1.), 2.5) * 0.5;
 
-                    if (dark < 0.5) {
+                    if (dark < 0.35) {
                         dark = Math.pow(dark, 2.0);
                     }
                     else {
-                        dark = Math.pow(dark, 0.5);
+                        dark = Math.pow(dark, 0.25);
                     }
 
                     desc.envMapT = dark;

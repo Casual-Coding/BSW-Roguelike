@@ -1,7 +1,7 @@
 BSWG.tileSize = 512;
 BSWG.tileMeshSize = 64;
 BSWG.tileSizeWorld = 48.0;
-BSWG.tileHeightWorld = 16.0;
+BSWG.tileHeightWorld = 32.0;
 
 BSWG.tMask = {
     L: 1,
@@ -279,6 +279,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 'v4',
                 value: new THREE.Vector4(color[0], color[1], color[2], 1.0)
             },
+            waterLevel: {
+                type: 'f',
+                value: BSWG.tileGWLevel
+            },
             envMap: {
                 type: 't',
                 value: BSWG.render.envMap.texture
@@ -432,6 +436,8 @@ BSWG.testMap = {
     }
 }
 
+BSWG.tileGWLevel = -32;
+
 BSWG.tileMap = function (layers, zoff) {
 
     zoff = zoff || 0.0;
@@ -443,6 +449,8 @@ BSWG.tileMap = function (layers, zoff) {
         layers.minimap = null;
         delete layers['minimap'];
     }
+    BSWG.tileGWLevel = (layers.water ? (layers.water.level * BSWG.tileHeightWorld * (layers.water.zscale || 1.0) - 10.0) : -32) + (zoff || 0) - 16.0;
+    console.log(BSWG.tileGWLevel);
     for (var set in layers) {
         if (layers[set].decals) {
             this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect, zoff, layers[set].zscale);
@@ -799,6 +807,8 @@ BSWG.makeCityTiles = function (seed) {
 BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp, flashColor, reflect, zoff, zscale) {
 
     zscale = zscale || 1.0;
+
+    zoff = (zoff || 0.0) - 16;
 
     var image = (typeof imageName === 'string') ? BSWG.render.images[imageName] : imageName;
 

@@ -279,7 +279,7 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.OrthographicCamera(-50, 50, 50, -50, 1, 150);
+        this.cam3DS = new THREE.OrthographicCamera(-110, 110, 110, -110, 0, 256);
         this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
@@ -741,6 +741,7 @@ BSWG.render = new function() {
     };
 
     this.addScreenShake = function(pos, size) {
+        size /= 4.0;
         if (!BSWG.game.battleMode && BSWG.game.editMode) {
             size /= 30.0;
         }
@@ -767,33 +768,44 @@ BSWG.render = new function() {
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld(true);
 
-            var ww = Math.max(this.viewport.w, this.viewport.h);
+            /*var ww = Math.max(this.viewport.w, this.viewport.h);
 
-            var p1 = this.unproject3D(new b2Vec2(-ww, -ww));
-            var p2 = this.unproject3D(new b2Vec2(ww, ww));
+            var p1 = this.unproject3D(new b2Vec2(-ww, -ww), -16);
+            var p2 = this.unproject3D(new b2Vec2(ww, ww), -16);
             var x2 = Math.max(p2.x, p1.x), x1 = Math.min(p2.x, p1.x);
             var y2 = Math.max(p2.y, p1.y), y1 = Math.min(p2.y, p1.y);
+            p1 = this.unproject3D(new b2Vec2(-ww, -ww), 0);
+            p2 = this.unproject3D(new b2Vec2(ww, ww), 0);
+            x2 = Math.max(x2, Math.max(p2.x, p1.x));
+            x1 = Math.min(x1, Math.min(p2.x, p1.x));
+            y2 = Math.max(y2, Math.max(p2.y, p1.y));
+            y1 = Math.min(y1, Math.min(p2.y, p1.y));*/
 
-            var f = 1.0;
-            var _f = 1.0;
-            if (cam.z > 0.020971520000002256) {
-                f = cam.z/0.020971520000002256;
+
+            //var f = 2.0;
+            //if (cam.z > 0.016777216435330464) {
+            //    f += (cam.z - 0.016777216435330464) * 20;//72.5;
+            //}
+
+            //this.cam3DS.left = x1 - cam.x;
+            //this.cam3DS.right = x2 - cam.x;
+            //this.cam3DS.top = y2 - cam.y;
+            //this.cam3DS.bottom = y1 - cam.y;
+            if (!this.frange) {
+                this.frange = 135;
             }
-            /*else if (cam.z < 0.008801935321022901) {
-                _f = 0.008801935321022901/cam.z;
-            }*/
-
-            this.cam3DS.left = (x1 - cam.x) * f;
-            this.cam3DS.right = (x2 - cam.x) * f;
-            this.cam3DS.top = (y2 - cam.y) * f;
-            this.cam3DS.bottom = (y1 - cam.y) * f;
+            this.cam3DS.left = -(this.frange+27.5);
+            this.cam3DS.right = this.frange+30.0;
+            this.cam3DS.top = (this.frange*0.75);
+            this.cam3DS.bottom = -(this.frange*0.75);
             this.cam3DS.zoom = 1.0;
+
             this.cam3DS.updateProjectionMatrix();
 
-            this.cam3DS.position.set(cam.x + 75.0, cam.y, 20.0);
+            this.cam3DS.position.set(cam.x + 25.0, cam.y, 100.0);
             this.cam3DS.updateMatrix();
             this.cam3DS.updateMatrixWorld(true);
-            this.cam3DS.lookAt(new THREE.Vector3(cam.x + 75.0 - 2.5, cam.y, 17.5));
+            this.cam3DS.lookAt(new THREE.Vector3(this.cam3DS.position.x - 25.0, cam.y, 0.0));
             this.cam3DS.updateProjectionMatrix();
             this.cam3DS.updateMatrix();
             this.cam3DS.updateMatrixWorld(true);
@@ -848,10 +860,14 @@ BSWG.render = new function() {
 
         if (this.cam3D && this.viewport) {
 
+            if (!z && z !== 0) {
+                z = 0.5;
+            }
+
             var p2 = new THREE.Vector3(
                  (p.x / this.viewport.w) * 2 - 1,
                 -(p.y / this.viewport.h) * 2 + 1,
-                0.5
+                z
             ).unproject(this.cam3D);
 
             var p2 = p2.sub( this.cam3D.position ).normalize();

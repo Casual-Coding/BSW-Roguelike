@@ -1680,8 +1680,8 @@ BSWG.componentList = new function () {
         this.removeStatic(comp);
         
         comp.obj = BSWG.physics.createObject('box', comp.center, 0, {
-            width:    comp.radius*2,
-            height:   comp.radius*2,
+            width:    comp.radius*2.48,
+            height:   comp.radius*2.48,
             smooth:   0.01,
             static:   true
         });
