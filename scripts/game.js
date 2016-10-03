@@ -801,6 +801,9 @@ BSWG.game = new function(){
                 this.curPanPos = 0;
                 this.panPosTime = this.panPosStartTime = 20.0;
 
+                var sx = Math.floor(Math.random()*10000),
+                    sy = Math.floor(Math.random()*10000);
+
                 var desc = {
                     /*'tileset-mountain': {
                         map: function(x,y) {
@@ -814,8 +817,8 @@ BSWG.game = new function(){
                         normalMapScale: 24.0,
                         normalMapAmp: 5.0,
                         map: function(x, y) {
-                            if (!BSWG.mapPerlinSparse(x+100,y+414) &&
-                                BSWG.mapPerlinSparse(x-100,y-414)) {
+                            if (!BSWG.mapPerlinSparse(x+100+sx,y+414+sy) &&
+                                BSWG.mapPerlinSparse(x-100+sx,y-414+sy)) {
                                 return ~~(Math.random2d(x, y) * 9) + 1;
                             }
                             else {
@@ -827,7 +830,9 @@ BSWG.game = new function(){
                         reflect: 0.75
                     },
                     'tileset-mountain': {
-                        map: BSWG.mapPerlin,
+                        map: function(x,y) {
+                            return BSWG.mapPerlin(x+sx, y+sy);
+                        },
                         color: [0.5, 0.0, 0.0],
                         reflect: 0.2,
                         normalMapAmp: 4.0,
@@ -860,9 +865,10 @@ BSWG.game = new function(){
                     speed:          0.1,
                     lightning:      new THREE.Vector4(1, 1, 1, 1),
                     lightningFreq:  0.01,
-                    wet:            0.175,
+                    wet:            0.25,
                     tint:           new THREE.Vector4(1, 0, 0, .125),
-                    swirl:          5.0
+                    swirl:          5.0,
+                    dark:           0.5
                 }, 5);
 
                 this.setSong(134, {
@@ -1658,7 +1664,7 @@ BSWG.game = new function(){
                         ccs = null;
 
                         self.cam.zoomTo(dt*0.6, toZ);
-                        self.cam.zoomTo(dt*0.15, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.5));
+                        self.cam.zoomTo(dt*0.15, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.25));
 
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 
