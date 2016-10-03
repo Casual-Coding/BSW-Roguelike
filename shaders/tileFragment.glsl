@@ -15,6 +15,7 @@ uniform float envMapT;
 uniform vec2 viewport;
 uniform vec3 cam;
 uniform float vreflect, waterLevel;
+uniform vec4 waterClr;
 varying float vFragDepth;
 varying vec4 vShadowCoord;
 
@@ -49,12 +50,17 @@ void main() {
 
     clrn.w = clrn.w * 0.5 * extra.z + 0.5;
 
+    float shoreT = pow(1.0 / (1.0 + abs(vPosition.z - waterLevel) / 3.5), 15.);
+
     float l0 = clrn.a * 0.5 + 0.5 * pow(clrw.a, 2.0);
     float l1 = pow(max(dot(normalize((normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7) * extra.z;
     float l2 = (pow(max(dot(normalize(N), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
     float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(max(l, 0.0), 2.5) + 0.3;
     gl_FragColor = vec4(clr.rgb*l, 1.0);
+
+    float _reflect = vreflect * (1. - shoreT) + 0.75 * shoreT;
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, clamp((waterClr.rgb+vec3(.1,.1,.1)) * 6.0, 0., 1.), shoreT);
 
     vec3 incident = normalize(vSPosition.xyz);
     vec3 reflected = reflect(incident, N);
@@ -64,9 +70,7 @@ void main() {
     vec3 envClr = mix(texture2D(envMap, envCoord).rgb, texture2D(envMap2, envCoord).rgb, envMapT);
     envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
     //gl_FragColor.rgb = clamp(gl_FragColor.rgb + gl_FragColor.rgb * envClr * vreflect * 4.0, 0., 1.);
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 1.));
-
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, clamp(clr.rgb * 4.0, 0., 1.), pow(1.0 / (1.0 + abs(vPosition.z - waterLevel) / 3.5), 10.5));
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(_reflect + envMapParam.x, 0., 1.));
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
@@ -98,6 +102,7 @@ void main() {
     if (vPosition.z > 0.0) {
         gl_FragColor.rgb /= (vPosition.z*15.0 + 1.0);
     }
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, pow(vSPosition.z/200., 0.5)*envMapTint.a);
 
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1., 0., 0.), pow(1.0 / (1.0 + abs(vPosition.z - 0.0) / 3.5), 10.5));
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1., 0., 0.), pow(1.0 / (1.0 + abs(vPosition.z - 0.0) / 5.0), 10.5));
 }

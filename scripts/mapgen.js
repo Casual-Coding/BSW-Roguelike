@@ -612,7 +612,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             normalMapAmp: 1.5
         },
         'water': {
-            color: [0.05*0.5, 0.4*0.25, 0.75*0.5, 0.75],
+            color: [0.05*0.5, 0.4*0.25, 0.75*0.5, 0.85],
             level: 0.20,
             normalMapScale: 0.5,
             map: function(x,y) {

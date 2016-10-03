@@ -28,5 +28,6 @@ void main() {
         vec3 envClr = mix(texture2D(envMap, envCoord).rgb, texture2D(envMap2, envCoord).rgb, envMapT);
         envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
         gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(0.5 + envMapParam.x, 0., 1.));
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb*0.25, pow(vSPosition.z/200., 0.5)*envMapTint.a);
     }
 }

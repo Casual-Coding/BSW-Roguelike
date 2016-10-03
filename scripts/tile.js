@@ -283,6 +283,10 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 'f',
                 value: BSWG.tileGWLevel
             },
+            waterClr: {
+                type: 'v4',
+                value: new THREE.Vector4(BSWG.tileGWColor[0], BSWG.tileGWColor[1], BSWG.tileGWColor[2], BSWG.tileGWColor[3])
+            },
             envMap: {
                 type: 't',
                 value: BSWG.render.envMap.texture
@@ -437,6 +441,7 @@ BSWG.testMap = {
 }
 
 BSWG.tileGWLevel = -32;
+BSWG.tileGWColor = null;
 
 BSWG.tileMap = function (layers, zoff) {
 
@@ -450,7 +455,9 @@ BSWG.tileMap = function (layers, zoff) {
         delete layers['minimap'];
     }
     BSWG.tileGWLevel = (layers.water ? (layers.water.level * BSWG.tileHeightWorld * (layers.water.zscale || 1.0) - 10.0) : -32) + (zoff || 0) - 16.0;
-    console.log(BSWG.tileGWLevel);
+    BSWG.tileGWColor = (layers.water ? layers.water.color : [0,0,0,0]) || [0,0,0,0];
+    BSWG.tileGWColor = [ BSWG.tileGWColor[0], BSWG.tileGWColor[1], BSWG.tileGWColor[2], layers.water ? layers.water.reflect : 0.3 ];
+    console.log(BSWG.tileGWColor);
     for (var set in layers) {
         if (layers[set].decals) {
             this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect, zoff, layers[set].zscale);

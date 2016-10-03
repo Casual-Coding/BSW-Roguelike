@@ -1657,8 +1657,8 @@ BSWG.game = new function(){
 
                         ccs = null;
 
-                        self.cam.zoomTo(dt*1.25, toZ);
-                        self.cam.zoomTo(dt*0.25, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.75));
+                        self.cam.zoomTo(dt*0.6, toZ);
+                        self.cam.zoomTo(dt*0.15, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.5));
 
                         var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 
