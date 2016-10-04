@@ -634,6 +634,7 @@ BSWG.game = new function(){
         BSWG.specialList.init();
 
         this.modeHistory = [];
+        this.minimapZoom = true;
         
         this.aiBtn = null;
         this.beMsg = null;
@@ -2410,9 +2411,53 @@ BSWG.game = new function(){
                     y = self.hudY(self.hudBtn[0][1])+1;
                 var w = self.hudX(self.hudBtn[0][2])-x-2,
                     h = self.hudY(self.hudBtn[0][3])-y-2;
+
+                if (BSWG.input.MOUSE_RELEASED('left')) {
+                    if (BSWG.input.MOUSE('x') >= x && BSWG.input.MOUSE('x') <= (x+w) &&
+                        BSWG.input.MOUSE('y') >= y && BSWG.input.MOUSE('y') <= (y+h)) {
+                        self.minimapZoom = !self.minimapZoom;
+                    }
+                }
+
+                var minx = 0, miny = 0, maxx = self.map.size-1, maxy = self.map.size-1, sz = self.map.size;
+
+                if (self.minimapZoom && self.inZone) {
+                    minx = self.inZone.rmin.x;
+                    miny = self.map.size - self.inZone.rmax.y;
+                    maxx = 1 + self.inZone.rmax.x;
+                    maxy = 1 + self.map.size - self.inZone.rmin.y;
+                    if ((maxx - minx) > (maxy - miny)) {
+                        sz = (maxx - minx);
+                        var p0 = (maxy + miny) * 0.5;
+                        miny = Math.floor(p0 - sz/2);
+                        maxy = Math.ceil(p0 + sz/2);
+                    }
+                    else {
+                        sz = (maxy - miny);
+                        var p0 = (maxx + minx) * 0.5;
+                        minx = Math.floor(p0 - sz/2);
+                        maxx = Math.ceil(p0 + sz/2);                       
+                    }
+                }
+
+                var iscx = self.mapImage.width / self.map.size;
+                var iscy = self.mapImage.height / self.map.size;
+
+                var TX = function(X) {
+                    return (((((X-x) / w) * self.map.size) - minx) / (maxx - minx)) * w + x;
+                };
+                var TY = function(Y) {
+                    return (((((Y-y) / h) * self.map.size) - miny) / (maxy - miny)) * h + y;
+                };
+
                 ctx.fillStyle = 'rgba(0,0,0,0.0)';
                 ctx.fillRect(x, y, w, h);
-                ctx.drawImage(self.mapImage, 0, 0, self.mapImage.width, self.mapImage.height, x, y, w, h);
+                ctx.drawImage(self.mapImage, Math.floor(minx * iscx) + BSWG.minimapTileSize/2, Math.floor(miny * iscy) + BSWG.minimapTileSize/2,
+                                             Math.floor((maxx-minx) * iscx), Math.floor((maxy-miny) * iscy),
+                                             x, y, w, h);
+                ctx.save();
+                ctx.rect(x, y, w, h);
+                ctx.clip();
 
                 for (var i=0; i<self.map.zones.length; i++) {
                     var zone = self.map.zones[i];
@@ -2422,10 +2467,10 @@ BSWG.game = new function(){
                         if (self.map.disMap[X] && self.map.disMap[X][Y]) {
                             ctx.fillStyle = '#000';
                             ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 1.5) * 0.5 + 0.5;
-                            ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
+                            ctx.fillRect(TX(x + p.x/self.map.size * w-1), TY(y + (1-p.y/self.map.size) * h-1), 3, 3);
                             ctx.fillStyle = '#ff0';
                             ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 1.5 + Math.PI*0.5) * 0.5 + 0.5;
-                            ctx.fillRect(x + p.x/self.map.size * w-1, y + (1-p.y/self.map.size) * h-1, 3, 3);
+                            ctx.fillRect(TX(x + p.x/self.map.size * w-1), TY(y + (1-p.y/self.map.size) * h-1), 3, 3);
                             ctx.globalAlpha = 1.0;
                         }
                     }
@@ -2435,10 +2480,10 @@ BSWG.game = new function(){
                     var p = self.map.worldToMap(self.ccblock.obj.body.GetWorldCenter());
                     ctx.fillStyle = '#000';
                     ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 5) * 0.5 + 0.5;
-                    ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                    ctx.fillRect(TX(x + p.x/self.map.size * w-1), TY(y + (p.y+1)/self.map.size * h-1), 3, 3);
                     ctx.fillStyle = '#fff';
                     ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 5 + Math.PI*0.5) * 0.5 + 0.5;
-                    ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                    ctx.fillRect(TX(x + p.x/self.map.size * w-1), TY(y + (p.y+1)/self.map.size * h-1), 3, 3);
                     ctx.globalAlpha = 1.0;
                 }
 
@@ -2448,14 +2493,16 @@ BSWG.game = new function(){
                         var p = self.map.worldToMap(ccs[i].obj.body.GetWorldCenter());
                         ctx.fillStyle = '#000';
                         ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 7) * 0.5 + 0.5;
-                        ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                        ctx.fillRect(TX(x + p.x/self.map.size * w-1), TY(y + (p.y+1)/self.map.size * h-1), 3, 3);
                         ctx.fillStyle = '#f00';
                         ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 7 + Math.PI*0.5) * 0.5 + 0.5;
-                        ctx.fillRect(x + p.x/self.map.size * w-1, y + p.y/self.map.size * h-1, 3, 3);
+                        ctx.fillRect(TX(x + p.x/self.map.size * w-1), TY(y + (p.y+1)/self.map.size * h-1), 3, 3);
                         ctx.globalAlpha = 1.0;                        
                     }
                 }
                 ccs = null;
+
+                ctx.restore();
 
                 if (self.inZone) {
                     var x = self.hudX(self.hudBtn[11][0])+1,

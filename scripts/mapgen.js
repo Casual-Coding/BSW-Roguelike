@@ -625,22 +625,22 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             getColor: function(x, y) {
                 if (this.getDiscovered(x, y)) {
                     if (ret.colMap[x][y]) {
-                        return 'rgba(192, 192, 192, 1)';
+                        return ['rgba(192, 192, 192, 1)', 'tileset-mountain'];
                     }
                     else if (ret.terMap[x][y] === 0) {
-                        return 'rgba(6, 50, 80, 1)';
+                        return ['rgba(6, 50, 80, 1)', 'water'];
                     }
                     else if (ret.terMap[x][y] === 1) {
-                        return 'rgba(40, 80, 20, 1)';
+                        return ['rgba(40, 80, 20, 1)', 'tileset-land'];
                     }
                     else if (ret.terMap[x][y] === 2) {
-                        return 'rgba(96, 72, 48, 1)';
+                        return ['rgba(96, 72, 48, 1)', 'tileset-sand'];
                     }
                     else if (ret.terMap[x][y] === 3) {
-                        return 'rgba(56, 40, 40, 1)';
+                        return ['rgba(56, 40, 40, 1)', 'tileset-rockland'];
                     }
                     else if (ret.terMap[x][y] === 4) {
-                        return 'rgba(130, 130, 130, 1)';
+                        return ['rgba(130, 130, 130, 1)', 'tileset-snow'];
                     }
                 }
                 else {
@@ -765,6 +765,21 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         return ret;
     };
+
+    for (var i=0; i<ret.zones.length; i++) {
+        ret.zones[i].rmin = new b2Vec2(10000, 10000);
+        ret.zones[i].rmax = new b2Vec2(-10000, -10000);
+        for (var x=0; x<ret.size; x++) {
+            for (var y=0; y<ret.size; y++) {
+                if (ret.zoneMap[x][y] === i) {
+                    ret.zones[i].rmin.x = Math.min(ret.zones[i].rmin.x, x);
+                    ret.zones[i].rmax.x = Math.max(ret.zones[i].rmax.x, x);
+                    ret.zones[i].rmin.y = Math.min(ret.zones[i].rmin.y, y);
+                    ret.zones[i].rmax.y = Math.max(ret.zones[i].rmax.y, y);
+                }
+            }
+        }
+    }
 
     ret.renderZoneMap = function (ctx, clr, flipY, scale, onlyDisc) {
 

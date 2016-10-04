@@ -2,6 +2,7 @@ BSWG.tileSize = 512;
 BSWG.tileMeshSize = 64;
 BSWG.tileSizeWorld = 48.0;
 BSWG.tileHeightWorld = 32.0;
+BSWG.minimapTileSize = 8;
 
 BSWG.tMask = {
     L: 1,
@@ -507,6 +508,38 @@ BSWG.tileMap = function (layers, zoff) {
         layers = null;
     };
 
+    var mmtCache = {};
+    this.getMinimapTile = function (clr, tileset, size) {
+        var key = clr + ',' + tileset + ',' + size;
+        if (mmtCache[key]) {
+            return mmtCache[key];
+        }
+        var hm = this.sets[tileset].tiles[1][1].heightMap;
+        return mmtCache[key] = BSWG.render.proceduralImage(size, size, function(ctx, w, h){
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = clr;
+            ctx.globalAlpha = 1;
+            var minh = 1, maxh = 0;
+            for (var x=0; x<w; x++) {
+                for (var y=0; y<h; y++) {
+                    var height = hm[x*BSWG.tileSize/BSWG.minimapTileSize + (y*BSWG.tileSize/BSWG.minimapTileSize) * BSWG.tileSize] / 256.0;
+                    minh = Math.min(height, minh);
+                    maxh = Math.max(height, maxh);
+                }
+            }
+            for (var x=0; x<w; x++) {
+                for (var y=0; y<h; y++) {
+                    var height = hm[x*BSWG.tileSize/BSWG.minimapTileSize + (y*BSWG.tileSize/BSWG.minimapTileSize) * BSWG.tileSize] / 256.0;
+                    ctx.globalAlpha = (height-minh) / (maxh-minh) * 0.6 + 0.4;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+            ctx.globalAlpha = 1;
+            hm = null;
+        });
+    };
+
     this.renderMinimap = function (x1, y1, x2, y2) {
         if (!this.minimap) {
             return;
@@ -514,7 +547,7 @@ BSWG.tileMap = function (layers, zoff) {
         var W = this.minimap.bounds[2] - this.minimap.bounds[0];
         var H = this.minimap.bounds[3] - this.minimap.bounds[1];
         if (!this.minimap.image) {
-            this.minimap.image = BSWG.render.proceduralImage(W, H, function(ctx, w, h){
+            this.minimap.image = BSWG.render.proceduralImage(W*BSWG.minimapTileSize, H*BSWG.minimapTileSize, function(ctx, w, h){
                 ctx.clearRect(0, 0, W, H);
             }, true);
         }
@@ -524,8 +557,18 @@ BSWG.tileMap = function (layers, zoff) {
         //ctx.clearRect(x1+ox, H - (y2+oy), x2-x1, y2-y1);
         for (var x=x1; x<=x2; x++) {
             for (var y=y1; y<=y2; y++) {
-                ctx.fillStyle = this.minimap.getColor(x, y);
-                ctx.fillRect(x+ox, (H-1) - (y+oy), 1, 1);
+                var R = this.minimap.getColor(x, y);
+                if (R instanceof Array) {
+                    var img = this.getMinimapTile(R[0], R[1], BSWG.minimapTileSize);
+                    if (img) {
+                        ctx.drawImage(img, 0, 0, img.width, img.height, (x+ox)*BSWG.minimapTileSize, ((H-1) - (y+oy))*BSWG.minimapTileSize, BSWG.minimapTileSize, BSWG.minimapTileSize);
+                        img = null;
+                    }
+                }
+                else {
+                    ctx.fillStyle = R;
+                    ctx.fillRect((x+ox)*BSWG.minimapTileSize, ((H-1) - (y+oy))*BSWG.minimapTileSize, BSWG.minimapTileSize, BSWG.minimapTileSize);
+                }
             }
         }
         ctx.restore();
