@@ -47,6 +47,15 @@ BSWG.physics = new function(){
             return new THREE.Vector3(this.x, this.y, z);
         };
 
+        b2Body.prototype.GetAngleWrapped = function () {
+            var a = this.GetAngle();
+            a = Math.atan2(Math.sin(a), Math.cos(a));
+            if (a < 0) {
+                a += Math.PI * 2.0;
+            }
+            return a;
+        };
+
         if (!b2Vec2.prototype.clone) {
             b2Vec2.prototype.clone = function() {
                 return new b2Vec2(this.x, this.y);

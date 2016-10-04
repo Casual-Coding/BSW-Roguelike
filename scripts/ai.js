@@ -180,7 +180,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     var distance = Math.distVec2(mp, p);
                     var radius = oradius;
 
-                    var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset);
+                    var angDiff = Math.angleBetween(mp, p) - (comp.obj.body.GetAngleWrapped() + comp.frontOffset + forwardOffset);
                     angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
 
                     this.angleDistance = angDiff;
@@ -360,7 +360,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         vel.y = p.y;
                     }
 
-                    var angDiff = Math.angleBetween(mp, vel) - (comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset);
+                    var angDiff = Math.angleBetween(mp, vel) - (comp.obj.body.GetAngleWrapped() + comp.frontOffset + forwardOffset);
                     angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
                     if (Math.abs(angDiff) > Math.PI*0.5 && reverse && distance < revRadius && !this.tracker) {
                         doReverse = true;
@@ -381,7 +381,7 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                     moveTos.push({
                         p: p,
                         mp: mp,
-                        a: -(comp.obj.body.GetAngle() + comp.frontOffset + forwardOffset + (doReverse ? Math.PI : 0)),
+                        a: -(comp.obj.body.GetAngleWrapped() + comp.frontOffset + forwardOffset + (doReverse ? Math.PI : 0)),
                         r: radius
                     });
 
@@ -490,8 +490,8 @@ BSWG.applyAIHelperFunctions = function (obj, self) {
                         else {
                             this.minAngle = this.angle && (this.angle[0] || this.angle[0] === 0) ? this.angle[0] : -Math.PI;
                             this.maxAngle = this.angle && (this.angle[1] || this.angle[1] === 0) ? this.angle[1] : Math.PI;
-                            this.minAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
-                            this.maxAngle += refBlock.obj.body.GetAngle() + refBlock.frontOffset;
+                            this.minAngle += refBlock.obj.body.GetAngleWrapped() + refBlock.frontOffset;
+                            this.maxAngle += refBlock.obj.body.GetAngleWrapped() + refBlock.frontOffset;
                             this.minAngle = Math.atan2(Math.sin(this.minAngle), Math.cos(this.minAngle));
                             this.maxAngle = Math.atan2(Math.sin(this.maxAngle), Math.cos(this.maxAngle));
                         }

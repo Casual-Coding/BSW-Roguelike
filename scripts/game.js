@@ -801,8 +801,8 @@ BSWG.game = new function(){
                 this.curPanPos = 0;
                 this.panPosTime = this.panPosStartTime = 20.0;
 
-                var sx = Math.floor(Math.random()*10000),
-                    sy = Math.floor(Math.random()*10000);
+                var sx = Math.floor(Math.random()*256),
+                    sy = Math.floor(Math.random()*256);
 
                 var desc = {
                     /*'tileset-mountain': {
@@ -1744,7 +1744,7 @@ BSWG.game = new function(){
                     }
                     if (self.editMode && !self.ccblock.destroyed) {
 
-                        if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.ui.mouseBlock) {
+                        if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.ui.mouseBlock && !grabbedBlock) {
                             if (BSWG.componentList.mouseOver) {
                                 grabbedBlock = BSWG.componentList.mouseOver;
                                 if (grabbedBlock.type === 'cc' || (grabbedBlock.onCC && (!grabbedBlock.canMoveAttached || grabbedBlock.onCC !== self.ccblock)) || grabbedBlock.distanceTo(self.ccblock) > BSWG.maxGrabDistance) {

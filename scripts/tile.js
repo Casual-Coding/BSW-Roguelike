@@ -457,7 +457,6 @@ BSWG.tileMap = function (layers, zoff) {
     BSWG.tileGWLevel = (layers.water ? (layers.water.level * BSWG.tileHeightWorld * (layers.water.zscale || 1.0) - 10.0) : -32) + (zoff || 0) - 16.0;
     BSWG.tileGWColor = (layers.water ? layers.water.color : [0,0,0,0]) || [0,0,0,0];
     BSWG.tileGWColor = [ BSWG.tileGWColor[0], BSWG.tileGWColor[1], BSWG.tileGWColor[2], layers.water ? layers.water.reflect : 0.3 ];
-    console.log(BSWG.tileGWColor);
     for (var set in layers) {
         if (layers[set].decals) {
             this.sets[set] = new BSWG.tileSet(layers[set].decals, layers[set].color, null, layers[set].normalMap, layers[set].normalMapScale, layers[set].normalMapAmp, layers[set].flashColor, layers[set].reflect, zoff, layers[set].zscale);

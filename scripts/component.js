@@ -816,7 +816,7 @@ BSWG.component.prototype.baseUpdate = function(dt) {
     var doWelds = false;
 
     if (BSWG.game.editMode) {
-        if (this.jmhover >= 0 && !BSWG.ui.mouseBlock && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift')) {
+        if (this.jmhover >= 0 && !BSWG.ui.mouseBlock && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift') && !BSWG.game.grabbedBlock) {
             doWelds = true;
         }
     }
@@ -925,12 +925,11 @@ BSWG.component.prototype.baseUpdate = function(dt) {
                             new BSWG.soundSample().play('error', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, 1.5);
                             BSWG.game.berrorMsg('Insufficient level');
                         }
+                        BSWG.input.EAT_MOUSE('left');
                     }
                     else {
                         makeWeld();
                     }
-
-                    BSWG.input.EAT_MOUSE('left');
                 }
                 else if (!autos) {
                     BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
@@ -1209,7 +1208,7 @@ BSWG.componentList = new function () {
             }
         }
 
-        if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.game.editMode) {
+        if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && BSWG.game.editMode && !BSWG.game.grabbedBlock) {
             if (BSWG.input.MOUSE_PRESSED('left') && BSWG.input.MOUSE('shift') && !BSWG.ui.mouseBlock) {
                 BSWG.input.EAT_MOUSE('left');
                 this.mouseOver.openConfigMenu();
