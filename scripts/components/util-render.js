@@ -352,7 +352,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         self.mat.uniforms.extra.value.x = texScale || 1.0;
 
-        if (anchor) {
+        if (anchor && (!obj || !obj.comp || obj.comp.onCC === BSWG.game.ccblock)) {
             self.anchorT += (1.0 - self.anchorT) * 0.25;
         }
         else {

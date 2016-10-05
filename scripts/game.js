@@ -2422,8 +2422,8 @@ BSWG.game = new function(){
                 var minx = 0, miny = 0, maxx = self.map.size-1, maxy = self.map.size-1, sz = self.map.size;
 
                 if (self.minimapZoom && self.inZone) {
-                    minx = self.inZone.rmin.x;
-                    miny = self.map.size - self.inZone.rmax.y;
+                    minx = -1 + self.inZone.rmin.x;
+                    miny = -1 + self.map.size - self.inZone.rmax.y;
                     maxx = 1 + self.inZone.rmax.x;
                     maxy = 1 + self.map.size - self.inZone.rmin.y;
                     if ((maxx - minx) > (maxy - miny)) {
