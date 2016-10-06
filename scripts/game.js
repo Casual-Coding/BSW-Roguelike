@@ -602,6 +602,11 @@ BSWG.game = new function(){
 
         this.cam = new BSWG.camera();
 
+        this._mmMinx = null;
+        this._mmMaxx = null;
+        this._mmMiny = null;
+        this._mmMaxy = null;
+
         BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-1'];
 
         if (scene === BSWG.SCENE_TITLE) {
@@ -1458,6 +1463,11 @@ BSWG.game = new function(){
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
                 Math.seedrandom(Math.floor((self.noteIndex%8)/4) + Math.floor(time/(60/self.musicBPM*16)));
                 new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat, 0, 'kick');
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 15/self.musicBPM, 0, 'kick');
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM, 0, 'kick');
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM + (15/4)/self.musicBPM, 0, 'kick');
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM + (15/2)/self.musicBPM, 0, 'crash-snare');
                 self.lastNote = nextBeat;
                 self.noteIndex += 1;
                 Math.seedrandom();
@@ -2426,6 +2436,14 @@ BSWG.game = new function(){
                     miny = -1 + self.map.size - self.inZone.rmax.y;
                     maxx = 1 + self.inZone.rmax.x;
                     maxy = 1 + self.map.size - self.inZone.rmin.y;
+                    if ((maxx - minx) < 24) {
+                        var p0 = (maxx + minx) * 0.5;
+                        minx = p0 - 12; maxx = p0 + 12;
+                    }
+                    if ((maxy - miny) < 24) {
+                        var p0 = (maxy + miny) * 0.5;
+                        miny = p0 - 12; maxy = p0 + 12;
+                    }
                     if ((maxx - minx) > (maxy - miny)) {
                         sz = (maxx - minx);
                         var p0 = (maxy + miny) * 0.5;
@@ -2440,6 +2458,18 @@ BSWG.game = new function(){
                     }
                 }
 
+                if (self._mmMinx !== null) {
+                    minx = (self._mmMinx*0.95 + minx*0.05);
+                    maxx = (self._mmMaxx*0.95 + maxx*0.05);
+                    miny = (self._mmMiny*0.95 + miny*0.05);
+                    maxy = (self._mmMaxy*0.95 + maxy*0.05);
+                }
+
+                self._mmMinx = minx;
+                self._mmMaxx = maxx;
+                self._mmMiny = miny;
+                self._mmMaxy = maxy;
+
                 var iscx = self.mapImage.width / self.map.size;
                 var iscy = self.mapImage.height / self.map.size;
 
@@ -2452,8 +2482,8 @@ BSWG.game = new function(){
 
                 ctx.fillStyle = 'rgba(0,0,0,0.0)';
                 ctx.fillRect(x, y, w, h);
-                ctx.drawImage(self.mapImage, Math.floor(minx * iscx) + BSWG.minimapTileSize/2, Math.floor(miny * iscy) + BSWG.minimapTileSize/2,
-                                             Math.floor((maxx-minx) * iscx), Math.floor((maxy-miny) * iscy),
+                ctx.drawImage(self.mapImage, (minx * iscx) + BSWG.minimapTileSize/2, (miny * iscy) + BSWG.minimapTileSize/2,
+                                             ((maxx-minx) * iscx), ((maxy-miny) * iscy),
                                              x, y, w, h);
                 ctx.save();
                 ctx.rect(x, y, w, h);

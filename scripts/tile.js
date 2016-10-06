@@ -2,7 +2,7 @@ BSWG.tileSize = 512;
 BSWG.tileMeshSize = 64;
 BSWG.tileSizeWorld = 48.0;
 BSWG.tileHeightWorld = 32.0;
-BSWG.minimapTileSize = 8;
+BSWG.minimapTileSize = 4;
 
 BSWG.tMask = {
     L: 1,

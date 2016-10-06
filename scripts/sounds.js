@@ -26,6 +26,24 @@ BSWG.soundBase = function (desc) {
         return panner;
     };
 
+    ret.prototype.createPanner2 = function (pos, amp) {
+        pos = pos || new THREE.Vector3(0, 0, 0);
+        amp = (!amp && amp !== 0) ? 0.1 : amp;
+        var panner = BSWG.music.audioCtx.createPanner();
+        panner.panningModel = 'HRTF';
+        panner.distanceModel = 'inverse';
+        panner.refDistance = 1;
+        panner.maxDistance = 10000 * amp * 2.0;
+        panner.rolloffFactor = 0.01;
+        panner.coneInnerAngle = 360;
+        panner.coneOuterAngle = 0;
+        panner.coneOuterGain = 0;
+        panner.setOrientation(0,0,1);
+        panner.setPosition(pos.x, pos.y, pos.z);
+        pos = null;
+        return panner;
+    };
+
     for (var key in desc) {
         ret.prototype[key] = desc[key];
     }
@@ -98,7 +116,8 @@ BSWG.soundSample = BSWG.soundBase({
         this.source = audioCtx.createBufferSource();
         this.source.loop = !!loop;
         this.source.buffer = BSWG.soundBuffers[name];
-        this.source.playbackRate.value = Math.clamp(rate || 1, 0.1, 10.0);
+        rate = Math.clamp(rate || 1, 0.1, 10.0);
+        this.source.playbackRate.value = rate;
 
         this.gain = audioCtx.createGain();
         this.gain.gain.value = amp * 0.5;
@@ -122,6 +141,16 @@ BSWG.soundSample = BSWG.soundBase({
             self.stop();
             self = null;
         };
+
+        if (!loop) {
+            window.setTimeout(function(){
+                if (self && self.audioCtx) {
+                    self.playing = false;
+                    self.stop();
+                    self = null;
+                }
+            }, Math.ceil(BSWG.soundBuffers[name].duration * (1.0/rate) * 1000 * 1.05));
+        }
 
         this.source.start(audioCtx.currentTime + delay);
         this.playing = true;
@@ -176,6 +205,10 @@ BSWG.soundSample = BSWG.soundBase({
  
     stop: function ( ) {
 
+        if (!this.audioCtx) {
+            return;
+        }
+
         BSWG.curSounds -= 1;
 
         this.audioCtx = null;
@@ -207,7 +240,7 @@ BSWG.noteSample = BSWG.soundBase({
 
     // test: new BSWG.sound_boom().play(BSWG.render.cam3D.position.clone(), 64, 3.0);
 
-    play: function (amp, interval, oct, happy, time, offset) {
+    play: function (amp, interval, oct, happy, time, offset, notename) {
     
         var audioCtx = this.audioCtx = BSWG.music.audioCtx;
 
@@ -228,13 +261,22 @@ BSWG.noteSample = BSWG.soundBase({
 
         this.source = audioCtx.createBufferSource();
         this.source.loop = false;
-        this.source.buffer = BSWG.soundBuffers['e2-distorted'];
-        this.source.playbackRate.value = BSWG.music_NoteFreq(oct, note+(offset||0)) / BSWG.music_NoteFreq(2, 8);
+        this.source.buffer = BSWG.soundBuffers[notename || 'e2-distorted'];
+        this.source.playbackRate.value = (Math.random()*0.01 + 0.995) * BSWG.music_NoteFreq(oct, note+(offset||0)) / BSWG.music_NoteFreq(2, 8);
 
         this.gain = audioCtx.createGain();
         this.gain.gain.value = amp * 0.5;
 
-        this.source.connect(this.gain);
+        var vec = new THREE.Vector3(
+            BSWG.render.cam3D.position.x + Math.random() * 30 - 15,
+            BSWG.render.cam3D.position.y + Math.random() * 30 - 15,
+            BSWG.render.cam3D.position.z + Math.random() * 30 - 15
+        );
+        this.panner = this.createPanner2(vec, amp * 100.0);
+        vec = null;
+
+        this.source.connect(this.panner);
+        this.panner.connect(this.gain);
         this.gain.connect(BSWG.mixer.gain);
 
         var self = this;
@@ -263,8 +305,10 @@ BSWG.noteSample = BSWG.soundBase({
 
         this.source.disconnect();
         this.gain.disconnect();
+        this.panner.disconnect();
         this.source = null;
         this.gain = null;
+        this.panner = null;
 
     }
 
@@ -293,7 +337,9 @@ BSWG.soundLoad = function (onload) {
         { name: 'e2-clean', url: 'sounds/e2-clean.wav' },
         { name: 'dialog', url: 'sounds/dialog.wav' },
         { name: 'trade', url: 'sounds/trade.wav' },
-        { name: 'error', url: 'sounds/error.wav' }
+        { name: 'error', url: 'sounds/error.wav' },
+        { name: 'kick', url: 'sounds/kick.wav' },
+        { name: 'crash-snare', url: 'sounds/crash-snare.wav' }
     ];
 
     var urls = [];
