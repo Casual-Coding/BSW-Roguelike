@@ -616,9 +616,9 @@ BSWG.render = new function() {
             while (true) {
                 frameTime = Date.timeStamp();
                 self.actualDt = frameTime - self.lastFrameTime;
-                //if (self.actualDt >= (1/60)) {
+                if (self.actualDt >= (1/65)) {
                     break;
-                //}
+                }
             }
 
             if (self.actualDt > 1/10) {

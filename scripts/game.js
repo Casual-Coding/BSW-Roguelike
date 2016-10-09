@@ -611,20 +611,20 @@ BSWG.game = new function(){
 
         if (scene === BSWG.SCENE_TITLE) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-2'];
-            BSWG.render.cloudColor.set(0.0, 0, 0, 1.0);
+            BSWG.render.cloudColor.set(0.2, 0, 0, 1.0);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
         else if (scene === BSWG.SCENE_GAME2) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(0.0, 0.02, 0.1, 1.0);
+            BSWG.render.cloudColor.set(0.0, 0.02, 0.4, 1.0);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
             BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(0.4, 0.4, 0.4, 0.95);
+            BSWG.render.cloudColor.set(0.8, 0.8, 0.8, 0.95);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
@@ -2470,6 +2470,23 @@ BSWG.game = new function(){
                         minx = Math.floor(p0 - sz/2);
                         maxx = Math.ceil(p0 + sz/2);                       
                     }
+                }
+
+                if (minx < 0) {
+                    maxx -= minx;
+                    minx = 0;
+                }
+                if (miny < 0) {
+                    maxy -= miny;
+                    miny = 0;
+                }
+                if (maxx > self.map.size) {
+                    minx -= (maxx - self.map.size);
+                    maxx = self.map.size;
+                }
+                if (maxy > self.map.size) {
+                    miny -= (maxy - self.map.size);
+                    maxy = self.map.size;
                 }
 
                 if (self._mmMinx !== null) {

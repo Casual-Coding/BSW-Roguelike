@@ -370,16 +370,16 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
 
     var opalette = this.palette;
 
-    /*if (!noSub && size > 0.1) {
+    if (!noSub && size > 0.1) {
         for (var i=0; i<2; i++) {
-            var len = size * Math._random() * 2.0;
+            var len = size * Math._random() * 1.25;
             var a = Math._random() * Math.PI * 2.0;
             var v2 = {
                 x: vel.x + Math.cos(a) * len,
                 y: vel.y + Math.sin(a) * len,
                 z: vel.z
             };
-            this.add(pos, size*0.15, 32, life * 1.0, attack, v2, true);
+            this.add(pos, size*0.15*0.5, 32, life * 1.0, attack, v2, true);
             v2 = null;
         }
     }
@@ -387,7 +387,7 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
         //this.palette = chadaboom3D.smoke;
         size *= 6.0;
         life *= 1.5;
-    }*/
+    }
 
     var palIdx = Math.clamp(this.palette || chadaboom3D.fire, 0, chadaboom3D.palettes.length-1);
     if (!isFinite(palIdx) || !(palIdx > -1) || !palIdx) {

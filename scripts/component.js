@@ -454,7 +454,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
                 BSWG.render.boom.add(
                     p2.particleWrap(0.025),
                     r*(3.5 + 2.5*Math._random()),
-                    256,
+                    512,
                     1 + Math.pow(r, 1/3) * Math._random(),
                     2.0,
                     v.THREE(Math._random()*2.0),

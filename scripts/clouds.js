@@ -264,8 +264,8 @@ BSWG.cloudMap = new function (){
             var dx = this.list[i].p.x - BSWG.render.cam3D.position.x;
             var dy = this.list[i].p.y - BSWG.render.cam3D.position.y;
             var len = Math.sqrt(dx*dx+dy*dy);
-            this.list[i].toP.x = this.list[i].p.x + dx / len * 500;
-            this.list[i].toP.y = this.list[i].p.y + dy / len * 500;
+            this.list[i].toP.x = this.list[i].p.x + dx / len * 50;
+            this.list[i].toP.y = this.list[i].p.y + dy / len * 50;
         }
 
     };

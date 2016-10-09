@@ -15,8 +15,8 @@ uniform vec4 envMapParam;
 
 void main() {
 
-    gl_FragColor.a = clr.a * (0.5*texture2D(texture, vLocal.xy/4. + vec2(.1,.25)).a+0.5);
-    gl_FragColor.rgb = mix(clr.rgb * texture2D(texture, vLocal.xy/2.).a, envMapTint.rgb, 0.25);
+    gl_FragColor.a = clr.a * (0.25*texture2D(texture, vLocal.xy/4. + vec2(.1,.25)).a+0.75);
+    gl_FragColor.rgb = mix(clr.rgb * (texture2D(texture, vLocal.xy/2.).a+0.5*0.5), envMapTint.rgb, envMapTint.a);
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
