@@ -1,3 +1,5 @@
+BSWG.maxClouds = 25;
+
 BSWG.generateCloudGeom = function (size) {
     
     var w = size, h = size;
@@ -7,7 +9,7 @@ BSWG.generateCloudGeom = function (size) {
     ];
 
     var R = C[0].r;
-    for (var k=0; k<8; k++) {
+    for (var k=0; k<16; k++) {
         R *= 0.92;
         var k2 = 1000;
         while (k2--) {
@@ -28,11 +30,11 @@ BSWG.generateCloudGeom = function (size) {
                     (c2.z-c.z) * (c2.z-c.z)
                 );
                 var a = false;
-                if (d < (c2.r+c.r)*0.4) {
+                if (d < (c2.r+c.r)*0.6) {
                     valid = false;
                     break;
                 }
-                else if (d < (c2.r+c.r)*0.6) {
+                else if (d < (c2.r+c.r)*0.8) {
                     anyClose = true;
                 }
             }
@@ -47,7 +49,8 @@ BSWG.generateCloudGeom = function (size) {
 
     for (var i=0; i<C.length; i++) {
         var sz = Math.floor(Math.max(Math.round(C[i].r*12), 5));
-        var sphere = new THREE.SphereGeometry(C[i].r, 6, sz);
+        //var sphere = new THREE.SphereGeometry(C[i].r, Math.min(6, sz), sz);
+        var sphere = new THREE.IcosahedronGeometry(C[i].r, 2)
         var matrix = new THREE.Matrix4();
         matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, C[i].z - size);
         geom.merge(sphere, matrix);
@@ -82,10 +85,10 @@ BSWG.cloud = function (pos, toPos, size, life) {
     var a = Math.random() * Math.PI * 2;
 
     this.mesh.position.set(this.p.x, this.p.y, this.p.z);
-    this.mesh.scale.set(size, size, size/12);
+    this.mesh.scale.set(size*1.2, size*1.2, size/8);
     this.mesh.rotation.set(0, 0, a, 'ZXY');
     this.smesh.position.set(this.p.x, this.p.y, this.p.z);
-    this.smesh.scale.set(size, size, size/12);
+    this.smesh.scale.set(size*1.6, size*1.6, size/8);
     this.smesh.rotation.set(0, 0, a, 'ZXY');
 
     BSWG.render.scene.add(this.mesh);
@@ -125,12 +128,12 @@ BSWG.cloudMap = new function (){
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.45),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.45),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.45),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.6),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.6),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.7)
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5)
             ];
 
             Math.seedrandom();
@@ -191,6 +194,9 @@ BSWG.cloudMap = new function (){
 
     };
 
+    this.noClouds = false;
+    this.cloudZOffset = 0.0;
+
     this.updateRender = function(dt) {
 
         for (var i=0; i<this.list.length; i++) {
@@ -200,8 +206,8 @@ BSWG.cloudMap = new function (){
             C.toP.y += this.windDir.y * dt;
             C.p.x += (C.toP.x - C.p.x) * dt * 0.2;
             C.p.y += (C.toP.y - C.p.y) * dt * 0.2;
-            C.mesh.position.set(C.p.x, C.p.y, C.p.z);
-            C.smesh.position.set(C.p.x, C.p.y, C.p.z);
+            C.mesh.position.set(C.p.x, C.p.y, C.p.z + this.cloudZOffset);
+            C.smesh.position.set(C.p.x, C.p.y, C.p.z + this.cloudZOffset);
             C.mesh.updateMatrix();
             C.smesh.updateMatrix();
 
@@ -209,7 +215,7 @@ BSWG.cloudMap = new function (){
                 dy = C.p.y - BSWG.render.cam3D.position.y;
             var dist = Math.sqrt(dx*dx+dy*dy);
 
-            if (dist > 180) {
+            if (dist > 170) {
                 this.remove(C);
                 C = null;
                 i --;
@@ -218,18 +224,21 @@ BSWG.cloudMap = new function (){
 
         }
 
-        var count = Math.min(Math.floor(Math.max(BSWG.render.weather.density, BSWG.render.envMapTint.w) * 400), 40);
+        var count = Math.min(Math.floor(Math.max(BSWG.render.weather.density, BSWG.render.envMapTint.w) * 400), BSWG.maxClouds);
+        if (this.noClouds) {
+            count = 0;
+        }
 
         while (this.list.length < count) {
             var p = BSWG.render.cam3D.position.clone();
             p.z = -5 - Math.random() * 6;
             var a = Math.random() * Math.PI * 2.0;
-            p.x += Math.cos(a) * 150;
-            p.y += Math.sin(a) * 150;
+            p.x += Math.cos(a) * 160;
+            p.y += Math.sin(a) * 160;
             var sz = Math.random() * 10 + 5;
             var toP = BSWG.render.cam3D.position.clone();
             toP.z = p.z;
-            var r = Math.random() * 90 + 25;
+            var r = Math.random() * 70 + 25;
             toP.x += Math.cos(a) * r;
             toP.y += Math.sin(a) * r;
             var no = false;

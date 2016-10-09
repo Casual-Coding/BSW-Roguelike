@@ -846,7 +846,7 @@ BSWG.control_Dialogue = {
 
             ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
 
-            if (this.hudBtn && this.hudHM) {
+            if (this.hudBtn && this.hudHM && (!this.hidden || this.p.y < BSWG.render.viewport.h)) {
                 var self = this;
                 var hx = function(v) {
                     var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));
@@ -977,6 +977,7 @@ BSWG.control_CompPalette = {
                 x: x,
                 y: y,
                 text: CL[i].name,
+                buttons: []
             };
             y += 20;
 
@@ -1002,6 +1003,7 @@ BSWG.control_CompPalette = {
                     mouseIn: false,
                     mouseDown: false
                 });
+                headers[i].buttons.push(buttons[buttons.length-1]);
                 x2 += w;
                 if (((j+1)%3) === 0) {
                     x2 = x;
@@ -1082,6 +1084,10 @@ BSWG.control_CompPalette = {
             ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
         }
 
+        if (this.p.x > BSWG.render.viewport.w || this.p.y > BSWG.render.viewport.h) {
+            return;
+        }
+
         ctx.font = '16px Orbitron';
 
         ctx.fillStyle = 'rgba(50,50,50,0.5)';
@@ -1094,10 +1100,19 @@ BSWG.control_CompPalette = {
 
         for (var i=0; i<this.headers.length; i++) {
             var H = this.headers[i];
+            var tc = 0;
+            for (var j=0; j<H.buttons.length; j++) {
+                tc += H.buttons[j].args.count;
+            }
             ctx.textAlign = 'left';
             ctx.fillStyle = '#ddf';
             ctx.strokeStyle = '#111';
-            ctx.fillTextB(H.text, this.p.x + H.x, this.p.y + H.y + 12);            
+            if (BSWG.game.scene !== BSWG.SCENE_GAME1 || tc > 0) {
+                ctx.fillTextB(H.text, this.p.x + H.x, this.p.y + H.y + 12);
+            }
+            else {
+                ctx.fillTextB('???', this.p.x + H.x, this.p.y + H.y + 12);
+            }
         }
 
         for (var i=0; i<this.buttons.length; i++) {
@@ -1129,7 +1144,12 @@ BSWG.control_CompPalette = {
             if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                 ctx.textAlign = 'left';
                 ctx.fillStyle = B.mouseDown ? '#fff' : '#fff';
-                ctx.fillText(B.text, B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
+                if (this.buttons[i].args.count) {
+                    ctx.fillText(B.text, B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
+                }
+                else {
+                    ctx.fillText('?', B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
+                }
             }
             else {
                 ctx.textAlign = 'center';
@@ -1306,7 +1326,7 @@ BSWG.control_TradeWindow = {
             ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
         }
 
-        if (this.hudBtn && this.hudHM && this.compValList && this.compValLookup) {
+        if (this.hudBtn && this.hudHM && this.compValList && this.compValLookup && this.p.y < BSWG.render.viewport.h) {
             var self = this;
             var hx = function(v) {
                 var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));

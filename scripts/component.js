@@ -62,18 +62,18 @@ BSWG.componentHoverFnAlpha = function(self) {
         return 0.6;
     }
     if (BSWG.game.attractorHover === self) {
-        return 0.4;
+        return 1.0;
     }
     if (!BSWG.game.editMode && BSWG.game.storeMode && BSWG.game.scene === BSWG.SCENE_GAME1 && !self.onCC) {
-        return BSWG.componentList.mouseOver === self ? 0.4 : 0.175;
+        return BSWG.componentList.mouseOver === self ? 0.4 : (Math.sin(BSWG.render.time*12+self.id*0.3) * 0.5 + 0.5);
     }
-    if (!BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
+    if ((!BSWG.game.editMode || (self.onCC && self.onCC !== BSWG.game.ccblock)) && self.onCC) {
         return 0.0;
     }
     if (self.onCC && !self.hasConfig && !self.canMoveAttached) {
         return 0.0;
     }
-    return BSWG.componentList.mouseOver === self ? 0.4 : 0.175;
+    return BSWG.componentList.mouseOver === self ? 0.4 : (Math.sin(BSWG.render.time*7+self.id*0.3) * 0.5 + 0.5) * (self.onCC ? 0 : 1);
 };
 
 BSWG.compAnchored = function(self) {

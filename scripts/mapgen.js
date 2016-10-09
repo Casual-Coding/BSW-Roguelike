@@ -150,13 +150,13 @@ BSWG.enemySettings = [
             { type: 'brute',            levels: [8,9,10], max: 2 },
             { type: 'crippler',         levels: [8,9,10] },
             { type: 'fighter',          levels: [0,1,2,5,6], max: 2 },
-            { type: 'four-blaster',     levels: [0,1,2] },
-            { type: 'four-blaster',     levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
-            { type: 'four-blaster',     levels: [0,1,2], with: [ 'fighter' ] },
-            { type: 'four-blaster',     levels: [0,1,2], with: [ 'four-blaster-x2' ] },
-            { type: 'four-blaster-x2',  levels: [0,1,2] },
-            { type: 'four-blaster-x2',  levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
-            { type: 'four-blaster-x2',  levels: [0,1,2], with: [ 'fighter' ] },
+            { type: 'four-blaster',     levels: [0,1] },
+            { type: 'four-blaster',     levels: [0,1], with: [ 'uni-dir-fighter' ] },
+            { type: 'four-blaster',     levels: [0,1], with: [ 'fighter' ] },
+            { type: 'four-blaster',     levels: [0,1], with: [ 'four-blaster-x2' ] },
+            { type: 'four-blaster-x2',  levels: [0,1] },
+            { type: 'four-blaster-x2',  levels: [0,1], with: [ 'uni-dir-fighter' ] },
+            { type: 'four-blaster-x2',  levels: [0,1], with: [ 'fighter' ] },
             { type: 'heavy-fighter',    levels: [6,7,9,10] },
             { type: 'laser-fighter',    levels: [4,5,6] },
             { type: 'laser-fighter',    levels: [4,5,6], with: [ 'msl-fighter' ] },
@@ -182,7 +182,7 @@ BSWG.enemySettings = [
             { type: 'uni-fight-msl',    levels: [4,5], max: 2 },
             { type: 'uni-laser',        levels: [5,6,7], max: 2 },
             { type: 'uni-laser',        levels: [8,9,10], max: 4 },
-            { type: 'little-tough-guy', levels: [0,1] },
+            { type: 'little-tough-guy', levels: [0,1,2] },
             { type: 'little-tough-guy', levels: [2,3], max: 2 },
             { type: 'tough-guy',        levels: [5,6,7], max: 2 },
             { type: 'stinger',          levels: [2,3] },
@@ -191,6 +191,7 @@ BSWG.enemySettings = [
             { type: 'brutenie',         levels: [1,2], with: [ 'brutenie'] },
             { type: 'brutenie',         levels: [0,1,2], with: [ 'uni-dir-fighter' ] },
             { type: 'brutenie',         levels: [1,2], with: [ 'fighter' ] },
+            { type: 'marauder',         levels: [1,2,3] },
             { type: 'marauder',         levels: [1,2,3] },
             { type: 'marauder',         levels: [2,3,4], with: [ 'marauder'] },
             { type: 'marauder',         levels: [2,3,4], with: [ 'little-tough-guy'] },
@@ -1122,7 +1123,7 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         BSWG.genMap_MusicSettings_Zone(zone, eInfo);
 
         if (!zone.hasPlanet) {
-            BSWG.genMap_EnemyPlacement_Zone(zone, eInfo);
+            BSWG.genMap_EnemyPlacement_Zone(zone, eInfo, i === 0 ? null : order[i-1]);
         }
         else if (!zone.home) {
             withBoss.push(zone);
@@ -1383,7 +1384,7 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
 
 };
 
-BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
+BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo, lastZone) {
 
     zone.tech = new Array();
     for (var i=0; i<eInfo.minComponents.length; i++) {
@@ -1431,6 +1432,11 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo) {
             for (var j=0; j<E.levels.length; j++) {
                 if (E.levels[j] >= zone.minLevel && E.levels[j] <= zone.maxLevel) {
                     found = true;
+                }
+            }
+            for (var j=0; found && lastZone && lastZone.enemies && j < lastZone.enemies.length; j++) {
+                if (lastZone.enemies[j].type === E.type && Math.random() < 0.5) {
+                    found = false;
                 }
             }
             if (found) {

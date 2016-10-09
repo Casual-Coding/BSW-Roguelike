@@ -611,16 +611,22 @@ BSWG.game = new function(){
 
         if (scene === BSWG.SCENE_TITLE) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-2'];
-            BSWG.render.cloudColor.set(0.2, 0, 0, 0.9);
+            BSWG.render.cloudColor.set(0.0, 0, 0, 1.0);
+            BSWG.cloudMap.noClouds = false;
+            BSWG.cloudMap.cloudZOffset = 5;
         }
         else if (scene === BSWG.SCENE_GAME2) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(0.0, 0.1, 0.4, 0.9);
+            BSWG.render.cloudColor.set(0.0, 0.02, 0.1, 1.0);
+            BSWG.cloudMap.noClouds = false;
+            BSWG.cloudMap.cloudZOffset = 5;
         }
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
             BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(0.4, 0.4, 0.4, 0.9);
+            BSWG.render.cloudColor.set(0.4, 0.4, 0.4, 0.95);
+            BSWG.cloudMap.noClouds = false;
+            BSWG.cloudMap.cloudZOffset = 5;
         }
 
         this.dialogPause = false;

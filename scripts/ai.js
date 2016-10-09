@@ -67,6 +67,7 @@ BSWG.getEnemy = function(type, statsOnly) {
         obj: eobj,
         stats: stats,
         title: title,
+        type: type,
         compStats: function (ostats) {
             var ustats = {};
             for (var stat in stats) {
