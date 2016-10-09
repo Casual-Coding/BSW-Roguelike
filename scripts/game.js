@@ -411,7 +411,7 @@ BSWG.game = new function(){
 
     this.saveGame = function () {
 
-        if (this.scene === BSWG.SCENE_GAME1 && window.localStorage) {
+        if (this.scene === BSWG.SCENE_GAME1 && window.localStorage && this.ccblock && !this.ccblock.destroyed) {
 
             // SAVE
 
@@ -1472,7 +1472,9 @@ BSWG.game = new function(){
             var nextBeat = Math.ceil(ctime/(60/self.musicBPM)) * (60/self.musicBPM);
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
                 Math.seedrandom(Math.floor((self.noteIndex%8)/4) + Math.floor(time/(60/self.musicBPM*16)));
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 12);
+                if (self.scene === BSWG.SCENE_TITLE || (self.ccblock && !self.ccblock.destroyed)) {
+                    new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 12);
+                }
                 new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 0, 1, musicHappy, nextBeat, 0, 'kick');
                 new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 0, 1, musicHappy, nextBeat + (15/2)/self.musicBPM, 0, 'kick');
                 if (self.scene === BSWG.SCENE_TITLE || self.battleMode) {
@@ -1997,7 +1999,7 @@ BSWG.game = new function(){
 
             if (self.ccblock && !self.ccblock.destroyed && !self.battleMode && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
                 if (!self.saveHealAdded) {
-                    self.saveBtn.add();
+                    self.saveBtn.flashing = true;
                     self.saveHealAdded = true;
                 }
             }
@@ -2012,7 +2014,7 @@ BSWG.game = new function(){
             }
 
             if (self.saveBtn) {
-                self.saveBtn.flashing = self.dialogBtnHighlight === 'save';
+                self.saveBtn.flashing = (self.dialogBtnHighlight === 'save') || true;
             }
             if (self.storeBtn) {
                 self.storeBtn.flashing = self.dialogBtnHighlight === 'store';
@@ -2668,6 +2670,37 @@ BSWG.game = new function(){
                 ctx.font = '26px Orbitron';
                 ctx.fillTextB(self.beMsg, viewport.w/2, self.hudY(self.hudBottomYT2));
                 ctx.textAlign = 'left';
+            }
+
+            if (BSWG.game.scene === BSWG.SCENE_GAME1 && (!self.ccblock || self.ccblock.destroyed)) {
+                var time = Date.timeStamp();
+                if (!self.deathTime) {
+                    self.deathTime = time;
+                    self.deathDone = false;
+                }
+
+                var t = Math.clamp(((time - self.deathTime) - 1.0) / 3.0, 0., 2.);
+                if (t >= 2 && !self.deathDone) {
+                    self.deathDone = true;
+                    self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
+                }
+
+                ctx.globalAlpha = Math.min(t, 1);
+
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, BSWG.render.viewport.w, BSWG.render.viewport.h);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#f00';
+                ctx.strokeStyle = '#444';
+                ctx.font = '64px Orbitron';
+                ctx.fillTextB("Annihilated ...", viewport.w/2, viewport.h/2+32);
+                ctx.textAlign = 'left';
+
+                ctx.globalAlpha = 1.0;
+            }
+            else {
+                self.deathTime = null;
+                self.deathDone = false;
             }
 
             ctx.globalAlpha = 1.0;
