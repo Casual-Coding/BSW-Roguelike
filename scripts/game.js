@@ -1999,6 +1999,7 @@ BSWG.game = new function(){
 
             if (self.ccblock && !self.ccblock.destroyed && !self.battleMode && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
                 if (!self.saveHealAdded) {
+                    self.saveBtn.add();
                     self.saveBtn.flashing = true;
                     self.saveHealAdded = true;
                 }
@@ -2594,18 +2595,18 @@ BSWG.game = new function(){
                                 xx *= (w-15) / 2;
                                 yy *= fs + 1;
 
-                                ctx.fillTextB((ccs[i].title || 'Unkown Enemy') + ' - Lvl. ' + (ccs[i].enemyLevel||0), x + 15 + xx, y + 10 + fs + yy);
+                                ctx.fillTextB((ccs[i].title || 'Unkown Enemy') + ' - Lvl. ' + Math.floor((ccs[i].enemyLevel||0)*10)/10, x + 15 + xx, y + 10 + fs + yy);
                                 idx ++;
                             }
                         }
                     }
                     else {
-                        var lStr = self.inZone.minLevel + '-' + self.inZone.maxLevel;
+                        var lStr = Math.floor(self.inZone.minLevel*10)/10 + '-' + Math.floor(self.inZone.maxLevel*10)/10;
                         if (self.inZone.minLevel === self.inZone.maxLevel) {
-                            lStr = '' + self.inZone.minLevel;
+                            lStr = '' + Math.floor(self.inZone.minLevel*10)/10;
                         }
                         if (self.inZone.boss) {
-                            lStr = '' + (self.inZone.maxLevel + 1);
+                            lStr = '' + Math.floor((self.inZone.maxLevel + 1)*10)/10;
                         }
                         ctx.fillTextB(self.inZone.name + ' - Lvl. ' + lStr, x + 15, y + 10 + 18);
                     }

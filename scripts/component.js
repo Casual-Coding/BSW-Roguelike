@@ -418,15 +418,16 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             if (BSWG.xpDisplay && BSWG.game.xpInfo && this.onCC !== BSWG.game.ccblock && !isFriendly && !disolve) {
                 var level = 0;
                 if (!this.onCC) {
-                    level = BSWG.game.ccblock.level();
+                    level = BSWG.game.ccblock.level() + 0.4;
                 }
                 else {
                     level = this.onCC.level();
                 }
-                var xpi0 = BSWG.xpInfo[level];
-                var xpi = BSWG.xpInfo[level+1];
+                var xpi0 = BSWG.xpInfo[Math.floor(level)];
+                var xpi = BSWG.xpInfo[Math.floor(level)+1];
                 if (xpi && xpi0 && BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                    var totalXP = (xpi.xp - xpi0.xp) * (BSWG.levelXpPer[level] || 0.2);
+                    var xpBase = BSWG.levelXpPer[Math.floor(level)] || 0.2;
+                    var totalXP = (xpi.xp - xpi0.xp) * xpBase;
                     totalXP *= this.xpBase ? this.xpBase : 0.01;
                     if (!this.onCC) {
                         totalXP /= 5;

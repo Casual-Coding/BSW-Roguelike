@@ -901,7 +901,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             key = key.getKey();
         }
 
-        level = level || 0;
+        level = Math.floor(level || 0);
 
         if (!(key in this.mlMap) || (this.mlMap[key] > level)) {
             this.mlMap[key] = level;
@@ -1104,10 +1104,10 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
         var level1 = (startDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
         var level2 = (1.0 - endDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
 
-        var level = Math.floor(((zone.order - 1) / (ret.zones.length-1)) * (eInfo.maxLevel - eInfo.minLevel)) + eInfo.minLevel;
+        var level = (((zone.order - 1) / (ret.zones.length-1)) * (eInfo.maxLevel - eInfo.minLevel)) + eInfo.minLevel;
 
         zone.minLevel = Math.floor(Math.min(level1, level2));
-        zone.maxLevel = Math.ceil(Math.max(level1, level2));
+        zone.maxLevel = (Math.max(level1, level2));
         zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-3);
 
         var range = zone.maxLevel - zone.minLevel;
@@ -1115,10 +1115,14 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
             range = 0;
         }
         else {
-            range = 1;
+            while (range >= 1.5) {
+                range -= 1;
+            }
         }
-        zone.minLevel = level;
+        zone.minLevel = Math.floor(level);
         zone.maxLevel = level + range;
+
+        console.log(zone.minLevel, zone.maxLevel);
 
         BSWG.genMap_MusicSettings_Zone(zone, eInfo);
 
@@ -1208,13 +1212,13 @@ BSWG.genMap_LoadMusicSettings_Zone = function(zone, eInfo) {
 
 BSWG.pickEnemyLevel = function(zone, E) {
     if (zone.boss) {
-        return Math.floor((zone.maxLevel + zone.minLevel) * 0.5) + E.levelInc;
+        return ((zone.maxLevel + zone.minLevel) * 0.5) + E.levelInc;
     }
 
     var possible = new Array();
     for (var j=0; j<E.levels.length; j++) {
         if (E.levels[j] >= zone.minLevel && E.levels[j] <= zone.maxLevel) {
-            possible.push(E.levels[j]);
+            possible.push(E.levels[j] + Math.random() * (zone.maxLevel - E.levels[j]));
         }
     }
     if (possible.length === 0) {
