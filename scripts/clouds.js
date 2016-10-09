@@ -3,11 +3,11 @@ BSWG.generateCloudGeom = function (size) {
     var w = size, h = size;
 
     var C = [
-        { x: w/2, y: h/2, z: size/2, r: size/4 },
+        { x: w/2, y: h/2, z: size/2, r: size/5.5 },
     ];
 
     var R = C[0].r;
-    for (var k=0; k<15; k++) {
+    for (var k=0; k<8; k++) {
         R *= 0.92;
         var k2 = 1000;
         while (k2--) {
@@ -46,8 +46,8 @@ BSWG.generateCloudGeom = function (size) {
     var geom = new THREE.Geometry();
 
     for (var i=0; i<C.length; i++) {
-        var sz = Math.max(Math.round(C[i].r*12), 5)*4;
-        var sphere = new THREE.SphereGeometry(C[i].r, sz, sz);
+        var sz = Math.floor(Math.max(Math.round(C[i].r*12), 5));
+        var sphere = new THREE.SphereGeometry(C[i].r, 6, sz);
         var matrix = new THREE.Matrix4();
         matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, C[i].z - size);
         geom.merge(sphere, matrix);
@@ -121,13 +121,13 @@ BSWG.cloudMap = new function (){
             Math.seedrandom(666.666);
 
             this.geom = [
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.2),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.3),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.3),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.3),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.6),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.6),
                 BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.7)
