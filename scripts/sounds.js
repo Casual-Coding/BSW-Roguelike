@@ -259,10 +259,12 @@ BSWG.noteSample = BSWG.soundBase({
             note = BSWG.noteHappy[interval];
         }
 
+        notename = notename || 'e2-distorted';
+
         this.source = audioCtx.createBufferSource();
         this.source.loop = false;
-        this.source.buffer = BSWG.soundBuffers[notename || 'e2-distorted'];
-        this.source.playbackRate.value = (Math.random()*0.01 + 0.995) * BSWG.music_NoteFreq(oct, note+(offset||0)) / BSWG.music_NoteFreq(2, 8);
+        this.source.buffer = BSWG.soundBuffers[notename];
+        this.source.playbackRate.value = (Math.random()*0.01 + 0.995) * (notename === 'e2-distorted' ? (BSWG.music_NoteFreq(oct, note+(offset||0)) / BSWG.music_NoteFreq(2, 8)) : 1.0);
 
         this.gain = audioCtx.createGain();
         this.gain.gain.value = amp * 0.5;

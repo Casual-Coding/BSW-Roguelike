@@ -611,13 +611,16 @@ BSWG.game = new function(){
 
         if (scene === BSWG.SCENE_TITLE) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-2'];
+            BSWG.render.cloudColor.set(0.2, 0, 0, 0.9);
         }
         else if (scene === BSWG.SCENE_GAME2) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
+            BSWG.render.cloudColor.set(0.0, 0.1, 0.4, 0.9);
         }
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
             BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
+            BSWG.render.cloudColor.set(0.4, 0.4, 0.4, 0.9);
         }
 
         this.dialogPause = false;
@@ -637,6 +640,7 @@ BSWG.game = new function(){
         BSWG.exaustList.init();
         BSWG.orbList.init();
         BSWG.specialList.init();
+        BSWG.cloudMap.init();
 
         this.modeHistory = [];
         this.minimapZoom = true;
@@ -1462,12 +1466,15 @@ BSWG.game = new function(){
             var nextBeat = Math.ceil(ctime/(60/self.musicBPM)) * (60/self.musicBPM);
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
                 Math.seedrandom(Math.floor((self.noteIndex%8)/4) + Math.floor(time/(60/self.musicBPM*16)));
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat, 0, 'kick');
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 15/self.musicBPM, 0, 'kick');
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM, 0, 'kick');
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM + (15/4)/self.musicBPM, 0, 'kick');
-                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM + (15/2)/self.musicBPM, 0, 'crash-snare');
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 12);
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 0, 1, musicHappy, nextBeat, 0, 'kick');
+                new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 0, 1, musicHappy, nextBeat + (15/2)/self.musicBPM, 0, 'kick');
+                if (self.scene === BSWG.SCENE_TITLE || self.battleMode) {
+                    new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 0, 1, musicHappy, nextBeat + (15)/self.musicBPM, 0, 'kick');
+                }
+                //new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM, -6, 'kick');
+                //new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM + (15/4)/self.musicBPM, -6, 'kick');
+                //new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 8 + self.noteIndex%2, 1, musicHappy, nextBeat + 30/self.musicBPM + (15/2)/self.musicBPM, -6, 'crash-snare');
                 self.lastNote = nextBeat;
                 self.noteIndex += 1;
                 Math.seedrandom();
@@ -1836,6 +1843,7 @@ BSWG.game = new function(){
             BSWG.exaustList.render(dt);
             BSWG.orbList.updateRender(dt);
             BSWG.specialList.updateRender(ctx, dt);
+            BSWG.cloudMap.updateRender(dt);
 
             if (self.tileMap) {
                 self.tileMap.update(dt);
@@ -2436,13 +2444,13 @@ BSWG.game = new function(){
                     miny = -1 + self.map.size - self.inZone.rmax.y;
                     maxx = 1 + self.inZone.rmax.x;
                     maxy = 1 + self.map.size - self.inZone.rmin.y;
-                    if ((maxx - minx) < 24) {
+                    if ((maxx - minx) < 18) {
                         var p0 = (maxx + minx) * 0.5;
-                        minx = p0 - 12; maxx = p0 + 12;
+                        minx = p0 - 9; maxx = p0 + 9;
                     }
-                    if ((maxy - miny) < 24) {
+                    if ((maxy - miny) < 18) {
                         var p0 = (maxy + miny) * 0.5;
-                        miny = p0 - 12; maxy = p0 + 12;
+                        miny = p0 - 9; maxy = p0 + 9;
                     }
                     if ((maxx - minx) > (maxy - miny)) {
                         sz = (maxx - minx);

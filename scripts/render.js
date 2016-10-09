@@ -294,6 +294,8 @@ BSWG.render = new function() {
         this.shadowMap.texture.generateMipmaps = true;
         this.shadowMap.stencilBuffer = false;
 
+        this.cloudColor = new THREE.Vector4(0, 0, 0, 0.9);
+
         this.sizeViewport();
 
         BSWG.initCanvasContext(this.ctx);
