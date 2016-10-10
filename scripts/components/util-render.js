@@ -11,6 +11,97 @@ BSWG.bpmReflectDefault = 0.35;
 BSWG.bpmReflect = BSWG.bpmReflectDefault;
 BSWG.bpmSmoothNormals = false;
 
+BSWG.rciPolyCache = {};
+
+BSWG.renderCompIconRecenter = false;
+
+BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB) {
+
+    var poly = BSWG.rciPolyCache[key + '|' + BSWG.renderCompIconRecenter];
+    if (!poly) {
+        var typeArgs = BSWG.componentList.compStrTypeArgs(key);
+        if (!typeArgs[2]) {
+            BSWG.renderCompIconRecenter = false;
+            return;
+        }
+        poly = typeArgs[2].getIconPoly(typeArgs[1] || {});
+        if (!poly) {
+            BSWG.renderCompIconRecenter = false;
+            return;
+        }
+        if (BSWG.renderCompIconRecenter) {
+            var minx = 1000, maxx = -1000,
+                miny = 1000, maxy = -1000;
+            for (var i=0; i<poly.length; i++) {
+                for (var j=0; j<poly[i].length; j++) {
+                    minx = Math.min(minx, poly[i][j].x);
+                    maxx = Math.max(maxx, poly[i][j].x);
+                    miny = Math.min(miny, poly[i][j].y);
+                    maxy = Math.max(maxy, poly[i][j].y);
+                }
+            }
+            var ox = (maxx + minx) * 0.5,
+                oy = (maxy + miny) * 0.5;
+            for (var i=0; i<poly.length; i++) {
+                for (var j=0; j<poly[i].length; j++) {
+                    poly[i][j].x -= ox;
+                    poly[i][j].y -= oy;
+                }
+            }
+        }
+        BSWG.rciPolyCache[key + '|' + BSWG.renderCompIconRecenter] = poly;
+        BSWG.renderCompIconRecenter = false;
+    }
+
+    if (!scale && scale !== 0) {
+        scale = 1.0;
+    }
+    angle = angle || 0.0;
+
+    var r = Math.floor(Math.clamp(baseR||0.3, 0, 1)*255);
+    var g = Math.floor(Math.clamp(baseG||0.3, 0, 1)*255);
+    var b = Math.floor(Math.clamp(baseB||0.3, 0, 1)*255);
+
+    var r2 = Math.floor(Math.clamp((baseR||0.3+0.1) * 1.5, 0, 1)*255);
+    var g2 = Math.floor(Math.clamp((baseG||0.3+0.1) * 1.5, 0, 1)*255);
+    var b2 = Math.floor(Math.clamp((baseB||0.3+0.1) * 1.5, 0, 1)*255);
+
+    var r3 = Math.floor(Math.clamp((baseR||0.3+0.1) * 3.5, 0, 1)*255);
+    var g3 = Math.floor(Math.clamp((baseG||0.3+0.1) * 3.5, 0, 1)*255);
+    var b3 = Math.floor(Math.clamp((baseB||0.3+0.1) * 3.5, 0, 1)*255);
+
+    var c1 = 'rgb(' + r + ',' + g + ',' + b + ')';
+    var c2 = 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
+    var c3 = 'rgb(' + r3 + ',' + g3 + ',' + b3 + ')';
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.rotate(angle);
+    for (var j=0; j<poly.length; j++) {
+        ctx.lineWidth = 1.5 / scale;
+        ctx.strokeStyle = c3;
+        ctx.beginPath();
+        ctx.moveTo(poly[j][0].x, poly[j][0].y);
+        for (var i=1; i<poly[j].length; i++) {
+            ctx.lineTo(poly[j][i].x, poly[j][i].y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+    for (var j=0; j<poly.length; j++) {
+        ctx.fillStyle = j === 0 ? c1 : c2;
+        ctx.beginPath();
+        ctx.moveTo(poly[j][0].x, poly[j][0].y);
+        for (var i=1; i<poly[j].length; i++) {
+            ctx.lineTo(poly[j][i].x, poly[j][i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+    ctx.restore();
+};
+
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     if (!BSWG.bpmMatCache) {

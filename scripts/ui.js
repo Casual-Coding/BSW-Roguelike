@@ -1150,6 +1150,8 @@ BSWG.control_CompPalette = {
                 else {
                     ctx.fillText('?', B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
                 }
+                //BSWG.renderCompIconRecenter = true;
+                //BSWG.renderCompIcon(ctx, this.buttons[i].key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, 16);
             }
             else {
                 ctx.textAlign = 'center';
