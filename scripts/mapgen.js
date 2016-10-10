@@ -388,6 +388,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
         mazeGen(start);
 
+        if (ret.maxMazeLevel < numPlanets*2) {
+            return BSWG.genMap(size, numZones, numPlanets, areaNo);
+        }
+
         ret.planets[0] = new Object();
         ret.planets[0].zone = ret.zones[start];
         ret.planets[0].p = ret.zones[start].p;
