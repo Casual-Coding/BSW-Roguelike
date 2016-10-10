@@ -592,7 +592,7 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
-    var last60dt = new Array(6);
+    var last60dt = new Array(20);
     for (var i=0; i<last60dt.length; i++) {
         last60dt[i] = 1.0/60;
     }
