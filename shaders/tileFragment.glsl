@@ -91,10 +91,10 @@ void main() {
         svec.a = (SA.a + SB.a + SC.a + SD.a + SE.a) / 5.0;
     }
     if (zval > Z) {
-        gl_FragColor.rgb *= (1.0 - svec.a) * 0.65 + 0.35;
+        gl_FragColor.rgb *= (1.0 - svec.a) * 0.5 + 0.5;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*25.+1.0)) * 0.65 + 0.35;
+        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*25.+1.0)) * 0.5 + 0.5;
     }
     gl_FragColor.rgb -= 0.1;
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);

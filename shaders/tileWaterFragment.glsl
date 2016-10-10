@@ -64,14 +64,14 @@ void main() {
         float ZC = (SC.r * 65536.0 + SC.g * 256.0 + SC.b) / 256.0 - 256.0;
         float ZD = (SD.r * 65536.0 + SD.g * 256.0 + SD.b) / 256.0 - 256.0;
         float ZE = (SE.r * 65536.0 + SE.g * 256.0 + SE.b) / 256.0 - 256.0;
-        zval = (ZA+ZB+ZC+ZD+ZE) / 5.0 - 0.05;
+        zval = (ZA+ZB+ZC+ZD+ZE) / 5.0;
         svec.a = (SA.a + SB.a + SC.a + SD.a + SE.a) / 5.0;
     }
     if (zval > Z) {
-        gl_FragColor.rgb *= (1.0 - svec.a) * 0.65 + 0.35;
+        gl_FragColor.rgb *= (1.0 - svec.a) * 0.5 + 0.5;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*50.+1.0)) * 0.65 + 0.35;
+        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*50.+1.0)) * 0.5 + 0.5;
     }
     gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb*0.25, pow(vSPosition.z/200., 0.5)*envMapTint.a);
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
