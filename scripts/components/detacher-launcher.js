@@ -27,6 +27,27 @@ BSWG.component_DetacherLauncher = {
 
     frontOffset: Math.PI,
 
+    getIconPoly: function (args) {
+        var size = args.size || 2;
+        return [
+            Math.smoothPoly([
+                new b2Vec2(size * -0.35, size * -0.25),
+                new b2Vec2(size *  0.35, size * -0.25),
+                new b2Vec2(size *  0.6,  size * -0.125),
+                new b2Vec2(size *  0.6,  size *  0.125),
+                new b2Vec2(size *  0.35, size *  0.25),
+                new b2Vec2(size * -0.35, size *  0.25)
+            ], 0.02),
+            [
+                new b2Vec2(size * ( 0.25 - 0.2), size *  0.125),
+                new b2Vec2(size * (0.125 - 0.2), size *  0.125),
+                new b2Vec2(size * (  0.0 - 0.2), size *  0.0),
+                new b2Vec2(size * (0.125 - 0.2), size * -0.125),
+                new b2Vec2(size * ( 0.25 - 0.2), size * -0.125)
+            ]
+        ];
+    },
+
     init: function(args) {
 
         this.size      = args.size || 2;

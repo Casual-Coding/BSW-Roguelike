@@ -29,6 +29,40 @@ BSWG.component_SawMotor = {
 
     frontOffset: 0.0,
 
+    getIconPoly: function (args) {
+        var size   = args.size || 1;
+        var motor  = true;
+
+        var verts = Math.smoothPoly([
+            new b2Vec2(size *  0.5, size * -0.5),
+            new b2Vec2(size *  0.65,            -0.2),
+            new b2Vec2(size *  0.65,             0.2),
+            new b2Vec2(size *  0.5, size *  0.5)
+        ], 0.05);
+
+        var motorC = new b2Vec2(size * 1.3, 0.0);
+
+        var len = 6;
+        var cverts = new Array(len);
+        var r = size * 0.6 * 0.3;
+        for (var i=0; i<len; i++) {
+            var a = (i/len)*Math.PI*2.0;
+            cverts[i] = new b2Vec2(
+                motorC.x + Math.cos(a) * r,
+                motorC.y + Math.sin(a) * r
+            );
+        }
+
+        var averts = [
+            new b2Vec2(size *  0.5,        size * -0.2),
+            new b2Vec2(motorC.x+size*0.05, motorC.y-size*0.1),
+            new b2Vec2(motorC.x+size*0.05, motorC.y+size*0.1),
+            new b2Vec2(size *  0.5,        size *  0.2)
+        ];
+
+        return [verts, cverts, averts];
+    },
+
     init: function(args) {
 
         this.size   = args.size || 1;

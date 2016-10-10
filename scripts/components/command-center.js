@@ -29,6 +29,30 @@ BSWG.component_CommandCenter = {
 
     frontOffset: -Math.PI/2,
 
+    getIconPoly: function (args) {
+        var width = 2, height = 3;
+        return [
+            Math.smoothPoly([
+                new b2Vec2(-width * 0.5, -height * 0.5),
+                new b2Vec2( width * 0.5, -height * 0.5),
+                new b2Vec2( width * 0.5,  height * 0.5),
+                new b2Vec2(-width * 0.5,  height * 0.5)
+            ], 0.02),
+            [
+                new b2Vec2(-width * 0.5 * 0.75, -height * 0.5 * 0.0),
+                new b2Vec2( width * 0.5 * 0.75, -height * 0.5 * 0.0),
+                new b2Vec2( width * 0.3 * 0.75, -height * 0.5 * 0.75),
+                new b2Vec2(-width * 0.3 * 0.75, -height * 0.5 * 0.75)
+            ].reverse(),
+            [
+                new b2Vec2(-width * 0.5 * 0.7, height * 0.5 * 0.75),
+                new b2Vec2( width * 0.5 * 0.7, height * 0.5 * 0.75),
+                new b2Vec2( width * 0.5 * 0.7, height * 0.5 * 0.05),
+                new b2Vec2(-width * 0.5 * 0.7, height * 0.5 * 0.05)
+            ].reverse()
+        ];
+    },
+
     init: function(args) {
 
         this.width  = 2;

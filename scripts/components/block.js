@@ -41,6 +41,27 @@ BSWG.component_Block = {
         { title: 'Tri 3x2', width: 3, height: 2, triangle: 1, armour: false, value: 6*2 }
     ],
 
+    getIconPoly: function (args) {
+        var width    = args.width || 1;
+        var height   = args.height || 1;
+        var armour   = args.armour || false;
+        var triangle = args.triangle || 0;
+
+        var verts = [
+            new b2Vec2(-width * 0.5, -height * 0.5),
+            new b2Vec2( width * 0.5, -height * 0.5),
+            new b2Vec2( width * 0.5,  height * 0.5),
+            new b2Vec2(-width * 0.5,  height * 0.5)
+        ];
+
+        if (triangle === -1)
+            verts.splice(0, 1);
+        else if (triangle === 1)
+            verts.splice(1, 1);
+
+        return [Math.smoothPoly(verts, 0.03)];
+    },
+
     init: function(args) {
 
         this.width    = args.width || 1;

@@ -22,6 +22,15 @@ BSWG.component_MissileLauncher = {
 
     frontOffset: Math.PI/2,
 
+    getIconPoly: function (args) {
+        return [[
+            new b2Vec2(-0.45,  -0.3),
+            new b2Vec2(-0.4,  0.85),
+            new b2Vec2( 0.4,  0.85),
+            new b2Vec2( 0.45,  -0.3)
+        ].reverse()];
+    },
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

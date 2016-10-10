@@ -283,8 +283,10 @@ BSWG.component = function (desc, args) {
     this.handleInput = function(key) {};
     this.frontOffset = 0.0;
 
-    for (var key in desc)
+    for (var key in desc) {
         this[key] = desc[key];
+    }
+    this.iconPoly = null;
 
     this.id = BSWG.nextCompID++;
     this.jpoints = [];

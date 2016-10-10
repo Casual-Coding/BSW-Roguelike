@@ -31,6 +31,53 @@ BSWG.component_Spikes = {
 
     frontOffset: Math.PI/2 - Math.PI/16 - Math.PI/50,
 
+    getIconPoly: function(args) {
+        var size      = args.size || 1;
+        var nteeth    = [6, 6, 8][size-1];
+        var toothSize = [0.8, 1.6, 2.8][size-1];
+        var pike      = args.pike || false;
+
+        if (pike) {
+            toothSize *= 2.0;
+        }
+
+        var wheelVerts = new Array(nteeth);
+        for (var i=0; i<nteeth; i++) {
+            var a = i/nteeth * Math.PI;
+            wheelVerts[i] = new b2Vec2(
+                Math.cos(a) * size * 0.20, Math.sin(a) * size * 0.20
+            );
+        }
+
+        var verts = new Array(pike ? 2 : nteeth-2);
+        verts[0] = wheelVerts;
+        if (pike) {
+            var tverts = new Array(3);
+            var p1 = wheelVerts[wheelVerts.length-1], p2 = wheelVerts[0];
+            var dx = p2.x - p1.x, dy = p2.y - p1.y;
+            var ac = Math.atan2(dx, -dy);
+            var a1 = ac - Math.PI*0.2;
+            var a2 = ac + Math.PI*0.2;
+            tverts[0] = new b2Vec2(Math.cos(a1) * size * 0.20, Math.sin(a1) * size * 0.20);
+            tverts[1] = new b2Vec2(Math.cos(ac) * (size+toothSize) * 0.40, Math.sin(ac) * (size+toothSize) * 0.40);
+            tverts[2] = new b2Vec2(Math.cos(a2) * size * 0.20, Math.sin(a2) * size * 0.20);
+            verts[1] = tverts;
+        }
+        else {
+            for (var i=1; i<(nteeth-2); i++) {
+                var tverts = new Array(3);
+                var ac = (i+0.5)/nteeth * Math.PI;
+                var j = (i+1) % nteeth;
+                tverts[0] = new b2Vec2(wheelVerts[i].x, wheelVerts[i].y);
+                tverts[1] = new b2Vec2(Math.cos(ac) * (size+toothSize) * 0.40, Math.sin(ac) * (size+toothSize) * 0.40);
+                tverts[2] = new b2Vec2(wheelVerts[j].x, wheelVerts[j].y);
+                verts[i] = tverts;
+            }
+        }
+
+        return verts;
+    },
+
     init: function(args) {
 
         this.size      = args.size || 1;

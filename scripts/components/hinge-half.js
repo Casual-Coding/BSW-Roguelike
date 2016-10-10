@@ -30,6 +30,35 @@ BSWG.component_HingeHalf = {
 
     frontOffset: Math.PI,
 
+    getIconPoly: function (args) {
+        var size = args.size || 1;
+        var motor = args.motor || false;
+
+        var body = Math.smoothPoly([
+            new b2Vec2(size *  0.5, size * -0.5),
+            new b2Vec2(size *  0.95,             0.0),
+            new b2Vec2(size *  0.5, size *  0.5),
+        ], 0.05);
+
+        var motorC = new b2Vec2(size * 1.0, 0.0);
+
+        var len = Math.floor(size * 5 * (motor ? 2 : 1.5));
+        var hinge = new Array(len);
+        var r = size * (motor ? 0.6 : 0.45) * 0.3;
+        for (var i=0; i<len; i++) {
+            var a = (i/len)*Math.PI*2.0;
+            hinge[i] = new b2Vec2(
+                motorC.x + Math.cos(a) * r,
+                motorC.y + Math.sin(a) * r
+            );
+        }
+
+        return [
+            body,
+            hinge
+        ];
+    },
+
     init: function(args) {
 
         this.size   = args.size || 1;

@@ -26,6 +26,16 @@ BSWG.component_Thruster = {
 
     frontOffset: -Math.PI/2,
 
+    getIconPoly: function (args) {
+        var size = args.size || 1;
+        return [Math.smoothPoly([
+            new b2Vec2(-0.2 * size, -0.5 * size),
+            new b2Vec2( 0.2 * size, -0.5 * size),
+            new b2Vec2( 0.4 * size,  0.5 * size),
+            new b2Vec2(-0.4 * size,  0.5 * size)
+        ].reverse(), 0.1)];
+    },
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

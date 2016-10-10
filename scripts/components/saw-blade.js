@@ -25,6 +25,34 @@ BSWG.component_SawBlade = {
         { title: 'Size 3', size: 3, value: 40 }
     ],
 
+    getIconPoly: function (args) {
+        var size      = args.size || 1;
+        var nteeth    = [7, 8, 9][size-1];
+        var toothSize = [0.4, 0.8, 1.4][size-1];
+
+        var wheelVerts = new Array(nteeth);
+        for (var i=0; i<nteeth; i++) {
+            var a = i/nteeth * Math.PI * 2.0;
+            wheelVerts[i] = new b2Vec2(
+                Math.cos(a) * size * 0.30, Math.sin(a) * size * 0.30
+            );
+        }
+
+        var verts = new Array(nteeth+1);
+        verts[0] = wheelVerts;
+        for (var i=0; i<nteeth; i++) {
+            var tverts = new Array(3);
+            var ac = (i+0.7)/nteeth * Math.PI * 2.0;
+            var j = (i+1) % nteeth;
+            tverts[0] = new b2Vec2(wheelVerts[i].x, wheelVerts[i].y);
+            tverts[1] = new b2Vec2(Math.cos(ac) * (size+toothSize) * 0.40, Math.sin(ac) * (size+toothSize) * 0.40);
+            tverts[2] = new b2Vec2(wheelVerts[j].x, wheelVerts[j].y);
+            verts[i+1] = tverts;
+        }
+
+        return verts;
+    },
+
     init: function(args) {
 
         this.size      = args.size || 1;

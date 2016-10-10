@@ -22,6 +22,17 @@ BSWG.component_Laser = {
 
     frontOffset: Math.PI/2,
 
+    getIconPoly: function (args) {
+        return [Math.smoothPoly([
+            new b2Vec2(-0.4,  -0.3),
+            new b2Vec2(-0.5,  -0.1),
+            new b2Vec2(-0.15,  0.85),
+            new b2Vec2( 0.15,  0.85),
+            new b2Vec2( 0.5,  -0.1),
+            new b2Vec2( 0.4,  -0.3)
+        ].reverse(), 0.02)];
+    },
+
     init: function(args) {
 
         var offsetAngle = this.offsetAngle = 0.0;

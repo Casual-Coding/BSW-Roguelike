@@ -20,6 +20,35 @@ BSWG.component_ChainLink = {
 
     frontOffset: 0.0,
 
+    getIconPoly: function (args) {
+        var size = 1;
+
+        var body = Math.smoothPoly([
+            new b2Vec2(size * -0.25, size * -0.25),
+            new b2Vec2(size *  0.25, size * -0.25),
+            new b2Vec2(size *  0.55,         0.0),
+            new b2Vec2(size *  0.25, size *  0.25),
+            new b2Vec2(size * -0.25, size *  0.25)
+        ], 0.05);
+
+        var hingeC = new b2Vec2(size * 0.6, 0.0);
+        var len = Math.floor(size * 5);
+        var hinge = new Array(len);
+        var r = size * 0.45 * 0.45;
+        for (var i=0; i<len; i++) {
+            var a = (i/len)*Math.PI*2.0;
+            hinge[i] = new b2Vec2(
+                hingeC.x + Math.cos(a) * r,
+                hingeC.y + Math.sin(a) * r
+            );
+        }
+
+        return [
+            body,
+            hinge
+        ];
+    },
+
     init: function(args) {
 
         this.size   = 1;
