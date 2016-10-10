@@ -69,6 +69,7 @@ BSWG.cloud = function (pos, toPos, size, life) {
     this.toP = toPos.clone();
     this.size = size || 1.0;
     this.life = life || 10.0;
+    this.exSpeed = 0.0;
 
     var geom = BSWG.cloudMap.geom[~~(Math.random()*0.999*BSWG.cloudMap.geom.length)];
 
@@ -261,11 +262,25 @@ BSWG.cloudMap = new function (){
         }
 
         for (var i=0; i<(this.list.length-count); i++) {
+            this.list[i].exSpeed += dt * 25;
+            if (this.list[i].exSpeed > 50) {
+                this.list[i].exSpeed = 50;
+            }
+        }
+        for (var i=Math.max(this.list.length-count, 0); i<this.list.length; i++) {
+            this.list[i].exSpeed -= dt * 25;
+            if (this.list[i].exSpeed < 0) {
+                this.list[i].exSpeed = 0;
+            }
+        }
+        for (var i=0; i<this.list.length; i++) {
             var dx = this.list[i].p.x - BSWG.render.cam3D.position.x;
             var dy = this.list[i].p.y - BSWG.render.cam3D.position.y;
             var len = Math.sqrt(dx*dx+dy*dy);
-            this.list[i].toP.x = this.list[i].p.x + dx / len * 50;
-            this.list[i].toP.y = this.list[i].p.y + dy / len * 50;
+            if (this.list[i].exSpeed > 0) {
+                this.list[i].toP.x = this.list[i].p.x + dx / len * this.list[i].exSpeed;
+                this.list[i].toP.y = this.list[i].p.y + dy / len * this.list[i].exSpeed;            
+            }
         }
 
     };

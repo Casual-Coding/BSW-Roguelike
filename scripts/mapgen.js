@@ -127,7 +127,7 @@ BSWG.enemySettings = [
                     who: 77,
                     friend: true,
                     text: [
-                        "Seems like a suck at being a warlord too...",
+                        "Seems like I suck at being a warlord too...",
                         "Maybe I should become a merchant like Dad?",
                         "It runs in the blood after all!",
                         "You know the day before dad died I'd never seen him so scared...",
