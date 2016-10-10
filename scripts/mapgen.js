@@ -321,6 +321,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 var sc = ret.size / a;
                 p.x *= sc;
                 p.y *= sc;
+                p.x += Math.random()*12-6;
+                p.y += Math.random()*12-6;
                 var valid = true;
                 if (true) {
                     ret.zones[i] = new Object();
@@ -479,7 +481,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         for (var x=0; x<size; x++) {
             for (var y=0; y<size; y++) {
                 var zone = ret.zones[ret.zoneMap[x][y]];
-                if (!zone.hasPlanet && Math.random() < 0.05 && Math.distVec2(zone.p, new b2Vec2(x, y)) > 1.5) {
+                if (!zone.hasPlanet && Math.random() < 0.01 && Math.distVec2(zone.p, new b2Vec2(x, y)) > 1.5) {
                     ret.colMap[x][y] = true;
                 }
             }
