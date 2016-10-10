@@ -921,7 +921,7 @@ BSWG.game = new function(){
                 else {
                     Math.seedrandom();
                     this.noDefault = false;
-                    this.map = BSWG.genMap(162, 35, 8);
+                    this.map = BSWG.genMap(162, 6*6, 8);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
                     this.xpInfo = new BSWG.playerStats();
                     startPos = this.map.planets[0].worldP.clone();

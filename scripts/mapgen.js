@@ -3,7 +3,7 @@ BSWG.map_minZoneEdgeDist = 20; // Minimum distance allowed from a zone center to
 BSWG.map_gridSize        = 24.0; // overwritte as BSWG.tileSizeWorld
 BSWG.map_flPlanetDist    = 0.9; // * size
 BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
-BSWG.map_planetSafeDist  = 4; // Size of zone surrounding planet
+BSWG.map_planetSafeDist  = 8; // Size of zone surrounding planet
 
 BSWG.enemySettings_compToStr = function (obj) {
     var str = obj.type;
@@ -316,14 +316,13 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         for (var i=0; i<numZones; i++) {
             var k;
             for (k=0; k<1000; k++) {
-                var p = randPoint();
+                var a = Math.ceil(Math.sqrt(numZones));
+                var p = new b2Vec2((i%a)+0.5, (~~(i/a))+0.5);
+                var sc = ret.size / a;
+                p.x *= sc;
+                p.y *= sc;
                 var valid = true;
-                for (var j=0; j<i && valid; j++) {
-                    if (Math.distSqVec2(p, ret.zones[j].p) < BSWG.map_minZoneDist*BSWG.map_minZoneDist) {
-                        valid = false;
-                    }
-                }
-                if (valid) {
+                if (true) {
                     ret.zones[i] = new Object();
                     ret.zones[i].p = p;
                     ret.zones[i].worldP = new b2Vec2(p.x * ret.gridSize, p.y * ret.gridSize);
@@ -348,56 +347,83 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
-        var found = false;
-        for (var i=0; i<numZones && !found; i++) {
-            for (var j=i+1; j<numZones && !found; j++) {
-                if (Math.distVec2(ret.zones[i].p, ret.zones[j].p) > size*BSWG.map_flPlanetDist) {
-                    ret.planets[0] = new Object();
-                    ret.planets[1] = new Object();
-                    ret.planets[0].zone = ret.zones[i];
-                    ret.planets[1].zone = ret.zones[j];
-                    ret.planets[0].p = ret.zones[i].p;
-                    ret.planets[1].p = ret.zones[j].p;
-                    ret.planets[0].worldP = new b2Vec2(ret.planets[0].p.x * ret.gridSize, ret.planets[0].p.y * ret.gridSize);
-                    ret.planets[1].worldP = new b2Vec2(ret.planets[1].p.x * ret.gridSize, ret.planets[1].p.y * ret.gridSize);
-                    ret.zones[i].hasPlanet = true;
-                    ret.zones[j].hasPlanet = true;
-                    ret.zones[i].home = true;
-                    ret.zones[i].safe = true;
-                    ret.zones[j].end = true;
-                    found = true;
+        var start = ~~(Math.random()*100000) % ret.zones.length;
+        var vcount = 0;
+
+        var a = Math.ceil(Math.sqrt(numZones));
+        var sc = size / a;
+
+        ret.maxMazeLevel = 0;
+
+        var paths = [];
+
+        var mazeGen = function(id, level) {
+            var z = ret.zones[id];
+            if (z.order) {
+                return;
+            }
+            vcount += 1;
+            z.order = vcount;
+            z.mazeLevel = level = level || 0;
+            ret.maxMazeLevel = Math.max(ret.maxMazeLevel, z.mazeLevel);
+            var x = id % a;
+            var y = ~~(id / a);
+            var ord = [ [-1, 0], [1, 0], [0, -1], [0, 1]];
+            while (ord.length) {
+                var idx = Math.floor(Math.random()*10000) % ord.length;
+                var vec = ord[idx];
+                ord.splice(idx, 1);
+                if (vec[0]+x >= 0 && vec[0]+x < a && vec[1]+y >= 0 && vec[1]+y < a) {
+                    var id2 = (vec[0]+x) + (vec[1]+y) * a;
+                    var z2 = ret.zones[id2];
+                    if (!z2.order) {
+                        paths.push([z, z2]);
+                        mazeGen(id2, level+1);
+                    }
                 }
             }
         }
 
-        if (!found) {
-            return BSWG.genMap(size, numZones, numPlanets);
-        }
+        mazeGen(start);
 
-        for (var i=2; i<numPlanets; i++) {
-            var k;
-            for (k=0; k<1000; k++) {
-                var z = ret.zones[~~(Math.random()*ret.zones.length)];
-                var valid = true;
-                for (var j=0; j<i && valid; j++) {
-                    if (Math.distVec2(z.p, ret.planets[j].p) < BSWG.map_minPlanetDist) {
-                        valid = false;
-                    }
-                }
-                if (valid) {
-                    ret.planets[i] = new Object();
-                    ret.planets[i].zone = z;
-                    ret.planets[i].p = z.p;
-                    ret.planets[i].worldP = new b2Vec2(ret.planets[i].p.x * ret.gridSize, ret.planets[i].p.y * ret.gridSize);
-                    z.hasPlanet = true;
+        ret.planets[0] = new Object();
+        ret.planets[0].zone = ret.zones[start];
+        ret.planets[0].p = ret.zones[start].p;
+        ret.planets[0].worldP = new b2Vec2(ret.planets[0].p.x * ret.gridSize, ret.planets[0].p.y * ret.gridSize);
+        ret.zones[start].home = true;
+        ret.zones[start].safe = true;
+        ret.zones[start].hasPlanet = true;
+
+        var end = -1;
+
+        for (var i=0; i<ret.zones.length; i++) {
+            if (end === -1 || ret.zones[i].mazeLevel > ret.zones[end].mazeLevel) {
+                end = i;
+            }
+        }
+        
+        ret.planets[1] = new Object();
+        ret.planets[1].zone = ret.zones[end];
+        ret.planets[1].p = ret.zones[end].p;
+        ret.planets[1].worldP = new b2Vec2(ret.planets[1].p.x * ret.gridSize, ret.planets[1].p.y * ret.gridSize);
+        ret.zones[end].hasPlanet = true;
+        ret.zones[end].end = true;
+
+        for (var i=2; i<ret.planets.length; i++) {
+            var mazeLevel = Math.floor((i-1) / (ret.planets.length-1) * ret.maxMazeLevel);
+            var j = -1;
+            for (var k=0; k<ret.zones.length; k++) {
+                if (ret.zones[k].mazeLevel === mazeLevel && !ret.zones[k].hasPlanet) {
+                    j = k;
                     break;
                 }
             }
-            if (k >= 1000) {
-                return BSWG.genMap(size, numZones, numPlanets);
-                //numPlanets = i;
-                //ret.planets.length = numPlanets;
-            }
+            var z = ret.zones[j];
+            ret.planets[i] = new Object();
+            ret.planets[i].zone = z;
+            ret.planets[i].p = z.p;
+            ret.planets[i].worldP = new b2Vec2(ret.planets[i].p.x * ret.gridSize, ret.planets[i].p.y * ret.gridSize);
+            z.hasPlanet = true;
         }
 
         for (var x=0; x<size; x++) {
@@ -440,6 +466,18 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         for (var x=0; x<size; x++) {
             for (var y=0; y<size; y++) {
                 ret.colMap[x][y] = ret.edgeMap[x][y] > -1;
+            }
+        }
+        for (var k=0; k<10000; k++) {
+            var x = Math.floor(Math.random() * (ret.size-2)) + 1;
+            var y = Math.floor(Math.random() * (ret.size-2)) + 1;
+            if ((ret.colMap[x-1][y] || ret.colMap[x+1][y] || ret.colMap[x][y-1] || ret.colMap[x][y+1]) && Math.random() > 1/10) {
+                ret.colMap[x][y] = true;
+            }
+        }
+
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
                 var zone = ret.zones[ret.zoneMap[x][y]];
                 if (!zone.hasPlanet && Math.random() < 0.05 && Math.distVec2(zone.p, new b2Vec2(x, y)) > 1.5) {
                     ret.colMap[x][y] = true;
@@ -447,36 +485,15 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             }
         }
 
-        var start = ret.planets[0].zone;
-        var visited = {};
-        var vcount = 0;
-        while (vcount < (ret.zones.length-1)) {
-            visited[start.id] = true;
-            vcount += 1;
-            start.order = vcount;
-
-            var best = null, bestD = null;
-            for (var i=0; i<ret.zones.length; i++) {
-                if (!visited[i]) {
-                    var d = Math.distSqVec2(ret.zones[i].p, start.p);
-                    if (best === null || d < bestD) {
-                        best = ret.zones[i];
-                        bestD = d;
+        for (var i=0; i<paths.length; i++) {
+            for (var _x=0; _x<size; _x++) {
+                for (var _y=0; _y<size; _y++) {
+                    if (Math.pointLineDistance(paths[i][0].p, paths[i][1].p, new b2Vec2(_x, _y)) < 2) {
+                        ret.colMap[_x][_y] = false;
                     }
                 }
             }
-
-            for (var x=0; x<size; x++) {
-                for (var y=0; y<size; y++) {
-                    if (Math.pointLineDistance(start.p, best.p, new b2Vec2(x, y)) < 2) {
-                        ret.colMap[x][y] = false;
-                    }
-                }
-            }
-
-            start = best;
         }
-        start.order = vcount+1;
 
         for (var x=0; x<size; x++) {
             for (var y=0; y<size; y++) {            
@@ -986,6 +1003,16 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     }
 
     for (var i=0; i<ret.zones.length; i++) {
+        if (ret.zones[i].maxLevel < 1) {
+            ret.zones[i].maxLevel = ret.zones[i].minLevel = 0;
+        }
+        else if (ret.zones[i].maxLevel < 2) {
+            ret.zones[i].maxLevel = 1;
+            ret.zones[i].minLevel = 0;
+        }
+    }
+
+    for (var i=0; i<ret.zones.length; i++) {
         BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo, ret.zones[i] === ret.planets[0].zone);
         for (var key in ret.zones[i].compHist) {
             ret.updateMinLevelComp(key, ret.zones[i].maxLevel);
@@ -1098,31 +1125,9 @@ BSWG.genMap_EnemyPlacement = function(ret, eInfo) {
 
     for (var i=0; i<order.length; i++) {
         var zone = order[i];
-        var startDist = Math.distSqVec2(zone.p, startZone.p);
-        var endDist = Math.distSqVec2(zone.p, endZone.p);
 
-        var level1 = (startDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
-        var level2 = (1.0 - endDist / tDist) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
-
-        var level = (((zone.order - 1) / (ret.zones.length-1)) * (eInfo.maxLevel - eInfo.minLevel)) + eInfo.minLevel;
-
-        zone.minLevel = Math.floor(Math.min(level1, level2));
-        zone.maxLevel = (Math.max(level1, level2));
-        zone.minLevel = Math.max(zone.minLevel, zone.maxLevel-3);
-
-        var range = zone.maxLevel - zone.minLevel;
-        if (i < 2) {
-            range = 0;
-        }
-        else {
-            while (range >= 1.5) {
-                range -= 1;
-            }
-        }
-        zone.minLevel = Math.floor(level);
-        zone.maxLevel = level + range;
-
-        console.log(zone.minLevel, zone.maxLevel);
+        zone.minLevel = Math.floor((zone.mazeLevel / (ret.maxMazeLevel+1)) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel);
+        zone.maxLevel = ((zone.mazeLevel+1) / (ret.maxMazeLevel+1)) * (eInfo.maxLevel - eInfo.minLevel) + eInfo.minLevel;
 
         BSWG.genMap_MusicSettings_Zone(zone, eInfo);
 
