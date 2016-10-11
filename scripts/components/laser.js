@@ -22,6 +22,8 @@ BSWG.component_Laser = {
 
     frontOffset: Math.PI/2,
 
+    category: 'weapon',
+
     getIconPoly: function (args) {
         return [Math.smoothPoly([
             new b2Vec2(-0.4,  -0.3),

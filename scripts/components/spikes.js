@@ -31,6 +31,8 @@ BSWG.component_Spikes = {
 
     frontOffset: Math.PI/2 - Math.PI/16 - Math.PI/50,
 
+    category: 'weapon',
+
     getIconPoly: function(args) {
         var size      = args.size || 1;
         var nteeth    = [6, 6, 8][size-1];

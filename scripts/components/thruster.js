@@ -26,6 +26,8 @@ BSWG.component_Thruster = {
 
     frontOffset: -Math.PI/2,
 
+    category: 'movement',
+
     getIconPoly: function (args) {
         var size = args.size || 1;
         return [Math.smoothPoly([

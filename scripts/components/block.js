@@ -41,6 +41,8 @@ BSWG.component_Block = {
         { title: 'Tri 3x2', width: 3, height: 2, triangle: 1, armour: false, value: 6*2 }
     ],
 
+    category: 'block',
+
     getIconPoly: function (args) {
         var width    = args.width || 1;
         var height   = args.height || 1;

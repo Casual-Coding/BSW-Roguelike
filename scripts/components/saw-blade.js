@@ -25,6 +25,8 @@ BSWG.component_SawBlade = {
         { title: 'Size 3', size: 3, value: 40 }
     ],
 
+    category: 'weapon',
+
     getIconPoly: function (args) {
         var size      = args.size || 1;
         var nteeth    = [7, 8, 9][size-1];

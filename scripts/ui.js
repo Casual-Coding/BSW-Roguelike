@@ -962,28 +962,31 @@ BSWG.control_CompPalette = {
 
     init: function (args) {
 
-        var x = 10, y = 10;
+        this.compClr = {
+            'weapon': [1, .5, 0],
+            'block': [.7, .7, .7],
+            'movement': [0, 1, .25]
+        };
 
         var CL = BSWG.componentList.sbTypes;
-        var headers = new Array(CL.length);
         var buttons = new Array();
 
         if (args.clickInner) {
             this.clickInner = args.clickInner;
         }
 
+        var bcount = 0;
         for (var i=0; i<CL.length; i++) {
-            headers[i] = {
-                x: x,
-                y: y,
-                text: CL[i].name,
-                buttons: []
-            };
-            y += 20;
+            bcount += CL[i].sbadd.length;
+        }
+
+        var bWidth = 6;
+        var bSize = Math.min(this.w-20, this.h-20) / bWidth;
+        var idx = 0;
+
+        for (var i=0; i<CL.length; i++) {
 
             var SBL = CL[i].sbadd;
-            var x2 = x;
-            var w = ~~((this.w-20) / 3);
             for (var j=0; j<SBL.length; j++) {
                 var key = CL[i].type;
                 for (var k=0; CL[i].sbkey && k<CL[i].sbkey.length; k++) {
@@ -993,32 +996,30 @@ BSWG.control_CompPalette = {
                     }
                 }
 
+                var x = 10 + (idx % bWidth) * bSize;
+                var y = 10 + Math.floor(idx / bWidth) * bSize;
+
                 buttons.push({
                     args: SBL[j],
                     text: SBL[j].title,
                     key: key,
                     comp: CL[i],
-                    x: x2, y: y,
-                    w: w, h: 18,
+                    x: x+1, y: y+1,
+                    w: bSize-2, h: bSize-2,
                     mouseIn: false,
                     mouseDown: false
                 });
-                headers[i].buttons.push(buttons[buttons.length-1]);
-                x2 += w;
-                if (((j+1)%3) === 0) {
-                    x2 = x;
-                    y += 20;
-                }
+
+                idx += 1;
             }
-            if (SBL.length % 3) {
-                y += 20;
-            }
-            y += 5;
+
         }
 
-        this.h = y+5;
+        this.h = 20 + Math.floor((bcount-1) / bWidth) * bSize + bSize;
+        this.bSize = bSize;
+        this.bWidth = bWidth;
+        this.bcount = bcount;
 
-        this.headers = headers;
         this.buttons = buttons;
 
     },
@@ -1050,10 +1051,21 @@ BSWG.control_CompPalette = {
                 sz *= 2;
             }
 
+            var self = this;
+
             this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
 
                 var H = BSWG.ui_HM(w, h, aw, ah);
                 H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+
+                var bSize = (H.r(10) - H.l(10)) / self.bWidth;
+
+                for (var i=0; i<self.bcount; i++) {
+                    var x = (i % self.bWidth) * bSize;
+                    var y = Math.floor(i / self.bWidth) * bSize;
+                    H.plate(H.l(10) + x, H.t(10) + y, bSize-1, bSize-1, 0.35, 0.15);
+                }
+
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
             });
@@ -1098,31 +1110,22 @@ BSWG.control_CompPalette = {
 
         ctx.lineWidth = 1.0;
 
-        for (var i=0; i<this.headers.length; i++) {
-            var H = this.headers[i];
-            var tc = 0;
-            for (var j=0; j<H.buttons.length; j++) {
-                tc += H.buttons[j].args.count;
-            }
-            ctx.textAlign = 'left';
-            ctx.fillStyle = '#ddf';
-            ctx.strokeStyle = '#111';
-            if (BSWG.game.scene !== BSWG.SCENE_GAME1 || tc > 0) {
-                ctx.fillTextB(H.text, this.p.x + H.x, this.p.y + H.y + 12);
-            }
-            else {
-                ctx.fillTextB('???', this.p.x + H.x, this.p.y + H.y + 12);
-            }
-        }
+        var mouseIn = null;
 
         for (var i=0; i<this.buttons.length; i++) {
             var B = this.buttons[i];
+
+            ctx.globalAlpha = 1.0;
             
             if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                 if (this.buttons[i].args.count < 1) {
                     ctx.globalAlpha = 0.125;
                     B.mouseIn = B.mouseDown = false;
                 }
+            }
+
+            if (B.mouseIn && !B.mouseDown) {
+                mouseIn = B;
             }
 
             ctx.font = '12px Orbitron';
@@ -1134,48 +1137,106 @@ BSWG.control_CompPalette = {
             ctx.fillStyle = B.mouseDown ?
                 'rgba(32, 32, 32, 0.9)' :
                 (B.mouseIn ?
-                    'rgba(128, 128, 128, 0.8)' :
-                    'rgba(128, 128, 128, 0.5)'
+                    'rgba(128, 128, 128, 0.35)' :
+                    'rgba(0, 0, 0, 0.5)'
                 );
             ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
 
             ctx.lineWidth = 1.0;
 
             if (BSWG.game.scene === BSWG.SCENE_GAME1) {
-                ctx.textAlign = 'left';
-                ctx.fillStyle = B.mouseDown ? '#fff' : '#fff';
-                if (this.buttons[i].args.count) {
-                    ctx.fillText(B.text, B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
-                }
-                else {
-                    ctx.fillText('?', B.x + this.p.x + 4, B.y + this.p.y + B.h*0.5+4);
-                }
-                //BSWG.renderCompIconRecenter = true;
-                //BSWG.renderCompIcon(ctx, this.buttons[i].key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, 16);
-            }
-            else {
-                ctx.textAlign = 'center';
-                ctx.fillStyle = B.mouseDown ? '#bbb' : '#bbb';
-                ctx.fillText(B.text, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5+4);
-            }
-
-            if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                 if (this.buttons[i].args.count > 0) {
                     ctx.textAlign = 'right';
                     ctx.fillStyle = '#0f0';
-                    ctx.fillText(this.buttons[i].args.count + '', B.x + this.p.x + B.w - 4, B.y + this.p.y + B.h*0.5+4);
-                }
-                if (BSWG.game.map && BSWG.game.xpInfo) {
-                    if (BSWG.game.map.minLevelComp(this.buttons[i].key) > BSWG.game.xpInfo.level) {
-                        ctx.fillStyle = 'rgba(255, 0, 0, .35)';
-                        ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
+                    ctx.fillText('x' + this.buttons[i].args.count + '', B.x + this.p.x + B.w - 4, B.y + this.p.y + B.h - 4);
+                    if (BSWG.game.map && BSWG.game.xpInfo) {
+                        if (BSWG.game.map.minLevelComp(this.buttons[i].key) > BSWG.game.xpInfo.level) {
+                            ctx.fillStyle = 'rgba(255, 0, 0, .35)';
+                            ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
+                        }
                     }
                 }
+            }
+
+            if (BSWG.game.scene !== BSWG.SCENE_GAME1 || this.buttons[i].args.count > 0) {
+                ctx.globalAlpha = B.mouseIn ? 1.0 : 0.5;
+                BSWG.renderCompIconRecenter = true;
+                var clr = this.compClr[B.comp.category];
+                BSWG.renderCompIcon(ctx, this.buttons[i].key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, B.w/4, 0.2, clr[0], clr[1], clr[2]);
             }
 
             ctx.textAlign = 'left';
 
             ctx.globalAlpha = 1.0;
+        }
+
+        if (mouseIn) {
+            var w = 300 + 4;
+            var h = 70 + 4;
+            var x = (this.p.x + mouseIn.x + mouseIn.w) - (w + 1);
+            var y = (this.p.y + mouseIn.y) - (h+1);
+
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.strokeStyle = 'rgba(128, 128, 128, 0.75)';
+            ctx.fillRect(x+4, y+4, w, h)
+            ctx.fillStyle = 'rgba(64, 64, 64, 0.75)';
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#000';
+            ctx.font = '14px Orbitron';
+            ctx.fillTextB(mouseIn.comp.name, x+9, y+6+14);
+
+            ctx.fillStyle = '#bbb';
+            ctx.strokeStyle = '#000';
+            ctx.font = '12px Orbitron';
+            ctx.fillTextB(mouseIn.text, x+9, y+6+14+13);
+
+            var clr = this.compClr[mouseIn.comp.category];
+            ctx.fillStyle = 'rgb(' + Math.floor(clr[0]*255) + ',' + Math.floor(clr[1]*255) + ',' + Math.floor(clr[2]*255) + ')';
+            ctx.strokeStyle = '#000';
+            ctx.font = '12px Orbitron';
+            ctx.textAlign = 'right';
+            ctx.fillTextB('Type: ' + mouseIn.comp.category.toTitleCase(), x+w-10, y+6+13);
+
+            ctx.fillStyle = 'rgb(0, 255, 0)';
+            ctx.strokeStyle = '#000';
+            ctx.font = '12px Orbitron';
+            ctx.textAlign = 'right';
+            ctx.fillTextB(BSWG.game.scene === BSWG.SCENE_GAME1 ? ('Count: ' + mouseIn.args.count) : ('Count: Inf'), x+w-10, y+6+13+13);
+
+            if (BSWG.game.map && BSWG.game.xpInfo) {
+                if (BSWG.game.map.minLevelComp(mouseIn.key) > BSWG.game.xpInfo.level) {
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#f00';
+                    ctx.strokeStyle = '#000';
+                    ctx.font = '14px Orbitron';
+                    ctx.fillTextB('Level ' + BSWG.game.map.minLevelComp(mouseIn.key) + ' required.', x + w*0.5, y + h - 8);
+                }
+            }
+
+            if (BSWG.game.map && BSWG.game.inZone && BSWG.game.inZone.compValLookup) {
+                var it = BSWG.game.inZone.compValLookup[mouseIn.key];
+                if (it) {
+                    var text = "Value here: " + Math.floor(it.value*100)/100;
+                    ctx.strokeStyle = '#000';
+                    ctx.font = '12px Orbitron';
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = 'rgba(255, 64, 0, 1)';
+                    if (!it.rare) {
+                        ctx.fillStyle = 'rgba(255, 192, 0, 1)';
+                    }
+                    else {
+                        text += ' (Rare)';
+                    }
+                    ctx.fillTextB(text, x+w-10, y+6+13+13+13);
+                }
+            }
+
+            ctx.textAlign = 'left';
         }
 
     },
@@ -1451,7 +1512,10 @@ BSWG.control_TradeWindow = {
                                 ctx.fillStyle = '#f00';
                             }
                         }
-                        ctx.fillTextB(name, x+24, y0 + sh - fs*1.25);
+                        ctx.fillTextB(name, x+24+sh, y0 + sh - fs*1.25);
+                        BSWG.renderCompIconRecenter = true;
+                        var clr = [.8, .8, .8];
+                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2, clr[0], clr[1], clr[2]);
                         //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                         ctx.textAlign = 'right';
                         ctx.fillStyle = '#bbb';
@@ -1465,7 +1529,7 @@ BSWG.control_TradeWindow = {
                         else {
                             ctx.textAlign = 'right';
                             ctx.fillStyle = '#fbb';
-                            ctx.fillTextB('Cancel', x+w-18-fs*4, y0 + sh - fs*1.25);   
+                            ctx.fillTextB('(X)', x+w-18-fs*4+12, y0 + sh - fs*1.25);   
                         }
                         if (count <= 0) {
                             ctx.fillStyle = 'rgba(0,0,0,.35)';
@@ -1522,7 +1586,11 @@ BSWG.control_TradeWindow = {
                                 ctx.fillStyle = '#f00';
                             }
                         }
-                        ctx.fillTextB(name, x+24, y0 + sh - fs*1.25);
+                        ctx.fillTextB(name, x+24+sh, y0 + sh - fs*1.25);
+                        BSWG.renderCompIconRecenter = true;
+                        var clr = [.8, .8, .8];
+                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2, clr[0], clr[1], clr[2]);
+                        //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                     }
                     y0 += sh;
                 }
@@ -1566,7 +1634,11 @@ BSWG.control_TradeWindow = {
                         ctx.textAlign = 'left';
                         ctx.fillStyle = '#fff';
                         ctx.strokeStyle = '#000';
-                        ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
+                        ctx.fillTextB(this.compName[it.key], x+24+sh, y0 + sh - fs*1.25);
+                        BSWG.renderCompIconRecenter = true;
+                        var clr = [.8, .8, .8];
+                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2, clr[0], clr[1], clr[2]);
+                        //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                         ctx.textAlign = 'right';
                         ctx.fillStyle = '#bbb';
                         ctx.fillTextB('' + it.count + 'x', x+w-18, y0 + sh - fs*1.25)

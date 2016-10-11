@@ -30,6 +30,8 @@ BSWG.component_HingeHalf = {
 
     frontOffset: Math.PI,
 
+    category: 'movement',
+
     getIconPoly: function (args) {
         var size = args.size || 1;
         var motor = args.motor || false;

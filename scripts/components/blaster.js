@@ -21,6 +21,8 @@ BSWG.component_Blaster = {
 
     frontOffset: Math.PI/2,
 
+    category: 'weapon',
+
     getIconPoly: function (args) {
         return [[
             new b2Vec2(-0.245,  -0.3),

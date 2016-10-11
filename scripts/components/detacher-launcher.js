@@ -27,6 +27,8 @@ BSWG.component_DetacherLauncher = {
 
     frontOffset: Math.PI,
 
+    category: 'movement',
+
     getIconPoly: function (args) {
         var size = args.size || 2;
         return [

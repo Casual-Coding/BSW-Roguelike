@@ -79,7 +79,7 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     ctx.scale(scale, scale);
     ctx.rotate(angle);
     for (var j=0; j<poly.length; j++) {
-        ctx.lineWidth = 1.5 / scale;
+        ctx.lineWidth = 0.75 / scale;
         ctx.strokeStyle = c3;
         ctx.beginPath();
         ctx.moveTo(poly[j][0].x, poly[j][0].y);

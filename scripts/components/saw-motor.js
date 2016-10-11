@@ -29,6 +29,8 @@ BSWG.component_SawMotor = {
 
     frontOffset: 0.0,
 
+    category: 'movement',
+
     getIconPoly: function (args) {
         var size   = args.size || 1;
         var motor  = true;

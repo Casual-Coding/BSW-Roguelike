@@ -29,6 +29,8 @@ BSWG.component_CommandCenter = {
 
     frontOffset: -Math.PI/2,
 
+    category: 'block',
+
     getIconPoly: function (args) {
         var width = 2, height = 3;
         return [

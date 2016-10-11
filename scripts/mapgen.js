@@ -1031,7 +1031,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     }
 
     for (var i=0; i<ret.zones.length; i++) {
-        BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo, ret.zones[i] === ret.planets[0].zone);
+        BSWG.genMap_ComputeCompCount(ret.zones[i], ret.eInfo, ret.zones[i].home);
         for (var key in ret.zones[i].compHist) {
             ret.updateMinLevelComp(key, ret.zones[i].maxLevel);
         }
@@ -1307,10 +1307,6 @@ BSWG.genMap_ComputeCompCount = function(zone, eInfo, isFirst) {
 
 BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
 
-    if (!zone.boss && !zone.safe) {
-        return;
-    }
-
     var minLevel = Math.max(zone.minLevel - 2, 0);
     var maxLevel = zone.maxLevel + 1;
 
@@ -1351,12 +1347,14 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
     });
 
     zone.compValList = [];
+    zone.compValMaxValue = 0;
     for (var i=0; i<list.length; i++) {
         zone.compValList.push({
             key: list[i][0],
             value: list[i][1],
             rare: compHist[list[i][0]] && (compHistBoss[list[i][0]] === compHist[list[i][0]])
         });
+        zone.compValMaxValue = Math.max(zone.compValMaxValue, list[i][1]);
     }
     zone.compValLookup = {};
     for (var i=0; i<zone.compValList.length; i++) {

@@ -20,6 +20,8 @@ BSWG.component_ChainLink = {
 
     frontOffset: 0.0,
 
+    category: 'block',
+
     getIconPoly: function (args) {
         var size = 1;
 
