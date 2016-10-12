@@ -1159,10 +1159,11 @@ BSWG.control_CompPalette = {
             }
 
             if (BSWG.game.scene !== BSWG.SCENE_GAME1 || this.buttons[i].args.count > 0) {
-                ctx.globalAlpha = B.mouseIn ? 1.0 : 0.5;
+                ctx.globalAlpha = 1.0;
+                var light = B.mouseIn ? 0.75 : 0.35;
                 BSWG.renderCompIconRecenter = true;
                 var clr = this.compClr[B.comp.category];
-                BSWG.renderCompIcon(ctx, this.buttons[i].key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, B.w/4, 0.2, clr[0], clr[1], clr[2]);
+                BSWG.renderCompIcon(ctx, this.buttons[i].key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, B.w/5, 0.2 + (B.mouseIn ? BSWG.render.time : 0.0), clr[0]*light, clr[1]*light, clr[2]*light);
             }
 
             ctx.textAlign = 'left';
@@ -1182,6 +1183,12 @@ BSWG.control_CompPalette = {
             ctx.strokeStyle = 'rgba(128, 128, 128, 0.75)';
             ctx.fillRect(x+4, y+4, w, h)
             ctx.fillStyle = 'rgba(64, 64, 64, 0.75)';
+
+            var grd = ctx.createLinearGradient(x, y, x, y+h);
+            grd.addColorStop(0, 'rgba(64, 64, 64, 0.75)');
+            grd.addColorStop(1, 'rgba(96, 96, 96, 0.75)');
+            ctx.fillStyle = grd;
+            grd = null;
             ctx.fillRect(x, y, w, h);
             ctx.strokeRect(x, y, w, h);
 
@@ -1507,15 +1514,17 @@ BSWG.control_TradeWindow = {
                         var name = this.compName[it.key];
                         if (BSWG.game.map) {
                             var lvl = BSWG.game.map.minLevelComp(it.key);
-                            name += ' (L.' + lvl + ')';
+                            if (i < 1) {
+                                name += ' (L.' + lvl + ')';
+                            }
                             if (BSWG.game.xpInfo && lvl > BSWG.game.xpInfo.level) {
                                 ctx.fillStyle = '#f00';
                             }
                         }
                         ctx.fillTextB(name, x+24+sh, y0 + sh - fs*1.25);
                         BSWG.renderCompIconRecenter = true;
-                        var clr = [.8, .8, .8];
-                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2, clr[0], clr[1], clr[2]);
+                        var clr = [.4, .4, .4];
+                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2 + (this.hoverLeft === i ? BSWG.render.time : 0.0), clr[0], clr[1], clr[2]);
                         //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                         ctx.textAlign = 'right';
                         ctx.fillStyle = '#bbb';
@@ -1524,7 +1533,7 @@ BSWG.control_TradeWindow = {
                         if (i > 0) {
                             ctx.textAlign = 'right';
                             ctx.fillStyle = '#ffb';
-                            ctx.fillTextB(Math.clamp(Math.floor(count*100*it.value/this.want.value * 10 + 0.5) / 10, 0, 100*100) + '%', x+w-18-fs*6, y0 + sh - fs*1.25);
+                            ctx.fillTextB(Math.clamp(Math.floor(count*100*it.value/this.want.value * 10 + 0.5) / 10, 0, 100*100) + '%', x+w-18-fs*3.5, y0 + sh - fs*1.25);
                         }
                         else {
                             ctx.textAlign = 'right';
@@ -1588,8 +1597,8 @@ BSWG.control_TradeWindow = {
                         }
                         ctx.fillTextB(name, x+24+sh, y0 + sh - fs*1.25);
                         BSWG.renderCompIconRecenter = true;
-                        var clr = [.8, .8, .8];
-                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2, clr[0], clr[1], clr[2]);
+                        var clr = [.4, .4, .4];
+                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2 + (this.hoverLeft === i ? BSWG.render.time : 0.0), clr[0], clr[1], clr[2]);
                         //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                     }
                     y0 += sh;
@@ -1636,15 +1645,15 @@ BSWG.control_TradeWindow = {
                         ctx.strokeStyle = '#000';
                         ctx.fillTextB(this.compName[it.key], x+24+sh, y0 + sh - fs*1.25);
                         BSWG.renderCompIconRecenter = true;
-                        var clr = [.8, .8, .8];
-                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2, clr[0], clr[1], clr[2]);
+                        var clr = [.4, .4, .4];
+                        BSWG.renderCompIcon(ctx, it.key, x+16+sh*0.5, y0 + sh * 0.5, (sh-8) / 4, 0.2 + (this.hoverRight === i ? BSWG.render.time : 0.0), clr[0], clr[1], clr[2]);
                         //ctx.fillTextB(this.compName[it.key], x+24, y0 + sh - fs*1.25);
                         ctx.textAlign = 'right';
                         ctx.fillStyle = '#bbb';
                         ctx.fillTextB('' + it.count + 'x', x+w-18, y0 + sh - fs*1.25)
                         ctx.textAlign = 'right';
                         ctx.fillStyle = '#ffb';
-                        ctx.fillTextB(Math.clamp(Math.floor(100*it.value/this.want.value * 10 + 0.5) / 10, 0, 100*100) + '%', x+w-18-fs*6, y0 + sh - fs*1.25);
+                        ctx.fillTextB(Math.clamp(Math.floor(100*it.value/this.want.value * 10 + 0.5) / 10, 0, 100*100) + '%', x+w-18-fs*3.5, y0 + sh - fs*1.25);
                         if (it.count <= 0) {
                             ctx.fillStyle = 'rgba(0,0,0,.35)';
                             ctx.fillRect(x+8, y0+4, w-12, sh-8);

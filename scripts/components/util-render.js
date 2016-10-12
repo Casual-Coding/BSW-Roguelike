@@ -12,12 +12,14 @@ BSWG.bpmReflect = BSWG.bpmReflectDefault;
 BSWG.bpmSmoothNormals = false;
 
 BSWG.rciPolyCache = {};
+BSWG.rciPolyCacheBounds = {};
 
 BSWG.renderCompIconRecenter = false;
 
 BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB) {
 
     var poly = BSWG.rciPolyCache[key + '|' + BSWG.renderCompIconRecenter];
+    var bnd = BSWG.rciPolyCacheBounds[key + '|' + BSWG.renderCompIconRecenter];
     if (!poly) {
         var typeArgs = BSWG.componentList.compStrTypeArgs(key);
         if (!typeArgs[2]) {
@@ -50,6 +52,9 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
             }
         }
         BSWG.rciPolyCache[key + '|' + BSWG.renderCompIconRecenter] = poly;
+        BSWG.rciPolyCacheBounds[key + '|' + BSWG.renderCompIconRecenter] = bnd = [
+            minx-ox, miny-oy, maxx-ox, maxy-oy
+        ];
         BSWG.renderCompIconRecenter = false;
     }
 
@@ -62,24 +67,29 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     var g = Math.floor(Math.clamp(baseG||0.3, 0, 1)*255);
     var b = Math.floor(Math.clamp(baseB||0.3, 0, 1)*255);
 
-    var r2 = Math.floor(Math.clamp((baseR||0.3+0.1) * 1.5, 0, 1)*255);
-    var g2 = Math.floor(Math.clamp((baseG||0.3+0.1) * 1.5, 0, 1)*255);
-    var b2 = Math.floor(Math.clamp((baseB||0.3+0.1) * 1.5, 0, 1)*255);
+    var r2 = Math.floor(Math.clamp((baseR||0.3) * 2, 0, 1)*255);
+    var g2 = Math.floor(Math.clamp((baseG||0.3) * 2, 0, 1)*255);
+    var b2 = Math.floor(Math.clamp((baseB||0.3) * 2, 0, 1)*255);
 
-    var r3 = Math.floor(Math.clamp((baseR||0.3+0.1) * 3.5, 0, 1)*255);
-    var g3 = Math.floor(Math.clamp((baseG||0.3+0.1) * 3.5, 0, 1)*255);
-    var b3 = Math.floor(Math.clamp((baseB||0.3+0.1) * 3.5, 0, 1)*255);
+    var r4 = Math.floor(Math.clamp((baseR||0.3) * 3.5, 0, 1)*255);
+    var g4 = Math.floor(Math.clamp((baseG||0.35) * 3.5, 0, 1)*255);
+    var b4 = Math.floor(Math.clamp((baseB||0.3) * 3.5, 0, 1)*255);
+
+    var r3 = Math.floor(Math.clamp((baseR||0.3) * 1.35, 0, 1)*255);
+    var g3 = Math.floor(Math.clamp((baseG||0.3) * 1.35, 0, 1)*255);
+    var b3 = Math.floor(Math.clamp((baseB||0.3) * 1.35, 0, 1)*255);
 
     var c1 = 'rgb(' + r + ',' + g + ',' + b + ')';
     var c2 = 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
     var c3 = 'rgb(' + r3 + ',' + g3 + ',' + b3 + ')';
+    var c4 = 'rgb(' + r4 + ',' + g4 + ',' + b4 + ')';
 
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
     ctx.rotate(angle);
     for (var j=0; j<poly.length; j++) {
-        ctx.lineWidth = 0.75 / scale;
+        ctx.lineWidth = 2 / scale;
         ctx.strokeStyle = c3;
         ctx.beginPath();
         ctx.moveTo(poly[j][0].x, poly[j][0].y);
@@ -91,6 +101,20 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     }
     for (var j=0; j<poly.length; j++) {
         ctx.fillStyle = j === 0 ? c1 : c2;
+        var a = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[1]), -angle);
+        var b = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[3]), -angle);
+        var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        a = b = null;
+        if (j === 0) {
+            grd.addColorStop(0, c1);
+            grd.addColorStop(1, c2);
+        }
+        else {
+            grd.addColorStop(0, c2);
+            grd.addColorStop(1, c4);
+        }
+        ctx.fillStyle = grd;
+        grd = null;
         ctx.beginPath();
         ctx.moveTo(poly[j][0].x, poly[j][0].y);
         for (var i=1; i<poly[j].length; i++) {

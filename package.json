@@ -22,7 +22,8 @@
     "icon": "images/icon-128.png"
   },
   "webkit": {
-    "plugin": false
+    "plugin": false,
+    "ignore-gpu-blacklist": true
   },
   "dependencies": {
   },
