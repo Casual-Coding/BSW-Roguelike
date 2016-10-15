@@ -30,7 +30,7 @@
             if (window.require) {
                 BSWG.nwg = require('nw.gui') || null;
                 BSWG.app = BSWG.nwg.App || null;
-                //BSWG.nwg.Window.get().zoomLevel = Math.log(1/window.devicePixelRatio) / Math.log(1.2);
+                BSWG.nwg.Window.get().zoomLevel = Math.log(1/window.devicePixelRatio) / Math.log(1.2);
             }
             if (!window.gc) {
                 window.gc = function () {};

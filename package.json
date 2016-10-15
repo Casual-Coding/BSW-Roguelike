@@ -32,7 +32,7 @@
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",
-    "nw-builder": "^3.1.0",
+    "nw-builder": "^3.1.2",
     "simple-glob": "^0.1.0"
   },
   "licenses": [{

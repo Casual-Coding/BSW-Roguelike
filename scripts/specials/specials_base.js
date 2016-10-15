@@ -6,6 +6,7 @@ BSWG.specialList = new (function(){
     this.updateRender = function(ctx, dt) {
 
         for (var i=0; i<this.contList.length; i++) {
+            if (this.contList[i])
             this.contList[i].updateRender(ctx, dt);
         }
         for (var i=0; i<this.effectList.length; i++) {
@@ -37,6 +38,22 @@ BSWG.specialList = new (function(){
         //this.typeMapE['key'] = BSWG.specialEffect_Desc2
         // ...
 
+        BSWG.SCCR_healPoly = [
+            [
+                new b2Vec2(-.3, .15/2),
+                new b2Vec2(-.3, -.15/2),
+                new b2Vec2(-.15/2, -.15/2),
+                new b2Vec2(-.15/2, -.3),
+                new b2Vec2(.15/2, -.3),
+                new b2Vec2(.15/2, -.15/2),
+                new b2Vec2(.3, -.15/2),
+                new b2Vec2(.3, .15/2),
+                new b2Vec2(.15/2, .15/2),
+                new b2Vec2(.15/2, .3),
+                new b2Vec2(-.15/2, .3),
+                new b2Vec2(-.15/2, .15/2)
+            ]
+        ];
 
     };
 
@@ -119,11 +136,9 @@ BSWG.specialControl = function(desc, args) {
         this[key] = desc[key];
     }
 
-    this.init(args);
+    this.output = null;
 
-    if (args.active) {
-        this.makeActive(true);
-    }
+    this.init(args);
 
     BSWG.specialList.contList.push(this);
 
@@ -163,13 +178,14 @@ BSWG.specialControl.prototype.destroy = function() {
 
 };
 
-BSWG.specialControl.prototype.makeActive = function(flag) {
-
-    this.active = flag;
-
-};
-
 BSWG.specialControl.prototype.updateRender = function(ctx, dt) {
+
+    if (this.output) {
+        this.destroy();
+        return false;
+    }
+
+    return true;
 
 };
 

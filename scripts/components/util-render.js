@@ -101,8 +101,8 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     }
     for (var j=0; j<poly.length; j++) {
         ctx.fillStyle = j === 0 ? c1 : c2;
-        var a = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[1]), -angle);
-        var b = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[3]), -angle);
+        var a = Math.rotVec2(new b2Vec2(bnd[0], (bnd[1]+bnd[3])*0.5), -angle);
+        var b = Math.rotVec2(new b2Vec2(bnd[2], (bnd[1]+bnd[3])*0.5), -angle);
         var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         a = b = null;
         if (j === 0) {
@@ -669,6 +669,10 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
             type: 'v4',
             value: new THREE.Vector4(0.5, 1.0, 0.5, 0.0)
         },
+        warp: {
+            type: 'v4',
+            value: new THREE.Vector4(0.0, 0.0, 0.0, 0.0)
+        }
     }, THREE.NormalBlending, false);
     ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
 
