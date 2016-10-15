@@ -38,6 +38,16 @@ BSWG.specialList = new (function(){
         //this.typeMapE['key'] = BSWG.specialEffect_Desc2
         // ...
 
+        /*new BSWG.specialControl(BSWG.specialCont_circleRange, {
+            color: new THREE.Vector4(0, 1, 0, 0.75),
+            minRadius: 5,
+            maxRadius: 5,
+            speed: 0.5,
+            polys: BSWG.SCCR_healPoly,
+            callback: function(data){
+                console.log(data)
+            }
+        });*/
         BSWG.SCCR_healPoly = [
             [
                 new b2Vec2(-.3, .15/2),
@@ -137,10 +147,15 @@ BSWG.specialControl = function(desc, args) {
     }
 
     this.output = null;
+    this.userAction = false;
 
-    this.init(args);
+    var ret = this.init(args);
 
     BSWG.specialList.contList.push(this);
+
+    if (!ret) {
+        this.destroy();
+    }
 
 };
 
@@ -163,6 +178,12 @@ BSWG.specialControl.prototype.serialize = function () {
 
 BSWG.specialControl.prototype.init = function(args) {
 
+    if (args.callback) {
+        this.callback = args.callback;
+    }
+
+    return true;
+
 };
 
 BSWG.specialControl.prototype.destroy = function() {
@@ -180,8 +201,12 @@ BSWG.specialControl.prototype.destroy = function() {
 
 BSWG.specialControl.prototype.updateRender = function(ctx, dt) {
 
-    if (this.output) {
-        this.destroy();
+    if ((this.output || BSWG.input.KEY_DOWN(BSWG.KEY.ESC)) && !this.userAction) {
+        BSWG.input.EAT_KEY(BSWG.KEY.ESC);
+        this.userAction = true;
+        if (this.callback) {
+            this.callback(this.output);
+        }
         return false;
     }
 

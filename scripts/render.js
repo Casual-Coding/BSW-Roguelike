@@ -691,7 +691,7 @@ BSWG.render = new function() {
 
             if (self.customCursor && !self.dlgOpen) {
                 document.body.style.cursor = 'none';
-                if (BSWG.input.MOUSE('mousein')) {
+                if (BSWG.input.MOUSE('mousein') && BSWG.specialList.contList.length === 0) {
                     self.ctx.drawImage(
                         self.images[
                             self.cursorNo ? 'cursor-custom-' + self.cursorNo :

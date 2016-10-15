@@ -4,7 +4,8 @@ BSWG.specialCont_circleRange = {
 
         this.polys = args.polys || null;
         this.color = args.color || new THREE.Vector4(1, 1, 1, 1);
-        this.time = 0.0
+        this.time = 0.0;
+        this.outTime = 0.0;
         this.minRadius = args.minRadius || 1.0;
         this.maxRadius = args.maxRadius || 5.0;
         this.speed = args.speed || 1.0;
@@ -54,7 +55,7 @@ BSWG.specialCont_circleRange = {
         this.mat = BSWG.render.newMaterial("basicVertex", "selectionFragment", {
             clr: {
                 type: 'v4',
-                value: this.color
+                value: new THREE.Vector4(0,0,0,0)
             },
             warp: {
                 type: 'v4',
@@ -69,6 +70,8 @@ BSWG.specialCont_circleRange = {
         BSWG.render.scene.add(this.mesh);
 
         this._init(args);
+
+        return true;
     },
 
     destroy: function () {
@@ -101,6 +104,17 @@ BSWG.specialCont_circleRange = {
 
         this.time += dt;
 
+        if (this.userAction) {
+            this.outTime += dt*8;
+            if (this.outTime >= 1) {
+                this.destroy();
+            }
+            else {
+                this.mat.uniforms.clr.value.set(this.color.x, this.color.y, this.color.z, this.color.w * Math.clamp(this.time*8, 0, 1) * (1-this.outTime));
+            }
+            return;
+        }
+
         var t = (Math.sin(this.time * Math.PI * this.speed) * 0.5 + 0.5);
 
         this.radius = (this.maxRadius - this.minRadius) * t + this.minRadius;
@@ -108,9 +122,11 @@ BSWG.specialCont_circleRange = {
 
         this.mesh.position.set(this.pos.x, this.pos.y, 0.0 - this.depth * 0.25);
         this.mesh.scale.set(this.radius, this.radius, 1.0);
+        this.mat.uniforms.clr.value.set(this.color.x, this.color.y, this.color.z, this.color.w * Math.clamp(this.time*4, 0, 1));
         this.mat.uniforms.warp.value.set(1.0, this.time, 0.0, 0.0);
 
         if (BSWG.input.MOUSE_PRESSED('left')) {
+            BSWG.input.EAT_MOUSE('left');
             this.output = {
                 p: this.pos,
                 r: this.radius
@@ -134,6 +150,8 @@ BSWG.specialCont_targetSelf = {
         };
 
         this._init(args);
+
+        return false;
     }
 
 };
