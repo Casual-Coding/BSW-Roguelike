@@ -4,6 +4,27 @@ BSWG.uberFastCC = false;
 
 BSWG.newAI = {};
 
+BSWG.newCCSpecialsObj = function () {
+    var ret = {
+        all: {
+
+        },
+        equipped: [
+            null,
+            null,
+            null,
+            null
+        ]
+    };
+    for (var key in BSWG.specialsInfo) {
+        ret.all[key] = {
+            t: 0.0,
+            has: false
+        }
+    }
+    return ret;
+}
+
 BSWG.component_CommandCenter = {
 
     type: 'cc',
@@ -24,7 +45,8 @@ BSWG.component_CommandCenter = {
         'leftKeyAlt',
         'rightKeyAlt',
         'upKeyAlt',
-        'downKeyAlt'
+        'downKeyAlt',
+        'specials'
     ],
 
     frontOffset: -Math.PI/2,
@@ -55,6 +77,76 @@ BSWG.component_CommandCenter = {
         ];
     },
 
+    hasSpecial: function(key) {
+        return this.specials && this.specials.all && this.specials.all[key] && this.specials.all[key].has;
+    },
+
+    specialReady: function(key) {
+        if (!this.hasSpecial(key) || !this.specialEquipped(key)) {
+            return 0.0;
+        }
+        return this.specials.all[key].t;
+    },
+
+    specialEquipped: function(key) {
+        if (!key || !this.specials || !this.specials.equipped) {
+            return false;
+        }
+        for (var i=0; i<this.specials.equipped.length; i++) {
+            if (this.specials.equipped[i] === key) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    equipSpecial: function(key, row) {
+        if (this.hasSpecial(key)) {
+            if (row >= 0 && row < this.specials.equipped.length) {
+                this.specials.equipped[row] = key;
+            }
+        }
+    },
+
+    equippedSpecialNo: function(i) {
+        if (!this.specials || !this.specials.equipped || (!i && i!==0) || !this.specials.equipped[i]) {
+            return null;
+        }
+        return this.specials.equipped[i] || null;
+    },
+
+    updateSpecials: function(dt) {
+        for (var i=0; i<4; i++) {
+            var key = this.equippedSpecialNo(i);
+            if (key) {
+                var desc = BSWG.specialsInfo[key];
+                if (desc && this.specials.all && this.specials.all[key]) {
+                    this.specials.all[key].t += dt / desc.cooldown;
+                    if (this.specials.all[key].t > 1.0) {
+                        this.specials.all[key].t = 1.0;
+                    }
+                }
+            }
+        }
+    },
+
+    giveSpecial: function(key) {
+        if (this.specials && this.specials.all) {
+            if (!this.specials.all[key]) {
+                this.specials.all[key] = {
+                    t: 0.0,
+                    has: false                    
+                };
+            }
+            this.specials.all[key].has = true;
+            return true;
+        }
+        else {
+            this.specials = BSWG.newCCSpecialsObj();
+            return this.giveSpecial(key);
+        }
+    },
+
     init: function(args) {
 
         this.width  = 2;
@@ -78,6 +170,7 @@ BSWG.component_CommandCenter = {
         this.rightKeyAlt = args.rightKeyAlt || this.rightKey;
         this.upKeyAlt = args.upKeyAlt || this.upKey;
         this.downKeyAlt = args.downKeyAlt || this.downKey;
+        this.specials = args.specials || BSWG.newCCSpecialsObj();
 
         this.totalMass = this.obj.body.GetMass();
 
@@ -349,6 +442,8 @@ BSWG.component_CommandCenter = {
         }*/
 
         this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+
+        this.updateSpecials(dt);
 
     },
 

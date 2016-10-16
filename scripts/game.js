@@ -666,6 +666,7 @@ BSWG.game = new function(){
         this.tradeMode = false;
         this.showControls = false;
         this.modeBtns = null;
+        this.specBtns = null;
 
         if (this.tileMap) {
             this.tileMap.destroy();
@@ -1261,6 +1262,39 @@ BSWG.game = new function(){
                     }
                 });
 
+                this.specBtns = [];
+                for (var i=0; i<4; i++) {
+                    this.specBtns.push(
+                        new BSWG.uiControl(BSWG.control_Button, {
+                            x: 10 + 65 + 10 + 65 + 10, y: 10,
+                            w: 65, h: 65,
+                            text: function(idx){
+                                return function(ctx, x, y, w, h, hover) {
+                                    if (self.ccblock) {
+                                        var key = self.ccblock.equippedSpecialNo(idx);
+                                        if (key) {
+                                            var scale = Math.min(w, h) * 0.8;
+                                            BSWG.renderSpecialIcon(ctx, key, x+w/2+1, y+h/2, scale, 0.0 + ((hover && self.ccblock.specialReady(key) === 1.0) || BSWG.specialList.curCont() === key ? BSWG.render.time : 0.0), self.ccblock);
+                                        }
+                                    }
+                                };
+                            }(i),
+                            selected: false,
+                            click: function (me) {
+                                if (self.ccblock && !self.ccblock.destroyed) {
+                                    var idx = me._idx;
+                                    var key = self.ccblock.equippedSpecialNo(idx);
+                                    if (key) {
+                                        BSWG.startSpecial(key, self.ccblock, me);
+                                    }
+                                }
+                            }
+                        })
+                    );
+                    this.specBtns[this.specBtns.length-1]._idx = i;
+                    this.specBtns[this.specBtns.length-1]._added = true;
+                }
+
                 this.modeBtns = {
                     'edit': this.editBtn,
                     'anchor': this.anchorBtn,
@@ -1739,6 +1773,8 @@ BSWG.game = new function(){
             }*/
             BSWG.render.updateCam3D(self.cam, offset);
             
+            BSWG.specialList.updateRender(ctx, dt);
+
             BSWG.ui.update();
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
@@ -1850,7 +1886,6 @@ BSWG.game = new function(){
             BSWG.xpDisplay.updateRender(ctx, self.cam, dt);
             BSWG.exaustList.render(dt);
             BSWG.orbList.updateRender(dt);
-            BSWG.specialList.updateRender(ctx, dt);
             BSWG.cloudMap.updateRender(dt);
 
             if (self.tileMap) {
@@ -2010,6 +2045,29 @@ BSWG.game = new function(){
                     self.saveHealAdded = false;
                 }
             }
+
+            for (var i=0; self.specBtns && i<self.specBtns.length; i++) {
+                var btn = self.specBtns[i];
+                if (BSWG.game.scene === BSWG.SCENE_GAME1 && self.ccblock && self.ccblock.equippedSpecialNo(i)) {
+                    if (!btn._added) {
+                        btn.add();
+                        btn._added = true;
+                    }
+                    btn.p.x = self.hudX(self.hudBtn[2+i][0]) + 1;
+                    btn.p.y = self.hudY(self.hudBtn[2+i][1]) + 1;
+                    btn.w = self.hudX(self.hudBtn[2+i][2]) - btn.p.x - 2;
+                    btn.h = self.hudY(self.hudBtn[2+i][3]) - btn.p.y - 2;
+                    btn.flashing = self.ccblock.specialReady(self.ccblock.equippedSpecialNo(i)) === 1.0;
+                }
+                else {
+                    btn.flashing = false;
+                    if (btn._added) {
+                        btn.remove();
+                        btn._added = false;
+                    }
+                } 
+            }          
+
             if (self.storeBtn) {
                 self.storeBtn.text = !self.battleMode ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
             }

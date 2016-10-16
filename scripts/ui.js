@@ -535,7 +535,10 @@ BSWG.control_Button = {
         }
 
         ctx.strokeStyle = '#111';
-        if (typeof this.text !== 'string') {
+        if (typeof this.text === 'function') {
+            this.text(ctx, this.p.x, this.p.y, this.w, this.h, this.mouseIn);
+        }
+        else if (typeof this.text !== 'string') {
             ctx.drawImage(this.text, 0, 0, this.text.width, this.text.height, this.p.x + this.w * 0.5 - this.h*0.4, this.p.y + this.h*0.1, this.h*0.8, this.h*0.8);
         }
         else {

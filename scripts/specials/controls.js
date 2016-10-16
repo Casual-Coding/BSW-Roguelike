@@ -122,6 +122,7 @@ BSWG.specialCont_circleRange = {
 
         this.mesh.position.set(this.pos.x, this.pos.y, 0.0 - this.depth * 0.25);
         this.mesh.scale.set(this.radius, this.radius, 1.0);
+        this.mesh.rotation.set(0, 0, this.time*this.speed);
         this.mat.uniforms.clr.value.set(this.color.x, this.color.y, this.color.z, this.color.w * Math.clamp(this.time*4, 0, 1));
         this.mat.uniforms.warp.value.set(1.0, this.time, 0.0, 0.0);
 
@@ -132,6 +133,14 @@ BSWG.specialCont_circleRange = {
                 r: this.radius
             };
         }
+        else if (BSWG.input.MOUSE_PRESSED('right')) {
+            BSWG.input.EAT_MOUSE('right');
+            this.output = null;
+            this.userAction = true;
+            if (this.callback) {
+                this.callback(this.output);
+            }
+        }
 
     }
 
@@ -141,17 +150,26 @@ BSWG.specialCont_targetEnemy = {
 
 };
 
-BSWG.specialCont_targetSelf = {
+BSWG.specialCont_targetShip = {
 
     init: function(args) {
 
         this.output = { // Immediately finish (no user input)
-            cc: (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) ? BSWG.game.ccblock : null
+            cc: args.cc || null
         };
+
+        if (!this.output.cc) {
+            this.output.cc = (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) ? BSWG.game.ccblock : null;
+        }
 
         this._init(args);
 
+        if (this.callback) {
+            this.callback(this.output);
+        }
+
         return false;
+
     }
 
 };

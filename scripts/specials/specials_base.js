@@ -15,6 +15,13 @@ BSWG.specialList = new (function(){
 
     };
 
+    this.curCont = function () {
+        if (this.contList && this.contList[0]) {
+            return this.contList[0].key;
+        }
+        return null;
+    };
+
     this.typeMapC = {};
     this.typeMapE = {};
 
@@ -38,32 +45,32 @@ BSWG.specialList = new (function(){
         //this.typeMapE['key'] = BSWG.specialEffect_Desc2
         // ...
 
-        /*new BSWG.specialControl(BSWG.specialCont_circleRange, {
-            color: new THREE.Vector4(0, 1, 0, 0.75),
-            minRadius: 5,
-            maxRadius: 5,
-            speed: 0.5,
-            polys: BSWG.SCCR_healPoly,
-            callback: function(data){
-                console.log(data)
+        BSWG.specialsInfo = {
+            'heal': {
+                controller: BSWG.specialCont_circleRange,
+                color: new THREE.Vector4(0, 1, 0, 0.75),
+                minRadius: 5,
+                maxRadius: 5,
+                cooldown: 20.0, // seconds
+                polys: [
+                    [
+                        new b2Vec2(-.3, .15/2),
+                        new b2Vec2(-.3, -.15/2),
+                        new b2Vec2(-.15/2, -.15/2),
+                        new b2Vec2(-.15/2, -.3),
+                        new b2Vec2(.15/2, -.3),
+                        new b2Vec2(.15/2, -.15/2),
+                        new b2Vec2(.3, -.15/2),
+                        new b2Vec2(.3, .15/2),
+                        new b2Vec2(.15/2, .15/2),
+                        new b2Vec2(.15/2, .3),
+                        new b2Vec2(-.15/2, .3),
+                        new b2Vec2(-.15/2, .15/2)
+                    ]
+                ],
+                iconScale: 0.75
             }
-        });*/
-        BSWG.SCCR_healPoly = [
-            [
-                new b2Vec2(-.3, .15/2),
-                new b2Vec2(-.3, -.15/2),
-                new b2Vec2(-.15/2, -.15/2),
-                new b2Vec2(-.15/2, -.3),
-                new b2Vec2(.15/2, -.3),
-                new b2Vec2(.15/2, -.15/2),
-                new b2Vec2(.3, -.15/2),
-                new b2Vec2(.3, .15/2),
-                new b2Vec2(.15/2, .15/2),
-                new b2Vec2(.15/2, .3),
-                new b2Vec2(-.15/2, .3),
-                new b2Vec2(-.15/2, .15/2)
-            ]
-        ];
+        };
 
     };
 
@@ -110,9 +117,9 @@ BSWG.specialList = new (function(){
             list: []
         };
 
-        for (var i=0; i<this.contList.length; i++) {
-            ret.list.push(this.contList[i].serialize());
-        }
+        //for (var i=0; i<this.contList.length; i++) {
+        //    ret.list.push(this.contList[i].serialize());
+        //}
 
         return ret;
 
@@ -121,22 +128,32 @@ BSWG.specialList = new (function(){
     this.load = function(obj) {
 
         this.init();
-        if (obj) {
-            for (var i=0; i<obj.list.length; i++) {
-                var it = obj.list[i];
-                new BSWG.specialControl(this.getCDesc(it.type), it.args);
-            }
-        }
+        //if (obj) {
+        //    for (var i=0; i<obj.list.length; i++) {
+        //        var it = obj.list[i];
+        //        new BSWG.specialControl(this.getCDesc(it.type), it.args);
+        //    }
+        //}
     };
 
 });
 
 // For player use of specials (player input)
-BSWG.specialControl = function(desc, args) {
+BSWG.specialControl = function(args, callback) {
+
+    var desc = null
+
+    if (typeof args === 'string') {
+        this.key = args;
+        args = BSWG.specialsInfo[args];
+    }
+
+    desc = args.controller;
 
     if (!desc) {
-        desc = {};
+        return;
     }
+
     if (!args) {
         args = {};
     }
@@ -148,6 +165,7 @@ BSWG.specialControl = function(desc, args) {
 
     this.output = null;
     this.userAction = false;
+    this.callback = callback || null;
 
     var ret = this.init(args);
 
@@ -177,10 +195,6 @@ BSWG.specialControl.prototype.serialize = function () {
 };
 
 BSWG.specialControl.prototype.init = function(args) {
-
-    if (args.callback) {
-        this.callback = args.callback;
-    }
 
     return true;
 
@@ -254,4 +268,171 @@ BSWG.specialEffect.prototype.destroy = function() {
 
 BSWG.specialEffect.prototype.updateRender = function(ctx, dt) {
 
+};
+
+BSWG.startSpecial = function(key, who, btn) {
+
+    if (!who) {
+        who = BSWG.game.ccblock;
+        if (!who || who.destroyed) {
+            return;
+        }
+    }
+
+    if (!who.hasSpecial(key) || who.specialReady(key) < 1.0 || !who.specialEquipped(key)) {
+        return;
+    }
+
+    if (btn) {
+        btn.selected = true;
+    }
+
+    return new BSWG.specialControl(
+        key,
+        function(data){
+            if (btn) {
+                btn.selected = false;
+            }
+            if (!who || who.destroyed) {
+                return;
+            }
+            if (data) {
+                if (who.hasSpecial(key)) {
+                    who.specials.all[key].t = 0.0;
+                }
+            }
+        }
+    );
+}
+
+BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
+
+    var desc = BSWG.specialsInfo[key];
+    var poly = desc.polys;
+    var baseR = desc.color.x;
+    var baseG = desc.color.y;
+    var baseB = desc.color.z;
+    var avg = (baseR + baseG + baseB) / 3.0;
+    var saturation = 1.0;
+    var lightness = 0.0;
+
+    var T = 0.0;
+
+    if (who) {
+        if (!who.hasSpecial(key)) {
+            saturation = 0.0;
+        }
+        if (!who.specialEquipped(key)) {
+            lightness -= 0.35;
+        }
+        T = who.specialReady(key);
+        if (T < 1.0) {
+            saturation *= 0.5;
+        }
+    }
+
+    baseR = saturation * baseR + (1 - saturation) * avg + lightness - .3;
+    baseG = saturation * baseG + (1 - saturation) * avg + lightness - .3;
+    baseB = saturation * baseB + (1 - saturation) * avg + lightness - .3;
+
+    if (!scale && scale !== 0) {
+        scale = 1.0;
+    }
+
+    var iscale = scale;
+
+    var bnd = [-0.5, -0.5, 0.5, 0.5];
+
+    scale *= desc.iconScale || 1.0;
+
+    angle = angle || 0.0;
+
+    var r = Math.floor(Math.clamp(baseR||0.3, 0, 1)*255);
+    var g = Math.floor(Math.clamp(baseG||0.3, 0, 1)*255);
+    var b = Math.floor(Math.clamp(baseB||0.3, 0, 1)*255);
+
+    var r2 = Math.floor(Math.clamp((baseR||0.3) * 2, 0, 1)*255);
+    var g2 = Math.floor(Math.clamp((baseG||0.3) * 2, 0, 1)*255);
+    var b2 = Math.floor(Math.clamp((baseB||0.3) * 2, 0, 1)*255);
+
+    var r4 = Math.floor(Math.clamp((baseR||0.3) * 3.5, 0, 1)*255);
+    var g4 = Math.floor(Math.clamp((baseG||0.35) * 3.5, 0, 1)*255);
+    var b4 = Math.floor(Math.clamp((baseB||0.3) * 3.5, 0, 1)*255);
+
+    var r3 = Math.floor(Math.clamp((baseR||0.3) * 0.1, 0, 1)*255);
+    var g3 = Math.floor(Math.clamp((baseG||0.3) * 0.1, 0, 1)*255);
+    var b3 = Math.floor(Math.clamp((baseB||0.3) * 0.1, 0, 1)*255);
+
+    var c1 = 'rgb(' + r + ',' + g + ',' + b + ')';
+    var c2 = 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
+    var c3 = 'rgb(' + r3 + ',' + g3 + ',' + b3 + ')';
+    var c4 = 'rgb(' + r4 + ',' + g4 + ',' + b4 + ')';
+
+    if (T) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(iscale, iscale);
+
+        var a = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[3]), -angle);
+        var b = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[1]), -angle);
+        var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        a = b = null;
+        if (!lightness) {
+            grd.addColorStop(0, 'rgba(0, 32, 0, 0.5)');
+            grd.addColorStop(1, 'rgba(0, 128, 0, 0.5)');
+        }
+        else {
+            grd.addColorStop(0, 'rgba(0, 16, 0, 0.35)');
+            grd.addColorStop(1, 'rgba(0, 64, 0, 0.35)');
+        }
+        ctx.fillStyle = grd;
+        var H = bnd[3] - bnd[1];
+        ctx.lineWidth = 3 / iscale;
+        ctx.strokeStyle = c3;
+        ctx.strokeRect(bnd[0], bnd[1] + (1-1) * H, bnd[2]-bnd[0], H * 1);
+        ctx.fillRect(bnd[0], bnd[1] + (1-T) * H, bnd[2]-bnd[0], H * T);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.rotate(angle);
+    
+    for (var j=0; j<poly.length; j++) {
+        ctx.lineWidth = 3 / scale;
+        ctx.strokeStyle = c3;
+        ctx.beginPath();
+        ctx.moveTo(poly[j][0].x, poly[j][0].y);
+        for (var i=1; i<poly[j].length; i++) {
+            ctx.lineTo(poly[j][i].x, poly[j][i].y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+    for (var j=0; j<poly.length; j++) {
+        ctx.fillStyle = j === 0 ? c1 : c2;
+        var a = Math.rotVec2(new b2Vec2(bnd[0], (bnd[1]+bnd[3])*0.5), -angle);
+        var b = Math.rotVec2(new b2Vec2(bnd[2], (bnd[1]+bnd[3])*0.5), -angle);
+        var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        a = b = null;
+        if (j === 0) {
+            grd.addColorStop(0, c1);
+            grd.addColorStop(1, c2);
+        }
+        else {
+            grd.addColorStop(0, c2);
+            grd.addColorStop(1, c4);
+        }
+        ctx.fillStyle = grd;
+        grd = null;
+        ctx.beginPath();
+        ctx.moveTo(poly[j][0].x, poly[j][0].y);
+        for (var i=1; i<poly[j].length; i++) {
+            ctx.lineTo(poly[j][i].x, poly[j][i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+    ctx.restore();
 };
