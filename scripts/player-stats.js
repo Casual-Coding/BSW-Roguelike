@@ -145,10 +145,10 @@ BSWG.specialsUnlockInfo = {
     'attack': {
         'title': 'Guns',
         'levels': {
-            1: 'fury',           // +35% firerate on projectile weapons
+            1: 'fury',           // +35% firerate on projectile weapons for 8s
             3: 'torpedo',        // Fire torpedo from CC to user selected point, does splash damage, doesn't collide with anything
             5: 'emp-attack',     // Same as torpedo, except EMP
-            7: 'over-power',     // +50% damage on non-mele weapons
+            7: 'over-power',     // +50% damage on non-mele weapons for 10s
             9: 'torpedo-spread', // Fires three tropedoes instead of one, larger range
         }
     },
@@ -156,10 +156,9 @@ BSWG.specialsUnlockInfo = {
         'title': 'Mele',
         'levels': {
             2: 'massive',        // +30% mass for all blocks on ship 3s for more ramming damage
-            4: 'spin-up',        // Double saw speed
-            6: 'double-mele',    // +50% damage for all mele weapons
+            4: 'spin-up',        // Double saw speed for 6s
+            6: 'double-mele',    // +50% damage for all mele weapons for 6s
             8: 'massive2',       // +50% mass for all blocks on ship 3s for more ramming damage
-            10: 'singularity'    // Create singularity at user selected point (lasting 10s) pulling all ships towards it
         }
     },
     'defend': {
@@ -168,7 +167,8 @@ BSWG.specialsUnlockInfo = {
             1: 'heal',            // Heal in selected radius for 3s
             3: 'defense-screen',  // Deploys shield for 10s, take half damage
             5: 'emp-defend',      // EMP blast from CC (larger than emp-attack) that does not effect self
-            8: 'shockwave'        // Powerful shockwave eminating from CC that pushes any enemy ships back
+            7: 'shockwave',       // Powerful shockwave eminating from CC that pushes any enemy ships back
+            9: 'singularity'      // Create singularity at user selected point (lasting 10s) pulling all enemy ships towards it
         }
     },
     'speed': {
@@ -177,7 +177,7 @@ BSWG.specialsUnlockInfo = {
             2: 'speed',         // +50% speed for 5s
             4: 'light-weight',  // -50% mass for 10s
             6: 'speed2',        // +50% speed for 10s
-            8: 'feather-weight' // -50% mass, +25% speed for 20s
+            8: 'feather-weight' // -50% mass, +12% speed for 20s
         }
     }
 };

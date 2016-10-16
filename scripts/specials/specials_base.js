@@ -45,8 +45,20 @@ BSWG.specialList = new (function(){
         //this.typeMapE['key'] = BSWG.specialEffect_Desc2
         // ...
 
+        BSWG.specialsDefaultPoly = [
+            [
+                new b2Vec2(-.3, .3),
+                new b2Vec2(-.3, -.3),
+                new b2Vec2(.3, -.3),
+                new b2Vec2(.3, .3)
+            ]
+        ];
+
         BSWG.specialsInfo = {
+
+            // defend
             'heal': {
+                name: 'Repair',
                 controller: BSWG.specialCont_circleRange,
                 color: new THREE.Vector4(0, 1, 0, 0.75),
                 minRadius: 5,
@@ -68,6 +80,156 @@ BSWG.specialList = new (function(){
                         new b2Vec2(-.15/2, .15/2)
                     ]
                 ],
+                iconScale: 0.75
+            },
+            'defense-screen': {
+                name: 'Defense Screen',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(0, .3, 1, 0.75),
+                cooldown: 25.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'emp-defend': {
+                name: 'EMP Pulse',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(.3, 0, 1, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'shockwave': {
+                name: 'Shockwave',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(1, 1, 0, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'singularity': {
+                name: 'Singularity',
+                controller: BSWG.specialCont_circleRange,
+                minRadius: 6.5,
+                maxRadius: 6.5,
+                color: new THREE.Vector4(.0, .0, .0, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+
+            // attack
+            'fury': {
+                name: 'Fury',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(1, 0, 0, 0.75),
+                cooldown: 25.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'torpedo': {
+                name: 'Torpedo',
+                controller: BSWG.specialCont_circleRange,
+                minRadius: 3,
+                maxRadius: 3,
+                color: new THREE.Vector4(1, .5, 0, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'emp-attack': {
+                name: 'EMP Torpedo',
+                controller: BSWG.specialCont_circleRange,
+                minRadius: 3,
+                maxRadius: 3,
+                color: new THREE.Vector4(.5, .25, 1, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'over-power': {
+                name: 'Over Powered',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(1, 0, 0, 0.75),
+                cooldown: 25.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'torpedo-spread': {
+                name: 'Torpedo Spread',
+                controller: BSWG.specialCont_circleRange,
+                minRadius: 6,
+                maxRadius: 6,
+                color: new THREE.Vector4(1, .5, 0, 0.75),
+                cooldown: 40.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+
+            // mele
+            'massive': {
+                name: 'Massive',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(.5, .5, .5, 0.75),
+                cooldown: 12.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'spin-up': {
+                name: 'Spin Up',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(.75, .75, .75, 0.75),
+                cooldown: 18.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'double-mele': {
+                name: 'Double Punch',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(1, .25, .125, 0.75),
+                cooldown: 22.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'massive2': {
+                name: 'Massive II',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(.5, .5, .5, 0.75),
+                cooldown: 12.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+
+            // speed
+            'speed': {
+                name: 'Boost',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(0, 1, .1, 0.75),
+                cooldown: 20.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'light-weight': {
+                name: 'Light Weight',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(.2, .75, .75, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'speed2': {
+                name: 'Boost II',
+                controller: BSWG.specialCont_targetShip,
+                color:new THREE.Vector4(0, 1, .1, 0.75),
+                cooldown: 30.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
+                iconScale: 0.75
+            },
+            'feather-weight': {
+                name: 'Feather Weight',
+                controller: BSWG.specialCont_targetShip,
+                color: new THREE.Vector4(.2, .75, .75, 0.75),
+                cooldown: 40.0, // seconds
+                polys: BSWG.specialsDefaultPoly,
                 iconScale: 0.75
             }
         };
