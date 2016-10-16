@@ -19,6 +19,7 @@
     "min_height": 768,
     "width": 1280,
     "height": 768,
+    "frame": false,
     "icon": "images/icon-128.png"
   },
   "webkit": {

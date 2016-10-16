@@ -282,8 +282,9 @@ BSWG.render = new function() {
         this.cam3D.matrixAutoUpdate = true;
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: false, antialias: true });
-        this.renderer.setClearColor( 0x000000, 0x00 );
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
+        this.renderer.autoClearColor = false;
+        //this.renderer.setClearColor( 0x000000, 0x00 );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
@@ -683,8 +684,8 @@ BSWG.render = new function() {
             Math.random = Math._random;
 
             self.renderer.sortObjects = true;
-            self.renderer.clear();
-            self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap, true);
+            //self.renderer.clear();
+            self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap);
             self.renderer.render(self.scene, self.cam3D);
 
             self.ctx.save();

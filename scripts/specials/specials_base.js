@@ -378,13 +378,13 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
         var b = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[1]), 0);
         var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         a = b = null;
-        if (!lightness) {
-            grd.addColorStop(0, 'rgba(8, 32, 8, 0.75)');
-            grd.addColorStop(1, 'rgba(32, 128, 32, 0.75)');
+        if (T === 1.0) {
+            grd.addColorStop(0, 'rgba(18, 24, 18, 0.75)');
+            grd.addColorStop(1, 'rgba(72, 96, 72, 0.75)');
         }
         else {
-            grd.addColorStop(0, 'rgba(8, 16, 8, 0.5)');
-            grd.addColorStop(1, 'rgba(32, 64, 32, 0.5)');
+            grd.addColorStop(0, 'rgba(24, 24, 24, 0.65)');
+            grd.addColorStop(1, 'rgba(96, 96, 96, 0.65)');
         }
         ctx.fillStyle = grd;
         ctx.lineWidth = 1 / iscale;
@@ -405,6 +405,9 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
         ctx.closePath();
 
         ctx.fill();
+        if (T < 1) {
+            ctx.stroke();   
+        }
         ctx.restore();
     }
 

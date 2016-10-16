@@ -1564,8 +1564,6 @@ BSWG.game = new function(){
 
             var ctx = BSWG.render.ctx;
             var viewport = BSWG.render.viewport;
-            
-            document.title = "BlockShip Wars: Roguelike - " + Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds;
 
             var mx = BSWG.input.MOUSE('x');
             var my = BSWG.input.MOUSE('y');
@@ -2722,6 +2720,11 @@ BSWG.game = new function(){
             */
 
             BSWG.ui.render(ctx, viewport);
+            var statusTxt = Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds;
+            ctx.fillStyle = '#ccc';
+            ctx.textAlign = 'left'
+            ctx.font = '12px Orbitron';
+            ctx.fillText(statusTxt, viewport.w - 10*Math.ceil(statusTxt.length/8)*8 - 32, 28);
             if (self.beMsg && (self.beMsgTime + 3) > Date.timeStamp()) {
                 ctx.fillStyle = '#f00';
                 ctx.strokeStyle = '#000';
