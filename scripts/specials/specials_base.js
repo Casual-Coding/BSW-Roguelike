@@ -344,12 +344,13 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
     var bnd = [-0.5, -0.5, 0.5, 0.5];
 
     scale *= desc.iconScale || 1.0;
+    var invscale = desc.iconScale || 1.0;
 
     angle = angle || 0.0;
 
-    var r = Math.floor(Math.clamp(baseR||0.3, 0, 1)*255);
-    var g = Math.floor(Math.clamp(baseG||0.3, 0, 1)*255);
-    var b = Math.floor(Math.clamp(baseB||0.3, 0, 1)*255);
+    var r = Math.floor(Math.clamp((baseR||0.3) * 0.6, 0, 1)*255);
+    var g = Math.floor(Math.clamp((baseG||0.3) * 0.6, 0, 1)*255);
+    var b = Math.floor(Math.clamp((baseB||0.3) * 0.6, 0, 1)*255);
 
     var r2 = Math.floor(Math.clamp((baseR||0.3) * 2, 0, 1)*255);
     var g2 = Math.floor(Math.clamp((baseG||0.3) * 2, 0, 1)*255);
@@ -373,17 +374,17 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
         ctx.translate(x, y);
         ctx.scale(iscale, iscale);
 
-        var a = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[3]), -angle);
-        var b = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[1]), -angle);
+        var a = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[3]), 0);
+        var b = Math.rotVec2(new b2Vec2((bnd[0]+bnd[2])*0.5, bnd[1]), 0);
         var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         a = b = null;
         if (!lightness) {
-            grd.addColorStop(0, 'rgba(0, 32, 0, 0.5)');
-            grd.addColorStop(1, 'rgba(0, 128, 0, 0.5)');
+            grd.addColorStop(0, 'rgba(0, 32, 0, 0.75)');
+            grd.addColorStop(1, 'rgba(0, 128, 0, 0.75)');
         }
         else {
-            grd.addColorStop(0, 'rgba(0, 16, 0, 0.35)');
-            grd.addColorStop(1, 'rgba(0, 64, 0, 0.35)');
+            grd.addColorStop(0, 'rgba(0, 16, 0, 0.5)');
+            grd.addColorStop(1, 'rgba(0, 64, 0, 0.5)');
         }
         ctx.fillStyle = grd;
         var H = bnd[3] - bnd[1];
@@ -412,8 +413,8 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
     }
     for (var j=0; j<poly.length; j++) {
         ctx.fillStyle = j === 0 ? c1 : c2;
-        var a = Math.rotVec2(new b2Vec2(bnd[0], (bnd[1]+bnd[3])*0.5), -angle);
-        var b = Math.rotVec2(new b2Vec2(bnd[2], (bnd[1]+bnd[3])*0.5), -angle);
+        var a = Math.rotVec2(new b2Vec2(bnd[0]*invscale, (bnd[1]+bnd[3])*0.5*invscale), -angle);
+        var b = Math.rotVec2(new b2Vec2(bnd[2]*invscale, (bnd[1]+bnd[3])*0.5*invscale), -angle);
         var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         a = b = null;
         if (j === 0) {

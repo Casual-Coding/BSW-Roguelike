@@ -122,7 +122,7 @@ BSWG.specialCont_circleRange = {
 
         this.mesh.position.set(this.pos.x, this.pos.y, 0.0 - this.depth * 0.25);
         this.mesh.scale.set(this.radius, this.radius, 1.0);
-        this.mesh.rotation.set(0, 0, this.time*this.speed);
+        this.mesh.rotation.set(0, 0, -this.time*this.speed);
         this.mat.uniforms.clr.value.set(this.color.x, this.color.y, this.color.z, this.color.w * Math.clamp(this.time*4, 0, 1));
         this.mat.uniforms.warp.value.set(1.0, this.time, 0.0, 0.0);
 
