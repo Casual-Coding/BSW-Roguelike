@@ -12,7 +12,7 @@ void main() {
     gl_FragColor = clamp(clr, 0., 1.);
 
     if (warp.x > 0.0) {
-        gl_FragColor.a *= sin(length(vNormal + vPosition.xyz) + warp.y*5.0) * 0.25 + 0.75;
+        gl_FragColor.a *= sin(length(vNormal + vPosition.xyz)*4.0 + warp.y*5.0) * 0.25 + 0.75;
         gl_FragColor.rgb *= clamp(vPosition.z, 0.5, 1.0);
     }
 

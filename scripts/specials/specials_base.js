@@ -379,19 +379,32 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
         var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         a = b = null;
         if (!lightness) {
-            grd.addColorStop(0, 'rgba(0, 32, 0, 0.75)');
-            grd.addColorStop(1, 'rgba(0, 128, 0, 0.75)');
+            grd.addColorStop(0, 'rgba(8, 32, 8, 0.75)');
+            grd.addColorStop(1, 'rgba(32, 128, 32, 0.75)');
         }
         else {
-            grd.addColorStop(0, 'rgba(0, 16, 0, 0.5)');
-            grd.addColorStop(1, 'rgba(0, 64, 0, 0.5)');
+            grd.addColorStop(0, 'rgba(8, 16, 8, 0.5)');
+            grd.addColorStop(1, 'rgba(32, 64, 32, 0.5)');
         }
         ctx.fillStyle = grd;
-        var H = bnd[3] - bnd[1];
-        ctx.lineWidth = 3 / iscale;
+        ctx.lineWidth = 1 / iscale;
         ctx.strokeStyle = c3;
-        ctx.strokeRect(bnd[0], bnd[1] + (1-1) * H, bnd[2]-bnd[0], H * 1);
-        ctx.fillRect(bnd[0], bnd[1] + (1-T) * H, bnd[2]-bnd[0], H * T);
+        ctx.beginPath();
+        ctx.rect(bnd[0], bnd[1], bnd[2]-bnd[0], bnd[3]-bnd[1]);
+        ctx.stroke();
+        ctx.clip();
+        var R = Math.min(bnd[2]-bnd[0], bnd[3]-bnd[1])*2.0;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        for (var i=0; i<=256*T; i++) {
+            var A = i/256*Math.PI*2.0;
+            var X = Math.cos(A) * R, Y = Math.sin(A) * R;
+            ctx.lineTo(X, Y);
+        }
+        ctx.lineTo(0, 0);
+        ctx.closePath();
+
+        ctx.fill();
         ctx.restore();
     }
 
