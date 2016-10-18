@@ -434,16 +434,116 @@ BSWG.control_UnlockTree = {
         this.updateButtons();
 
         this.cats = [ 'attack', 'mele', 'defend', 'speed' ];
+
+        this.scrollY = 0.0;
     },
 
     updateButtons: function () {
 
         this.buttons = [];
+
+        if (!this.hudHM) {
+            return;
+        }
+
+        var self = this;
         this.maxLevelCat = {};
         this.maxLevel = 0;
 
         for (var i=0; i<this.cats.length; i++) {
+            var cat = this.cats[i];
+            var levels = BSWG.specialsUnlockInfo[cat].levels;
+            for (var level in levels) {
+                this.maxLevelCat[cat] = Math.max(this.maxLevelCat[cat] || 0, parseInt(level));
+                this.maxLevel = Math.max(this.maxLevel, parseInt(level));
+            }
+        }
 
+        var hx = function(v) {
+            var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));
+            return self.w*t + self.p.x;
+        };
+        var hy = function(v) {
+            var t = (v - self.hudHM.t(0)) / (self.hudHM.b(0) - self.hudHM.t(0));
+            return self.h*t + self.p.y;
+        };
+
+        var w = (this.w - (hx(20) - this.p.x)) / this.bRows;
+        self.scrollH = w;
+        var y = hy(10) - (this.maxLevel - this.bRows) * w - w;
+        for (var level=this.maxLevel; level >= 0; level--) {
+            for (var i=0; i<this.cats.length; i++) {
+                var cat = this.cats[i];
+                if (this.maxLevelCat[cat] < level) {
+                    continue;
+                }
+                var levels = BSWG.specialsUnlockInfo[cat].levels;
+                var x = w*i;
+
+                var B = {
+                    x: x + 5 + 9,
+                    y: y - this.p.y + 5,
+                    w: w - 10,
+                    h: w - 10,
+                    cat: cat,
+                    level: level,
+                    has: BSWG.game.xpInfo[cat] >= level,
+                    canHave: (BSWG.game.xpInfo[cat]+Math.min(1, BSWG.game.xpInfo.pointsLeft())) >= level
+                };
+
+                B.render = function(me, key, has) {
+                    return function(ctx) {
+                        var x = me.x + self.p.x;
+                        var y = me.y + self.p.y - self.scrollY;
+                        if (key) {
+                            ctx.globalAlpha = me.canHave ? 1.0 : 0.25;
+                            if (me.canHave && !me.has) {
+                                ctx.globalAlpha = Math.sin(BSWG.render.time*5)*0.35+0.65;
+                            }
+                            ctx.save();
+                            ctx.translate(x+me.w/2, y+me.h/2);
+                            ctx.rotate(BSWG.render.time)
+                            ctx.translate(-me.w/2, -me.h/2)
+                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
+                            ctx.restore();
+                            ctx.globalAlpha *= 0.5;
+                            ctx.save();
+                            ctx.translate(x+me.w/2, y+me.h/2);
+                            ctx.rotate(-BSWG.render.time)
+                            ctx.translate(-me.w/2, -me.h/2)
+                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
+                            ctx.restore();
+                            ctx.globalAlpha = 1.0;
+
+                            BSWG.renderSpecialIcon(ctx, key, x + me.w/2, y + me.h/2, me.w, 0.0, BSWG.game.ccblock, true);
+                        }
+                        else
+                        {
+                            ctx.globalAlpha = me.canHave ? 1.0 : 0.25;
+                            if (me.canHave && !me.has) {
+                                ctx.globalAlpha = Math.sin(BSWG.render.time*5)*0.35+0.65;
+                            }
+                            ctx.save();
+                            ctx.translate(x+me.w/2, y+me.h/2);
+                            ctx.rotate(BSWG.render.time*3)
+                            ctx.translate(-me.w/4, -me.h/4)
+                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
+                            ctx.restore();
+                            ctx.globalAlpha *= 0.5;
+                            ctx.save();
+                            ctx.translate(x+me.w/2, y+me.h/2);
+                            ctx.rotate(-BSWG.render.time)
+                            ctx.translate(-me.w/4, -me.h/4)
+                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
+                            ctx.restore();
+                            ctx.globalAlpha = 1.0;
+                        }
+                    };
+                }(B, levels[level]);
+
+                this.buttons.push(B);
+            }
+            y += w;
         }
 
         /*ctx.drawImage(BSWG.render.images['unlock-icon'], this.p.x, this.p.y, this.w, this.h);
@@ -495,6 +595,7 @@ BSWG.control_UnlockTree = {
 
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
+                self.hudHM = H;
                 self.hudBtn = H.hudBtn;
 
             });
@@ -528,6 +629,38 @@ BSWG.control_UnlockTree = {
         if (this.p.y < -this.h) {
             return;
         }
+
+        ctx.save();
+        ctx.rect(this.p.x, this.p.y, this.w, this.h);
+        ctx.clip();
+
+        for (var i=0; i<this.cats.length; i++) {
+            var cat = this.cats[i];
+            var lb = null;
+            for (var j=0; j<this.buttons.length; j++) {
+                if (this.buttons[j].cat === cat) {
+                    var B = this.buttons[j];
+                    if (lb) {
+                        var x1 = lb.x + lb.w*0.5 + this.p.x, y1 = lb.y + lb.h*0.5 + this.p.y;
+                        var x2 = B.x + B.w*0.5 + this.p.x, y2 = B.y + B.h*0.5 + this.p.y;
+                        ctx.beginPath();
+                        ctx.lineWidth = 3.0;
+                        ctx.strokeStyle = lb.has ? '#fff' : (lb.canHave ? '#aaa' : '#666');
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                    lb = B;
+                }
+            }
+        }
+
+        for (var i=0; i<this.buttons.length; i++) {
+            this.buttons[i].render(ctx);
+        }
+
+        ctx.restore();
 
     },
 

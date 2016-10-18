@@ -467,7 +467,7 @@ BSWG.startSpecial = function(key, who, btn) {
     );
 }
 
-BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
+BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
 
     var desc = BSWG.specialsInfo[key];
     var poly = desc.polys;
@@ -480,7 +480,7 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
 
     var T = 0.0;
 
-    if (who) {
+    if (who && !nobg) {
         if (!who.hasSpecial(key)) {
             saturation = 0.0;
         }
@@ -490,6 +490,14 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
         T = who.specialReady(key);
         if (T < 1.0) {
             saturation *= 0.5;
+        }
+    }
+    else if (who && nobg) {
+        if (!who.hasSpecial(key)) {
+            saturation = 0.5;
+        }
+        if (!who.specialEquipped(key)) {
+            lightness -= 0.15;
         }
     }
 
@@ -531,7 +539,7 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who) {
     var c3 = 'rgb(' + r3 + ',' + g3 + ',' + b3 + ')';
     var c4 = 'rgb(' + r4 + ',' + g4 + ',' + b4 + ')';
 
-    if (T) {
+    if (T && !nobg) {
         ctx.save();
         ctx.translate(x, y);
         ctx.scale(iscale, iscale);
