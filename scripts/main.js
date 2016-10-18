@@ -125,7 +125,9 @@ var BSWG = new function(){
         'tileset-below': 'tileset-below-512.png',
         'tileset-sand': 'tileset-sand-512.png',
         'tileset-snow': 'tileset-snow-512.png',
-        'tileset-rockland': 'tileset-rockland-512.png'
+        'tileset-rockland': 'tileset-rockland-512.png',
+        'unlock-icon': 'unlock-icon.png',
+        'unlock-hover': 'unlock-hover.png'
         //'dc-logo': 'dc-logo.png'
     };
     var makeTexture = [

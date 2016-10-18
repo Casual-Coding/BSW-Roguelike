@@ -169,6 +169,7 @@ BSWG.game = new function(){
                 }
 
                 H.plate(0, 0, w, 48, 0.25, 0.5);
+                self.hudTopYT = 48;
 
                 H.plate(w-48, (48-40)/2+1, 42, 40, 0.5, 0.35); // 12
 
@@ -662,6 +663,8 @@ BSWG.game = new function(){
         this.cam = new BSWG.camera();
         BSWG.render.updateCam3D(this.cam);
         this.editMode = false;
+        this.unlockMode = false;
+        this.specialMode = false;
         this.storeMode = false;
         this.tradeMode = false;
         this.showControls = false;
@@ -1055,14 +1058,38 @@ BSWG.game = new function(){
                         x: 10, y: 10,
                         w: 65, h: 65,
                         text: 'Specials',
+                        selected: self.specialMode,
                         click: function (me) {
+                            self.specialMode = !self.specialMode;
+                            me.selected = self.specialMode;
+                            if (self.specialMode) {
+                                self.unlockMode = false;
+                                self.levelUpBtn.selected = false;
+                                self.removeMode('unlock');
+                                self.pushMode('specials');
+                            }
+                            else {
+                                self.removeMode('specials');
+                            }
                         }
                     });
                     this.levelUpBtn = new BSWG.uiControl(BSWG.control_Button, {
                         x: 10, y: 10,
                         w: 65, h: 65,
                         text: 'Points',
+                        selected: self.unlockMode,
                         click: function (me) {
+                            self.unlockMode = !self.unlockMode;
+                            me.selected = self.unlockMode;
+                            if (self.unlockMode) {
+                                self.specialMode = false;
+                                self.specialsBtn.selected = false;
+                                self.removeMode('specials');
+                                self.pushMode('unlock');
+                            }
+                            else {
+                                self.removeMode('unlock');
+                            }                            
                         }
                     });
                 }
@@ -1125,6 +1152,14 @@ BSWG.game = new function(){
                                 break;
                             }
                         }
+                    });
+                }
+
+                if (scene === BSWG.SCENE_GAME1) {
+                    this.unlockMenu = new BSWG.uiControl(BSWG.control_UnlockTree, {
+                        x: 3000, y: -2000,
+                        w: 128 * 3,
+                        h: 650
                     });
                 }
 
@@ -1300,7 +1335,9 @@ BSWG.game = new function(){
                     'anchor': this.anchorBtn,
                     'controls': this.showControlsBtn,
                     'store': this.storeBtn,
-                    'trade': this.tradeBtn
+                    'trade': this.tradeBtn,
+                    'unlock': this.levelUpBtn,
+                    'specials': this.specialsBtn
                 };
 
                 this.saveHealAdded = false;
@@ -1531,6 +1568,7 @@ BSWG.game = new function(){
             }
 
             self.hudBottomY = self.hudY(self.hudBottomYT);
+            self.hudTopY = self.hudY(self.hudTopYT);
 
             if (self.editMode || !(self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2)) {
                 self.emodeTint += (1 - self.emodeTint) * dt * 5;

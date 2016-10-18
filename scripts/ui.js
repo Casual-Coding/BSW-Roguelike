@@ -421,6 +421,175 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
 };
 
+
+BSWG.control_UnlockTree = {
+
+    init: function (args) {
+
+        this.w = BSWG.render.viewport.h / 1.5;
+        this.h = this.w;
+
+        this.bRows = 6;
+
+        this.updateButtons();
+
+        this.cats = [ 'attack', 'mele', 'defend', 'speed' ];
+    },
+
+    updateButtons: function () {
+
+        this.buttons = [];
+        this.maxLevelCat = {};
+        this.maxLevel = 0;
+
+        for (var i=0; i<this.cats.length; i++) {
+
+        }
+
+        /*ctx.drawImage(BSWG.render.images['unlock-icon'], this.p.x, this.p.y, this.w, this.h);
+        if (this.key) {
+            BSWG.renderSpecialIcon(ctx, this.key, this.p.x+this.w/2, this.p.y+this.p.h/2, this.w, 0.0, self.ccblock);
+        }*/
+
+    },
+
+    destroy: function () {
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
+    render: function (ctx, viewport) {
+
+        var aw = this.w, ah = this.h;
+
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+            }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            var self = this;
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var H = BSWG.ui_HM(w, h, aw, ah);
+                H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+
+                var bSize = (H.r(10) - H.l(10)) / self.bRows;
+
+                for (var i=0; i<4; i++) {
+                    H.plate(H.l(10) + i*bSize, H.t(10), bSize-1, H.b(10)-H.t(10), 0.35, 0.15); // 0..3
+                }
+
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
+
+                self.hudBtn = H.hudBtn;
+
+            });
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.15, // z
+                [.9,.9,1.1,1], // color
+                false, // split
+                true // moving
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+            ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
+        }
+
+        if (this.p.y < -this.h) {
+            return;
+        }
+
+    },
+
+    update: function () {
+
+        var toY = -this.h - 1;
+
+        if (BSWG.game.scene === BSWG.SCENE_GAME1 && (BSWG.game.unlockMode || BSWG.game.specialMode) && !BSWG.game.battleMode && BSWG.game.dialogObj.hidden) {
+            toY = BSWG.game.hudTopY;
+            this.updateButtons();
+        }
+
+        this.p.y += (toY - this.p.y) * BSWG.render.dt * 4.0;
+        this.p.x = BSWG.render.viewport.w/2 - this.w/2;
+
+        if (this.buttons && this.mouseIn) {
+
+            var mx = BSWG.input.MOUSE('x') - this.p.x;
+            var my = BSWG.input.MOUSE('y') - this.p.y;
+
+            for (var i=0; i<this.buttons.length; i++) {
+
+                var B = this.buttons[i];
+
+                if (mx >= B.x && my >= B.y && mx < (B.x + B.w) && my < (B.y + B.h) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
+                    B.mouseIn = true;
+                else
+                    B.mouseIn = false;
+                
+                /*if (BSWG.game.scene === BSWG.SCENE_GAME1) {
+                    if (this.buttons[i].args.count < 1) {
+                        B.mouseIn = B.mouseDown = false;
+                    }
+                }*/
+
+                if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
+                {
+                    //this.clickInner(this, B);
+                }
+
+                B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
+
+            }
+
+        }
+        else if (this.buttons) {
+
+            for (var i=0; i<this.buttons.length; i++) {
+
+                var B = this.buttons[i];
+
+                B.mouseIn = B.mouseDown = false;
+
+            }
+
+        }
+
+
+    },
+
+};
+
 BSWG.control_Button = {
 
     init: function (args) {

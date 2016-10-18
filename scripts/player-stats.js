@@ -312,10 +312,13 @@ BSWG.playerStats = function(load) {
         return xpi.buff;
     };
 
-    this.usePoint = function (on) {
-        if (on == 'attack' || on == 'mele' || on == 'defend' || on == 'speed') {
+    this.usePoint = function (on, ccblock) {
+        if (on === 'attack' || on === 'mele' || on === 'defend' || on === 'speed') {
             if (this.pointsUsed() < this.points()) {
                 this[on] += 1;
+                if (BSWG.specialsUnlockInfo[on][this[on]]) {
+                    ccblock.giveSpecial(BSWG.specialsUnlockInfo[on][this[on]]);
+                }
                 return true;
             }
             return false;
