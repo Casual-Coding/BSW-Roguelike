@@ -429,7 +429,7 @@ BSWG.control_UnlockTree = {
         this.w = BSWG.render.viewport.h / 1.5;
         this.h = this.w;
 
-        this.bRows = 6;
+        this.bRows = 4;
 
         this.updateButtons();
 
@@ -468,9 +468,9 @@ BSWG.control_UnlockTree = {
             return self.h*t + self.p.y;
         };
 
-        var w = (this.w - (hx(20) - this.p.x)) / this.bRows;
+        var w = (this.w - (hx(20) - this.p.x)) / (this.bRows*2);
         self.scrollH = w;
-        var y = hy(10) - (this.maxLevel - this.bRows) * w - w;
+        var y = hy(10);
         for (var level=this.maxLevel; level >= 0; level--) {
             for (var i=0; i<this.cats.length; i++) {
                 var cat = this.cats[i];
@@ -478,7 +478,7 @@ BSWG.control_UnlockTree = {
                     continue;
                 }
                 var levels = BSWG.specialsUnlockInfo[cat].levels;
-                var x = w*i;
+                var x = w*i*2 + (Math.floor((level+1)/2)%2)*w;
 
                 var B = {
                     x: x + 5 + 9,
@@ -498,20 +498,23 @@ BSWG.control_UnlockTree = {
                         if (key) {
                             ctx.globalAlpha = me.canHave ? 1.0 : 0.25;
                             if (me.canHave && !me.has) {
-                                ctx.globalAlpha = Math.sin(BSWG.render.time*5)*0.35+0.65;
+                                ctx.globalAlpha = Math.sin(BSWG.render.time*5*(me.mouseIn ? 2 : 1))*0.35+0.65;
                             }
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(BSWG.render.time)
                             ctx.translate(-me.w/2, -me.h/2)
-                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
+                            if (me.mouseIn) {
+                                ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
+                            }
+                            ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w, me.h);
                             ctx.restore();
                             ctx.globalAlpha *= 0.5;
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(-BSWG.render.time)
                             ctx.translate(-me.w/2, -me.h/2)
-                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
+                            ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w, me.h);
                             ctx.restore();
                             ctx.globalAlpha = 1.0;
 
@@ -521,20 +524,23 @@ BSWG.control_UnlockTree = {
                         {
                             ctx.globalAlpha = me.canHave ? 1.0 : 0.25;
                             if (me.canHave && !me.has) {
-                                ctx.globalAlpha = Math.sin(BSWG.render.time*5)*0.35+0.65;
+                                ctx.globalAlpha = Math.sin(BSWG.render.time*5*(me.mouseIn ? 2 : 1))*0.35+0.65;
                             }
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(BSWG.render.time*3)
                             ctx.translate(-me.w/4, -me.h/4)
-                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
+                            if (me.mouseIn) {
+                                ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
+                            }
+                            ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w*.5, me.h*.5);
                             ctx.restore();
                             ctx.globalAlpha *= 0.5;
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(-BSWG.render.time)
                             ctx.translate(-me.w/4, -me.h/4)
-                            ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
+                            ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w*.5, me.h*.5);
                             ctx.restore();
                             ctx.globalAlpha = 1.0;
                         }
@@ -543,7 +549,12 @@ BSWG.control_UnlockTree = {
 
                 this.buttons.push(B);
             }
-            y += w;
+
+            if (!(level%2)) y += w;
+        }
+
+        for (var i=0; i<this.buttons.length; i++) {
+            this.buttons[i].y -= y - hy(0) - w*2*self.bRows;
         }
 
         /*ctx.drawImage(BSWG.render.images['unlock-icon'], this.p.x, this.p.y, this.w, this.h);
@@ -641,11 +652,11 @@ BSWG.control_UnlockTree = {
                 if (this.buttons[j].cat === cat) {
                     var B = this.buttons[j];
                     if (lb) {
-                        var x1 = lb.x + lb.w*0.5 + this.p.x, y1 = lb.y + lb.h*0.5 + this.p.y;
-                        var x2 = B.x + B.w*0.5 + this.p.x, y2 = B.y + B.h*0.5 + this.p.y;
+                        var x1 = lb.x + lb.w*0.5 + this.p.x, y1 = lb.y + lb.h*0.5 + this.p.y - this.scrollY;
+                        var x2 = B.x + B.w*0.5 + this.p.x, y2 = B.y + B.h*0.5 + this.p.y - this.scrollY;
                         ctx.beginPath();
                         ctx.lineWidth = 3.0;
-                        ctx.strokeStyle = lb.has ? '#fff' : (lb.canHave ? '#aaa' : '#666');
+                        ctx.strokeStyle = lb.has ? '#fff' : (lb.canHave ? '#787878' : '#282828');
                         ctx.moveTo(x1, y1);
                         ctx.lineTo(x2, y2);
                         ctx.closePath();

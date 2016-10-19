@@ -22,13 +22,12 @@
     "icon": "images/icon-128.png"
   },
   "webkit": {
-    "plugin": false,
-    "ignore-gpu-blacklist": true
+    "plugin": false
   },
   "dependencies": {
   },
   "js-flags": "",
-  "chromium-args": "",
+  "chromium-args": "--force-gpu-rasterization --in-process-gpu --ignore-gpu-blacklist",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",

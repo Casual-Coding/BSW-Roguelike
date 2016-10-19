@@ -13,9 +13,10 @@ var getNW = function (run, dbg) {
     //files.push('node_modules/open/**');
 
     var nw = new NwBuilder({
-        version: '0.17.6',
+        version: '0.18.1',
         files: glob(files),
-        platforms: run ? (dbg ? ['win64dbg'] : ['win64']) : ['win64', 'osx64', 'linux64' ], // change this to 'win' for/on windows
+        flavor: dbg ? 'sdk' : 'normal',
+        platforms: run ? ['win64'] : ['win64', 'osx64', 'linux64' ], // change this to 'win' for/on windows
         zip: true
     });
 
@@ -69,7 +70,7 @@ gulp.task('debug', function () {
     return nw.build().then(function(){
         setIcons(function(){
             exec("BSWR.exe", {
-                'cwd': 'build/BSWR/win64dbg/'
+                'cwd': 'build/BSWR/win64/'
             });
         }, true);
     }).catch(function (err) {
