@@ -9,7 +9,7 @@
     "bswr",
     "node-webkit"
   ],
-  "single-instance": false,
+  "single-instance": true,
   "window": {
     "title": "BlockShip Wars: Roguelike",
     "toolbar": false,
@@ -27,7 +27,7 @@
   "dependencies": {
   },
   "js-flags": "",
-  "chromium-args": "--force-gpu-rasterization --in-process-gpu --ignore-gpu-blacklist",
+  "chromium-args": "--force-gpu-rasterization --in-process-gpu --ignore-gpu-blacklist --winhttp-proxy-resolver --process-per-site",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",
