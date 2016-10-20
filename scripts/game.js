@@ -2525,6 +2525,9 @@ BSWG.game = new function(){
                 if (points > 0) {
                     self.levelUpBtn.text = 'Points (' + points + ')';
                 }
+                else {
+                    self.levelUpBtn.text = 'Points';
+                }
             }
 
             if (self.mapImage) {
@@ -2762,7 +2765,7 @@ BSWG.game = new function(){
             ctx.fillStyle = '#ccc';
             ctx.textAlign = 'left'
             ctx.font = '12px Orbitron';
-            ctx.fillText(statusTxt, viewport.w - 10*Math.ceil(statusTxt.length/8)*8 - 32, 28);
+            ctx.fillText(statusTxt, viewport.w - 10*Math.ceil(statusTxt.length/8)*8 - 32, self.hudY(self.hudTopYT)/2+6);
             if (self.beMsg && (self.beMsgTime + 3) > Date.timeStamp()) {
                 ctx.fillStyle = '#f00';
                 ctx.strokeStyle = '#000';

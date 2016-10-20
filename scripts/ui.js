@@ -436,6 +436,20 @@ BSWG.control_UnlockTree = {
         this.cats = [ 'attack', 'mele', 'defend', 'speed' ];
 
         this.scrollY = 0.0;
+
+        this.catClr = {
+            'attack': '#800',
+            'defend': '#048',
+            'mele': '#880',
+            'speed': '#084'
+        };
+
+        this.catClrLight = {
+            'attack': '#f00',
+            'defend': '#08f',
+            'mele': '#ff0',
+            'speed': '#0f8'
+        };
     },
 
     updateButtons: function () {
@@ -469,6 +483,7 @@ BSWG.control_UnlockTree = {
         };
 
         var w = (this.w - (hx(20) - this.p.x)) / (this.bRows*2);
+        self.bWidth = w;
         self.scrollH = w;
         var y = hy(10);
         for (var level=this.maxLevel; level >= 0; level--) {
@@ -478,6 +493,9 @@ BSWG.control_UnlockTree = {
                     continue;
                 }
                 var levels = BSWG.specialsUnlockInfo[cat].levels;
+                if (level > BSWG.game.xpInfo[cat] && BSWG.game.specialMode) {
+                    continue;
+                }
                 var x = w*i*2 + (Math.floor((level+1)/2)%2)*w;
 
                 var B = {
@@ -488,7 +506,11 @@ BSWG.control_UnlockTree = {
                     cat: cat,
                     level: level,
                     has: BSWG.game.xpInfo[cat] >= level,
-                    canHave: (BSWG.game.xpInfo[cat]+Math.min(1, BSWG.game.xpInfo.pointsLeft())) >= level
+                    canHave: (BSWG.game.xpInfo[cat]+Math.min(1, BSWG.game.xpInfo.pointsLeft())) >= level,
+                    nameClr: this.catClrLight[cat],
+                    key: levels[level],
+                    name: levels[level] ? BSWG.specialsInfo[levels[level]].name : '',
+                    row: i
                 };
 
                 B.render = function(me, key, has) {
@@ -502,34 +524,61 @@ BSWG.control_UnlockTree = {
                             }
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
-                            ctx.rotate(BSWG.render.time)
-                            ctx.translate(-me.w/2, -me.h/2)
+                            ctx.rotate(BSWG.render.time);
+                            ctx.translate(-me.w/2, -me.h/2);
                             if (me.mouseIn) {
                                 ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
                             }
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w, me.h);
                             ctx.restore();
+                            if (BSWG.game.specialMode && BSWG.game.ccblock.specialEquipped(key)) {
+                                ctx.save();
+                                ctx.translate(x+me.w/2, y+me.h/2);
+                                ctx.rotate(BSWG.render.time*2);
+                                ctx.translate(-me.w*1.125/2, -me.h*1.125/2);
+                                ctx.drawImage(BSWG.render.images['unlock-equipped'], 0, 0, me.w*1.125, me.h*1.125);
+                                ctx.restore();
+                            }
+                            
                             ctx.globalAlpha *= 0.5;
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
-                            ctx.rotate(-BSWG.render.time)
-                            ctx.translate(-me.w/2, -me.h/2)
+                            ctx.rotate(-BSWG.render.time);
+                            ctx.translate(-me.w/2, -me.h/2);
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w, me.h);
                             ctx.restore();
                             ctx.globalAlpha = 1.0;
 
+                            ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
+
+                            ctx.fillStyle = me.nameClr;
+                            ctx.strokeStyle = '#000';
+                            ctx.font = '10px Orbitron';
+                            ctx.textAlign = 'center';
+                            ctx.fillTextB(me.name, x + me.w/2, y+10+4);
+                            ctx.fillStyle = '#eee';
+                            ctx.font = '8px Orbitron';
+                            ctx.fillTextB(me.level === 1 ? '1 point' : me.level + ' points', x + me.w/2, y+me.h-4);
+
+                            ctx.globalAlpha = me.canHave ? 1.0 : 0.75;
+
                             BSWG.renderSpecialIcon(ctx, key, x + me.w/2, y + me.h/2, me.w, 0.0, BSWG.game.ccblock, true);
+
+                            ctx.globalAlpha = 1.0;
                         }
                         else
                         {
                             ctx.globalAlpha = me.canHave ? 1.0 : 0.25;
+                            if (BSWG.game.specialMode) {
+                                ctx.globalAlpha = 0.5;
+                            }
                             if (me.canHave && !me.has) {
                                 ctx.globalAlpha = Math.sin(BSWG.render.time*5*(me.mouseIn ? 2 : 1))*0.35+0.65;
                             }
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
-                            ctx.rotate(BSWG.render.time*3)
-                            ctx.translate(-me.w/4, -me.h/4)
+                            ctx.rotate(BSWG.render.time*3);
+                            ctx.translate(-me.w/4, -me.h/4);
                             if (me.mouseIn) {
                                 ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
                             }
@@ -538,8 +587,8 @@ BSWG.control_UnlockTree = {
                             ctx.globalAlpha *= 0.5;
                             ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
-                            ctx.rotate(-BSWG.render.time)
-                            ctx.translate(-me.w/4, -me.h/4)
+                            ctx.rotate(-BSWG.render.time);
+                            ctx.translate(-me.w/4, -me.h/4);
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w*.5, me.h*.5);
                             ctx.restore();
                             ctx.globalAlpha = 1.0;
@@ -604,6 +653,10 @@ BSWG.control_UnlockTree = {
                     H.plate(H.l(10) + i*bSize, H.t(10), bSize-1, H.b(10)-H.t(10), 0.35, 0.15); // 0..3
                 }
 
+                for (var i=0; i<4; i++) {
+                    H.plate(H.l(10) + i*bSize + 5, H.t(12), bSize - 1 - 10, bSize/2, 0.15, 0.1); // 4..7
+                }
+
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
                 self.hudHM = H;
@@ -641,8 +694,37 @@ BSWG.control_UnlockTree = {
             return;
         }
 
+        var self = this;
+        var hx = function(v) {
+            var t = (v - self.hudHM.l(0)) / (self.hudHM.r(0) - self.hudHM.l(0));
+            return self.w*t + self.p.x;
+        };
+        var hy = function(v) {
+            var t = (v - self.hudHM.t(0)) / (self.hudHM.b(0) - self.hudHM.t(0));
+            return self.h*t + self.p.y;
+        };
+
+        for (var i=0; i<this.cats.length; i++) {
+            var x = hx(self.hudBtn[4+i][0]), y = hy(self.hudBtn[4+i][1]);
+            var w = hx(self.hudBtn[4+i][2]) - x, h = hy(self.hudBtn[4+i][3]) - y;
+
+            var text = BSWG.specialsUnlockInfo[this.cats[i]].title;
+            var clr = this.catClr[this.cats[i]];
+            ctx.fillStyle = clr;
+            ctx.globalAlpha = 0.75;
+            ctx.fillRect(x+5, y+5, w-10, h-10);
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#000';
+            ctx.textAlign = 'center';
+            ctx.font = '14px Orbitron';
+            ctx.fillTextB(text, x+w/2, y+h/2+14/2);
+            ctx.textAlign = 'left';
+            x += w;
+        }
+
         ctx.save();
-        ctx.rect(this.p.x, this.p.y, this.w, this.h);
+        ctx.rect(this.p.x+5, this.p.y+5+this.bWidth, this.w-10, this.h-10-this.bWidth);
         ctx.clip();
 
         for (var i=0; i<this.cats.length; i++) {
@@ -673,6 +755,11 @@ BSWG.control_UnlockTree = {
 
         ctx.restore();
 
+        for (var i=0; i<this.buttons.length; i++) {
+            if (this.buttons[i].mouseIn) {
+                break;
+            }
+        }
     },
 
     update: function () {
@@ -707,9 +794,24 @@ BSWG.control_UnlockTree = {
                     }
                 }*/
 
-                if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
+                if (BSWG.game.specialMode && !B.key) {
+                    B.mouseIn = false;
+                }
+                else if (BSWG.game.unlockMode && B.has && !B.key) {
+                    B.mouseIn = false;
+                }
+
+                if (B.mouseIn && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
                 {
-                    //this.clickInner(this, B);
+                    if (BSWG.game.unlockMode) {
+                        if (B.canHave && !B.has) {
+                            BSWG.game.xpInfo.usePoint(B.cat, BSWG.game.ccblock);
+                            new BSWG.soundSample().play('levelup', null, 0.25, 1.5);
+                        }
+                    }
+                    else if (B.key) {
+                        BSWG.game.ccblock.equipSpecial(B.key, B.row);
+                    }
                 }
 
                 B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;

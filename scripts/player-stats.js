@@ -193,7 +193,8 @@ BSWG.playerStats = function(load) {
         speed:      0,
         levelUp:    false,
         money:      100,
-        store:      null
+        store:      null,
+        pointBonus: 1
     };
 
     if (!load.store) {
@@ -202,6 +203,10 @@ BSWG.playerStats = function(load) {
 
     for (var key in load) {
         this[key] = load[key];
+    }
+
+    if (!this.pointBonus) {
+        this.pointBonus = 0;
     }
 
     this.serialize = function () {
@@ -300,7 +305,7 @@ BSWG.playerStats = function(load) {
 
     this.points = function () {
         var xpi = BSWG.xpInfo[this.level];
-        return xpi.points;
+        return xpi.points + this.pointBonus || 0;
     };
 
     this.pointsLeft = function () {
@@ -316,8 +321,8 @@ BSWG.playerStats = function(load) {
         if (on === 'attack' || on === 'mele' || on === 'defend' || on === 'speed') {
             if (this.pointsUsed() < this.points()) {
                 this[on] += 1;
-                if (BSWG.specialsUnlockInfo[on][this[on]]) {
-                    ccblock.giveSpecial(BSWG.specialsUnlockInfo[on][this[on]]);
+                if (BSWG.specialsUnlockInfo[on].levels[this[on]]) {
+                    ccblock.giveSpecial(BSWG.specialsUnlockInfo[on].levels[this[on]]);
                 }
                 return true;
             }
