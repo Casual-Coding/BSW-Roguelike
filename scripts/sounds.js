@@ -341,7 +341,9 @@ BSWG.soundLoad = function (onload) {
         { name: 'trade', url: 'sounds/trade.wav' },
         { name: 'error', url: 'sounds/error.wav' },
         { name: 'kick', url: 'sounds/kick.wav' },
-        { name: 'crash-snare', url: 'sounds/crash-snare.wav' }
+        { name: 'crash-snare', url: 'sounds/crash-snare.wav' },
+        { name: 'unlock-hover', url: 'sounds/unlock-hover.wav '},
+        { name: 'special-equip', url: 'sounds/special-equip.wav '}
     ];
 
     var urls = [];

@@ -593,7 +593,7 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
-    var last60dt = new Array(20);
+    var last60dt = new Array(10);
     for (var i=0; i<last60dt.length; i++) {
         last60dt[i] = 1.0/60;
     }
@@ -616,8 +616,6 @@ BSWG.render = new function() {
         }
 
         this.renderCbk = cbk;
-
-        sumDt = 1;
 
         var self = this;
         var renderFrame = function () {
@@ -651,11 +649,6 @@ BSWG.render = new function() {
             avg /= last60dt.length;
 
             var targetDt = 1/(Math.round((1/avg)/5)*5);
-            sumDt += self.actualDt;
-
-            while (sumDt >= targetDt) {
-                sumDt -= targetDt;
-            }
 
             self.dt = targetDt;
             self.time += self.dt;

@@ -450,6 +450,8 @@ BSWG.control_UnlockTree = {
             'mele': '#ff0',
             'speed': '#0f8'
         };
+
+        this.hoverKey = null;
     },
 
     updateButtons: function () {
@@ -774,6 +776,9 @@ BSWG.control_UnlockTree = {
         this.p.y += (toY - this.p.y) * BSWG.render.dt * 4.0;
         this.p.x = BSWG.render.viewport.w/2 - this.w/2;
 
+        this.lastHoverKey = this.hoverKey;
+        this.hoverKey = null;
+
         if (this.buttons && this.mouseIn) {
 
             var mx = BSWG.input.MOUSE('x') - this.p.x;
@@ -806,16 +811,25 @@ BSWG.control_UnlockTree = {
                     if (BSWG.game.unlockMode) {
                         if (B.canHave && !B.has) {
                             BSWG.game.xpInfo.usePoint(B.cat, BSWG.game.ccblock);
-                            new BSWG.soundSample().play('levelup', null, 0.25, 1.5);
+                            new BSWG.soundSample().play('levelup', null, 0.125, 1.5);
                         }
                     }
                     else if (B.key) {
                         BSWG.game.ccblock.equipSpecial(B.key, B.row);
+                        new BSWG.soundSample().play('special-equip', null, 0.4, 1.0);
                     }
                 }
 
                 B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
 
+                if (B.mouseIn) {
+                    this.hoverKey = B.cat + '|' + B.level;
+                }
+
+            }
+
+            if (this.hoverKey !== this.lastHoverKey && this.hoverKey) {
+                new BSWG.soundSample().play('unlock-hover', null, 0.065, 1.0);
             }
 
         }
