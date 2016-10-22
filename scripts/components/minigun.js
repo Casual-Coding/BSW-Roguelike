@@ -47,7 +47,7 @@ BSWG.component_Minigun = {
         for (var  i=0; i<nPoints; i++) {
             var a = i/nPoints * Math.PI * 2.0;
             circle.push(new b2Vec2(
-                c.x + r * Math.cos(a),
+                c.x + r * Math.cos(a) * 0.95,
                 c.y + r * Math.sin(a)
             ));
         }
@@ -88,7 +88,7 @@ BSWG.component_Minigun = {
         for (var  i=0; i<nPoints; i++) {
             var a = i/nPoints * Math.PI * 2.0;
             circle.push(new b2Vec2(
-                r * Math.cos(a),
+                r * Math.cos(a) * 0.95,
                 r * Math.sin(a)
             ));
         }
@@ -104,7 +104,7 @@ BSWG.component_Minigun = {
         BSWG.bpmReflect = 0.75;
         //BSWG.bpmSmoothNormals = true;
         BSWG.bpmRotating = true;
-        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: circle, comp: this}, 0.4, new b2Vec2(0, 0), 0.165);
+        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: circle, comp: this}, 0.4, new b2Vec2(0, 0), -0.1);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
@@ -142,6 +142,7 @@ BSWG.component_Minigun = {
         this.meshObj.update([1.0, 0.3, 0.1, 1], 4, BSWG.compAnchored(this));
         this.meshObj2.update([0.75, 0.75, 0.75, 1], 3, BSWG.compAnchored(this), this.wheelRot, this.circleOffset);
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
+        BSWG.drawBlockPolyOffset = null;
         
         //BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
 

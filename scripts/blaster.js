@@ -1,7 +1,7 @@
 BSWG.blasterDmg = 3.0;
 BSWG.minigunDmg = {
-    1: 1.5,
-    2: 3.5
+    1: 1.25,
+    2: 3.0
 };
 
 BSWG.blasterList = new function () {
