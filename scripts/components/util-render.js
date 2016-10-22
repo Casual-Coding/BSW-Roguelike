@@ -10,6 +10,7 @@ BSWG.bpmGeomCache = {};
 BSWG.bpmReflectDefault = 0.35;
 BSWG.bpmReflect = BSWG.bpmReflectDefault;
 BSWG.bpmSmoothNormals = false;
+BSWG.bpmRotating = true;
 
 BSWG.rciPolyCache = {};
 BSWG.rciPolyCacheBounds = {};
@@ -211,6 +212,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     else { key += 'z,0,0'; }
     key += 'l' + K(body.GetLocalCenter().x) + K(body.GetLocalCenter().y);
     if (zoffset) { key += 'o' + K(zoffset); }
+    if (BSWG.bpmRotating) { key += 'R'; }
     if (depth) { key += 'd' + K(depth); }
     if (iscale) { key += 'i' + K(iscale); }
     if (BSWG.bpmSmoothNormals) { key += 'f'; }
@@ -230,10 +232,10 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         var offset = null;
 
         if (!zcenter) {
-            zcenter = body.GetLocalCenter();
+            zcenter = BSWG.bpmRotating ? new b2Vec2(0, 0) : body.GetLocalCenter();
         }
         else {
-            var bc = body.GetLocalCenter();
+            var bc = BSWG.bpmRotating ? new b2Vec2(0, 0) : body.GetLocalCenter();
             offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
         }
 
@@ -429,7 +431,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     self.enemyT = 0.0;
     self.lclr = null;
 
-    ret.update = function(clr, texScale, anchor) {
+    ret.update = function(clr, texScale, anchor, exRot, center) {
 
         if (obj && obj.comp) {
             if (obj.comp.onCC && (obj.comp.onCC !== BSWG.game.ccblock || obj.comp.onCC.ai)) {
@@ -442,21 +444,21 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         var matrix = self.mesh.matrix;
 
-        var center = body.GetWorldCenter(),
-            angle  = body.GetAngle();
+        center = body.GetWorldPoint((center || body.GetLocalCenter()).clone());
+        var angle  = body.GetAngle();
 
         var offset = BSWG.drawBlockPolyOffset || null;
 
         self.mesh.position.x = center.x + (offset?offset.x:0);
         self.mesh.position.y = center.y + (offset?offset.y:0);
         self.mesh.position.z = zoffset;
-        self.mesh.rotation.z = angle;
+        self.mesh.rotation.z = angle + (exRot || 0);
         self.mesh.updateMatrix();
 
         self.meshS.position.x = center.x + (offset?offset.x:0);
         self.meshS.position.y = center.y + (offset?offset.y:0);
         self.meshS.position.z = zoffset;
-        self.meshS.rotation.z = angle;
+        self.meshS.rotation.z = angle + (exRot || 0);
         self.meshS.updateMatrix();
 
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
@@ -570,6 +572,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     ret.update();
 
     BSWG.bpmSmoothNormals = false;
+    BSWG.bpmRotating = false;
 
     return ret;
 

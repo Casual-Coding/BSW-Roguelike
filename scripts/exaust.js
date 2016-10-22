@@ -12,7 +12,13 @@ BSWG.exaustBlue = [
     new THREE.Vector4(0, 0, 1, 1)
 ];
 
-BSWG.exaust = function (body, local, size, angle, z, palette) {
+BSWG.exaustWhite = [
+    new THREE.Vector4( 1,  1,  1, 1),
+    new THREE.Vector4(.5, .5, .5, 1),
+    new THREE.Vector4(.1, .1, .1, 1)
+];
+
+BSWG.exaust = function (body, local, size, angle, z, palette, minigun) {
 
     if (!palette) {
         palette = BSWG.exaustFire;
@@ -33,6 +39,7 @@ BSWG.exaust = function (body, local, size, angle, z, palette) {
     this.mat = mat;
     this.time = 0.0;
     this.strength = 0;
+    this.narrow = minigun ? 0.2 : 1.0;
     this.size = size || 1.0;
     this.body = body || null;
     this.local = local || new b2Vec2(0, 0);
@@ -44,7 +51,7 @@ BSWG.exaust = function (body, local, size, angle, z, palette) {
         this.mat.uniforms.clrm.value.copy(palette[1]);
         this.mat.uniforms.clro.value.copy(palette[2]);
         this.mat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
-        this.mat.__shadowMat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
+        this.mat.__shadowMat.uniforms.extra.value.set(this.strength, this.time, this.narrow, 0.);
         this.mesh = new THREE.Mesh(this.geom, this.mat);
         this.mesh.renderOrder = 1600.0;
         BSWG.render.scene.add(this.mesh);
@@ -61,8 +68,8 @@ BSWG.exaust.prototype.render = function (dt) {
     this.time += dt;
 
     if (this.mat) {
-        this.mat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
-        this.mat.__shadowMat.uniforms.extra.value.set(this.strength, this.time, 0., 0.);
+        this.mat.uniforms.extra.value.set(this.strength, this.time, 0., this.narrow);
+        this.mat.__shadowMat.uniforms.extra.value.set(this.strength, this.time, 0., this.narrow);
     }
 
     if (this.mesh && this.body) {

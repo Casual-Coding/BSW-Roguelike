@@ -16,6 +16,8 @@ void main() {
 
     vec2 P = (vUv - vec2(.5, .5)) * 2.;
 
+    P.y /= extra.w;
+
     float str = pow(1. - clamp(P.x, 0., 1.), 2.5);
     str *= pow(1. - clamp(abs(P.y), 0., 1.), 1.5);
 

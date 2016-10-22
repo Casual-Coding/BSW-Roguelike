@@ -28,6 +28,7 @@ var BSWG = new function(){
         'clouds.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
+        'components/minigun.js',
         'components/block.js',
         'components/chain-link.js',
         'components/command-center.js',

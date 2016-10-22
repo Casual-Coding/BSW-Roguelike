@@ -345,7 +345,9 @@ BSWG.soundLoad = function (onload) {
         { name: 'unlock-hover', url: 'sounds/unlock-hover.wav' },
         { name: 'special-equip', url: 'sounds/special-equip.wav' },
         { name: 'click', url: 'sounds/click.wav' },
-        { name: 'hover', url: 'sounds/hover.wav' }
+        { name: 'hover', url: 'sounds/hover.wav' },
+        { name: 'minigun', url: 'sounds/minigun.wav '},
+        { name: 'minigun-fire', url: 'sounds/minigun-fire.wav '}
     ];
 
     var urls = [];

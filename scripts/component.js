@@ -1092,7 +1092,8 @@ BSWG.componentList = new function () {
             'sawblade':         BSWG.component_SawBlade,
             'sawmotor':         BSWG.component_SawMotor,
             'spikes':           BSWG.component_Spikes,
-            'thruster':         BSWG.component_Thruster
+            'thruster':         BSWG.component_Thruster,
+            'minigun':          BSWG.component_Minigun
         };
 
         this.sbTypes = [];
@@ -1102,7 +1103,13 @@ BSWG.componentList = new function () {
             }
         }
         this.sbTypes.sort(function(a, b){
-            return a.name.localeCompare(b.name);
+            var c = a.category.localeCompare(b.category);
+            if (!c) {
+                return a.name.localeCompare(b.name);
+            }
+            else {
+                return c;
+            }
         });
 
         if (!this.compCached) {

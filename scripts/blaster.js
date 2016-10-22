@@ -1,4 +1,8 @@
 BSWG.blasterDmg = 3.0;
+BSWG.minigunDmg = {
+    1: 1.5,
+    2: 3.5
+};
 
 BSWG.blasterList = new function () {
 
@@ -47,10 +51,10 @@ BSWG.blasterList = new function () {
             if (B.t <= 0.0 || comp) {
                 if (B.t <= 0.0 || comp !== B.source) {
                     if (comp && comp !== B.source) {
-                        comp.takeDamage(BSWG.blasterDmg, B.source, true);
+                        comp.takeDamage(B.minigun ? BSWG.minigunDmg[B.minigun] : BSWG.blasterDmg, B.source, true);
                     }
                     if (B.t > 0.0) {
-                        BSWG.render.boom.palette = chadaboom3D.blue_bright;
+                        BSWG.render.boom.palette = B.minigun ? chadaboom3D.fire : chadaboom3D.blue_bright;
                         BSWG.render.boom.add(
                             new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
                             2.0,
@@ -78,7 +82,7 @@ BSWG.blasterList = new function () {
             var p = cam.toScreen(BSWG.render.viewport, B.p);
 
             if (!B.exaust) {
-                B.exaust = new BSWG.exaust(B.p, null, 0.25, 0, 0.05, BSWG.exaustBlue);
+                B.exaust = new BSWG.exaust(B.p, null, 0.25*(B.minigun||1), 0, 0.05, B.minigun ? BSWG.exaustWhite : BSWG.exaustBlue, B.minigun);
             }
 
             B.exaust.strength = Math.clamp(t * 3.0, 0., 1.);
@@ -107,12 +111,12 @@ BSWG.blasterList = new function () {
 
     };
 
-    this.add = function (p, v, baseV, source) {
+    this.add = function (p, v, baseV, source, minigun) {
 
         BSWG.render.boom.palette = chadaboom3D.fire;
         BSWG.render.boom.add(
             p.particleWrap(0.2),
-            1.0,
+            1.0 * (minigun || 1),
             32,
             0.4,
             1.0,
@@ -123,14 +127,20 @@ BSWG.blasterList = new function () {
 
             p: p,
             v: v,
-            t: 1.5,
+            t: minigun ? 0.75 : 1.5,
             lp: p.clone(),
             source: source,
-            off: ~~(Math._random() * 3)
+            off: ~~(Math._random() * 3),
+            minigun: minigun || null
 
         });
 
-        new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0, Math._random()*0.1+0.35);
+        if (minigun) {
+            new BSWG.soundSample().play('minigun-fire', p.THREE(0.2), 0.5/minigun, (Math._random()*0.1+0.35)*3.0/minigun);
+        }
+        else {
+            new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0, Math._random()*0.1+0.35);
+        }
 
     };
 
