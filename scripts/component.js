@@ -455,7 +455,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
                                     p.y + Math.sin(a) * r2);
                 BSWG.render.boom.palette = disolve ? chadaboom3D.green : chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
-                    p2.particleWrap(0.025),
+                    p2.particleWrap(0.025+Math.random()+0.1),
                     r*(3.5 + 2.5*Math._random()),
                     512,
                     1 + Math.pow(r, 1/3) * Math._random(),

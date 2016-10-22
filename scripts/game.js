@@ -1643,7 +1643,7 @@ BSWG.game = new function(){
                                 }
                             }
                         }
-                        if (minC && !minC.onCC) {
+                        if (minC && !minC.onCC && !minC.noGrab) {
                             if (minLen > 0.05 && BSWG.input.MOUSE('left')) {
                                 var vec = mp.clone();
                                 var vec2 = minC.obj.body.GetWorldCenter();
@@ -2813,6 +2813,8 @@ BSWG.game = new function(){
             ctx.globalAlpha = 1.0;
 
             if (self.switchScene) {
+
+                cancelAnimationFrame(BSWG.render.nextVSync);
 
                 var ss = self.switchScene;
                 var t = 0.0;

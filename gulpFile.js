@@ -13,7 +13,7 @@ var getNW = function (run, dbg) {
     //files.push('node_modules/open/**');
 
     var nw = new NwBuilder({
-        version: '0.18.1',
+        version: '0.18.2',
         files: glob(files),
         flavor: dbg ? 'sdk' : 'normal',
         platforms: run ? ['win64'] : ['win64', 'osx64', 'linux64' ], // change this to 'win' for/on windows

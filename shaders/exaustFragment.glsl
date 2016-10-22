@@ -23,7 +23,7 @@ void main() {
         str = 0.0;
     }
     else {
-        str *= pow(P.x, 0.85);
+        str *= pow(P.x, 0.95);
     }
 
     str = clamp(str * 9.0, 0., 1.) * extra.x;

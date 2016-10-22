@@ -36,6 +36,8 @@ BSWG.component_CommandCenter = {
 
     hasConfig: true,
 
+    noGrab: true,
+
     serialize: [
         'aiStr',
         'leftKey',

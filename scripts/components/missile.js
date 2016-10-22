@@ -14,6 +14,8 @@ BSWG.component_Missile = {
 
     maxHP: 3,
 
+    noGrab: true,
+
     init: function(args) {
 
         this.size      = args.size || 1;

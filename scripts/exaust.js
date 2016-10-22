@@ -180,7 +180,7 @@ BSWG.exaustList = (new function () {
                     type: 'v4',
                     value: new THREE.Vector4(0, 0, 0, 0) // strength, time, ?, ?
                 }
-            }, THREE.NormalBlending, THREE.DoubleSide);
+            }, THREE.AdditiveBlending, THREE.DoubleSide);
             this.mat[i].__used = false;
             this.mat[i].__shadowMat = BSWG.render.newMaterial("basicVertex", "exaustFragmentShadow", {
                 extra: {
