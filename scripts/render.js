@@ -611,7 +611,7 @@ BSWG.render = new function() {
     this.startRenderer = function (cbk) {
 
         if (this.animFrameID !== null) {
-            window.cancelAnimationFrame(this.animFrameID);
+            window.cancelTimeout(this.animFrameID);
             this.animFrameID = null;
         }
 
@@ -620,13 +620,15 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
+            self.animFrameID = window.setTimeout(renderFrame, 1000/60);
+
             var frameTime;
             while (true) {
                 frameTime = Date.timeStamp();
                 self.actualDt = frameTime - self.lastFrameTime;
-                if (self.actualDt >= (1/65)) {
+                //if (self.actualDt >= (1/60)) {
                     break;
-                }
+                //}
             }
 
             if (self.actualDt > 1/10) {
@@ -721,10 +723,10 @@ BSWG.render = new function() {
 
             self.screenShake -= Math.min(self.dt * 2.0, 1) * self.screenShake;
 
-            self.animFrameID = window.requestAnimationFrame(renderFrame);
+            window.requestAnimationFrame(function(){});
         };
 
-        self.animFrameID = window.requestAnimationFrame(renderFrame);
+        self.animFrameID = window.setTimeout(renderFrame, 1000/60);
     };
 
     this.checkCanvas = function () {

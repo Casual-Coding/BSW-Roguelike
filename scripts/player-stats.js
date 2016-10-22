@@ -6,40 +6,40 @@ BSWG.enemyLevelInfo = {
         buffi: -1.25
     },
     2: {
-        buffi: -0.5
+        buffi: 0.5
     },
     3: {
-        buffi: 0
+        buffi: 0.5
     },
     4: {
-        buffi: 0
+        buffi: 0.75
     },
     5: {
-        buffi: 0
+        buffi: 0.75
     },
     6: {
-        buffi: 0
+        buffi: 1.0
     },
     7: {
-        buffi: 0
+        buffi: 1.0
     },
     8: {
-        buffi: 0.5
+        buffi: 1.25
     },
     9: {
-        buffi: 0.5
+        buffi: 1.5
     },
     10: {
-        buffi: 0.5
+        buffi: 2.0
     },
     11: {
-        buffi: 0.5
+        buffi: 2.0
     },
     12: {
-        buffi: 0.5
+        buffi: 2.0
     },
     13: {
-        buffi: 0.5
+        buffi: 2.25
     }
 };
 

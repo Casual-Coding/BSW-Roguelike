@@ -313,9 +313,16 @@ BSWG.component_CommandCenter = {
             }
         }
         else {
-            var eli = BSWG.enemyLevelInfo[this.enemyLevel || 0];
-            if (eli) {
-                return eli.buff || 0;
+            var level = this.enemyLevel || 0;
+            var eli1 = BSWG.enemyLevelInfo[Math.floor(level)];
+            var eli2 = BSWG.enemyLevelInfo[Math.floor(level)+1];
+            
+            if (eli1 && eli2) {
+                var t = level - Math.floor(level);
+                return (eli1.buff || 0) * (1-t) + (eli2.buff || 0) * (t);
+            }
+            else if (eli1) {
+                return eli1.buff || 0;
             }
             else {
                 return 0;
