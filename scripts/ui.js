@@ -562,7 +562,7 @@ BSWG.control_UnlockTree = {
                             ctx.font = '8px Orbitron';
                             ctx.fillTextB(me.level === 1 ? '1 point' : me.level + ' points', x + me.w/2, y+me.h-4);
 
-                            ctx.globalAlpha = me.canHave ? 1.0 : 0.75;
+                            ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
 
                             BSWG.renderSpecialIcon(ctx, key, x + me.w/2, y + me.h/2, me.w, 0.0, BSWG.game.ccblock, true);
 
@@ -981,6 +981,8 @@ BSWG.control_Button = {
     update: function () {
 
     },
+
+    hoverClickSound: true
 
 };
 
@@ -1700,11 +1702,17 @@ BSWG.control_CompPalette = {
 
                 var B = this.buttons[i];
 
+                var omousein = B.mouseIn;
+
                 if (mx >= B.x && my >= B.y && mx < (B.x + B.w) && my < (B.y + B.h) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
                     B.mouseIn = true;
                 else
                     B.mouseIn = false;
                 
+                if (B.mouseIn && !omousein && B.args.count >= 1) {
+                    new BSWG.soundSample().play('hover', null, 0.125, 1.45+Math.random()*0.05);
+                }
+
                 if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                     if (this.buttons[i].args.count < 1) {
                         B.mouseIn = B.mouseDown = false;
@@ -1713,10 +1721,15 @@ BSWG.control_CompPalette = {
 
                 if (B.mouseIn && this.clickInner && BSWG.input.MOUSE_RELEASED('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
                 {
+                    new BSWG.soundSample().play('click', null, 0.25, 1.45+Math.random()*0.05);
                     this.clickInner(this, B);
                 }
 
                 B.mouseDown = B.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
+
+                if (B.mouseDown && BSWG.input.MOUSE_PRESSED('left')) {
+                    new BSWG.soundSample().play('click', null, 0.25, 0.95+Math.random()*0.05);
+                }
 
             }
 
@@ -2554,7 +2567,9 @@ BSWG.control_3DTextButton = {
                 this.textObj = null;
             }
         }
-    }
+    },
+
+    hoverClickSound: true
 
 };
 
@@ -2662,6 +2677,10 @@ BSWG.uiControl = function (desc, args) {
         this[k] = desc[k];
     }
 
+    if ('hoverClickSound' in args) {
+        this.hoverClickSound = args['hoverClickSound'];
+    }
+
     this.p = { x: args.x || 0, y: args.y || 0 };
     this.w = args.w || 40;
     this.h = args.h || 40;
@@ -2673,18 +2692,22 @@ BSWG.uiControl = function (desc, args) {
 
     this.init(args);
 
+    this._added = false;
+
     this.remove = function () {
 
         if (this.onremove) {
             this.onremove();
         }
 
+        this._added = false;
         BSWG.ui.remove(this);
 
     };
 
     this.add = function () {
 
+        this._added = true;
         BSWG.ui.add(this);
 
     };
@@ -2692,6 +2715,10 @@ BSWG.uiControl = function (desc, args) {
     this.add();
 
     this._update = function () {
+
+        if (!this._added) {
+            return;
+        }
 
         var mx = BSWG.input.MOUSE('x');
         var my = BSWG.input.MOUSE('y');
@@ -2704,17 +2731,32 @@ BSWG.uiControl = function (desc, args) {
             mx += this.w * 0.5;
         }
 
+        var omousein = this.mouseIn;
+
         if (mx >= this.p.x && my >= this.p.y && mx < (this.p.x + this.w) && my < (this.p.y + this.h) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
             this.mouseIn = true;
         else
             this.mouseIn = false;
 
+        if (this.mouseIn && !omousein && this.hoverClickSound && this.click) {
+            //new BSWG.soundSample().play('hover', null, 0.1, 1.45+Math.random()*0.05);
+        }
+
         if (this.click && ((this.mouseIn && BSWG.input.MOUSE_RELEASED('left')) || (this.clickKey && BSWG.input.KEY_PRESSED(this.clickKey))) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
         {
+            if (this.hoverClickSound) {
+                new BSWG.soundSample().play('click', null, 0.15, 1.45+Math.random()*0.05);
+            }
             this.click(this);
         }
 
         this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
+
+        if (BSWG.input.MOUSE_PRESSED('left') && this.mouseDown) {
+            if (this.hoverClickSound && this.click) {
+                new BSWG.soundSample().play('click', null, 0.15, 0.95+Math.random()*0.05);
+            }
+        }
 
         this.update();
 

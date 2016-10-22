@@ -1834,6 +1834,9 @@ BSWG.game = new function(){
                     if (self.storeMode && !self.editMode && BSWG.input.MOUSE_PRESSED('left') && self.attractorHover) {
                         var comp = self.attractorHover;
                         if (!comp.onCC && !comp.salvaged) {
+                            if (comp.obj && comp.obj.body) {
+                                new BSWG.soundSample().play('levelup', comp.obj.body.GetWorldCenter().THREE(0.2), 0.125*comp.obj.body.GetMass(), 1.5);
+                            }
                             comp.salvaged = true;
                             self.xpInfo.addStore(comp, 1);
                             comp.takeDamage(1000000, null, true, true);
@@ -2152,7 +2155,8 @@ BSWG.game = new function(){
                             color: [1, 1, 1.5, 1],
                             hoverColor: [1, 1, 1.5, 1],
                             lowDetail: true,
-                            click: function (me) {}
+                            click: function (me) {},
+                            hoverClickSound: false
                         });
                         zones[i].zoneTitle.hide();
                     }

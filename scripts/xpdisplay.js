@@ -22,6 +22,7 @@ BSWG.xpDisplay = new (function(){
             color: [1.5, 1.5, 0, 1],
             hoverColor: [1.5, 1.5, 0, 1],
             lowDetail: true,
+            hoverClickSound: false,
             click: function (me) {}
         });
         this.luText.hide();

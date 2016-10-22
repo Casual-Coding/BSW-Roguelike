@@ -945,7 +945,7 @@ BSWG.render = new function() {
                 font:           this.font3D,
                 size:           4,
                 height:         (depth/size)*4,
-                curveSegments:  lowDetial ? 2 : 4,
+                curveSegments:  lowDetial ? 2 : 3,
                 bevelEnabled:   true,
                 bevelThickness: 4 * 0.05,
                 bevelSize:      4 * 0.05
