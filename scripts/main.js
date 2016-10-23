@@ -214,7 +214,15 @@ var BSWG = new function(){
         'striker',
         'four-blaster-x2',
         'freighter',
-        'tracker'
+        'tracker',
+        'fighter-mg',
+        'four-minigun',
+        'freighter-2',
+        'little-brute-2',
+        'marauder-2',
+        'mini-gunner',
+        'mini-gunner-m2',
+        'mini-gunner-m3'
     ];
     for (var i=0; i<ai.length; i++) {
         scripts.push([

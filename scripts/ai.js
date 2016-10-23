@@ -58,6 +58,14 @@ BSWG.getEnemy = function(type, statsOnly) {
         case 'stinger':         title = 'Stinger'; break;
         case 'freighter':       title = 'Freighter'; break;
         case 'tracker':         title = 'Tracker'; break;
+        case 'fighter-mg':      title = 'Fighter MG'; break;
+        case 'four-minigun':    title = '4x Minigun'; break;
+        case 'freighter-2':     title = 'Freighter II'; break;
+        case 'little-brute-2':  title = 'Little Brute II'; break;
+        case 'marauder-2':      title = 'Heavy Marauder'; break;
+        case 'mini-gunner':     title = 'Gunner'; break;
+        case 'mini-gunner-m2':  title = 'Gunner MII'; break;
+        case 'mini-gunner-m3':  title = 'Gunner MIII'; break;
         default: break;
     }
 

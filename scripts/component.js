@@ -1522,6 +1522,9 @@ BSWG.componentList = new function () {
         else if (BSWG.game.attractorShowing) {
             BSWG.render.setCustomCursor(true, 4);
         }
+        else if (BSWG.game.editCam && BSWG.input.MOUSE('middle')) {
+            BSWG.render.setCustomCursor(true, 2);
+        }
         else {
             BSWG.render.setCustomCursor(true);
         }

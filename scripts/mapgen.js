@@ -19,24 +19,6 @@ BSWG.enemySettings = [
     {
         minLevel: 0,
         maxLevel: 10,
-        minComponents: [
-            { type: 'thruster', size: 1 },
-            { type: 'blaster' },
-            { type: 'block', width: 2, height: 2 },
-            { type: 'hingehalf', size: 2 },
-            { type: 'spikes', size: 2, pike: true }
-        ],
-        maxComponents: [
-            { type: 'block', width: 3, height: 3,   minLevel: 5, alwaysLevel: 8,  minProb: 0.8 },
-            { type: 'thruster', size: 2,            minLevel: 3, alwaysLevel: 6,  minProb: 0.5 },
-            { type: 'missile-launcher',             minLevel: 3, alwaysLevel: 6,  minProb: 0.5 },
-            { type: 'laser',                        minLevel: 7, alwaysLevel: 10, minProb: 0.65 },
-            { type: 'sawblade', size: 3,            minLevel: 5, alwaysLevel: 7,  minProb: 0.8 },
-            { type: 'detacherlauncher', size: 2,    minLevel: 5, alwaysLevel: 8,  minProb: 0.8 },
-            { type: 'spikes', size: 3, pike: true,  minLevel: 5, alwaysLevel: 8,  minProb: 0.9 },
-            { type: 'spikes', size: 3, pike: false, minLevel: 5, alwaysLevel: 8,  minProb: 0.9 },
-            { type: 'chainlink',                    minLevel: 3, alwaysLevel: 5,  minProb: 0.6 }
-        ],
         intro: {
             who: -1,
             friend: true,
@@ -205,21 +187,45 @@ BSWG.enemySettings = [
             { type: 'brutenie',         levels: [1,2], with: [ 'fighter' ] },
             { type: 'marauder',         levels: [1,2,3] },
             { type: 'marauder',         levels: [1,2,3] },
+            { type: 'marauder',         levels: [1,2,3], with: [ 'mini-gunner' ] },
+            { type: 'marauder',         levels: [2,3,4], with: [ 'mini-gunner' ] },
+            { type: 'marauder-2',       levels: [3,4,5,6] },
+            { type: 'marauder-2',       levels: [4,5,6,7] },
+            { type: 'marauder-2',       levels: [4,5,6,7] },
             { type: 'marauder',         levels: [2,3,4], with: [ 'marauder'] },
             { type: 'marauder',         levels: [2,3,4], with: [ 'little-tough-guy'] },
             { type: 'striker',          levels: [2,3,4], with: [ 'marauder' ] },
             { type: 'striker',          levels: [4,5,6], max: 2, with: [ 'marauder' ] },
             { type: 'striker',          levels: [2,3], max: 2, with: [ 'freighter' ] },
+            { type: 'striker',          levels: [4,5], max: 2, with: [ 'freighter-2' ] },
+            { type: 'marauder-2',       levels: [5,6,7], max: 2, with: [ 'freighter-2' ] },
             { type: 'striker',          levels: [4,5,6], with: [ 'freighter' ] },
             { type: 'striker',          levels: [4,5,6], max: 2, with: [ 'freighter' ] },
             { type: 'striker',          levels: [4,5,6], with: [ 'little-brute', 'little-tough-guy'] },
             { type: 'freighter',        levels: [2,3,4,5,6] },
+            { type: 'freighter-2',      levels: [4,5,6] },
             { type: 'tracker',          levels: [0] },
             { type: 'tracker',          levels: [0] },
             { type: 'tracker',          levels: [0] },
             { type: 'tracker',          levels: [1], max: 2 },
             { type: 'tracker',          levels: [1], max: 2 },
-            { type: 'tracker',          levels: [1], max: 2 }
+            { type: 'tracker',          levels: [1], max: 2 },
+            { type: 'fighter-mg',       levels: [1, 2, 3], max: 2 },
+            { type: 'fighter-mg',       levels: [2, 3], max: 2 },
+            { type: 'fighter-mg',       levels: [2], max: 2 },
+            { type: 'four-minigun',     levels: [1, 2, 3], max: 2 },
+            { type: 'four-minigun',     levels: [1, 2], max: 2 },
+            { type: 'four-minigun',     levels: [2], max: 2 },
+            { type: 'mini-gunner',      levels: [1, 2, 3] },
+            { type: 'mini-gunner',      levels: [1, 2, 3] },
+            { type: 'mini-gunner',      levels: [2, 3, 4], max: 2 },
+            { type: 'mini-gunner',      levels: [3, 4, 5], max: 2 },
+            { type: 'mini-gunner-m2',   levels: [3, 4, 5] },
+            { type: 'mini-gunner-m2',   levels: [3, 4, 5] },
+            { type: 'mini-gunner-m2',   levels: [3, 4, 5] },
+            { type: 'mini-gunner-m3',   levels: [5, 6, 7] },
+            { type: 'mini-gunner-m3',   levels: [5, 6, 7] },
+            { type: 'mini-gunner-m3',   levels: [5, 6, 7] }
         ]
     }
 ];
@@ -1021,12 +1027,12 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     }
 
     for (var i=0; i<ret.zones.length; i++) {
-        if (ret.zones[i].maxLevel < 1) {
+        if (ret.zones[i].mazeLevel < 1) {
             ret.zones[i].maxLevel = ret.zones[i].minLevel = 0;
         }
         else if (ret.zones[i].maxLevel < 2) {
-            ret.zones[i].maxLevel = 1;
             ret.zones[i].minLevel = 0;
+            ret.zones[i].maxLevel = 1;
         }
     }
 
@@ -1411,37 +1417,9 @@ BSWG.genMap_ComputeTrading = function(zone, all, eInfo) {
 
 BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo, lastZone) {
 
-    zone.tech = new Array();
-    for (var i=0; i<eInfo.minComponents.length; i++) {
-        zone.tech.push(BSWG.enemySettings_compToStr(eInfo.minComponents[i]));
-    }
-    for (var i=0; i<eInfo.maxComponents.length; i++) {
-        var C = eInfo.maxComponents[i];
-        if (C.minLevel <= zone.minLevel) {
-            var t = Math.clamp((C.minLevel - zone.minLevel) / (C.alwaysLevel - C.minLevel), 0, 1);
-            var prob = t + C.minProb * (1-t);
-            if (prob >= Math.random()) {
-                zone.tech.push(BSWG.enemySettings_compToStr(C));
-            }
-        }
-    }
-    for (var i=0; i<zone.tech.length; i++) {
-        var found = false;
-        for (var j=i+1; j<zone.tech.length && !found; j++) {
-            if (BSWG.compImplied(zone.tech[i], zone.tech[j])) {
-                found = true;
-            }
-        }
-        if (found) {
-            zone.tech.splice(i, 1);
-            i --;
-            continue;
-        }
-    }
-
     zone.enemies = new Array();
-    var k = 250;
-    while (zone.enemies.length < 8 && k-- > 0) {
+    var k = 1000;
+    while (zone.enemies.length < 16 && k-- > 0) {
         for (var i=0; i<eInfo.enemies.length; i++) {
             var E = eInfo.enemies[i];
             var found = false;
@@ -1467,11 +1445,6 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo, lastZone) {
             if (found) {
                 var E2 = BSWG.getEnemy(E.type);
                 if (E2 && E2.obj && E2.stats) {
-                    //var prob = E2.compStats(zone.tech);
-                    //prob = Math.pow(prob, 2.0);
-                    //if (Math.random() < prob) {
-                    //    zone.enemies.push(E);
-                    //}
                     if (Math.random() < 0.05) {
                         zone.enemies.push(E);
                     }

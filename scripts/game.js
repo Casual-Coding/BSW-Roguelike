@@ -925,7 +925,7 @@ BSWG.game = new function(){
                 else {
                     Math.seedrandom();
                     this.noDefault = false;
-                    this.map = BSWG.genMap(162, 6*6, 8);
+                    this.map = BSWG.genMap(145, 5*5, 8);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
                     this.xpInfo = new BSWG.playerStats();
                     startPos = this.map.planets[0].worldP.clone();
@@ -1191,6 +1191,8 @@ BSWG.game = new function(){
 
                         BSWG.ai.closeEditor();
                         self.aiBtn.selected = false;
+
+                        self.dragStart = null;
 
                         var backup = BSWG.componentList.serialize(null, true);
 
@@ -1719,64 +1721,112 @@ BSWG.game = new function(){
                     self.loadGameBtn.p.y = 350+70+yoff-80;
                     self.sandBoxBtn.p.x = BSWG.render.viewport.w*0.5;
                     self.sandBoxBtn.p.y = 350+140+yoff-80;
+
+                    self.dragStart = null;
+                    self.editCam = false;
                     break;
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
+                    self.editCam = self.ccblock && self.editMode && !self.battleMode;
                     if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause)) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
 
-                        var ccs = BSWG.componentList.allCCs();
-                        var avgDist = 0.0;
-                        var avgP = new b2Vec2(0, 0);
-                        var w = 0;
-                        avgP.x *= w;
-                        avgP.y *= w;
-                        for (var i=0; i<ccs.length; i++) {
-                            var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
-                            if (dist < 1) {
-                                dist = 1;
+                        if (!self.editCam) {
+
+                            var ccs = BSWG.componentList.allCCs();
+                            var avgDist = 0.0;
+                            var avgP = new b2Vec2(0, 0);
+                            var w = 0;
+                            avgP.x *= w;
+                            avgP.y *= w;
+                            for (var i=0; i<ccs.length; i++) {
+                                var dist = Math.distVec2(ccs[i].p(), self.ccblock.p());
+                                if (dist < 1) {
+                                    dist = 1;
+                                }
+                                avgDist += dist;
+                                var tw = 1;
+                                if (dist > 20) {
+                                    tw = 1 / ((1+dist-20)/5);
+                                }
+                                avgP.x += ccs[i].p().x * tw + ccs[i].obj.body.GetLinearVelocity().x * (self.battleMode ? 2 : 3) * tw;
+                                avgP.y += ccs[i].p().y * tw + ccs[i].obj.body.GetLinearVelocity().y * (self.battleMode ? 2 : 3) * tw;
+                                w += tw;
                             }
-                            avgDist += dist;
-                            var tw = 1;
-                            if (dist > 20) {
-                                tw = 1 / ((1+dist-20)/5);
+
+                            if (w>0.1) {
+                                avgP.x /= w;
+                                avgP.y /= w;
+                                avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
+                                toZ /= Math.max(Math.log(avgDist), 1.0);
+                                toZ = Math.max(toZ, 0.007);
+                                self.cam.panTo(0.75*dt*(self.ccblock.anchored ? 0.15 : 1.0), avgP);
                             }
-                            avgP.x += ccs[i].p().x * tw + ccs[i].obj.body.GetLinearVelocity().x * (self.battleMode ? 2 : 3) * tw;
-                            avgP.y += ccs[i].p().y * tw + ccs[i].obj.body.GetLinearVelocity().y * (self.battleMode ? 2 : 3) * tw;
-                            w += tw;
+
+                            ccs = null;
+
+                            self.cam.zoomTo(dt*1.25, toZ);
+                            self.cam.zoomTo(dt*0.15, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.25));
+
+                            var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
+
+                            var bfr = BSWG.camVelLookBfr * viewport.w;
+                            var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
+                            var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
+                            var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
+                            var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
+                            var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
+
+                            var tx = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
+                            var ty = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
+
+                            self.cam.panTo(8.*dt, new b2Vec2(tx, ty));
+
+                            p = p1 = pc = p2 = null;
+
+                            self.dragStart = null;
                         }
+                        else {
 
-                        if (w>0.1) {
-                            avgP.x /= w;
-                            avgP.y /= w;
-                            avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
-                            toZ /= Math.max(Math.log(avgDist), 1.0);
-                            toZ = Math.max(toZ, 0.007);
-                            self.cam.panTo(0.75*dt*(self.ccblock.anchored ? 0.15 : 1.0), avgP);
+                            self.cam.zoomTo(dt*1.5, toZ);
+
+                            var p = new b2Vec2(self.cam.x, self.cam.y);
+
+                            if (BSWG.input.MOUSE_PRESSED('middle') && !BSWG.componentList.mouseOver) {
+                                self.dragStart = {
+                                    mx: BSWG.input.MOUSE('x'),
+                                    my: BSWG.input.MOUSE('y'),
+                                    camx: self.cam.x,
+                                    camy: self.cam.y,
+                                    lp: null
+                                }
+                            }
+
+                            if (self.dragStart && BSWG.input.MOUSE('middle')) {
+                                self.dragStart.lp = p = new b2Vec2(
+                                    self.dragStart.camx - self.cam.toWorldSize(viewport, BSWG.input.MOUSE('x') - self.dragStart.mx),
+                                    self.dragStart.camy + self.cam.toWorldSize(viewport, BSWG.input.MOUSE('y') - self.dragStart.my)
+                                );
+                            }
+                            else if (self.dragStart && self.dragStart.lp) {
+                                p = self.dragStart.lp;
+                            }
+
+                            var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
+
+                            var p1 = new b2Vec2(ccp.x - BSWG.maxGrabDistance, ccp.y - BSWG.maxGrabDistance);
+                            var pc = p;
+                            var p2 = new b2Vec2(ccp.x + BSWG.maxGrabDistance, ccp.y + BSWG.maxGrabDistance);
+
+                            var tx = Math.clamp(p.x, Math.min(p1.x, p2.x), Math.max(p1.x, p2.x));
+                            var ty = Math.clamp(p.y, Math.min(p1.y, p2.y), Math.max(p1.y, p2.y));
+
+                            self.cam.panTo(4.*dt, new b2Vec2(tx, ty));
+
+                            p = p1 = pc = p2 = null;
                         }
-
-                        ccs = null;
-
-                        self.cam.zoomTo(dt*0.6, toZ);
-                        self.cam.zoomTo(dt*0.15, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.25));
-
-                        var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
-
-                        var bfr = BSWG.camVelLookBfr * viewport.w;
-                        var p1 = BSWG.render.unproject3D(new b2Vec2(bfr, bfr));
-                        var pc = BSWG.render.unproject3D(new b2Vec2(viewport.w*0.5, viewport.h*0.5));
-                        var p2 = BSWG.render.unproject3D(new b2Vec2(viewport.w-bfr, viewport.h-bfr));
-                        var w = Math.abs(Math.max(p1.x, p2.x) - pc.x);
-                        var h = Math.abs(Math.max(p1.y, p2.y) - pc.y);
-
-                        var tx = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
-                        var ty = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
-
-                        self.cam.panTo(8.*dt, new b2Vec2(tx, ty));
-
-                        p = p1 = pc = p2 = null;
                     }
                     else if (self.bossFight && self.dialogPause) {
 
@@ -1791,6 +1841,8 @@ BSWG.game = new function(){
                         }
 
                         ccs = null;
+
+                        self.dragStart = null;
 
                     }
 
@@ -1948,6 +2000,7 @@ BSWG.game = new function(){
 
                         if (comp.type !== 'cc' && !(comp.onCC && (!comp.canMoveAttached || comp.onCC !== self.ccblock)) || comp.distanceTo(self.ccblock) > BSWG.maxGrabDistance) {
                             var gpc = BSWG.render.project3D(comp.obj.body.GetWorldCenter());
+                            ctx.fillStyle = 'rgba(192, 192, 255, 0.75)';
                             ctx.beginPath();
                             ctx.arc(gpc.x, gpc.y, 5, 0, 2*Math.PI);
                             ctx.fill();

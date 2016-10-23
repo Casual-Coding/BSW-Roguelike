@@ -15,9 +15,19 @@ BSWG.camera = function() {
         this.y += (y - this.y) * Math.min(dt, 1.0);
     };
 
-    this.zoomTo = function (dt, z) {
+    this.zoomTo = function (dt, z, center, viewport) {
 
-        this.z += (z - this.z) * Math.min(dt, 1.0);
+        if (center) {
+            var sp = this.toScreen(viewport, center);
+            this.z += (z - this.z) * Math.min(dt, 1.0);
+            var cp2 = this.toWorld(viewport, sp);
+            this.x += (center.x - cp2.x);
+            this.y += (center.y - cp2.y);
+            sp = cp2 = null;
+        }
+        else {
+            this.z += (z - this.z) * Math.min(dt, 1.0);
+        }
     };
 
     this.toScreenList = function (viewport, list) {
@@ -54,6 +64,13 @@ BSWG.camera = function() {
 
         var vpsz = Math.max(viewport.w, viewport.h);
         return sz * this.z * vpsz;
+
+    };
+
+    this.toWorldSize = function (viewport, sz) {
+
+        var vpsz = Math.max(viewport.w, viewport.h);
+        return sz / (vpsz * this.z);
 
     };
 
@@ -593,7 +610,7 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
-    var last60dt = new Array(10);
+    var last60dt = new Array(20);
     for (var i=0; i<last60dt.length; i++) {
         last60dt[i] = 1.0/60;
     }
@@ -611,7 +628,7 @@ BSWG.render = new function() {
     this.startRenderer = function (cbk) {
 
         if (this.animFrameID !== null) {
-            window.cancelTimeout(this.animFrameID);
+            window.cancelAnimationFrame(this.animFrameID);
             this.animFrameID = null;
         }
 
@@ -620,7 +637,7 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
-            self.animFrameID = window.setTimeout(renderFrame, 1000/60);
+            self.animFrameID = window.requestAnimationFrame(renderFrame, 1000/60);
 
             var frameTime;
             while (true) {
@@ -723,7 +740,7 @@ BSWG.render = new function() {
 
             self.screenShake -= Math.min(self.dt * 2.0, 1) * self.screenShake;
 
-            self.nextVSync = window.requestAnimationFrame(function(){});
+            //self.nextVSync = window.requestAnimationFrame(function(){});
         };
 
         self.animFrameID = window.setTimeout(renderFrame, 1000/60);
