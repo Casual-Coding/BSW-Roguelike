@@ -32,7 +32,6 @@ BSWG.enemySettings = [
                 { text: "You can take components out and put them in from anywhere, just be careful about leaving them around, they might disappear!", btnHighlight: "store" },
                 { text: "Go into build mode to attach components to your ship, you can drag them around with left mouse, and weld them together by clicking the weld points.", btnHighlight: "build" },
                 { text: "Some components are activated by keypress, for those ones you can right click them when they're attached to your ship and press a key to bind to that component.", btnHighlight: "keys" },
-                { text: "If it's safe, you can save your progress at orbs like the one here. I don't understand how it works exactly, something to do with time travel.", btnHighlight: "save" },
                 { text: "I think that's everything... be safe and good luck! ...... Oh, and come back here any time if you need something for your ship... I don't have much, but I'll help you if I can!", btnHighlight: "trade" }
             ]
         },

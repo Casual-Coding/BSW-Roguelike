@@ -426,6 +426,8 @@ BSWG.game = new function(){
 
             this.lastSave = Date.timeStamp();
 
+            this.berrorMsg('Game saved.');
+
         }
 
     };
@@ -670,6 +672,7 @@ BSWG.game = new function(){
         this.showControls = false;
         this.modeBtns = null;
         this.specBtns = null;
+        this.needsSave = true;
 
         if (this.tileMap) {
             this.tileMap.destroy();
@@ -1280,24 +1283,28 @@ BSWG.game = new function(){
                     };
                 }
 
-                this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
-                    x: 10 + 65 + 10 + 65 + 10, y: 10,
-                    w: 65, h: 65,
-                    text: self.scene === BSWG.SCENE_GAME1 ? BSWG.render.images['save'] : 'Export',
-                    selected: false,
-                    click: function (me) {
-                        if (self.scene === BSWG.SCENE_GAME2) {
-                            setExportFN();
-                            JSON.saveAs(
-                                BSWG.componentList.serialize(null, true),
-                                self.exportFN
-                            );
+                if (self.scene === BSWG.SCENE_GAME2) {
+                    this.saveBtn = new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10 + 65 + 10 + 65 + 10, y: 10,
+                        w: 65, h: 65,
+                        text: self.scene === BSWG.SCENE_GAME1 ? BSWG.render.images['save'] : 'Export',
+                        selected: false,
+                        click: function (me) {
+                            if (self.scene === BSWG.SCENE_GAME2) {
+                                setExportFN();
+                                JSON.saveAs(
+                                    BSWG.componentList.serialize(null, true),
+                                    self.exportFN
+                                );
+                            }
+                            else {
+                                if (!self.battleMode && self.saveHealAdded) {
+                                    self.saveGame();
+                                }
+                            }
                         }
-                        else {
-                            self.saveGame();
-                        }
-                    }
-                });
+                    });
+                }
 
                 this.specBtns = [];
                 for (var i=0; i<4; i++) {
@@ -1473,6 +1480,7 @@ BSWG.game = new function(){
                                 app.quit();
                             }
                             else {
+                                self.saveGame();
                                 BSWG.ai.closeEditor();
                                 self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
                             }
@@ -1527,6 +1535,11 @@ BSWG.game = new function(){
 
             if (self.inZone && self.inZone.bossDefeated) {
                 self.inZone.safe = true;
+            }
+
+            if (self.needsSave && !self.battleMode) {
+                self.needsSave = false;
+                self.saveGame();
             }
 
             if (self.scene === BSWG.SCENE_GAME1 && !(self.map.introNext > self.map.areaNo)) {
@@ -1728,7 +1741,7 @@ BSWG.game = new function(){
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
-                    self.editCam = self.ccblock && self.editMode && !self.battleMode;
+                    self.editCam = self.ccblock && (self.editMode || self.storeMode) && !self.battleMode;
                     if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause)) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
@@ -2124,16 +2137,17 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode && (Date.timeStamp()-self.lastSave) > 3 && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
+            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode /*&& (Date.timeStamp()-self.lastSave) > 3*/ && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
                 if (!self.saveHealAdded) {
-                    self.saveBtn.add();
-                    self.saveBtn.flashing = true;
+                    self.saveGame();
+                    //self.saveBtn.add();
+                    //self.saveBtn.flashing = true;
                     self.saveHealAdded = true;
                 }
             }
             else {
                 if (self.saveHealAdded) {
-                    self.saveBtn.remove();
+                    //self.saveBtn.remove();
                     self.saveHealAdded = false;
                 }
             }
@@ -2331,6 +2345,7 @@ BSWG.game = new function(){
                     //self.inZone.zoneTitle.hoverColor[3] = self.inZone.zoneTitle.textColor[3] = 1.0;
                     //self.inZone.zoneTitle.add();
                     self.inZone.zoneTitle.show();
+                    self.needsSave = true;
                     self.lastZone = self.inZone;
 
                     self.lastWeatherChange = Date.timeStamp() - 55.0;
@@ -2842,7 +2857,12 @@ BSWG.game = new function(){
                 var t = Math.clamp(((time - self.deathTime) - 1.0) / 3.0, 0., 2.);
                 if (t >= 2 && !self.deathDone) {
                     self.deathDone = true;
-                    self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
+                    if (localStorage.game_save) {
+                        self.changeScene(BSWG.SCENE_GAME1, {load: JSON.parse(localStorage.game_save)}, '#000', 0.75);
+                    }
+                    else {
+                        self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
+                    }
                 }
 
                 ctx.globalAlpha = Math.min(t, 1);

@@ -316,18 +316,22 @@ BSWG.component_CommandCenter = {
         }
         else {
             var level = this.enemyLevel || 0;
+            var inc = 0;
+            if (level < 2 && BSWG.game.xpInfo && BSWG.game.xpInfo.level === 1) {
+                level += 0.45;
+            }
             var eli1 = BSWG.enemyLevelInfo[Math.floor(level)];
             var eli2 = BSWG.enemyLevelInfo[Math.floor(level)+1];
-            
+
             if (eli1 && eli2) {
                 var t = level - Math.floor(level);
-                return (eli1.buff || 0) * (1-t) + (eli2.buff || 0) * (t);
+                return (eli1.buff || 0) * (1-t) + (eli2.buff || 0) * (t) + inc;
             }
             else if (eli1) {
-                return eli1.buff || 0;
+                return (eli1.buff || 0) + inc;
             }
             else {
-                return 0;
+                return 0 + inc;
             }
         }
     },

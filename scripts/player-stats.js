@@ -70,52 +70,52 @@ BSWG.xpInfo = {
         buff: 1
     },
     2: {
-        xpi: 375,
+        xpi: 600,
         pointsi: 1,
         buff: 2
     },
     3: {
-        xpi: 800,
+        xpi: 1200,
         pointsi: 1,
         buff: 3
     },
     4: {
-        xpi: 1900,
+        xpi: 2000,
         pointsi: 2,
         buff: 5
     },
     5: {
-        xpi: 3950,
+        xpi: 4500,
         pointsi: 1,
         buff: 6
     },
     6: {
-        xpi: 8000,
+        xpi: 9000,
         pointsi: 1,
         buff: 7
     },
     7: {
-        xpi: 16000,
+        xpi: 18000,
         pointsi: 1,
         buff: 9
     },
     8: {
-        xpi: 32000,
+        xpi: 36000,
         pointsi: 2,
         buff: 10
     },
     9: {
-        xpi: 64000,
+        xpi: 72000,
         pointsi: 1,
         buff: 11
     },
     10: {
-        xpi: 128000,
+        xpi: 158000,
         pointsi: 2,
         buff: 12
     },
     11: {
-        xpi: 230000,
+        xpi: 300000,
         pointsi: 1,
         buff: 13
     },
