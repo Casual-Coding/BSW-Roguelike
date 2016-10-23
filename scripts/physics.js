@@ -5,6 +5,7 @@ BSWG.meleDmg = 75.0;
 BSWG.meleDef = 100.0;
 BSWG.pweldDistSq = Math.pow(0.03, 2.0);
 BSWG.pweldVel = 10.0; // * mass
+BSWG.forceScale = 2.3;
 
 BSWG.physics = new function(){
 
@@ -15,7 +16,7 @@ BSWG.physics = new function(){
     this.maxWeldForce       = 15000.0;
     this.welds              = [];
     this.objects            = [];
-    this.baseDamping        = 0.225;
+    this.baseDamping        = 0.65;
     this.pwelds             = [];
 
     this.init = function (){
@@ -34,6 +35,12 @@ BSWG.physics = new function(){
             }
         };
         scan(Box2D);
+
+        var __tmp = b2Body.prototype.ApplyForce;
+        b2Body.prototype.ApplyForce = function(v, c) {
+            v = new b2Vec2(v.x*BSWG.forceScale, v.y*BSWG.forceScale);
+            __tmp.apply(this, [v, c]);
+        };
 
         b2Body.prototype.ApplyForceToCenter = function(v) {
             this.ApplyForce(v, this.GetWorldCenter());
