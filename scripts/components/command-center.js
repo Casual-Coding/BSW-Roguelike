@@ -308,7 +308,7 @@ BSWG.component_CommandCenter = {
     buff: function() {
         if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
             if (BSWG.game.xpInfo) {
-                return BSWG.game.xpInfo.buff() + 0.2;
+                return BSWG.game.xpInfo.buff() + 0.5;
             }
             else {
                 return 0;
@@ -317,9 +317,6 @@ BSWG.component_CommandCenter = {
         else {
             var level = this.enemyLevel || 0;
             var inc = 0;
-            if (level < 2 && BSWG.game.xpInfo && BSWG.game.xpInfo.level === 1) {
-                level += 0.45;
-            }
             var eli1 = BSWG.enemyLevelInfo[Math.floor(level)];
             var eli2 = BSWG.enemyLevelInfo[Math.floor(level)+1];
 

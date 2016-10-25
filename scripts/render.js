@@ -625,10 +625,18 @@ BSWG.render = new function() {
         this.next60 = true;
     };
 
+    this.vsyncOn = true;
+    this.lastAF = this.vsyncOn;
+
     this.startRenderer = function (cbk) {
 
         if (this.animFrameID !== null) {
-            window.cancelAnimationFrame(this.animFrameID);
+            if (this.lastAf) {
+                window.cancelAnimationFrame(this.animFrameID);    
+            }
+            else {
+                window.cancelTimeout(this.animFrameID);
+            }
             this.animFrameID = null;
         }
 
@@ -637,7 +645,14 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
-            self.animFrameID = window.requestAnimationFrame(renderFrame, 1000/60);
+            if (self.vsyncOn) {
+                self.animFrameID = window.requestAnimationFrame(renderFrame);
+                self.lastAF = true;
+            }
+            else {
+                self.animFrameID = window.setTimeout(renderFrame, 1000/60);
+                self.lastAF = false;
+            }
 
             var frameTime;
             while (true) {
@@ -731,6 +746,11 @@ BSWG.render = new function() {
             //self.ctx.fillColor = '#fff';
             //self.ctx.fillText(self.renderer.info.memory.textures + '', 15, 15);
 
+            var newVsync = self.vsyncOn;
+            if (BSWG.input.KEY_PRESSED(BSWG.KEY.F10)) {
+                newVsync = !newVsync;
+            }            
+
             BSWG.input.newFrame();
 
             Math.random = tmp;
@@ -740,10 +760,21 @@ BSWG.render = new function() {
 
             self.screenShake -= Math.min(self.dt * 2.0, 1) * self.screenShake;
 
-            //self.nextVSync = window.requestAnimationFrame(function(){});
+            if (!self.vsyncOn) {
+                self.nextVSync = window.requestAnimationFrame(function(){});
+            }
+
+            self.vsyncOn = newVsync;
         };
 
-        self.animFrameID = window.setTimeout(renderFrame, 1000/60);
+        if (this.vsyncOn) {
+            this.animFrameID = window.requestAnimationFrame(renderFrame);
+            this.lastAF = true;
+        }
+        else {
+            this.animFrameID = window.setTimeout(renderFrame, 1000/60);
+            this.lastAF = false;
+        }
     };
 
     this.checkCanvas = function () {

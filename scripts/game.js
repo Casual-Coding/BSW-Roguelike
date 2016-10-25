@@ -4,7 +4,7 @@ BSWG.maxGrabDistance       = 45.0;
 BSWG.mouseLookFactor       = 0.0; // 0 to 0.5
 BSWG.camVelLookBfr         = 0.22; // * viewport.w
 BSWG.lookRange             = 45.0;
-BSWG.grabSpeed             = 2.75;
+BSWG.grabSpeed             = 3.5;
 BSWG.attractorRange        = 4.0;
 BSWG.attractorForce        = 6.5;
 
@@ -32,6 +32,7 @@ BSWG.game = new function(){
         "blaster",
         "blaster",
         "blaster",
+        "minigun,size=1",
         "block,width=2,height=2,armour=false,triangle=0",
         "block,width=2,height=2,armour=false,triangle=0",
         "block,width=1,height=2,armour=false,triangle=0",
@@ -61,7 +62,11 @@ BSWG.game = new function(){
         "block,width=2,height=2,armour=false,triangle=1",
         "block,width=2,height=2,armour=false,triangle=1",
         "block,width=2,height=2,armour=false,triangle=0",
-        "block,width=2,height=2,armour=false,triangle=0"
+        "block,width=2,height=2,armour=false,triangle=0",
+        "block,width=1,height=1,armour=false,triangle=1",
+        "block,width=1,height=1,armour=false,triangle=1",
+        "block,width=1,height=1,armour=false,triangle=1",
+        "block,width=1,height=1,armour=false,triangle=1"
     ];
 
     this.curSong = null;
@@ -1472,6 +1477,16 @@ BSWG.game = new function(){
                     new BSWG.uiControl(BSWG.control_Button, {
                         x: 10, y: -1000,
                         w: 250, h: 32,
+                        text: 'VSync ' + (BSWG.render.vsyncOn ? ' Off' : 'On'),
+                        selected: false,
+                        click: function (me) {
+                            BSWG.render.vsyncOn = !BSWG.render.vsyncOn;
+                            me.text = 'VSync ' + (BSWG.render.vsyncOn ? ' Off' : 'On');
+                        }
+                    }),
+                    new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: -1000,
+                        w: 250, h: 32,
                         text: 'Exit',
                         selected: false,
                         click: function (me) {
@@ -2139,15 +2154,24 @@ BSWG.game = new function(){
 
             if (self.ccblock && !self.ccblock.destroyed && !self.battleMode /*&& (Date.timeStamp()-self.lastSave) > 3*/ && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
                 if (!self.saveHealAdded) {
-                    self.saveGame();
+                    self.needsSave = true;
                     //self.saveBtn.add();
                     //self.saveBtn.flashing = true;
                     self.saveHealAdded = true;
+                    if (self.map) {
+                        self.map.resetTickSpawner(self.inZone);
+                    }
                 }
             }
             else {
                 if (self.saveHealAdded) {
                     //self.saveBtn.remove();
+                    if (!self.battleMode) {
+                        self.needsSave = true;
+                        if (self.map) {
+                            self.map.resetTickSpawner(self.inZone);
+                        }
+                    }
                     self.saveHealAdded = false;
                 }
             }
@@ -2346,6 +2370,9 @@ BSWG.game = new function(){
                     //self.inZone.zoneTitle.add();
                     self.inZone.zoneTitle.show();
                     self.needsSave = true;
+                    if (self.map) {
+                        self.map.resetTickSpawner(self.inZone);
+                    }
                     self.lastZone = self.inZone;
 
                     self.lastWeatherChange = Date.timeStamp() - 55.0;
@@ -2833,7 +2860,7 @@ BSWG.game = new function(){
             */
 
             BSWG.ui.render(ctx, viewport);
-            var statusTxt = Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds;
+            var statusTxt = Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds + (BSWG.render.vsyncOn ? ', VSYNC' : '');
             ctx.fillStyle = '#ccc';
             ctx.textAlign = 'left'
             ctx.font = '12px Orbitron';

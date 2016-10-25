@@ -75,6 +75,8 @@ BSWG.component_Minigun = {
             verts: verts
         });
 
+        this.maxHP = [40, 120][size-1];
+
         this.fireKey = args.fireKey || BSWG.KEY.SPACE;
         this.fireKeyAlt = args.fireKeyAlt || this.fireKey;
         this.dispKeys = {
@@ -108,7 +110,7 @@ BSWG.component_Minigun = {
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
-        this.xpBase = 0.025;
+        this.xpBase = 0.025 * Math.pow(size, 2);
 
         this.wheelRot = 0.0;
         this.wheelSpeed = 0.0;

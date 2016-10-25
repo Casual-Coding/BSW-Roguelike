@@ -953,9 +953,22 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     var lastBattleP = null;
     var lastBattleZone = null;
     var lastZone = null;
-    var distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+    var distanceLeft = Math.random() * 10 * ret.gridSize / 1.35 + 6 * ret.gridSize / 1.35;
 
     ret.mapTime = 0.0;
+
+    ret.resetTickSpawner = function(zone) {
+        if (!zone) {
+            distanceLeft = this.gridSize * 8;
+            return;
+        }
+        if (zone.boss && !zone.bossDefeated) {
+            distanceLeft = this.gridSize * 2.5;
+        }
+        else {
+            distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+        }
+    };
 
     ret.tickSpawner = function(dt, p) {
 
@@ -975,6 +988,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         }
 
         if (BSWG.orbList.atSafe() || zone.bossDefeated) {
+            this.resetTickSpawner(zone);
             return null;
         }
 

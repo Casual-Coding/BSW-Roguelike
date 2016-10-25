@@ -7,11 +7,21 @@ BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
 // attack/defense bias to level difference
+BSWG.adBiasArr = [1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0];
 BSWG.adBias = function(p, e) { // (p)layer (e)nemy
-    var diff = Math.min(e-p, 10);
-    return 0.801983527 * Math.pow(1.896948118, diff);
+    var diff = Math.clamp(e-p, -7, 7);
+    var bias1 = BSWG.adBiasArr[Math.floor(Math.abs(diff))];
+    var bias2 = BSWG.adBiasArr[Math.floor(Math.abs(diff)) + 1];
+    var t = Math.abs(diff) - Math.floor(Math.abs(diff));
+    var bias = bias1 * (1-t) + bias2 * t;
+    if (diff < 0) {
+        return 1/bias;
+    }
+    else {
+        return bias;
+    }
 };
-BSWG.defenceBias = 2.0;
+BSWG.defenceBias = 1.0;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
@@ -393,7 +403,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
     if (this.onCC && !isFriendly) {
         amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
         if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
-            amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) * BSWG.defenceBias;
+            amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) / BSWG.defenceBias;
         }
         else if (this.onCC && BSWG.game.ccblock) {
             amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
@@ -417,32 +427,25 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
 
             var p = this.obj.body.GetWorldCenter();
 
-            if (BSWG.xpDisplay && BSWG.game.xpInfo && this.onCC !== BSWG.game.ccblock && !isFriendly && !disolve) {
-                var level = 0;
-                if (!this.onCC) {
-                    level = BSWG.game.ccblock.level() + 0.4;
-                }
-                else {
-                    level = this.onCC.level();
-                }
-                var xpi0 = BSWG.xpInfo[Math.floor(level)];
-                var xpi = BSWG.xpInfo[Math.floor(level)+1];
-                if (xpi && xpi0 && BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                    var xpBase = BSWG.levelXpPer[Math.floor(level)] || 0.2;
-                    var totalXP = (xpi.xp - xpi0.xp) * xpBase;
+            if (BSWG.xpDisplay && BSWG.game.xpInfo && this.onCC !== BSWG.game.ccblock && this.lastOnCC !== BSWG.game.ccblock && !isFriendly && !disolve && this.lastOnCC) {
+
+                var bias = BSWG.adBias(BSWG.game.ccblock.level(), this.lastOnCC.level());
+                var level = BSWG.game.xpInfo.level;
+                var xpi = BSWG.xpInfo[level + 1];
+
+                if (xpi && BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
+                    var xpBase = (BSWG.levelXpPer[level] || 0.2) * bias;
+                    var totalXP = xpi.xpi * xpBase;
+
                     totalXP *= this.xpBase ? this.xpBase : 0.01;
-                    if (!this.onCC) {
-                        totalXP /= 5;
-                    }
                     totalXP = Math.floor(totalXP);
-                    if (totalXP < 1) {
-                        totalXP = 0;
-                    }
-                    if (totalXP > 0) {
+
+                    if (totalXP >= 1) {
                         BSWG.xpDisplay.giveXP(totalXP, p.clone());
                     }
                 }
             }
+
             var v = this.obj.body.GetLinearVelocity();
             var r = this.obj.radius;
             if (this.type === 'cc') {
@@ -760,6 +763,9 @@ BSWG.component.prototype.updateJCache = function() {
 BSWG.component.prototype.baseUpdate = function(dt) {
 
     this.canEquip = true;
+    if (this.onCC) {
+        this.lastOnCC = this.onCC;
+    }
 
     if (BSWG.game.map && !('minLevelEquip' in this)) {
         this.minLevelEquip = BSWG.game.map.minLevelComp(this);

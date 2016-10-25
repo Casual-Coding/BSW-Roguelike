@@ -1401,6 +1401,11 @@ BSWG.control_CompPalette = {
             'block': [.7, .7, .7],
             'movement': [0, 1, .25]
         };
+        this.compClrBg = {
+            'weapon': 'rgb(255, 127, 0)',
+            'block': 'rgb(175, 175, 175)',
+            'movement': 'rgb(0, 255, 63)'
+        };
 
         var CL = BSWG.componentList.sbTypes;
         var buttons = new Array();
@@ -1568,6 +1573,11 @@ BSWG.control_CompPalette = {
                 
             ctx.lineWidth = 2.0;
 
+            ctx.globalAlpha = 0.135;
+            ctx.fillStyle = this.compClrBg[B.comp.category];
+            ctx.fillRect(this.p.x + B.x, this.p.y + B.y, B.w-1, B.h);
+            ctx.globalAlpha = 1.0;
+
             ctx.fillStyle = B.mouseDown ?
                 'rgba(32, 32, 32, 0.9)' :
                 (B.mouseIn ?
@@ -1592,12 +1602,12 @@ BSWG.control_CompPalette = {
                 }
             }
 
-            if (BSWG.game.scene !== BSWG.SCENE_GAME1 || this.buttons[i].args.count > 0) {
+            if (BSWG.game.scene !== BSWG.SCENE_GAME1 || B.args.count > 0 && !B.mouseIn) {
                 ctx.globalAlpha = 1.0;
                 var light = B.mouseIn ? 0.75 : 0.35;
                 BSWG.renderCompIconRecenter = true;
                 var clr = this.compClr[B.comp.category];
-                BSWG.renderCompIcon(ctx, this.buttons[i].key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, B.w/5, 0.2 + (B.mouseIn ? BSWG.render.time : 0.0), clr[0]*light, clr[1]*light, clr[2]*light);
+                BSWG.renderCompIcon(ctx, B.key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, B.w/5, 0.2 + (B.mouseIn ? BSWG.render.time : 0.0), clr[0]*light, clr[1]*light, clr[2]*light);
             }
 
             ctx.textAlign = 'left';
@@ -1606,6 +1616,15 @@ BSWG.control_CompPalette = {
         }
 
         if (mouseIn) {
+            if (BSWG.game.scene !== BSWG.SCENE_GAME1 || mouseIn.args.count > 0) {
+                var B = mouseIn;
+                ctx.globalAlpha = 1.0;
+                var light = B.mouseIn ? 0.75 : 0.35;
+                BSWG.renderCompIconRecenter = true;
+                var clr = this.compClr[B.comp.category];
+                BSWG.renderCompIcon(ctx, B.key, B.x + this.p.x + B.w*0.5, B.y + this.p.y + B.h*0.5, B.w/5*3, 0.2 + (B.mouseIn ? BSWG.render.time : 0.0), clr[0]*light, clr[1]*light, clr[2]*light);
+            }
+
             var w = 300 + 4;
             var h = 70 + 4;
             var x = (this.p.x + mouseIn.x + mouseIn.w) - (w + 1);
