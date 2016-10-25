@@ -308,7 +308,7 @@ BSWG.component_CommandCenter = {
     buff: function() {
         if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
             if (BSWG.game.xpInfo) {
-                return BSWG.game.xpInfo.buff() + 0.5;
+                return BSWG.game.xpInfo.buff() + 0.25;
             }
             else {
                 return 0;

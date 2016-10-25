@@ -401,12 +401,18 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
     }
 
     if (this.onCC && !isFriendly) {
-        amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 10;
-        if (BSWG.game.ccblock && this.onCC.id === BSWG.game.ccblock.id) {
-            amt *= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff()) / BSWG.defenceBias;
-        }
-        else if (this.onCC && BSWG.game.ccblock) {
-            amt /= BSWG.adBias(BSWG.game.ccblock.buff(), this.onCC.buff());
+        // Level bias
+        var enemyCC = fromC ? fromC.onCC : null;
+        var enemyBuff = enemyCC ? enemyCC.buff() : this.onCC.buff();
+        var myBuff = this.onCC.buff();
+        amt *= BSWG.adBias(myBuff, enemyBuff);
+
+        // Weight bias
+        amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 5;
+
+        // Human bias
+        if (this.onCC === BSWG.game.ccblock) {
+            amt /= BSWG.defenceBias;
         }
     }
 
