@@ -21,7 +21,7 @@ BSWG.adBias = function(p, e) { // (p)layer (e)nemy
         return bias;
     }
 };
-BSWG.defenceBias = 1.0;
+BSWG.defenceBias = 0.725;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
@@ -807,7 +807,9 @@ BSWG.component.prototype.baseUpdate = function(dt) {
         this.orphanTime = null;
     }
 
-    if (!BSWG.game.battleMode && BSWG.game.ccblock) {
+    this.repairing = false;
+    if (!BSWG.game.battleMode && BSWG.game.ccblock && (!BSWG.game.scene === BSWG.SCENE_GAME1 || BSWG.game.saveHealAdded) && this.hp < this.maxHP) {
+        this.repairing = true;
         this.takeDamage(-dt*5.0, null, true);
     }
 

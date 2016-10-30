@@ -678,6 +678,7 @@ BSWG.game = new function(){
         this.modeBtns = null;
         this.specBtns = null;
         this.needsSave = true;
+        this.saveAt = Date.timeStamp() + 3.0;
 
         if (this.tileMap) {
             this.tileMap.destroy();
@@ -1552,7 +1553,7 @@ BSWG.game = new function(){
                 self.inZone.safe = true;
             }
 
-            if (self.needsSave && !self.battleMode) {
+            if (self.needsSave && !self.battleMode && (Date.timeStamp() >= self.saveAt)) {
                 self.needsSave = false;
                 self.saveGame();
             }
@@ -2152,9 +2153,10 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode /*&& (Date.timeStamp()-self.lastSave) > 3*/ && BSWG.componentList.allCCs().length === 1 && BSWG.orbList.atSafe()) {
+            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode /*&& (Date.timeStamp()-self.lastSave) > 3*/ && BSWG.componentList.allCCs().length === 1 && (BSWG.orbList.atSafe()) && !self.inZone.safe) {
                 if (!self.saveHealAdded) {
                     self.needsSave = true;
+                    self.saveAt = Date.timeStamp() + 3.0;
                     //self.saveBtn.add();
                     //self.saveBtn.flashing = true;
                     self.saveHealAdded = true;
@@ -2168,6 +2170,7 @@ BSWG.game = new function(){
                     //self.saveBtn.remove();
                     if (!self.battleMode) {
                         self.needsSave = true;
+                        self.saveAt = Date.timeStamp() + 1.5;
                         if (self.map) {
                             self.map.resetTickSpawner(self.inZone);
                         }
@@ -2199,7 +2202,7 @@ BSWG.game = new function(){
             }          
 
             if (self.storeBtn) {
-                self.storeBtn.text = !self.battleMode ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
+                self.storeBtn.text = !self.battleMode && (self.saveHealAdded || self.scene !== BSWG.SCENE_GAME1) ? BSWG.render.images['store-mode-safe'] : BSWG.render.images['store-mode'];
             }
 
             if (self.saveBtn) {
@@ -2370,6 +2373,7 @@ BSWG.game = new function(){
                     //self.inZone.zoneTitle.add();
                     self.inZone.zoneTitle.show();
                     self.needsSave = true;
+                    self.saveAt = Date.timeStamp() + 1.5;
                     if (self.map) {
                         self.map.resetTickSpawner(self.inZone);
                     }

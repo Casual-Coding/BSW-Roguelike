@@ -2,7 +2,7 @@ BSWG.orbRes      = 3;
 BSWG.orbReflect  = 0.15;
 BSWG.orbZ        = -0.5 - 3.5;
 BSWG.orbScale    = 2.5;
-BSWG.orbZoneSize = 32.0;
+BSWG.orbZoneSize = 48.0;
 
 BSWG.orb = function (pos, zone) {
 

@@ -650,7 +650,7 @@ BSWG.render = new function() {
                 self.lastAF = true;
             }
             else {
-                self.animFrameID = window.setTimeout(renderFrame, 1000/60);
+                self.animFrameID = window.setTimeout(renderFrame, 16);
                 self.lastAF = false;
             }
 
@@ -772,7 +772,7 @@ BSWG.render = new function() {
             this.lastAF = true;
         }
         else {
-            this.animFrameID = window.setTimeout(renderFrame, 1000/60);
+            this.animFrameID = window.setTimeout(renderFrame, 16);
             this.lastAF = false;
         }
     };

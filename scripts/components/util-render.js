@@ -485,6 +485,30 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         self.mat.uniforms.envMapT.value = BSWG.render.envMapT;
 
+        if (obj && obj.comp && obj.comp.p && obj.comp.repairing) {
+            if (Math.pow(Math._random(), 0.25) < 0.85) {
+                var a = Math._random() * Math.PI * 2.0;
+                var r = Math._random() * (obj.radius || 1.0);
+                var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+                var p = obj.comp.p(lp);
+                if (BSWG.componentList.atPoint(p, obj.comp)) {
+                    var v = obj.body.GetLinearVelocityFromLocalPoint(lp).clone();
+                    v.x *= 0.75;
+                    v.y *= 0.75;
+                    BSWG.render.boom.palette = chadaboom3D.green;
+                    BSWG.render.boom.add(
+                        p.particleWrap(0.1),
+                        (Math._random()*0.5+0.1)*2,
+                        32,
+                        Math._random()*0.5+1.0,
+                        4.0,
+                        v.THREE(Math._random()*2.0),
+                        null,
+                        Math.random() < 0.25
+                    );
+                }
+            }
+        }
         if (obj && obj.comp && obj.comp.p && dmg > 0.25) {
             if (Math.pow(Math._random(), 0.25) < dmg) {
                 var a = Math._random() * Math.PI * 2.0;
