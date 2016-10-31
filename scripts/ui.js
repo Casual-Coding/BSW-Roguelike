@@ -512,6 +512,7 @@ BSWG.control_UnlockTree = {
                     nameClr: this.catClrLight[cat],
                     key: levels[level],
                     name: levels[level] ? BSWG.specialsInfo[levels[level]].name : '',
+                    energy: levels[level] ? BSWG.specialsInfo[levels[level]].energy : 0,
                     row: i
                 };
 
@@ -560,7 +561,9 @@ BSWG.control_UnlockTree = {
                             ctx.fillTextB(me.name, x + me.w/2, y+10+4);
                             ctx.fillStyle = '#eee';
                             ctx.font = '8px Orbitron';
-                            ctx.fillTextB(me.level === 1 ? '1 point' : me.level + ' points', x + me.w/2, y+me.h-4);
+                            ctx.fillTextB((me.level === 1 ? '1 point' : me.level + ' points'), x + me.w/2, y+me.h-4);
+                            ctx.fillStyle = '#99f';
+                            ctx.fillTextB(me.energy + ' energy', x + me.w/2, y+me.h-4+10);
 
                             ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
 

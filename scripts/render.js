@@ -761,7 +761,7 @@ BSWG.render = new function() {
             self.screenShake -= Math.min(self.dt * 2.0, 1) * self.screenShake;
 
             if (!self.vsyncOn) {
-                self.nextVSync = window.requestAnimationFrame(function(){});
+                //self.nextVSync = window.requestAnimationFrame(function(){});
             }
 
             self.vsyncOn = newVsync;

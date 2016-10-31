@@ -60,10 +60,12 @@ BSWG.specialList = new (function(){
             'heal': {
                 name: 'Repair',
                 controller: BSWG.specialCont_circleRange,
+                effect: BSWG.specialEffect_heal,
                 color: new THREE.Vector4(0, 1, 0, 0.75),
                 minRadius: 5,
                 maxRadius: 5,
                 cooldown: 20.0, // seconds
+                energy: 25,
                 polys: [
                     [
                         new b2Vec2(-.3, .15/2),
@@ -88,7 +90,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(0, .3, 1, 0.75),
                 cooldown: 25.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 25
             },
             'emp-defend': {
                 name: 'EMP Pulse',
@@ -96,7 +99,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.3, 0, 1, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 50,
             },
             'shockwave': {
                 name: 'Shockwave',
@@ -104,7 +108,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(1, 1, 0, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 50,
             },
             'singularity': {
                 name: 'Singularity',
@@ -114,7 +119,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.0, .0, .0, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 80,
             },
 
             // attack
@@ -124,7 +130,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(1, 0, 0, 0.75),
                 cooldown: 25.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 25,
             },
             'torpedo': {
                 name: 'Torpedo',
@@ -134,7 +141,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(1, .5, 0, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 50,
             },
             'emp-attack': {
                 name: 'EMP Torpedo',
@@ -144,7 +152,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.5, .25, 1, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 50,
             },
             'over-power': {
                 name: 'Over Powered',
@@ -152,7 +161,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(1, 0, 0, 0.75),
                 cooldown: 25.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 50,
             },
             'torpedo-spread': {
                 name: 'Torpedo Spread',
@@ -162,7 +172,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(1, .5, 0, 0.75),
                 cooldown: 40.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 80,
             },
 
             // mele
@@ -172,7 +183,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.5, .5, .5, 0.75),
                 cooldown: 12.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 15,
             },
             'spin-up': {
                 name: 'Spin Up',
@@ -180,7 +192,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.75, .75, .75, 0.75),
                 cooldown: 18.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 20,
             },
             'double-mele': {
                 name: 'Double Punch',
@@ -188,7 +201,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(1, .25, .125, 0.75),
                 cooldown: 22.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 40,
             },
             'massive2': {
                 name: 'Massive II',
@@ -196,7 +210,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.5, .5, .5, 0.75),
                 cooldown: 12.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 25,
             },
 
             // speed
@@ -206,7 +221,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(0, 1, .1, 0.75),
                 cooldown: 20.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 15,
             },
             'light-weight': {
                 name: 'Light Weight',
@@ -214,7 +230,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.2, .75, .75, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 20,
             },
             'speed2': {
                 name: 'Boost II',
@@ -222,7 +239,8 @@ BSWG.specialList = new (function(){
                 color:new THREE.Vector4(0, 1, .1, 0.75),
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 25,
             },
             'feather-weight': {
                 name: 'Feather Weight',
@@ -230,7 +248,8 @@ BSWG.specialList = new (function(){
                 color: new THREE.Vector4(.2, .75, .75, 0.75),
                 cooldown: 40.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
-                iconScale: 0.75
+                iconScale: 0.75,
+                energy: 30,
             }
         };
 
@@ -405,9 +424,12 @@ BSWG.specialEffect = function(desc, args) {
         this[key] = desc[key];
     }
 
-    this.init(args);
-
-    BSWG.specialList.effectList.push(this);
+    if (this.init(args)) {
+        BSWG.specialList.effectList.push(this);
+    }
+    else {
+        this.destroy();
+    }
 
 };
 
@@ -445,6 +467,10 @@ BSWG.startSpecial = function(key, who, btn) {
         return;
     }
 
+    if (who.energy < BSWG.specialsInfo[key].energy) {
+        return;
+    }
+
     if (btn) {
         btn.selected = true;
     }
@@ -459,7 +485,11 @@ BSWG.startSpecial = function(key, who, btn) {
                 return;
             }
             if (data) {
-                if (who.hasSpecial(key)) {
+                if (who.hasSpecial(key) && who.energy >= BSWG.specialsInfo[key].energy) {
+                    if (BSWG.specialsInfo[key].effect) {
+                        new BSWG.specialEffect(BSWG.specialsInfo[key].effect, data);
+                    }
+                    who.energy = Math.max(who.energy - BSWG.specialsInfo[key].energy || 0, 0);
                     who.specials.all[key].t = 0.0;
                 }
             }

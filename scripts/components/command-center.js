@@ -123,7 +123,7 @@ BSWG.component_CommandCenter = {
             if (key) {
                 var desc = BSWG.specialsInfo[key];
                 if (desc && this.specials.all && this.specials.all[key]) {
-                    this.specials.all[key].t += dt / desc.cooldown * (BSWG.game.battleMode ? 1 : 10);
+                    this.specials.all[key].t += dt / 1.5;
                     if (this.specials.all[key].t > 1.0) {
                         this.specials.all[key].t = 1.0;
                     }
@@ -173,6 +173,8 @@ BSWG.component_CommandCenter = {
         this.upKeyAlt = args.upKeyAlt || this.upKey;
         this.downKeyAlt = args.downKeyAlt || this.downKey;
         this.specials = args.specials || BSWG.newCCSpecialsObj();
+
+        this.energy = this.maxEnergy = 100;
 
         this.totalMass = this.obj.body.GetMass();
 
@@ -429,6 +431,10 @@ BSWG.component_CommandCenter = {
         this.dispKeys['reverse'][0] = BSWG.KEY_NAMES[this.downKey].toTitleCase();
         if (this.downKeyAlt !== this.downKey) {
             this.dispKeys['reverse'][0] += ' / ' + BSWG.KEY_NAMES[this.downKeyAlt].toTitleCase();
+        }
+
+        if (BSWG.game.saveHealAdded) {
+            this.energy = Math.clamp(this.energy + 5*dt, 0, this.maxEnergy);
         }
 
         /*if (this.escapeFrom) {

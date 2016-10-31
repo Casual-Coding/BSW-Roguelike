@@ -107,7 +107,7 @@ BSWG.game = new function(){
                     H.plate(0-off, h-mmsize*sc, mmsize*sc, mmsize*sc, 0.15, 0.5);
                     H.plate(7-off, h-mmsize*sc+7, mmsize*sc-14, mmsize*sc-14, 0.5, 0.15); // 0
 
-                    var hh = bfr*2 + bsz*2;
+                    var hh = bfr*2 + bsz*2+bsz/3;
 
                     self.hudBottomYT = h-(bfr*2 + bsz);
                     self.hudBottomYT2 = h-(bfr*2 + mmsize);
@@ -192,14 +192,16 @@ BSWG.game = new function(){
 
                 if (scene === BSWG.SCENE_GAME1) {
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr, (bfr*2+bsz*4)-bfr*2, bsz/3, 0.5, 0.25); // 17 (xp meter)
+                    var emH = bsz/3;
                     var sz2 = ((bfr*2+bsz*4)-bfr*2) / 3;
-                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 18 (stats button: bosses beaten, zones discovered, etc)
-                    H.plate(w/2-(bfr+bsz*2)+bfr+sz2, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 19 (specials button)
-                    H.plate(w/2-(bfr+bsz*2)+bfr+sz2*2, h-hh+bfr+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 20 (level up/points tree)
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+bsz/3+2+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 18 (stats button: bosses beaten, zones discovered, etc)
+                    H.plate(w/2-(bfr+bsz*2)+bfr+sz2, h-hh+bfr+bsz/3+2+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 19 (specials button)
+                    H.plate(w/2-(bfr+bsz*2)+bfr+sz2*2, h-hh+bfr+bsz/3+2+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 20 (level up/points tree)
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+1+bsz/3, (bfr*2+bsz*4)-bfr*2, bsz/3, 0.5, 0.25); // 21 (energy meter)
                 }
                 else {
-                    for (var i=0; i<4; i++) {
-                        H.hudBtn.push([-1000, -1000, 10, 10]); // 17..20
+                    for (var i=0; i<5; i++) {
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 17..21
                     }                   
                 }
 
@@ -678,7 +680,8 @@ BSWG.game = new function(){
         this.modeBtns = null;
         this.specBtns = null;
         this.needsSave = true;
-        this.saveAt = Date.timeStamp() + 3.0;
+        this.saveAt = null;
+        this.lastSave = Date.timeStamp() - 6.0;
 
         if (this.tileMap) {
             this.tileMap.destroy();
@@ -1324,7 +1327,13 @@ BSWG.game = new function(){
                                         var key = self.ccblock.equippedSpecialNo(idx);
                                         if (key) {
                                             var scale = Math.min(w, h) * 0.95;
-                                            BSWG.renderSpecialIcon(ctx, key, x+w/2, y+h/2, scale, 0.0 + ((hover && self.ccblock.specialReady(key) === 1.0) || BSWG.specialList.curCont() === key ? BSWG.render.time : 0.0), self.ccblock);
+                                            BSWG.renderSpecialIcon(ctx, key, x+w/2, y+h/2, scale, 0.0 + ((hover && self.ccblock.specialReady(key) === 1.0 && BSWG.specialsInfo[key].energy <= self.ccblock.energy) || BSWG.specialList.curCont() === key ? BSWG.render.time : 0.0), self.ccblock);
+                                            ctx.fillStyle = '#99f';
+                                            ctx.strokeStyle = '#000';
+                                            ctx.font = '12px Orbitron';
+                                            ctx.textAlign = 'right';
+                                            ctx.fillTextB(BSWG.specialsInfo[key].energy + '', x+w-7, y+h-7);
+                                            ctx.textAlign = 'left';
                                         }
                                     }
                                 };
@@ -1496,7 +1505,9 @@ BSWG.game = new function(){
                                 app.quit();
                             }
                             else {
-                                self.saveGame();
+                                if (self.saveHealAdded && self.scene === BSWG.SCENE_GAME1) {
+                                    self.saveGame();
+                                }
                                 BSWG.ai.closeEditor();
                                 self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);
                             }
@@ -1551,11 +1562,6 @@ BSWG.game = new function(){
 
             if (self.inZone && self.inZone.bossDefeated) {
                 self.inZone.safe = true;
-            }
-
-            if (self.needsSave && !self.battleMode && (Date.timeStamp() >= self.saveAt)) {
-                self.needsSave = false;
-                self.saveGame();
             }
 
             if (self.scene === BSWG.SCENE_GAME1 && !(self.map.introNext > self.map.areaNo)) {
@@ -1893,6 +1899,7 @@ BSWG.game = new function(){
             BSWG.specialList.updateRender(ctx, dt);
 
             BSWG.ui.update();
+
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
 
@@ -2153,7 +2160,7 @@ BSWG.game = new function(){
                     break;
             }
 
-            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode /*&& (Date.timeStamp()-self.lastSave) > 3*/ && BSWG.componentList.allCCs().length === 1 && (BSWG.orbList.atSafe()) && !self.inZone.safe) {
+            if (self.ccblock && !self.ccblock.destroyed && !self.battleMode /*&& (Date.timeStamp()-self.lastSave) > 3*/ && BSWG.componentList.allCCs().length === 1 && (BSWG.orbList.atSafe() || (self.inZone && self.inZone.safe))) {
                 if (!self.saveHealAdded) {
                     self.needsSave = true;
                     self.saveAt = Date.timeStamp() + 3.0;
@@ -2433,7 +2440,7 @@ BSWG.game = new function(){
                 self.storeBtn.h = self.hudY(self.hudBtn[10][3]) - self.storeBtn.p.y - 4;
             }
 
-            if (self.tradeWin && self.tradeBtn && self.inZone.safe && self.inZone.compValList && self.inZone.compValList.length && (!self.dialogPause || self.dialogBtnHighlight === 'trade')) {
+            if (self.tradeWin && self.tradeBtn && self.inZone && self.inZone.safe && self.inZone.compValList && self.inZone.compValList.length && (!self.dialogPause || self.dialogBtnHighlight === 'trade')) {
                 if (self.tradeBtn.text === '') {
                     self.tradeBtn.text = BSWG.character.getPortrait(self.inZone.boss ? self.inZone.boss.who : -1, true);
                 }
@@ -2620,6 +2627,37 @@ BSWG.game = new function(){
                 ctx.font = (~~(H*0.65)) + 'px Orbitron';
                 ctx.textAlign = 'right';
                 ctx.fillTextB('' + lstat.current + '/' + lstat.next + ' XP', X + W - W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
+            }
+
+            if (self.hudBtn[21] && self.ccblock) {
+                var X = self.hudX(self.hudBtn[21][0]) + 2;
+                var Y = self.hudY(self.hudBtn[21][1]) + 2;
+                var W = self.hudX(self.hudBtn[21][2]) - X - 4;
+                var H = self.hudY(self.hudBtn[21][3]) - Y - 4;
+
+                var t = self.ccblock.energy / self.ccblock.maxEnergy;
+
+                ctx.fillStyle = '#020';
+                ctx.globalAlpha = 0.75;
+                ctx.fillRect(X, Y, W, H);
+                ctx.globalAlpha = 1.0;
+
+                ctx.fillStyle = '#005';
+                ctx.globalAlpha = 0.75;
+                ctx.fillRect(X+1, Y+1, W*t-2, H-2);
+                ctx.globalAlpha = 1.0;
+
+                ctx.fillStyle = '#aaa';
+                ctx.strokeStyle = '#00f';
+                ctx.font = (~~(H*0.65)) + 'px Orbitron';
+                ctx.textAlign = 'left';
+                ctx.fillTextB('Energy', X + W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
+
+                ctx.fillStyle = '#aaa';
+                ctx.strokeStyle = '#00f';
+                ctx.font = (~~(H*0.65)) + 'px Orbitron';
+                ctx.textAlign = 'right';
+                ctx.fillTextB('' + Math.round(self.ccblock.energy) + '/' + Math.round(self.ccblock.maxEnergy), X + W - W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
             }
 
             if (self.xpInfo && self.levelUpBtn) {
@@ -2815,54 +2853,6 @@ BSWG.game = new function(){
 
             ctx.globalAlpha = 1.0;
 
-            /*if (true) { // demo camp timer mode
-
-                var img = BSWG.render.images['dc-logo'];
-                var h = BSWG.render.viewport.h * 0.03;
-                var w = (img.width / img.height) * h;
-                var text = "";
-                var timeLeft = 5*60;
-                ctx.drawImage(img, 0, 0, img.width, img.height, BSWG.render.viewport.w - w - 10, BSWG.render.viewport.h * 0.05, w, h);
-
-                if (self.dcTimer) {
-                    var time = Date.timeStamp() - self.dcTimer;
-                    var min = Math.floor(time / 60);
-                    var sec = Math.floor(time) % 60;
-                    timeLeft = 5*60 - min*60 - sec;
-                    if ((self.dcSoundT !== (min*60+sec)) && (min >= 1 && sec === 0 || min === 4 && sec === 30)) {
-                        self.dcSound = new BSWG.soundSample().play('levelup', null, 0.5, 1.0);
-                        self.dcSoundT = min*60+sec;
-                    }
-                    text = min + ':';
-                    if (sec < 10) {
-                        text += '0'
-                    }
-                    text += sec;
-                }
-                else if (BSWG.input.KEY_DOWN(BSWG.KEY.Z)) {
-                    self.dcTimer = Date.timeStamp();
-                }
-                else {
-                    text = "Press Z";
-                }
-
-                if (timeLeft > 1*60) {
-                    ctx.fillStyle = '#0f0';
-                }
-                else if (timeLeft > 30) {
-                    ctx.fillStyle = '#ff0';
-                }
-                else {
-                    ctx.fillStyle = '#f00';
-                }
-                ctx.strokeStyle = '#000';
-                ctx.textAlign = 'left';
-                ctx.font = Math.floor(h*.65) + 'px Orbitron';
-                ctx.fillTextB(text, BSWG.render.viewport.w - w - 10 + w * 0.02, BSWG.render.viewport.h * 0.05 + h * 1.65);
-
-            } // end demo camp timer mode
-            */
-
             BSWG.ui.render(ctx, viewport);
             var statusTxt = Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds + (BSWG.render.vsyncOn ? ', VSYNC' : '');
             ctx.fillStyle = '#ccc';
@@ -2960,6 +2950,20 @@ BSWG.game = new function(){
                     ctx.fillStyle = ss.color;
                     ctx.fillRect(0, 0, viewport.w, viewport.h);
                     ctx.globalAlpha = 1.0;
+                }
+            }
+            else {
+                if (self.scene === BSWG.SCENE_GAME1) {
+                    if (!self.saveAt) {
+                        self.saveAt = Date.timeStamp() + 3.0;
+                    }
+                    if (self.needsSave && !self.battleMode && (Date.timeStamp() >= self.saveAt)) {
+                        self.needsSave = false;
+                        if (Date.timeStamp() > (self.lastSave+4)) {
+                            self.saveGame();
+                            self.lastSave = Date.timeStamp();
+                        }
+                    }
                 }
             }
 

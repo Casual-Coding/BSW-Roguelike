@@ -21,7 +21,7 @@ BSWG.adBias = function(p, e) { // (p)layer (e)nemy
         return bias;
     }
 };
-BSWG.defenceBias = 0.725;
+BSWG.defenseBias = 0.725;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
@@ -318,6 +318,7 @@ BSWG.component = function (desc, args) {
     }
 
     this.hp = this.maxHP;
+    this.healHP = 0;
     this.destroyed = false;
 
     if (this.obj) {
@@ -381,43 +382,45 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
         return;
     }
 
-    var isFriendly = false;
-    if (fromC && fromC.onCC && this.onCC) {
-        if (fromC.onCC.id === this.onCC.id) {
-            amt *= BSWG.friendlyFactor;
-            isFriendly = true;
+    if (amt > 0) {
+        var isFriendly = false;
+        if (fromC && fromC.onCC && this.onCC) {
+            if (fromC.onCC.id === this.onCC.id) {
+                amt *= BSWG.friendlyFactor;
+                isFriendly = true;
+            }
+            else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
+                amt *= BSWG.friendlyFactor;
+                isFriendly = true;
+            }
         }
-        else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
-            amt *= BSWG.friendlyFactor;
-            isFriendly = true;
+
+        if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
+            amt /= BSWG.orphanDefense;
         }
-    }
-
-    if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
-        amt /= BSWG.orphanDefense;
-    }
-    if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
-        amt /= BSWG.orphanDefense;
-    }
-
-    if (this.onCC && !isFriendly) {
-        // Level bias
-        var enemyCC = fromC ? fromC.onCC : null;
-        var enemyBuff = enemyCC ? enemyCC.buff() : this.onCC.buff();
-        var myBuff = this.onCC.buff();
-        amt *= BSWG.adBias(myBuff, enemyBuff);
-
-        // Weight bias
-        amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 5;
-
-        // Human bias
-        if (this.onCC === BSWG.game.ccblock) {
-            amt /= BSWG.defenceBias;
+        if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
+            amt /= BSWG.orphanDefense;
         }
-    }
 
-    if (amt < 1 && !noMin) {
-        return;
+        if (this.onCC && !isFriendly) {
+            // Level bias
+            var enemyCC = fromC ? fromC.onCC : null;
+            var enemyBuff = enemyCC ? enemyCC.buff() : this.onCC.buff();
+            var myBuff = this.onCC.buff();
+            amt *= BSWG.adBias(myBuff, enemyBuff);
+
+            // Weight bias
+            amt /= 1.0 + Math.sqrt(this.onCC.totalMass || 0.0) / 5;
+
+            // Human bias
+            if (this.onCC === BSWG.game.ccblock) {
+                amt /= BSWG.defenseBias;
+            }
+        }
+
+        if (amt < 1 && !noMin) {
+            return;
+        }
     }
 
     if (disolve) {
@@ -428,7 +431,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
     if (this.hp > this.maxHP) {
         this.hp = this.maxHP;
     }
-    if (this.hp <= 0 && !this.destroyed) {
+    if (amt > 0 && this.hp <= 0 && !this.destroyed) {
         if (this.obj && this.obj.body) {
 
             var p = this.obj.body.GetWorldCenter();
@@ -808,6 +811,15 @@ BSWG.component.prototype.baseUpdate = function(dt) {
     }
 
     this.repairing = false;
+    if (this.healHP > 0) {
+        var amt = Math.clamp(dt*5.0, 0, this.healHP);
+        this.healHP -= amt;
+        this.repairing = true;
+        this.takeDamage(-amt, null, true);
+        if (this.healHP <= 0) {
+            this.healHP = 0.0;
+        }
+    }
     if (!BSWG.game.battleMode && BSWG.game.ccblock && (!BSWG.game.scene === BSWG.SCENE_GAME1 || BSWG.game.saveHealAdded) && this.hp < this.maxHP) {
         this.repairing = true;
         this.takeDamage(-dt*5.0, null, true);
