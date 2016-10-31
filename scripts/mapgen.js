@@ -143,10 +143,9 @@ BSWG.enemySettings = [
             { type: 'brute',            levels: [8,9,10], max: 2 },
             { type: 'crippler',         levels: [8,9,10] },
             { type: 'fighter',          levels: [0,1,2,5,6], max: 2 },
-            { type: 'four-blaster',     levels: [0,1] },
-            { type: 'four-blaster',     levels: [0,1], with: [ 'uni-dir-fighter' ] },
-            { type: 'four-blaster',     levels: [0,1], with: [ 'fighter' ] },
-            { type: 'four-blaster',     levels: [0,1], with: [ 'four-blaster-x2' ] },
+            { type: 'fighter',          levels: [0,1], with: [ 'uni-dir-fighter' ] },
+            { type: 'fighter',          levels: [0,1], with: [ 'fighter' ] },
+            { type: 'fighter',          levels: [0,1], with: [ 'four-blaster-x2' ] },
             { type: 'four-blaster-x2',  levels: [0,1] },
             { type: 'four-blaster-x2',  levels: [0,1], with: [ 'uni-dir-fighter' ] },
             { type: 'four-blaster-x2',  levels: [0,1], with: [ 'fighter' ] },
@@ -215,6 +214,17 @@ BSWG.enemySettings = [
             { type: 'four-minigun',     levels: [1, 2, 3], max: 2 },
             { type: 'four-minigun',     levels: [1, 2], max: 2 },
             { type: 'four-minigun',     levels: [2], max: 2 },
+            { type: 'mini-gunner',      levels: [1] },
+            { type: 'mini-gunner',      levels: [1] },
+            { type: 'mini-gunner',      levels: [1, 2] },
+            { type: 'mini-gunner',      levels: [1, 2] },
+            { type: 'mini-gunner',      levels: [1, 2] },
+            { type: 'fighter-mg-2',     levels: [1, 2] },
+            { type: 'fighter-mg-2',     levels: [1, 2] },
+            { type: 'fighter-mg-2',     levels: [1, 2] },
+            { type: 'fighter-mg-2',     levels: [2, 3], max: 2 },
+            { type: 'fighter-mg-2',     levels: [2, 3], max: 2 },
+            { type: 'fighter-mg-2',     levels: [2, 3], max: 2 },
             { type: 'mini-gunner',      levels: [1, 2, 3] },
             { type: 'mini-gunner',      levels: [1, 2, 3] },
             { type: 'mini-gunner',      levels: [2, 3, 4], max: 2 },
@@ -881,6 +891,17 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         return this.colMap[x] && this.colMap[x][y];
     };
 
+    ret.getTType = function(p) {
+        var x = Math.floor(p.x/BSWG.tileSizeWorld);
+        var y = Math.floor(p.y/BSWG.tileSizeWorld);
+        if (this.terMap[x]) {
+            return this.terMap[x][y] || 0;
+        }
+        else {
+            return 0;
+        }
+    };
+
     ret.colInBox = function(x1, y1, x2, y2) {
         var ax = Math.floor(x1/BSWG.tileSizeWorld);
         var ay = Math.floor(y1/BSWG.tileSizeWorld);
@@ -1021,9 +1042,13 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                     this.escapeDistance = this.gridSize * 4.0 / 1.35;
                     lastBattleZone = zone;
                     distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-                    return zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
+                    Math.seedrandom(Math.floor(p.x / (this.gridSize*8)) + 10000 * Math.floor(p.y / (this.gridSize*8)) + this.getTType(p)*0.1);
+                    var e = zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
+                    Math.seedrandom();
+                    return e;
                 }
             }
+            
 
         }
 
@@ -1432,8 +1457,12 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo, lastZone) {
 
     zone.enemies = new Array();
     var k = 1000;
+    var U = {};
     while (zone.enemies.length < 16 && k-- > 0) {
         for (var i=0; i<eInfo.enemies.length; i++) {
+            if (U[i]) {
+                continue;
+            }
             var E = eInfo.enemies[i];
             var found = false;
             for (var j=0; j<zone.enemies.length && !found; j++) {
@@ -1460,6 +1489,7 @@ BSWG.genMap_EnemyPlacement_Zone = function(zone, eInfo, lastZone) {
                 if (E2 && E2.obj && E2.stats) {
                     if (Math.random() < 0.05) {
                         zone.enemies.push(E);
+                        U[i] = true;
                     }
                 }
             }

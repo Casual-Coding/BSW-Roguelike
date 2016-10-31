@@ -310,7 +310,7 @@ BSWG.component_CommandCenter = {
     buff: function() {
         if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
             if (BSWG.game.xpInfo) {
-                return BSWG.game.xpInfo.buff() + 0.25;
+                return BSWG.game.xpInfo.buff();
             }
             else {
                 return 0;
@@ -371,6 +371,23 @@ BSWG.component_CommandCenter = {
         this.meshObj2.update([l, 0.8, 0.9, 1], 3.0, BSWG.compAnchored(this));
 
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
+
+        if (this.usedSpecial && this.usedSpecialT > 0 && this.obj && this.obj.body) {
+            var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
+            ctx.globalAlpha = Math.clamp(this.usedSpecialT*2.0, 0, 1);
+            ctx.font = '18px Orbitron';
+            ctx.fillStyle = this.usedSpecialClr;
+            ctx.strokeStyle = 'rgba(0,0,0,.4)';
+            ctx.textAlign = 'center';
+            ctx.fillTextB('"' + this.usedSpecial + '"', p.x, p.y-9);
+            ctx.textAlign = 'left';
+            ctx.globalAlpha = 1.0;
+            this.usedSpecialT -= dt;
+            p = null;
+        }
+        else {
+            this.usedSpecial = this.usedSpecialT = this.usedSpecialClr = null;
+        }
     },
 
     warpOut: function(slow) {

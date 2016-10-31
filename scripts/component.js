@@ -21,7 +21,7 @@ BSWG.adBias = function(p, e) { // (p)layer (e)nemy
         return bias;
     }
 };
-BSWG.defenseBias = 0.725;
+BSWG.defenseBias = 0.5;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;

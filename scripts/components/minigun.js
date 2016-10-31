@@ -34,10 +34,10 @@ BSWG.component_Minigun = {
         var size = args.size || 1;
         ret.push(Math.smoothPoly([
             new b2Vec2(size * -0.30 * 1.5, size * -0.125 * 1.5),
-            new b2Vec2(size *  0.0  * 1.5, size * -0.15  * 1.5),
+            new b2Vec2(size *  0.0  * 1.5, size * -0.125  * 1.5),
             new b2Vec2(size *  0.6  * 1.5, size * -0.05  * 1.5),
             new b2Vec2(size *  0.6  * 1.5, size *  0.05  * 1.5),
-            new b2Vec2(size *  0.0  * 1.5, size *  0.15  * 1.5),
+            new b2Vec2(size *  0.0  * 1.5, size *  0.125  * 1.5),
             new b2Vec2(size * -0.30 * 1.5, size *  0.125 * 1.5)
         ], 0.02));
         var circle = [];
@@ -64,10 +64,10 @@ BSWG.component_Minigun = {
         var overs = null;
         var verts = Math.smoothPoly(overts = [
             new b2Vec2(size * -0.30 * 1.5, size * -0.125 * 1.5),
-            new b2Vec2(size *  0.0  * 1.5, size * -0.15  * 1.5),
+            new b2Vec2(size *  0.0  * 1.5, size * -0.125  * 1.5),
             new b2Vec2(size *  0.6  * 1.5, size * -0.05  * 1.5),
             new b2Vec2(size *  0.6  * 1.5, size *  0.05  * 1.5),
-            new b2Vec2(size *  0.0  * 1.5, size *  0.15  * 1.5),
+            new b2Vec2(size *  0.0  * 1.5, size *  0.125  * 1.5),
             new b2Vec2(size * -0.30 * 1.5, size *  0.125 * 1.5)
         ], 0.02);
 
@@ -96,7 +96,7 @@ BSWG.component_Minigun = {
         }
         this.circleOffset = c;
 
-        this.jpoints = BSWG.createPolyJPoints(overts, [0, 1, 2, 3, 4], false);
+        this.jpoints = BSWG.createPolyJPoints(overts, [1, 2, 3], false);
 
         this.thrustT = 0.0;
         this.kickBack = 0.0;

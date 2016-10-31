@@ -223,7 +223,8 @@ var BSWG = new function(){
         'marauder-2',
         'mini-gunner',
         'mini-gunner-m2',
-        'mini-gunner-m3'
+        'mini-gunner-m3',
+        'fighter-mg-2'
     ];
     for (var i=0; i<ai.length; i++) {
         scripts.push([
