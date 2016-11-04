@@ -109,7 +109,7 @@ BSWG.component_MissileLauncher = {
         }
 
         if (this.fireT) {
-            this.fireT -= dt;
+            this.fireT -= dt * ((this.onCC && this.onCC.fury) ? 1.35 : 1.0);
             if (this.fireT <= 0)
                 this.fireT = 0.0;
         }

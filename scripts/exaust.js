@@ -1,4 +1,4 @@
-BSWG.maxExaust = 192;
+BSWG.maxExaust = 384;
 
 BSWG.exaustFire = [
     new THREE.Vector4(1, 1, 1, 1),

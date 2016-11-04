@@ -448,16 +448,21 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         var angle  = body.GetAngle();
 
         var offset = BSWG.drawBlockPolyOffset || null;
+        var zo2 = 0;
+
+        /*if (obj && obj.comp && obj.comp.onCC && obj.comp.onCC !== BSWG.game.ccblock) {
+            zo2 -= Math.pow(self.mat.uniforms.warpIn.value, 6.0) * 12;
+        }*/
 
         self.mesh.position.x = center.x + (offset?offset.x:0);
         self.mesh.position.y = center.y + (offset?offset.y:0);
-        self.mesh.position.z = zoffset;
+        self.mesh.position.z = zoffset + zo2;
         self.mesh.rotation.z = angle + (exRot || 0);
         self.mesh.updateMatrix();
 
         self.meshS.position.x = center.x + (offset?offset.x:0);
         self.meshS.position.y = center.y + (offset?offset.y:0);
-        self.meshS.position.z = zoffset;
+        self.meshS.position.z = zoffset + zo2;
         self.meshS.rotation.z = angle + (exRot || 0);
         self.meshS.updateMatrix();
 
@@ -551,6 +556,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         if (self.lclr) {
             var t = self.enemyT * 0.5;
             var clr2 = self.mat.uniforms.clr.value;
+            var br = self.lclr[0], bg = self.lclr[1], bb = self.lclr[2];
             var r = 1, g = 0, b = 0;
             if (BSWG.game.bossFight) {
                 r = 0.2;
@@ -560,7 +566,19 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             else {
                 self.mat.uniforms.vreflect.value = reflect;
             }
-            clr2.set(self.lclr[0] * (1-t) + t * r, self.lclr[1] * (1-t) + t * g, self.lclr[2] * (1-t) + t * b, self.lclr[3]);
+            if (obj && obj.comp && obj.comp.p) {
+                if (obj.comp.repairing) {
+                    bg = Math.clamp(bg + obj.comp.healHP, 0, 1);
+                    br = Math.clamp(br - bg * 0.5, 0, 1);
+                    bb = Math.clamp(bb - bg * 0.5, 0, 1);
+                }
+                if (obj.comp.onCC && obj.comp.onCC.fury) {
+                    br = Math.clamp(br + Math.min(obj.comp.onCC.fury*8, 1) * 0.75, 0, 1);
+                    bg = Math.clamp(bg - br * 0.5, 0, 1);
+                    bb = Math.clamp(bb - br * 0.5, 0, 1);
+                }
+            }
+            clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, self.lclr[3]*(1-self.mat.uniforms.warpIn.value));
         }
         else {
             self.mat.uniforms.vreflect.value = reflect;

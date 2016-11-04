@@ -65,7 +65,7 @@ BSWG.specialList = new (function(){
                 minRadius: 5,
                 maxRadius: 5,
                 cooldown: 20.0, // seconds
-                energy: 25,
+                energy: 20,
                 polys: [
                     [
                         new b2Vec2(-.3, .15/2),
@@ -127,11 +127,12 @@ BSWG.specialList = new (function(){
             'fury': {
                 name: 'Fury',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_fury,
                 color: new THREE.Vector4(1, 0, 0, 0.75),
                 cooldown: 25.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
                 iconScale: 0.75,
-                energy: 25,
+                energy: 15,
             },
             'torpedo': {
                 name: 'Torpedo',
@@ -142,7 +143,7 @@ BSWG.specialList = new (function(){
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
                 iconScale: 0.75,
-                energy: 50,
+                energy: 35,
             },
             'emp-attack': {
                 name: 'EMP Torpedo',
@@ -153,7 +154,7 @@ BSWG.specialList = new (function(){
                 cooldown: 30.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
                 iconScale: 0.75,
-                energy: 50,
+                energy: 35,
             },
             'over-power': {
                 name: 'Over Powered',
@@ -162,7 +163,7 @@ BSWG.specialList = new (function(){
                 cooldown: 25.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
                 iconScale: 0.75,
-                energy: 50,
+                energy: 40,
             },
             'torpedo-spread': {
                 name: 'Torpedo Spread',
@@ -173,7 +174,7 @@ BSWG.specialList = new (function(){
                 cooldown: 40.0, // seconds
                 polys: BSWG.specialsDefaultPoly,
                 iconScale: 0.75,
-                energy: 80,
+                energy: 60,
             },
 
             // mele

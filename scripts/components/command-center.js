@@ -176,6 +176,10 @@ BSWG.component_CommandCenter = {
 
         this.energy = this.maxEnergy = 100;
 
+        // special effects
+        this.fury = 0;
+        //
+
         this.totalMass = this.obj.body.GetMass();
 
         this.dispKeys = {
@@ -422,6 +426,13 @@ BSWG.component_CommandCenter = {
     },
 
     update: function(dt) {
+
+        if (this.fury) {
+            this.fury = Math.max(0, this.fury - dt);
+        }
+        else {
+            this.fury = 0;
+        }
 
         if (!this.sound) {
             this.sound = new BSWG.soundSample();
