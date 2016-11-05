@@ -54,6 +54,44 @@ BSWG.specialList = new (function(){
             ]
         ];
 
+        var makeTorpedoIcon = function(x,y,sz,a2,ripple,np,tail) {
+            np = np || 24;
+            ripple = ripple || false;
+            tail = tail || 1.5;
+            var poly = [];
+            for (var i=0; i<np; i++) {
+                var a = i/np * Math.PI * 2.0;
+                var tr = 0.65;
+                if (ripple && (i%2)) {
+                    tr *= 0.75;
+                }
+                var p = new b2Vec2(Math.cos(a)*sz*tr, Math.sin(a)*sz*tr);
+                var t = Math.clamp(Math.abs(a - a2) / (Math.PI/6), 0, 1);
+                t = Math.pow(t, 0.75);
+                if (t < 1) {
+                    p.x = p.x * t + Math.cos(a2) * sz * tail * (1-t);
+                    p.y = p.y * t + Math.sin(a2) * sz * tail * (1-t);
+                }
+                p.x += x;
+                p.y += y;
+                poly.push(p);
+            }
+            return poly;
+        }
+
+        var scalePolys = function(poly, sc) {
+            for (var i=0; i<poly.length; i++) {
+                if (poly[i] instanceof b2Vec2) {
+                    poly[i].x *= sc;
+                    poly[i].y *= sc;
+                }
+                else {
+                    scalePolys(poly[i], sc);
+                }
+            }
+            return poly;
+        };
+
         BSWG.specialsInfo = {
 
             // defend
@@ -89,7 +127,9 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(0, .3, 1, 0.75),
                 cooldown: 25.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: [
+                    Math.smoothPoly(Math.rotPoly(makeTorpedoIcon(.095, 0, .4, Math.PI, false, 6, 1.25), -Math.PI/2), 0.1)
+                ],
                 iconScale: 0.75,
                 energy: 25
             },
@@ -98,7 +138,9 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(.3, 0, 1, 0.75),
                 cooldown: 30.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: [
+                    makeTorpedoIcon(0, 0, .5, Math.PI*10000, true, 40)
+                ],
                 iconScale: 0.75,
                 energy: 50,
             },
@@ -107,7 +149,22 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(1, 1, 0, 0.75),
                 cooldown: 30.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    for (var i=0; i<5; i++) {
+                        var a1 = (i+0.25)/5 * Math.PI*2;
+                        var a2 = (i+1-0.25)/5 * Math.PI*2;
+                        var ac = (a1+a2)*0.5;
+                        var poly = [
+                            new b2Vec2(Math.cos(ac)*.4, Math.sin(ac)*.4),
+                            new b2Vec2(Math.cos(a1)*.3, Math.sin(a1)*.3),
+                            new b2Vec2(Math.cos(a2)*.3, Math.sin(a2)*.3)
+                        ];
+                        polys.push(poly);
+                    }
+                    polys.push(makeTorpedoIcon(0, 0, .15, Math.PI*10000, false, 12));
+                    return polys;
+                })(),
                 iconScale: 0.75,
                 energy: 50,
             },
@@ -118,7 +175,9 @@ BSWG.specialList = new (function(){
                 maxRadius: 6.5,
                 color: new THREE.Vector4(.0, .0, .0, 0.75),
                 cooldown: 30.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: [
+                    makeTorpedoIcon(0, 0, .5, Math.PI*10000, false, 40)
+                ],
                 iconScale: 0.75,
                 energy: 80,
             },
@@ -130,7 +189,19 @@ BSWG.specialList = new (function(){
                 effect: BSWG.specialEffect_fury,
                 color: new THREE.Vector4(1, 0, 0, 0.75),
                 cooldown: 25.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    for (var i=0; i<2; i++) {
+                        var poly = [
+                            new b2Vec2(0, -.15 - i*.3 + .125),
+                            new b2Vec2(-.3, .1 - i*.3 + .125),
+                            new b2Vec2(0, 0 - i*.3 + .125),
+                            new b2Vec2(.3, .1 - i*.3 + .125)
+                        ];
+                        polys.push(poly)
+                    }
+                    return polys;
+                })(),
                 iconScale: 0.75,
                 energy: 15,
             },
@@ -141,7 +212,9 @@ BSWG.specialList = new (function(){
                 maxRadius: 3,
                 color: new THREE.Vector4(1, .5, 0, 0.75),
                 cooldown: 30.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: [
+                    makeTorpedoIcon(0, 0, .35, Math.PI/2.5)
+                ],
                 iconScale: 0.75,
                 energy: 35,
             },
@@ -152,7 +225,9 @@ BSWG.specialList = new (function(){
                 maxRadius: 3,
                 color: new THREE.Vector4(.5, .25, 1, 0.75),
                 cooldown: 30.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: [
+                    makeTorpedoIcon(0, 0, .35, Math.PI/2.5, true, 32)
+                ],
                 iconScale: 0.75,
                 energy: 35,
             },
@@ -161,7 +236,19 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(1, 0, 0, 0.75),
                 cooldown: 25.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    for (var i=0; i<3; i++) {
+                        var poly = [
+                            new b2Vec2(0, -.15 - i*.3 + .3),
+                            new b2Vec2(-.3, .1 - i*.3 + .3),
+                            new b2Vec2(0, 0 - i*.3 + .3),
+                            new b2Vec2(.3, .1 - i*.3 + .3)
+                        ];
+                        polys.push(poly)
+                    }
+                    return scalePolys(polys, 0.8);
+                })(),
                 iconScale: 0.75,
                 energy: 40,
             },
@@ -172,7 +259,11 @@ BSWG.specialList = new (function(){
                 maxRadius: 6,
                 color: new THREE.Vector4(1, .5, 0, 0.75),
                 cooldown: 40.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: [
+                    makeTorpedoIcon(0, -.25, .25, Math.PI/2.5, false, 16),
+                    makeTorpedoIcon(-.25, 0, .25, Math.PI/2.5, false, 16),
+                    makeTorpedoIcon(.25, 0, .25, Math.PI/2.5, false, 16)
+                ],
                 iconScale: 0.75,
                 energy: 60,
             },
@@ -183,7 +274,17 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(.5, .5, .5, 0.75),
                 cooldown: 12.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    polys.push([
+                        new b2Vec2(-.175, -.2),
+                        new b2Vec2(-.25, .2),
+                        new b2Vec2(.25, .2),
+                        new b2Vec2(.175, -.2)
+                    ]);
+                    polys.push(makeTorpedoIcon(0, -.25, .1, Math.PI*1000, false, 8));
+                    return scalePolys(polys, 0.85);
+                })(),
                 iconScale: 0.75,
                 energy: 15,
             },
@@ -210,7 +311,17 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(.5, .5, .5, 0.75),
                 cooldown: 12.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    polys.push([
+                        new b2Vec2(-.175, -.2),
+                        new b2Vec2(-.25, .2),
+                        new b2Vec2(.25, .2),
+                        new b2Vec2(.175, -.2)
+                    ]);
+                    polys.push(makeTorpedoIcon(0, -.25, .1, Math.PI*1000, false, 12));
+                    return scalePolys(polys, 1.25);
+                })(),
                 iconScale: 0.75,
                 energy: 25,
             },
@@ -221,7 +332,19 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color: new THREE.Vector4(0, 1, .1, 0.75),
                 cooldown: 20.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    for (var i=0; i<2; i++) {
+                        var poly = [
+                            new b2Vec2(0, -.15 - i*.3 + .125),
+                            new b2Vec2(-.3, .1 - i*.3 + .125),
+                            new b2Vec2(0, 0 - i*.3 + .125),
+                            new b2Vec2(.3, .1 - i*.3 + .125)
+                        ];
+                        polys.push(poly)
+                    }
+                    return polys;
+                })(),
                 iconScale: 0.75,
                 energy: 15,
             },
@@ -239,7 +362,19 @@ BSWG.specialList = new (function(){
                 controller: BSWG.specialCont_targetShip,
                 color:new THREE.Vector4(0, 1, .1, 0.75),
                 cooldown: 30.0, // seconds
-                polys: BSWG.specialsDefaultPoly,
+                polys: (function(){
+                    var polys = [];
+                    for (var i=0; i<3; i++) {
+                        var poly = [
+                            new b2Vec2(0, -.15 - i*.3 + .3),
+                            new b2Vec2(-.3, .1 - i*.3 + .3),
+                            new b2Vec2(0, 0 - i*.3 + .3),
+                            new b2Vec2(.3, .1 - i*.3 + .3)
+                        ];
+                        polys.push(poly)
+                    }
+                    return scalePolys(polys, 0.8);
+                })(),
                 iconScale: 0.75,
                 energy: 25,
             },

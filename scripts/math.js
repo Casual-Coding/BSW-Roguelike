@@ -219,6 +219,13 @@ Math.pointBetween = function(c, a1, a2, p) {
     }
 }
 
+Math.rotPoly = function(poly, angle) {
+    for (var i=0; i<poly.length; i++) {
+        poly[i] = Math.rotVec2(poly[i], angle);
+    }
+    return poly;
+}
+
 Math.rotVec2 = function(vec, angle)
 {
     var x = vec.x,

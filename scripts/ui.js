@@ -559,6 +559,10 @@ BSWG.control_UnlockTree = {
 
                             ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
 
+                            BSWG.renderSpecialIcon(ctx, key, x + me.w/2, y + me.h/2, me.w, 0.0, BSWG.game.ccblock, true);
+
+                            ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
+
                             ctx.fillStyle = me.nameClr;
                             ctx.strokeStyle = '#000';
                             ctx.font = '10px Orbitron';
@@ -569,10 +573,6 @@ BSWG.control_UnlockTree = {
                             ctx.fillTextB((me.level === 1 ? '1 point' : me.level + ' points'), x + me.w/2, y+me.h-4);
                             ctx.fillStyle = '#99f';
                             ctx.fillTextB(me.energy + ' energy', x + me.w/2, y+me.h-4+10);
-
-                            ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
-
-                            BSWG.renderSpecialIcon(ctx, key, x + me.w/2, y + me.h/2, me.w, 0.0, BSWG.game.ccblock, true);
 
                             ctx.globalAlpha = 1.0;
                         }
