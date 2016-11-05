@@ -572,35 +572,47 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     br = Math.clamp(br - bg * 0.5, 0, 1);
                     bb = Math.clamp(bb - bg * 0.5, 0, 1);
                 }
-                if (obj.comp.onCC && obj.comp.onCC.fury) {
-                    br = Math.clamp(br + Math.min(obj.comp.onCC.fury, 1) * 0.75, 0, 1);
-                    bg = Math.clamp(bg - br * 0.5, 0, 1);
-                    bb = Math.clamp(bb - br * 0.5, 0, 1);
-                }
-                if (obj.comp.onCC && obj.comp.onCC.overpowered) {
-                    br = Math.clamp(br + Math.min(obj.comp.onCC.overpowered, 1) * 1.5, 0, 1);
-                    bg = Math.clamp(bg - br * 0.75, 0, 1);
-                    bb = Math.clamp(bb - br * 0.75, 0, 1);
-                }
-                if (obj.comp.onCC && obj.comp.onCC.defenseScreen) {
-                    bb = Math.clamp(bb + Math.min(obj.comp.onCC.defenseScreen, 1) * 0.25, 0, 1);
-                    bg = Math.clamp(bg - bb * 0.25, 0, 1);
-                    br = Math.clamp(br - bb * 0.25, 0, 1);
-                }
-                if (obj.comp.onCC && obj.comp.onCC.lightweight) {
-                    br = Math.clamp(br + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
-                    bg = Math.clamp(bg + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
-                    bb = Math.clamp(bb + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
-                }
-                if (obj.comp.onCC && obj.comp.onCC.massive) {
-                    br = Math.clamp(br - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
-                    bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
-                    bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
-                }
-                if (obj.comp.onCC && obj.comp.onCC.massive2) {
-                    br = Math.clamp(br - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
-                    bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
-                    bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                if (obj.comp.onCC) {
+                    if (obj.comp.onCC.fury) {
+                        br = Math.clamp(br + Math.min(obj.comp.onCC.fury, 1) * 0.75, 0, 1);
+                        bg = Math.clamp(bg - br * 0.5, 0, 1);
+                        bb = Math.clamp(bb - br * 0.5, 0, 1);
+                    }
+                    if (obj.comp.onCC.overpowered) {
+                        br = Math.clamp(br + Math.min(obj.comp.onCC.overpowered, 1) * 1.5, 0, 1);
+                        bg = Math.clamp(bg - br * 0.75, 0, 1);
+                        bb = Math.clamp(bb - br * 0.75, 0, 1);
+                    }
+                    if (obj.comp.onCC.defenseScreen) {
+                        bb = Math.clamp(bb + Math.min(obj.comp.onCC.defenseScreen, 1) * 0.25, 0, 1);
+                        bg = Math.clamp(bg - bb * 0.25, 0, 1);
+                        br = Math.clamp(br - bb * 0.25, 0, 1);
+                    }
+                    if (obj.comp.onCC.lightweight) {
+                        br = Math.clamp(br + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
+                        bg = Math.clamp(bg + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
+                        bb = Math.clamp(bb + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
+                    }
+                    if (obj.comp.onCC.massive) {
+                        br = Math.clamp(br - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
+                        bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
+                        bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
+                    }
+                    if (obj.comp.onCC.massive2) {
+                        br = Math.clamp(br - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                        bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                        bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                    }
+                    if (obj.comp.onCC.doublePunch && obj.comp.isMele) {
+                        br = Math.clamp(br + Math.min(obj.comp.onCC.doublePunch, 1) * 1.5, 0, 1);
+                        bg = Math.clamp(bg - br * 0.75, 0, 1);
+                        bb = Math.clamp(bb - br * 0.75, 0, 1);
+                    }
+                    if (obj.comp.onCC.spinUp && obj.comp.isMele && obj.comp.isSpinner) {
+                        br = Math.clamp(br + Math.min(obj.comp.onCC.spinUp, 1) * 1.5, 0, 1);
+                        bg = Math.clamp(bg - br * 0.75, 0, 1);
+                        bb = Math.clamp(bb - br * 0.75, 0, 1);
+                    }
                 }
 
             }

@@ -305,6 +305,7 @@ BSWG.specialList = new (function(){
             'spin-up': {
                 name: 'Spin Up',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_spinUp,
                 color: new THREE.Vector4(.75, .75, .75, 0.75),
                 cooldown: 18.0, // seconds
                 polys: (function(){
@@ -329,6 +330,7 @@ BSWG.specialList = new (function(){
             'double-mele': {
                 name: 'Double Punch',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_doublePunch,
                 color: new THREE.Vector4(1, .25, .125, 0.75),
                 cooldown: 22.0, // seconds
                 polys: (function(){

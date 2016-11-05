@@ -290,6 +290,7 @@ BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
 
     this.isMele = false;
+    this.isSpinner = false;
     this.initTime = Date.timeStamp();
     this.handleInput = function(key) {};
     this.frontOffset = 0.0;
@@ -433,11 +434,18 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             if (this.onCC.defenseScreen > 0) {
                 amt *= 0.5;
             }
+
+            // Massive
             if (this.onCC.massive > 0) {
                 amt *= 0.6;
             }
             if (this.onCC.massive2 > 0) {
                 amt *= 0.3;
+            }
+
+            // Double punch
+            if (fromC && fromC.onCC && fromC.onCC.doublePunch > 0 && fromC.isMele) {
+                amt *= 2.0;
             }
         }
 

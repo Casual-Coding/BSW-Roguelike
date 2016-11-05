@@ -10,6 +10,7 @@ BSWG.component_SawBlade = {
     canMoveAttached: true,
 
     isMele: true,
+    isSpinner: true,
 
     attStrength: 2.0,
 

@@ -435,7 +435,7 @@ BSWG.component_CommandCenter = {
         }        
     },
 
-    _spkeys: [ 'fury', 'overpowered', 'defenseScreen', 'speed', 'lightweight', 'massive', 'massive2', 'spinup', 'doublepunch' ],
+    _spkeys: [ 'fury', 'overpowered', 'defenseScreen', 'speed', 'lightweight', 'massive', 'massive2', 'spinUp', 'doublePunch' ],
 
     update: function(dt) {
 
