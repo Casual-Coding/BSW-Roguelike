@@ -591,8 +591,7 @@ BSWG.render = new function() {
         this.next60 = true;
     };
 
-    this.vsyncOn = true;
-    this.lastAF = this.vsyncOn;
+    this.lastAF = BSWG.options.vsync;
 
     this.startRenderer = function (cbk) {
 
@@ -611,7 +610,7 @@ BSWG.render = new function() {
         var self = this;
         var renderFrame = function () {
 
-            if (self.vsyncOn) {
+            if (BSWG.options.vsync) {
                 self.animFrameID = window.requestAnimationFrame(renderFrame);
                 self.lastAF = true;
             }
@@ -709,10 +708,7 @@ BSWG.render = new function() {
                 self.ctx.fillRect(0, 0, self.viewport.w, self.viewport.h);
             }
 
-            //self.ctx.fillColor = '#fff';
-            //self.ctx.fillText(self.renderer.info.memory.textures + '', 15, 15);
-
-            var newVsync = self.vsyncOn;
+            var newVsync = BSWG.options.vsync;
             if (BSWG.input.KEY_PRESSED(BSWG.KEY.F10)) {
                 newVsync = !newVsync;
             }            
@@ -726,14 +722,13 @@ BSWG.render = new function() {
 
             self.screenShake -= Math.min(self.dt * 2.0, 1) * self.screenShake;
 
-            if (!self.vsyncOn) {
-                //self.nextVSync = window.requestAnimationFrame(function(){});
+            if (BSWG.options.vsync !== newVsync) {
+                BSWG.options.vsync = newVsync;
+                BSWG.saveOptions();
             }
-
-            self.vsyncOn = newVsync;
         };
 
-        if (this.vsyncOn) {
+        if (BSWG.options.vsync) {
             this.animFrameID = window.requestAnimationFrame(renderFrame);
             this.lastAF = true;
         }

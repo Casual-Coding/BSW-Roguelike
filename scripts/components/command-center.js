@@ -540,8 +540,8 @@ BSWG.component_CommandCenter = {
         if (this.aiLoadID) {
 
             try {
-                this.ai = BSWG.newAI[this.aiLoadID];
-                if (this.ai) {
+                var ai = BSWG.newAI[this.aiLoadID];
+                if (ai) {
                     try {
                         BSWG.newAI[this.aiLoadID] = null;
                         delete BSWG.newAI[this.aiLoadID];
@@ -550,8 +550,12 @@ BSWG.component_CommandCenter = {
                         head.removeChild(this.aiScriptTag);
                         this.aiScriptTag = null;
                     } catch (e) { }
-                    BSWG.applyAIHelperFunctions(this.ai, this);
+                    this.ai = new BSWG.aiBase(this);
+                    for (var key in ai) {
+                        this.ai[key] = ai[key];
+                    }
                     this.ai.init(this);
+                    ai = null;
                 }
             } catch (e) {
                 BSWG.ai.logError("Error initializing AI script:");

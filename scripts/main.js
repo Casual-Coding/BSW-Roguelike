@@ -2,6 +2,20 @@
 
 var BSWG = new function(){
 
+    this.options = {
+        fullscreen: false,
+        vsync: false
+    };
+    this.saveOptions = function() {
+        window.localStorage = window.localStorage || {};
+        window.localStorage.options = JSON.stringify(this.options);
+    };
+    this.loadOptions = function() {
+        if (window.localStorage && window.localStorage.options) {
+            this.options = JSON.parse(window.localStorage.options);
+        }
+    };
+
     var scripts = [
         'game.js',
         'render.js',
@@ -244,12 +258,25 @@ var BSWG = new function(){
             if (scriptsLeft >= 1)
                 return;
 
+            if (window.localStorage && !window.localStorage.options) {
+                BSWG.saveOptions();
+            }
+            else {
+                BSWG.loadOptions();
+            }
+
             BSWG.music.init(function(){
                 BSWG.soundLoad(function(){
                     BSWG.render.init(function(){
                         BSWG.physics.init();
                         BSWG.input.init();
                         BSWG.game.changeScene(BSWG.SCENE_TITLE, {}, '#000', 1.0);
+                        if (BSWG.options.fullscreen) {
+                            var win = BSWG.render.win;
+                            if (!win.isFullscreen) {
+                                win.toggleFullscreen();
+                            }
+                        }
                         BSWG.game.start();
                     }, images, shaders, makeTexture);
                 });

@@ -1480,18 +1480,21 @@ BSWG.game = new function(){
                         selected: false,
                         click: function (me) {
                             var win = BSWG.render.win;
+                            var fs = !win.isFullscreen;
                             win.toggleFullscreen();
-                            win.setAlwaysOnTop(win.isFullscreen);
+                            BSWG.options.fullscreen = fs;
+                            BSWG.saveOptions();
                         }
                     }),
                     new BSWG.uiControl(BSWG.control_Button, {
                         x: 10, y: -1000,
                         w: 250, h: 32,
-                        text: 'VSync ' + (BSWG.render.vsyncOn ? ' Off' : 'On'),
+                        text: 'VSync ' + (BSWG.options.vsync ? ' Off' : 'On'),
                         selected: false,
                         click: function (me) {
-                            BSWG.render.vsyncOn = !BSWG.render.vsyncOn;
-                            me.text = 'VSync ' + (BSWG.render.vsyncOn ? ' Off' : 'On');
+                            BSWG.options.vsync = !BSWG.options.vsync;
+                            BSWG.saveOptions();
+                            me.text = 'VSync ' + (BSWG.options.vsync ? ' Off' : 'On');
                         }
                     }),
                     new BSWG.uiControl(BSWG.control_Button, {
@@ -2854,7 +2857,7 @@ BSWG.game = new function(){
             ctx.globalAlpha = 1.0;
 
             BSWG.ui.render(ctx, viewport);
-            var statusTxt = Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds + (BSWG.render.vsyncOn ? ', VSYNC' : '');
+            var statusTxt = Math.floor(1/BSWG.render.actualDt) + " fps (" + Math.floor(1/BSWG.render.dt) + " fps), CL: " + BSWG.componentList.compList.length + ', SC: ' + BSWG.curSounds + '/' + BSWG.maxSounds + (BSWG.options.vsync ? ', VSYNC' : '');
             ctx.fillStyle = '#ccc';
             ctx.textAlign = 'left'
             ctx.font = '12px Orbitron';
