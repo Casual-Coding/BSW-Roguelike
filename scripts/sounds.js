@@ -92,7 +92,7 @@ BSWG.soundMixerClass.prototype.setVolume = function (val) {
 
 BSWG.mixer = null;
 
-BSWG.maxSounds = 168;
+BSWG.maxSounds = 86;
 BSWG.curSounds = 0;
 
 BSWG.soundSample = BSWG.soundBase({
