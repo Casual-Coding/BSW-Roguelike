@@ -155,10 +155,10 @@ BSWG.specialsUnlockInfo = {
     'mele': {
         'title': 'Mele',
         'levels': {
-            2: 'massive',        // +30% mass for all blocks on ship 3s for more ramming damage
+            2: 'massive',        // +30% mass for all blocks on ship 5s for more ramming damage
             4: 'spin-up',        // Double saw speed for 6s
             6: 'double-mele',    // +50% damage for all mele weapons for 6s
-            8: 'massive2',       // +50% mass for all blocks on ship 3s for more ramming damage
+            8: 'massive2',       // +50% mass for all blocks on ship 5s for more ramming damage
         }
     },
     'defend': {
@@ -175,9 +175,9 @@ BSWG.specialsUnlockInfo = {
         'title': 'Mobility',
         'levels': {
             2: 'speed',         // +50% speed for 15s
-            4: 'light-weight',  // -50% mass for 20s
+            4: 'light-weight',  // -25% mass for 20s
             6: 'speed2',        // +50% speed for 30s
-            8: 'feather-weight' // -50% mass for 40s
+            8: 'feather-weight' // -25% mass for 40s
         }
     }
 };

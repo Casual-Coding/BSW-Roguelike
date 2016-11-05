@@ -311,6 +311,8 @@ BSWG.component = function (desc, args) {
         this.onCC = this;
     }
 
+    this.massFactor = 1.0;
+
     BSWG.blockPolySmooth = null;
     this.init(args);
 
@@ -430,6 +432,12 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             // Defense screen
             if (this.onCC.defenseScreen > 0) {
                 amt *= 0.5;
+            }
+            if (this.onCC.massive > 0) {
+                amt *= 0.6;
+            }
+            if (this.onCC.massive2 > 0) {
+                amt *= 0.3;
             }
         }
 
@@ -789,6 +797,31 @@ BSWG.component.prototype.baseUpdate = function(dt) {
     this.canEquip = true;
     if (this.onCC) {
         this.lastOnCC = this.onCC;
+    }
+
+    var newMassF = 1.0;
+    if (this.onCC && this.onCC.massive) {
+        newMassF *= 2.0;
+    }
+    if (this.onCC && this.onCC.massive2) {
+        newMassF *= 4.0;
+    }
+    if (this.onCC && this.onCC.lightweight) {
+        newMassF *= 0.75;
+    }
+    if (Math.abs(newMassF - this.massFactor) > 0.0001) {
+        this.massFactor = newMassF;
+        if (this.obj && this.obj.body) {
+            var fixture = this.obj.body.GetFixtureList();
+            while (fixture) {
+                if (!fixture.__oden) {
+                    fixture.__oden = fixture.GetDensity();
+                }
+                fixture.SetDensity(fixture.__oden * this.massFactor);
+                fixture = fixture.GetNext();
+            }
+            this.obj.body.ResetMassData();
+        }
     }
 
     if (BSWG.game.map && !('minLevelEquip' in this)) {

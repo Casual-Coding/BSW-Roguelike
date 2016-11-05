@@ -587,6 +587,22 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     bg = Math.clamp(bg - bb * 0.25, 0, 1);
                     br = Math.clamp(br - bb * 0.25, 0, 1);
                 }
+                if (obj.comp.onCC && obj.comp.onCC.lightweight) {
+                    br = Math.clamp(br + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
+                    bg = Math.clamp(bg + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
+                    bb = Math.clamp(bb + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
+                }
+                if (obj.comp.onCC && obj.comp.onCC.massive) {
+                    br = Math.clamp(br - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
+                    bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
+                    bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
+                }
+                if (obj.comp.onCC && obj.comp.onCC.massive2) {
+                    br = Math.clamp(br - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                    bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                    bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
+                }
+
             }
             clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, self.lclr[3]*(1-self.mat.uniforms.warpIn.value));
         }

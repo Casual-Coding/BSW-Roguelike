@@ -61,7 +61,8 @@ var BSWG = new function(){
         'specials/controls.js',
         'specials/defense.js',
         'specials/attack.js',
-        'specials/speed.js'
+        'specials/speed.js',
+        'specials/mele.js'
     ];
     var images = {
         /*'nebula_0': 'nebula-512-0.png',

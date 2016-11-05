@@ -285,6 +285,7 @@ BSWG.specialList = new (function(){
             'massive': {
                 name: 'Massive',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_massive,
                 color: new THREE.Vector4(.5, .5, .5, 0.75),
                 cooldown: 12.0, // seconds
                 polys: (function(){
@@ -357,6 +358,7 @@ BSWG.specialList = new (function(){
             'massive2': {
                 name: 'Massive II',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_massive2,
                 color: new THREE.Vector4(.5, .5, .5, 0.75),
                 cooldown: 12.0, // seconds
                 polys: (function(){
@@ -400,13 +402,14 @@ BSWG.specialList = new (function(){
             'light-weight': {
                 name: 'Light Weight',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_lightweight,
                 color: new THREE.Vector4(.2, .75, .75, 0.75),
                 cooldown: 30.0, // seconds
                 polys: [
                     Math.rotPoly(Math.scalePoly(makeTorpedoIcon(0, 0, .25, Math.PI, false, 16, 1.25, 0, 0.85), 1.25, 0.75), -Math.PI/3.5)
                 ],
                 iconScale: 0.75,
-                energy: 20,
+                energy: 10,
             },
             'speed2': {
                 name: 'Boost II',
@@ -433,6 +436,7 @@ BSWG.specialList = new (function(){
             'feather-weight': {
                 name: 'Feather Weight',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_lightweight2,
                 color: new THREE.Vector4(.2, .75, .75, 0.75),
                 cooldown: 40.0, // seconds
                 polys: [
@@ -440,7 +444,7 @@ BSWG.specialList = new (function(){
                     Math.translatePoly(Math.rotPoly(Math.scalePoly(makeTorpedoIcon(0, 0, .25, Math.PI, false, 16, 1.25, 0, 0.85), 1.25, 0.75), -Math.PI/3.5), .1, .05)
                 ],
                 iconScale: 0.75,
-                energy: 30,
+                energy: 15,
             }
         };
 
