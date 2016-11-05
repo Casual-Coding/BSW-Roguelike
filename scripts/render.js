@@ -151,62 +151,8 @@ BSWG.initCanvasContext = function(ctx) {
         if (!noBorder) {
             ctx.strokeText(text, x, y);
         }
-        ctx.fillText(text, x, y);
-        
-        return;
+        ctx.fillText(text, x, y);       
 
-        var widths = new Array(text.length);
-        var total = 0.0;
-        for (var i=0; i<widths.length; i++) {
-            if ((i+1) < widths.length) {
-                widths[i] = ctx.measureText(text.charAt(i) + '' + text.charAt(i+1)).width - 
-                            ctx.measureText(text.charAt(i+1) + '').width;
-                widths[i] += (ctx.fontSpacing || 0.0);
-            }
-            else {
-                widths[i] = ctx.measureText(text.charAt(i) + '').width;
-            }
-            total += widths[i];
-        }
-
-        var oalign = ctx.textAlign || 'left';
-
-        if (ctx.textAlign === 'center') {
-            x -= total * 0.5;
-        }
-        else if (ctx.textAlign === 'right') {
-            x -= total;
-        }
-
-        var x0 = x;
-
-        ctx.textAlign = 'left';
-
-        if (!noBorder) {
-            var tmp = ctx.fillStyle;
-            ctx.fillStyle = ctx.strokeStyle;
-            ctx.lineWidth = 3.5;
-            for (var i=0; i<widths.length; i++) {
-                var ch = text.charAt(i) + '';
-                /*ctx.fillText(ch, x-2, y);
-                ctx.fillText(ch, x+2, y);
-                ctx.fillText(ch, x, y-2);
-                ctx.fillText(ch, x, y+2);*/
-                ctx.strokeText(ch, x, y);
-                x += widths[i];
-            }
-            ctx.fillStyle = tmp;
-        }
-
-        x = x0;
-
-        for (var i=0; i<widths.length; i++) {
-            var ch = text.charAt(i) + '';
-            ctx.fillText(ch, x, y);
-            x += widths[i];
-        }
-
-        ctx.textAlign = oalign;
     };
 
 };
@@ -318,7 +264,8 @@ BSWG.render = new function() {
             format: THREE.RGBAFormat,
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
-            stencilBuffer: false
+            stencilBuffer: false,
+            depthBuffer: true
         });
 
         this.cloudColor = new THREE.Vector4(0, 0, 0, 0.9);
@@ -677,7 +624,29 @@ BSWG.render = new function() {
 
             self.renderer.sortObjects = true;
             //self.renderer.clear();
+            
+            var frange = 135;
+            self.cam3DS.left = -(frange+27.5);
+            self.cam3DS.right = frange+30.0;
+            self.cam3DS.top = (frange*0.75);
+            self.cam3DS.bottom = -(frange*0.75);
+            self.cam3DS.zoom = 1.0;
+
+            self.cam3DS.updateProjectionMatrix();
+
+            self.cam3DS.position.set(self.cam3D.position.x + 25.0, self.cam3D.position.y + 8.0, 100.0);
+            self.cam3DS.updateMatrix();
+            self.cam3DS.updateMatrixWorld(true);
+            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 25.0, self.cam3D.position.y - 8.0, 0.0));
+            self.cam3DS.updateProjectionMatrix();
+            self.cam3DS.updateMatrix();
+            self.cam3DS.updateMatrixWorld(true);
+
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap);
+
+            self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
+            self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
+
             self.renderer.render(self.scene, self.cam3D);
 
             self.ctx.save();
@@ -776,28 +745,6 @@ BSWG.render = new function() {
             this.cam3D.updateProjectionMatrix();
             this.cam3D.updateMatrix();
             this.cam3D.updateMatrixWorld(true);
-
-            var frange = 135;
-            this.cam3DS.left = -(frange+27.5);
-            this.cam3DS.right = frange+30.0;
-            this.cam3DS.top = (frange*0.75);
-            this.cam3DS.bottom = -(frange*0.75);
-            this.cam3DS.zoom = 1.0;
-
-            this.cam3DS.updateProjectionMatrix();
-
-            this.cam3DS.position.set(this.cam3D.position.x + 25.0, this.cam3D.position.y + 8.0, 100.0);
-            this.cam3DS.updateMatrix();
-            this.cam3DS.updateMatrixWorld(true);
-            this.cam3DS.lookAt(new THREE.Vector3(this.cam3D.position.x - 25.0, this.cam3D.position.y - 8.0, 0.0));
-            this.cam3DS.updateProjectionMatrix();
-            this.cam3DS.updateMatrix();
-            this.cam3DS.updateMatrixWorld(true);
-
-            this.shadowMatrix.copy(this.cam3DS.projectionMatrix);
-            this.shadowMatrix.multiply(this.cam3DS.matrixWorldInverse);
-
-
             p1 = p2 = null;
         }
     };

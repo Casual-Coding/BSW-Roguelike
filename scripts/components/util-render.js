@@ -160,7 +160,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     },
                     shadowMap: {
                         type: 't',
-                        value: BSWG.render.shadowMap.texture
+                        value: BSWG.render.shadowMap
                     },
                     warpIn: {
                         type: 'f',

@@ -40,7 +40,7 @@ BSWG.orb = function (pos, zone) {
         },
         shadowMap: {
             type: 't',
-            value: BSWG.render.shadowMap.texture
+            value: BSWG.render.shadowMap
         },
         warpIn: {
             type: 'f',

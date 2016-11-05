@@ -146,7 +146,7 @@ BSWG.cloudMap = new function (){
                 },
                 shadowMap: {
                     type: 't',
-                    value: BSWG.render.shadowMap.texture
+                    value: BSWG.render.shadowMap
                 },
                 shadowMatrix: {
                     type: 'm4',

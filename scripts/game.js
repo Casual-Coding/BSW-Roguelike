@@ -1805,8 +1805,8 @@ BSWG.game = new function(){
 
                             ccs = null;
 
-                            self.cam.zoomTo(dt*1.25, toZ);
-                            self.cam.zoomTo(dt*0.15, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.25));
+                            self.cam.zoomTo(dt*1.25*2, toZ);
+                            self.cam.zoomTo(dt*0.15*2, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.25));
 
                             var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 
@@ -1820,7 +1820,7 @@ BSWG.game = new function(){
                             var tx = Math.clamp(self.cam.x, ccp.x - w, ccp.x + w);
                             var ty = Math.clamp(self.cam.y, ccp.y - h, ccp.y + h);
 
-                            self.cam.panTo(8.*dt, new b2Vec2(tx, ty));
+                            self.cam.panTo(16.*dt, new b2Vec2(tx, ty));
 
                             p = p1 = pc = p2 = null;
 
@@ -1828,7 +1828,7 @@ BSWG.game = new function(){
                         }
                         else {
 
-                            self.cam.zoomTo(dt*1.5, toZ);
+                            self.cam.zoomTo(dt*1.5*2, toZ);
 
                             var p = new b2Vec2(self.cam.x, self.cam.y);
 
@@ -1861,7 +1861,7 @@ BSWG.game = new function(){
                             var tx = Math.clamp(p.x, Math.min(p1.x, p2.x), Math.max(p1.x, p2.x));
                             var ty = Math.clamp(p.y, Math.min(p1.y, p2.y), Math.max(p1.y, p2.y));
 
-                            self.cam.panTo(4.*dt, new b2Vec2(tx, ty));
+                            self.cam.panTo(8.*dt, new b2Vec2(tx, ty));
 
                             p = p1 = pc = p2 = null;
                         }
@@ -1873,7 +1873,7 @@ BSWG.game = new function(){
                         for (var i=0; i<ccs.length; i++) {
                             if (ccs[i] !== self.ccblock && ccs[i].obj && ccs[i].obj.body) {
                                 self.cam.panTo(4.5*dt, ccs[i].obj.body.GetWorldCenter().clone());
-                                self.cam.zoomTo(dt*0.5, 0.015);
+                                self.cam.zoomTo(dt*0.5*2, 0.015);
                                 break;
                             }
                         }
