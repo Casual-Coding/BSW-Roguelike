@@ -40,11 +40,19 @@ BSWG.ui_HM = function(w, h, aw, ah) {
         }
     };
     var box = function(sx,sy,bw,bh, depthEdge, depth) {
-        for (var x=sx; x<(sx+bw); x++) {
-            for (var y=sy; y<(sy+bh); y++) {
+        sx = ~~sx; sy = ~~sy; bw = ~~bw; bh = ~~bh;
+        var mx = Math.min(w, sx+bw), my = Math.min(h, sy+bh);
+        for (var x=Math.max(0, sx); x<mx; x++) {
+            for (var y=Math.max(sy, sy); y<my; y++) {
                 var dedge = Math.min(x-sx, Math.min(y-sy, Math.min((sx+bw-1)-x, (sy+bh-1)-y)));
-                var t = Math.clamp(dedge / 5, 0.0, 1.0);
-                S(x,y,depth*t+depthEdge*(1-t));
+                var t = dedge / 5;
+                if (t < 0) {
+                    t = 0;
+                }
+                else if (t > 1) {
+                    t = 1;
+                }
+                H[x+y*w] = depth*t+depthEdge*(1-t);
             }
         }
     };

@@ -537,7 +537,7 @@ BSWG.render = new function() {
             __imgData.data[i]   = (dx + 1.0) * 0.5 * 255;
             __imgData.data[i+2] = (dy + 1.0) * 0.5 * 255;
             __imgData.data[i+1] = (dz + 1.0) * 0.5 * 255;
-            __imgData.data[i+3] = (srcHm[j] || 0) * 255;
+            __imgData.data[i+3] = srcHm[j] * 255;
         }
         dstCtx.putImageData(__imgData, 0, 0, 0, 0, w, h);
 
