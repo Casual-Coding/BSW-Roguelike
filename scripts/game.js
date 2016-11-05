@@ -1327,8 +1327,8 @@ BSWG.game = new function(){
                                         var key = self.ccblock.equippedSpecialNo(idx);
                                         if (key) {
                                             var scale = Math.min(w, h) * 0.95;
-                                            BSWG.renderSpecialIcon(ctx, key, x+w/2, y+h/2, scale, 0.0 + ((hover && self.ccblock.specialReady(key) === 1.0 && BSWG.specialsInfo[key].energy <= self.ccblock.energy) || BSWG.specialList.curCont() === key ? BSWG.render.time : 0.0), self.ccblock);
-                                            ctx.fillStyle = '#99f';
+                                            BSWG.renderSpecialIcon(ctx, key, x+w/2, y+h/2, scale, 0.0 + ((hover && self.ccblock.canUseSpecial(key)) || BSWG.specialList.curCont() === key ? BSWG.render.time : 0.0), self.ccblock);
+                                            ctx.fillStyle = self.ccblock.canUseSpecial(key) ? '#99f' : '#45458f';
                                             ctx.strokeStyle = '#000';
                                             ctx.font = '12px Orbitron';
                                             ctx.textAlign = 'right';
@@ -2200,7 +2200,7 @@ BSWG.game = new function(){
                     btn.p.y = self.hudY(self.hudBtn[2+i][1]) + 1;
                     btn.w = self.hudX(self.hudBtn[2+i][2]) - btn.p.x - 2;
                     btn.h = self.hudY(self.hudBtn[2+i][3]) - btn.p.y - 2;
-                    btn.flashing = self.ccblock.specialReady(self.ccblock.equippedSpecialNo(i)) === 1.0;
+                    btn.flashing = self.ccblock.canUseSpecial(self.ccblock.equippedSpecialNo(i));
                 }
                 else {
                     btn.flashing = false;

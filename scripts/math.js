@@ -284,7 +284,9 @@ Math.polyCentroid = function(p) {
     return ret;    
 };
 
-Math.scalePoly = function(poly, s) {
+Math.scalePoly = function(poly, s, sy) {
+
+    sy = sy || s;
 
     var c = Math.polyCentroid(poly);
     var len = poly.length;
@@ -292,12 +294,25 @@ Math.scalePoly = function(poly, s) {
     for (var i=0; i<len; i++) {
         ret[i] = new b2Vec2(
             (poly[i].x - c.x) * s + c.x,
-            (poly[i].y - c.y) * s + c.y
+            (poly[i].y - c.y) * sy + c.y
         );
     }
     return ret;
 
 };
+
+Math.translatePoly = function(poly, x, y) {
+
+    var len = poly.length;
+    var ret = new Array(len);
+    for (var i=0; i<len; i++) {
+        ret[i] = new b2Vec2(
+            poly[i].x + x,
+            poly[i].y + y
+        );
+    }
+    return ret;
+}
 
 // http://alienryderflex.com/polygon/
 Math.pointInPoly = function(p, poly) {

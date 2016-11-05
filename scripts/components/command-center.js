@@ -90,6 +90,13 @@ BSWG.component_CommandCenter = {
         return this.specials.all[key].t;
     },
 
+    canUseSpecial: function(key) {
+        if (this.specialReady(key) < 1) {
+            return false;
+        }
+        return this.energy >= BSWG.specialsInfo[key].energy;
+    },
+
     specialEquipped: function(key) {
         if (!key || !this.specials || !this.specials.equipped) {
             return false;
