@@ -289,6 +289,7 @@ BSWG.comp_staticHashSize = 32.0;
 BSWG.nextCompID = 1;
 BSWG.component = function (desc, args) {
 
+    this.isMele = false;
     this.initTime = Date.timeStamp();
     this.handleInput = function(key) {};
     this.frontOffset = 0.0;
@@ -382,6 +383,10 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
         return;
     }
 
+    if (!fromC || !fromC.onCC || fromC.destroyed || !fromC.obj || !fromC.obj.body) {
+        fromC = null;
+    }
+
     if (amt > 0) {
         var isFriendly = false;
         if (fromC && fromC.onCC && this.onCC) {
@@ -415,6 +420,11 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             // Human bias
             if (this.onCC === BSWG.game.ccblock) {
                 amt /= BSWG.defenseBias;
+            }
+
+            // Overpowered bias
+            if (fromC && fromC.onCC && fromC.onCC.overpowered > 0 && !fromC.isMele) {
+                amt *= 1.5;
             }
 
             // Defense screen

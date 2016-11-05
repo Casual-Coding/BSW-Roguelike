@@ -18,8 +18,9 @@ BSWG.component_Missile = {
 
     init: function(args) {
 
-        this.size      = args.size || 1;
-        this.fireT = 0.0;
+        this.size   = args.size || 1;
+        this.fireT  = 0.0;
+        this.source = args.source;
 
         var verts = [
             new b2Vec2(this.size * -0.35, this.size * -0.25),
@@ -122,7 +123,7 @@ BSWG.component_Missile = {
                     var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
                     if (this.obj.body.__lastHit) {
                         if (this.obj.body.__lastHit.__comp) {
-                            this.obj.body.__lastHit.__comp.takeDamage(BSWG.missileDmg);
+                            this.obj.body.__lastHit.__comp.takeDamage(BSWG.missileDmg, this.source || null);
                         }
                     }
                     BSWG.render.boom.palette = chadaboom3D.fire_bright;

@@ -573,9 +573,14 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     bb = Math.clamp(bb - bg * 0.5, 0, 1);
                 }
                 if (obj.comp.onCC && obj.comp.onCC.fury) {
-                    br = Math.clamp(br + Math.min(obj.comp.onCC.fury*8, 1) * 0.75, 0, 1);
+                    br = Math.clamp(br + Math.min(obj.comp.onCC.fury, 1) * 0.75, 0, 1);
                     bg = Math.clamp(bg - br * 0.5, 0, 1);
                     bb = Math.clamp(bb - br * 0.5, 0, 1);
+                }
+                if (obj.comp.onCC && obj.comp.onCC.overpowered) {
+                    br = Math.clamp(br + Math.min(obj.comp.onCC.overpowered, 1) * 1.5, 0, 1);
+                    bg = Math.clamp(bg - br * 0.75, 0, 1);
+                    bb = Math.clamp(bb - br * 0.75, 0, 1);
                 }
                 if (obj.comp.onCC && obj.comp.onCC.defenseScreen) {
                     bb = Math.clamp(bb + Math.min(obj.comp.onCC.defenseScreen, 1) * 0.25, 0, 1);

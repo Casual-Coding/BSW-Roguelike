@@ -18,6 +18,8 @@ BSWG.component_Spikes = {
         'pike'
     ],
 
+    isMele: true,
+
     attStrength: 2.0,
 
     sbadd: [

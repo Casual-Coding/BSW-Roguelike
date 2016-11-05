@@ -185,6 +185,7 @@ BSWG.component_CommandCenter = {
 
         // special effects
         this.fury = 0;
+        this.overpowered = 0;
         this.defenseScreen = 0;
         //
 
@@ -440,6 +441,13 @@ BSWG.component_CommandCenter = {
         }
         else {
             this.fury = 0;
+        }
+
+        if (this.overpowered) {
+            this.overpowered = Math.max(0, this.overpowered - dt);
+        }
+        else {
+            this.overpowered = 0;
         }
 
         if (this.defenseScreen) {

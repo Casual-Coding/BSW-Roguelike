@@ -168,7 +168,8 @@ BSWG.component_MissileLauncher = {
                 pos: p[0],
                 angle: a,
                 angVel: av * 0.5,
-                vel: new b2Vec2(-Math.cos(a)*1.0 + v.x, -Math.sin(a)*1.0 + v.y)
+                vel: new b2Vec2(-Math.cos(a)*1.0 + v.x, -Math.sin(a)*1.0 + v.y),
+                source: this
 
             });
 

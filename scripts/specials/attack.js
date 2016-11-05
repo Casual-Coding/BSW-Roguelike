@@ -5,7 +5,32 @@ BSWG.specialEffect_fury = {
         this._init(args);
 
         if (args.cc) {
-            args.cc.fury += 16.0;
+            args.cc.fury += 20.0;
+        }
+
+        return false;
+    },
+
+    destroy: function () {
+
+        this._destroy();
+
+    },
+
+    updateRender: function(ctx, dt) {
+
+    }
+
+};
+
+BSWG.specialEffect_overpowered = {
+
+    init: function(args) {
+
+        this._init(args);
+
+        if (args.cc) {
+            args.cc.overpowered += 25.0;
         }
 
         return false;

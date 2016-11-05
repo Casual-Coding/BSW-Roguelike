@@ -246,6 +246,7 @@ BSWG.specialList = new (function(){
             'over-power': {
                 name: 'Over Powered',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_overpowered,
                 color: new THREE.Vector4(1, 0, 0, 0.75),
                 cooldown: 25.0, // seconds
                 polys: (function(){

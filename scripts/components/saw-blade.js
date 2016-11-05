@@ -9,6 +9,8 @@ BSWG.component_SawBlade = {
     hasConfig:       false,
     canMoveAttached: true,
 
+    isMele: true,
+
     attStrength: 2.0,
 
     serialize: [
