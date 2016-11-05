@@ -185,6 +185,7 @@ BSWG.component_CommandCenter = {
 
         // special effects
         this.fury = 0;
+        this.defenseScreen = 0;
         //
 
         this.totalMass = this.obj.body.GetMass();
@@ -439,6 +440,13 @@ BSWG.component_CommandCenter = {
         }
         else {
             this.fury = 0;
+        }
+
+        if (this.defenseScreen) {
+            this.defenseScreen = Math.max(0, this.defenseScreen - dt);
+        }
+        else {
+            this.defenseScreen = 0;
         }
 
         if (!this.sound) {

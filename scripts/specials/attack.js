@@ -5,7 +5,7 @@ BSWG.specialEffect_fury = {
         this._init(args);
 
         if (args.cc) {
-            args.cc.fury += 8.0;
+            args.cc.fury += 16.0;
         }
 
         return false;

@@ -416,6 +416,11 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             if (this.onCC === BSWG.game.ccblock) {
                 amt /= BSWG.defenseBias;
             }
+
+            // Defense screen
+            if (this.onCC.defenseScreen > 0) {
+                amt *= 0.5;
+            }
         }
 
         if (amt < 1 && !noMin) {

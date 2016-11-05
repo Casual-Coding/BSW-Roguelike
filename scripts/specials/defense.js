@@ -26,3 +26,28 @@ BSWG.specialEffect_heal = {
     }
 
 };
+
+BSWG.specialEffect_defenseScreen = {
+
+    init: function(args) {
+
+        this._init(args);
+
+        if (args.cc) {
+            args.cc.defenseScreen += 25.0;
+        }
+
+        return false;
+    },
+
+    destroy: function () {
+
+        this._destroy();
+
+    },
+
+    updateRender: function(ctx, dt) {
+
+    }
+
+};

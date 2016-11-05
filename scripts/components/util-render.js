@@ -577,6 +577,11 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     bg = Math.clamp(bg - br * 0.5, 0, 1);
                     bb = Math.clamp(bb - br * 0.5, 0, 1);
                 }
+                if (obj.comp.onCC && obj.comp.onCC.defenseScreen) {
+                    bb = Math.clamp(bb + Math.min(obj.comp.onCC.defenseScreen, 1) * 0.25, 0, 1);
+                    bg = Math.clamp(bg - bb * 0.25, 0, 1);
+                    br = Math.clamp(br - bb * 0.25, 0, 1);
+                }
             }
             clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, self.lclr[3]*(1-self.mat.uniforms.warpIn.value));
         }
@@ -753,6 +758,15 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
             }
             else {
                 self.mesh.visible = false;
+            }
+        }
+
+        if (obj && obj.comp && obj.comp.onCC && obj.comp.onCC.defenseScreen) {
+            var t = Math.clamp(obj.comp.onCC.defenseScreen, 0, 1);
+            var c = self.mat.uniforms.clr.value;
+            c.set(c.x*(1-t)+t*0.2, c.y*(1-t)+t*0.2, c.z*(1-t)+t, Math.max(t*0.75, c.w));
+            if (c.w > 0) {
+                self.mesh.visible = true;
             }
         }
 

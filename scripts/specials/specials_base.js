@@ -136,6 +136,7 @@ BSWG.specialList = new (function(){
             'defense-screen': {
                 name: 'Defense Screen',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_defenseScreen,
                 color: new THREE.Vector4(0, .3, 1, 0.75),
                 cooldown: 25.0, // seconds
                 polys: [
