@@ -455,23 +455,6 @@ BSWG.render = new function() {
 
         cbk(ctx, w, h);
 
-        /*if (!noTexture) {
-            var x = w;
-            while (x > 1) {
-                x /= 2;
-            }
-            if (Math.floor(x) !== x) {
-                console.log('!! w: ' + w);
-            }
-            x = h;
-            while (x > 1) {
-                x /= 2;
-            }
-            if (Math.floor(x) !== x) {
-                console.log('!! h: ' + h);
-            }
-        }*/
-
         if (!noTexture) {
 
             canvas.texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
@@ -508,65 +491,55 @@ BSWG.render = new function() {
 
     };
 
-    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h, tileMask, normalBfr) {
+    var __imgData = new ImageData(2048, 2048);
+    var __sqrt = new Float32Array(1 << 21);
+    for (var i=0; i<__sqrt.length; i++) {
+        __sqrt[i] = Math.sqrt(i/256);
+    }
 
-        tileMask = tileMask || 0;
+    this.heightMapToNormalMap = function (srcHm, dstCtx, w, h) {
 
-        var H = function(a, b) {
-            if (a < 0 && (tileMask & 1)) {
-                a = 0;
-            }
-            if (b < 0 && (tileMask & 4)) {
-                b = 0;
-            }
-            if (a >= w && (tileMask & 2)) {
-                a = w-1;
-            }
-            if (b >= h && (tileMask & 8)) {
-                b = h-1;
-            }
-            if (a < 0 || b < 0 || a >= w || b >= h) {
-                return 0.0;
-            }
-            else {
-                return srcHm[(~~a)+(~~b)*w];
-            }
-        };
-
-        var O = function(v) {
-            return Math.max(0, Math.min(255, Math.floor(v * 255)));
-        };
-
-        var imgData = dstCtx.getImageData(0, 0, w, h);
-        for (var i=0; i<imgData.data.length; i+=4) {
-            var x = (~~(i/4)) % w;
-            var y = ((~~(i/4)) - x) / w;
+        var x=0, y=0, sx=0, sy=0, dx=0, dy=0, dz=0, len=0, i=0, j=0;
+        var sz = w * h;
+        for (j=0; j<sz; j++) {
+            x = j % w;
+            y = (j - x) / w;
     
-            var sx = H(x+1, y) - H(x-1, y);
-            var sy = H(x, y+1) - H(x, y-1);
+            sx = 0;
+            if (x < (w-1)) {
+                sx += srcHm[j+1];
+            }
+            if (x > 0) {
+                sx -= srcHm[j-1];
+            }
 
-            var dx = -sx*64, dy = 2; dz = sy*64;
-            var len = Math.sqrt(dx*dx+dy*dy+dz*dz);
+            sy = 0;
+            if (y < (h-1)) {
+                sy += srcHm[j+w];
+            }
+            if (y > 0) {
+                sy -= srcHm[j-w];
+            }
+
+            dx = -sx*64, dy = 2; dz = sy*64;
+            len = __sqrt[~~(dx*dx+dy*dy+dz*dz*256)];
             if (len < 0.000001) {
                 dx = dy = dz = 0.0;
             }
             else {
-                dx /= len; dy /= len; dz /= len;
+                dx /= len;
+                dy /= len;
+                dz /= len;
             }
 
-            if (normalBfr) {
-                normalBfr.push(dx);
-                normalBfr.push(dy);
-                normalBfr.push(dz);
-            }
+            i = (x + (y << 11)) << 2;
 
-            imgData.data[i]   = O((dx + 1.0) * 0.5);
-            imgData.data[i+2] = O((dy + 1.0) * 0.5);
-            imgData.data[i+1] = O((dz + 1.0) * 0.5);
-            imgData.data[i+3] = O(H(x, y));
+            __imgData.data[i]   = (dx + 1.0) * 0.5 * 255;
+            __imgData.data[i+2] = (dy + 1.0) * 0.5 * 255;
+            __imgData.data[i+1] = (dz + 1.0) * 0.5 * 255;
+            __imgData.data[i+3] = (srcHm[j] || 0) * 255;
         }
-
-        dstCtx.putImageData(imgData, 0, 0);
+        dstCtx.putImageData(__imgData, 0, 0, 0, 0, w, h);
 
     };
 
@@ -584,13 +557,6 @@ BSWG.render = new function() {
                 this.viewport.h = ~~(maxRes.h / aspect);
             }
         }
-        /*this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';*/
-
-        /*this.canvas3D.width = this.viewport.w;
-        this.canvas3D.height = this.viewport.h;
-        this.canvas3D.style.width = '100%';
-        this.canvas3D.style.height = '100%';*/
 
         if (!lvp || lvp.w !== this.viewport.w || lvp.h !== this.viewport.h) {
             this.canvas.width = this.viewport.w;

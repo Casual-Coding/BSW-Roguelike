@@ -20,7 +20,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     }
 
     var self = this;
-    this.heightMap = new Array(BSWG.tileSize * BSWG.tileSize);
+    this.heightMap = new Float32Array(BSWG.tileSize * BSWG.tileSize);
 
     this.normalMap = BSWG.render.proceduralImage(BSWG.tileSize, BSWG.tileSize, function(ctx, w, h){
         ctx.drawImage(image, imgX, imgY, BSWG.tileSize, BSWG.tileSize, 0, 0, BSWG.tileSize, BSWG.tileSize);
@@ -30,7 +30,6 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         }
         imgData.data.length = 0;
         imgData = null;
-        //BSWG.render.heightMapToNormalMap(self.heightMap, ctx, w, h, tileMask);
     }, true);
 
     var mSize = water ? 2 : BSWG.tileMeshSize;
@@ -122,45 +121,54 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
 
                 var mask = tileMask;
 
-                var V = function(X, Y) {
+                var x2=0, y2=0;
+                var _f = 1 + (water ? 0 : 1.005 / BSWG.tileSize);
+                var _c1 = (mask & 1) && (mask & 2);
+                var _c2 = (mask & 2) && (mask & 1);
+                var _c3 = (mask & 4) && (mask & 8);
+                var _c4 = (mask & 8) && (mask & 4);
+
+                var V = function(X, Y, ret) {
 
                     X *= gSize;
                     Y *= gSize;
 
-                    var _x = (X * sSize - sSize*0.5) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
-                    var _y = (-(Y * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
+                    ret.x = (X * sSize - sSize*0.5) * _f;
+                    ret.y = -(Y * sSize - sSize*0.5) * _f;
 
-                    if ((mask & 1) && (mask & 2) && X<0) {
+                    if (_c1 && X<0) {
                         X = (((X/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
                     }
                     else if (X<0) {
                         X = 0;
                     }
-                    if ((mask & 2) && (mask & 1) && (X/gSize)>mSize) {
+
+                    if (_c2 && (X/gSize)>mSize) {
                         X = (((X/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
                     }
+
                     else if ((X/gSize)>mSize) {
                         X = mSize*gSize;
                     }
 
-                    if ((mask & 4) && (mask & 8) && Y<0) {
+                    if (_c3 && Y<0) {
                         Y = (((Y/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
                     }
                     else if (Y<0) {
                         Y = 0;
                     }
-                    if ((mask & 8) && (mask & 4) && (Y/gSize)>mSize) {
+
+                    if (_c4 && (Y/gSize)>mSize) {
                         Y = (((Y/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
                     }
                     else if ((Y/gSize)>mSize) {
                         Y = mSize*gSize;
                     }
 
-                    var x2 = ~~(X / (BSWG.tileSize) * (BSWG.tileSize-0.001));
-                    var y2 = ~~(Y / (BSWG.tileSize) * (BSWG.tileSize-0.001));
-                    var _z = BSWG.tileHeightWorld * self.heightMap[x2 + y2*BSWG.tileSize]/255;
+                    x2 = ~~(X / BSWG.tileSize * (BSWG.tileSize-0.001));
+                    y2 = ~~(Y / BSWG.tileSize * (BSWG.tileSize-0.001));
 
-                    return new THREE.Vector3(_x, _y, _z);
+                    ret.z = BSWG.tileHeightWorld * self.heightMap[x2 + y2*BSWG.tileSize]/255;
 
                 };
 
@@ -173,7 +181,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                     [ -1,  1 ],
                     [  0,  1 ],
                     [  1,  1 ]
-                ]
+                ];
 
                 var idx = 0;
                 for (var y = 0; y <= mSize; y++) {
@@ -181,9 +189,9 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
 
                         for (var i=0; i<off.length; i++) {
                             var j = (i+1)%off.length;
-                            pA = V(x, y);
-                            pB = V(x + off[i][0], y + off[i][1]);
-                            pC = V(x + off[j][0], y + off[j][1]);
+                            V(x, y, pA);
+                            V(x + off[i][0], y + off[i][1], pB);
+                            V(x + off[j][0], y + off[j][1], pC);
 
                             cb.subVectors( pC, pB );
                             ab.subVectors( pA, pB );

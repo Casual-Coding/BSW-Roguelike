@@ -13,10 +13,7 @@ BSWG.ui_HM = function(w, h, aw, ah) {
     ah = ~~((ah / max) * Math.max(w, h));
 
     var len = w*h;
-    var H = new Array(len);
-    for (var i=0; i<len; i++) {
-        H[i] = 0.0;
-    }
+    var H = new Float32Array(len);
     var hudBtn = new Array();
     var S = function(x,y,v) {
         if (x>=0 && y>=0 && x<w && y<h) {
