@@ -103,7 +103,8 @@ BSWG.component_Thruster = {
 
     render: function(ctx, cam, dt) {
 
-        this.meshObj.update([0.1, 0.75, 0.8, 1], 1/0.75, BSWG.compAnchored(this));
+        var spt = Math.clamp((this.onCC && this.onCC.speed) ? this.onCC.speed : 0, 0, 1);
+        this.meshObj.update([0.1*(1-spt)+spt*.5, 0.75*(1-spt)+1*spt, 0.8*(1-spt)+spt*.5, 1], 1/0.75, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
     },
@@ -113,12 +114,14 @@ BSWG.component_Thruster = {
         if (this.onCC) {
             if (!this.sound) {
                 this.sound = new BSWG.soundSample();
-                this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, Math._random()*0.1+0.5/this.size, true);
+                this.israte = Math._random()*0.1+0.5/this.size;
+                this.sound.play('thruster', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, this.israte, true);
             }
             if (!this.exaust) {
                 this.exaust = new BSWG.exaust(this.obj.body, new b2Vec2(0.0, -0.2 * this.size), 0.5 * this.size, -Math.PI*0.5, 0.125, BSWG.exaustFire);
             }
-            this.exaust.strength = Math.clamp(this.soundT*7.0, 0, 1);
+            var spt = Math.clamp((this.onCC && this.onCC.speed) ? (this.onCC.speed * .5 + 1) : 1, 0, 1.5);
+            this.exaust.strength = Math.clamp(this.soundT*7.0, 0, 1) * spt;
         }
         else {
             if (this.sound) {
@@ -172,7 +175,9 @@ BSWG.component_Thruster = {
         this.soundT += (this.thrustT - this.soundT) * dt * 4.0;
 
         if (this.sound) {
-            this.sound.volume(Math.clamp(this.soundT,0,1) * (this.size/2) * 2.0);
+            var spt = Math.clamp((this.onCC && this.onCC.speed) ? (this.onCC.speed * .5 + 1) : 1, 0, 1.5);
+            this.sound.volume(Math.clamp(this.soundT,0,1) * (this.size/2) * 2.0 * spt);
+            this.sound.rate(this.israte * spt)
             this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
         }
 
@@ -253,6 +258,8 @@ BSWG.component_Thruster = {
         {
             var a = this.obj.body.GetAngle() + Math.PI/2.0;
             accel *= 20.0 * [1,3][this.size-1];
+            var spt = Math.clamp((this.onCC && this.onCC.speed) ? (this.onCC.speed * .5 + 1) : 1, 0, 1.5);
+            accel *= spt;
             this.obj.body.SetAwake(true);
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);

@@ -177,7 +177,7 @@ BSWG.specialsUnlockInfo = {
             2: 'speed',         // +50% speed for 15s
             4: 'light-weight',  // -50% mass for 20s
             6: 'speed2',        // +50% speed for 30s
-            8: 'feather-weight' // -50% mass, +12% speed for 40s
+            8: 'feather-weight' // -50% mass for 40s
         }
     }
 };

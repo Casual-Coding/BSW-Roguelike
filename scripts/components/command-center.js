@@ -184,9 +184,10 @@ BSWG.component_CommandCenter = {
         this.energy = this.maxEnergy = 100;
 
         // special effects
-        this.fury = 0;
-        this.overpowered = 0;
-        this.defenseScreen = 0;
+        for (var i=0; i<this._spkeys.length; i++) {
+            var key = this._spkeys[i];
+            this[key] = 0;
+        }
         //
 
         this.totalMass = this.obj.body.GetMass();
@@ -434,27 +435,18 @@ BSWG.component_CommandCenter = {
         }        
     },
 
+    _spkeys: [ 'fury', 'overpowered', 'defenseScreen', 'speed', 'lightweight', 'massive', 'massive2', 'spinup', 'doublepunch' ],
+
     update: function(dt) {
 
-        if (this.fury) {
-            this.fury = Math.max(0, this.fury - dt);
-        }
-        else {
-            this.fury = 0;
-        }
-
-        if (this.overpowered) {
-            this.overpowered = Math.max(0, this.overpowered - dt);
-        }
-        else {
-            this.overpowered = 0;
-        }
-
-        if (this.defenseScreen) {
-            this.defenseScreen = Math.max(0, this.defenseScreen - dt);
-        }
-        else {
-            this.defenseScreen = 0;
+        for (var i=0; i<this._spkeys.length; i++) {
+            var key = this._spkeys[i];
+            if (this[key]) {
+                this[key] = Math.max(0, this[key] - dt);
+            }
+            else {
+                this[key] = 0;
+            }
         }
 
         if (!this.sound) {
@@ -692,18 +684,19 @@ BSWG.component_CommandCenter = {
         }
 
         if (this.sound) {
-            this.sound.volume(0.2 * (Math.abs(rot) + Math.abs(accel)));
+            this.sound.volume(0.2 * (Math.abs(rot) + Math.abs(accel)) * (this.speed ? 1.5 : 1));
+            this.sound.rate(0.1 + Math.clamp(this.speed, 0, 1) * 0.5);
         }
 
         if (rot) {
             this.obj.body.SetAwake(true);
-            this.obj.body.ApplyTorque(-rot*7.0);
+            this.obj.body.ApplyTorque(-rot*7.0*(this.speed ? 1.5 : 1));
             this.moveT = 0.21;
         }
         
         if (accel) {
             var a = this.obj.body.GetAngle() + Math.PI/2.0;
-            accel *= 5.0;
+            accel *= 5.0 * (this.speed ? 1.5 : 1);
             this.obj.body.SetAwake(true);
             var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
             this.obj.body.ApplyForceToCenter(force);

@@ -378,6 +378,7 @@ BSWG.specialList = new (function(){
             'speed': {
                 name: 'Boost',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_speed,
                 color: new THREE.Vector4(0, 1, .1, 0.75),
                 cooldown: 20.0, // seconds
                 polys: (function(){
@@ -410,7 +411,8 @@ BSWG.specialList = new (function(){
             'speed2': {
                 name: 'Boost II',
                 controller: BSWG.specialCont_targetShip,
-                color:new THREE.Vector4(0, 1, .1, 0.75),
+                effect: BSWG.specialEffect_speed2,
+                color: new THREE.Vector4(0, 1, .1, 0.75),
                 cooldown: 30.0, // seconds
                 polys: (function(){
                     var polys = [];
