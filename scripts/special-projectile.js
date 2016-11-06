@@ -4,8 +4,107 @@ BSWG.torpedoRange = 60;
 BSWG.torpedoDPS = 80/2;
 
 BSWG.eTorpedoSpeed = 20;
-BSWG.eTorpedoArcHeight = 20;
+BSWG.eTorpedoArcHeight = 10;
 BSWG.eTorpedoRange = 60;
+BSWG.eTorpedoEPS = 6; // 6s to 1s emp exposure vs emp effect
+
+BSWG.lightning = function(p, n, lw) {
+
+    this.p = p;
+    this.n = n;
+    this.ep = p.clone();
+    this.alpha = 0.0;
+
+    this.mat = BSWG.render.newMaterial("basicVertex", "torpedoFragment", {
+        clr: {
+            type: 'v4',
+            value: new THREE.Vector4(0, 0, 0, 0)
+        },
+    }, THREE.AdditiveBlending, THREE.DoubleSide);
+    this.mat.needsUpdate = true;
+    this.geom = new THREE.Geometry();
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
+    this.line = new THREE.Line(this.geom, this.mat);
+    this.line.renderOrder = 1601.0;
+    this.line.position.set(p.x, p.y, p.z);
+
+    this.nosoundyet = true;
+
+    BSWG.render.scene.add(this.line);
+
+};
+
+BSWG.lightning.prototype.playsound = function() {
+
+    var len = Math.sqrt(this.n.x * this.n.x + this.n.y * this.n.y + this.n.z * this.n.z);
+
+    new BSWG.soundSample().play('lightning', this.p.clone(), 1.5 * len * (Math.random() * 0.5 + 0.5), 2/(Math.clamp(len-Math.random()*0.5, 1, 3)));
+
+    this.nosoundyet = false;
+}
+
+BSWG.lightning.prototype.update = function(dt) {
+
+    if (this.nosoundyet || Math.random() < dt*1.1) {
+        this.playsound();
+    }
+
+    var clr = (~~(Math._random()*1000000)) % 4;
+
+    if (clr === 0) {
+        this.mat.uniforms.clr.value.set(1, 1, 1, 1.0 * this.alpha * Math._random());
+    }
+    else if (clr === 1) {
+        this.mat.uniforms.clr.value.set(0, 1, 1, 1.0 * this.alpha * Math._random());
+    }
+    else if (clr === 2) {
+        this.mat.uniforms.clr.value.set(0, .5, 1, 1.0 * this.alpha * Math._random());
+    }
+    else {
+        this.mat.uniforms.clr.value.set(0, 0, 1, 1.0 * this.alpha * Math._random());
+    }
+
+    this.line.position.set(this.p.x, this.p.y, this.p.z);
+    var n = this.n.clone();
+    for (var i=1; i<this.geom.vertices.length; i++) {
+        var a1 = Math.random() * Math.PI / 3 - Math.PI / 6;
+        var a2 = Math.random() * Math.PI / 3 - Math.PI / 6;
+        n.applyAxisAngle(new THREE.Vector3(1, 0, 0), a1);
+        n.applyAxisAngle(new THREE.Vector3(0, 1, 0), a2);
+        this.geom.vertices[i].x = this.geom.vertices[i-1].x + n.x * .3;
+        this.geom.vertices[i].y = this.geom.vertices[i-1].y + n.y * .3;
+        this.geom.vertices[i].z = this.geom.vertices[i-1].z + n.z * .3;
+        var t = i/(this.geom.vertices.length-1);
+        this.geom.vertices[i].x = t * (this.ep.x - this.p.x) + this.geom.vertices[i].x * (1-t);
+        this.geom.vertices[i].y = t * (this.ep.y - this.p.y) + this.geom.vertices[i].y * (1-t);
+        this.geom.vertices[i].z = t * (this.ep.z - this.p.z) + this.geom.vertices[i].z * (1-t);
+        this.geom.dynamic = true;
+        this.geom.verticesNeedUpdate = true;
+    }
+
+};
+
+BSWG.lightning.prototype.destroy = function() {
+
+    BSWG.render.scene.remove(this.line);
+
+    this.line.material = null;
+    this.line.geometry = null;
+    this.mat.dispose();
+    this.geom.dispose();
+    this.mat = null;
+    this.geom = null;
+    this.line = null;
+
+};
 
 BSWG.specProj_TorpedoOrEMP = {
 
@@ -13,6 +112,9 @@ BSWG.specProj_TorpedoOrEMP = {
 
         this.type = args.type || 'torpedo';
         this.source = args.source;
+        this.noSelfDamage = args.noSelfDamage;
+        this.lightning = [];
+        this.scale = args.scale || 1;
 
         if (this.type === 'torpedo') {
             this.speed = BSWG.torpedoSpeed;
@@ -33,7 +135,7 @@ BSWG.specProj_TorpedoOrEMP = {
         else {
             this.startP = args.startP;
             this.endP = args.endP;
-            this.totalDistance = Math.distVec2(this.startP, this.endP)
+            this.totalDistance = Math.distVec2(this.startP, this.endP);
             this.distance = 0;
         }
 
@@ -46,6 +148,8 @@ BSWG.specProj_TorpedoOrEMP = {
                 value: new THREE.Vector4(1, 0, 0, 1)
             },
         }, THREE.AdditiveBlending, THREE.DoubleSide);
+        this.mat.transparent = true;
+        this.mat.needsUpdate = true;
 
         this.smat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
         }, THREE.NormalBlending, THREE.DoubleSide);
@@ -59,8 +163,21 @@ BSWG.specProj_TorpedoOrEMP = {
         this.smesh = new THREE.Mesh(BSWG.torpedoGeom, this.smat);
         BSWG.render.sceneS.add(this.smesh);
 
+        if (this.type === 'emp') {
+            for (var k=0; k<10; k++) {
+                this.addLightning();
+            }
+        }
+
         this.updateRender(null, null, 1.0/60);
 
+    },
+
+    addLightning: function() {
+        var l = new BSWG.lightning(this.mesh.position.clone(), new THREE.Vector3(0, 0, 1));
+        l.just = true;
+        this.lightning.push(l);
+        l = null;
     },
 
     updateRender: function(ctx, cam, dt) {
@@ -72,13 +189,18 @@ BSWG.specProj_TorpedoOrEMP = {
                 if (!this.detonated) {
                     this.detonated = true;
                     this.explodeT = 0.0;
+                    if (this.type === 'emp') {
+                        for (var k=0; k<10; k++) {
+                            this.addLightning();
+                        }                        
+                    }
                 }
             }
         }
 
         var p = new THREE.Vector3(0, 0, 0.05);
-        var scale = 0.75;
-        var alpha = Math.clamp(this.distance*2, 0, 1);
+        var scale = this.scale * 0.75;
+        var alpha = Math.clamp(this.distance*2+Math.max(0.5-this.totalDistance, 0)*2, 0, 1);
 
         if (this.detonated) {
             this.explodeT += dt;
@@ -86,15 +208,43 @@ BSWG.specProj_TorpedoOrEMP = {
                 this.explodeT = 2.0;
             }
             alpha *= 1.0 - (this.explodeT / 2.0);
-            scale += Math.sqrt(this.explodeT * 10);
+            scale += this.scale * Math.sqrt(this.explodeT * 10);
         }
 
         if (!this.follow) {
-            var t = this.distance / this.totalDistance;
+            var t = (this.totalDistance > 0) ? (this.distance / this.totalDistance) : 0.0;
             p.z = 0.05 + Math.sin(t * Math.PI) * this.arcHeight;
             var p2 = Math.interpolate(this.startP, this.endP, t);
             p.x = p2.x; p.y = p2.y;
             p2 = null;
+        }
+
+        for (var i=0; i<this.lightning.length; i++) {
+            var L = this.lightning[i];
+            if (L.just || Math.random() < 1/20) {
+                L.n = new THREE.Vector3(0, 0, 2 * scale);
+                var a1 = Math.random() * Math.PI * 2;
+                var a2 = Math.random() * Math.PI * 2;
+                L.n.applyAxisAngle(new THREE.Vector3(1, 0, 0), a1);
+                L.n.applyAxisAngle(new THREE.Vector3(0, 1, 0), a2);
+                L.just = false;
+                L.n2 = new THREE.Vector3(0, 0, 2 * scale);
+                a1 = Math.random() * Math.PI * 2;
+                a2 = Math.random() * Math.PI * 2;
+                L.n2.applyAxisAngle(new THREE.Vector3(1, 0, 0), a1);
+                L.n2.applyAxisAngle(new THREE.Vector3(0, 1, 0), a2);
+            }
+            var n = L.n.clone();
+            n.normalize();
+            L.p = new THREE.Vector3(p.x + n.x * scale, p.y + n.y * scale, p.z + n.z * scale);
+
+            n = L.n2.clone();
+            n.normalize();
+            L.ep = new THREE.Vector3(p.x + n.x * scale, p.y + n.y * scale, p.z + n.z * scale);
+
+            L.alpha = alpha;
+            L.update(dt);
+            L = null;
         }
 
         var a1 = Math.random() * Math.PI * 2;
@@ -113,6 +263,9 @@ BSWG.specProj_TorpedoOrEMP = {
             if (this.detonated) {
                 var list = BSWG.componentList.withinRadius(new b2Vec2(p.x, p.y), scale);
                 for (var i=0; i<list.length; i++) {
+                    if (list[i].onCC === this.source.onCC && this.noSelfDamage) {
+                        continue;
+                    }
                     list[i].takeDamage(BSWG.torpedoDPS * dt, this.source || null, true);
                 }
                 list = null;                
@@ -150,6 +303,50 @@ BSWG.specProj_TorpedoOrEMP = {
                 p2 = v = null;
             }
         }
+        else if (this.type === 'emp') {
+            if (this.detonated) {
+                var list = BSWG.componentList.withinRadius(new b2Vec2(p.x, p.y), scale);
+                for (var i=0; i<list.length; i++) {
+                    if (list[i].onCC === this.source.onCC && this.noSelfDamage) {
+                        continue;
+                    }
+                    list[i].empEffect += BSWG.eTorpedoEPS * dt;
+                }
+                list = null;                
+            }
+            var r = (~~(Math.random() * 100000)) % 4;
+            if (r === 0) {
+                this.mat.uniforms.clr.value.set(1, 1, 1, .45*alpha);
+            }
+            else if (r === 1) {
+                this.mat.uniforms.clr.value.set(0, 1, 1, .45*alpha);
+            }
+            else if (r === 2) {
+                this.mat.uniforms.clr.value.set(0, .5, 1, .45*alpha);
+            }
+            else if (r === 3) {
+                this.mat.uniforms.clr.value.set(0, 0, 1, .45*alpha);
+            }
+            for (var i=0; i<4; i++) {
+                var r = scale;
+                var a = Math._random() * Math.PI * 2.0;
+                var r2 = Math._random() * r;
+                var v = new THREE.Vector3(Math._random() * 8 - 4, Math._random() * 8 - 4, Math._random() * 8 - 4);
+                var p2 = new THREE.Vector3(p.x + Math.cos(a) * r2, p.y + Math.sin(a) * r2, p.z);
+                BSWG.render.boom.palette = chadaboom3D.blue_bright;
+                BSWG.render.boom.add(
+                    p2,
+                    r*(1.5 + 4.5*Math._random())*0.1,
+                    256,
+                    1 + Math.pow(r, 1/3) * Math._random(),
+                    2.0,
+                    v,
+                    null,
+                    Math.random() < 0.2
+                );
+                p2 = v = null;
+            }            
+        }
 
         if (ctx && cam) {
             this._updateRender(ctx, cam, dt);
@@ -177,6 +374,12 @@ BSWG.specProj_TorpedoOrEMP = {
         this.smesh = null;
 
         this._destroy();
+
+        for (var i=0; i<this.lightning.length; i++) {
+            this.lightning[i].destroy();
+            this.lightning[i] = null;
+        }
+        this.lightning = null;
     }
 
 };

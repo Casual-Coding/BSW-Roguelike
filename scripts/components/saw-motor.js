@@ -262,7 +262,7 @@ BSWG.component_SawMotor = {
 
         if (robj) {
             if (keys[this.rotKey] || keys[this.rotKeyAlt]) {
-                this.motorAccel = 33.0 * ((this.onCC && this.onCC.spinUp) ? 2 : 1);
+                this.motorAccel = 33.0 * ((this.onCC && this.onCC.spinUp) ? 2 : 1) * this.empDamp;
             }
         }
 

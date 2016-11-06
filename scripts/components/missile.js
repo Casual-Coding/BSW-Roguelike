@@ -83,7 +83,7 @@ BSWG.component_Missile = {
         }
         this.exaust.strength = Math.clamp(this.fireT*3.0, 0, 1);
 
-        if (this.fireT > 0 && !this.obj.body.__lastHit && !this.nextDestroy) {
+        if (this.fireT > 0 && !this.obj.body.__lastHit && !this.nextDestroy || this.empDamp < 1) {
 
             var p = Math.rotVec2(new b2Vec2(this.size * 0.6, 0.0));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);

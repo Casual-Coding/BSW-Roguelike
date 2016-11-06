@@ -148,6 +148,7 @@ BSWG.specialList = new (function(){
             'emp-defend': {
                 name: 'EMP Pulse',
                 controller: BSWG.specialCont_targetShip,
+                effect: BSWG.specialEffect_empDefend,
                 color: new THREE.Vector4(.3, 0, 1, 0.75),
                 cooldown: 30.0, // seconds
                 polys: [
@@ -234,6 +235,7 @@ BSWG.specialList = new (function(){
             'emp-attack': {
                 name: 'EMP Torpedo',
                 controller: BSWG.specialCont_circleRange,
+                effect: BSWG.specialEffect_empTorpedo,
                 minRadius: 3,
                 maxRadius: 3,
                 color: new THREE.Vector4(.5, .25, 1, 0.75),

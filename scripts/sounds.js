@@ -349,6 +349,7 @@ BSWG.soundLoad = function (onload) {
         { name: 'minigun', url: 'sounds/minigun.wav '},
         { name: 'minigun-fire', url: 'sounds/minigun-fire.wav '},
         { name: 'use-special', url: 'sounds/use-special.wav' },
+        { name: 'lightning', url: 'sounds/lightning.wav' }
     ];
 
     var urls = [];

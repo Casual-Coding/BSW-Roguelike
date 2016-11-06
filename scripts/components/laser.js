@@ -163,7 +163,7 @@ BSWG.component_Laser = {
 
         var accel = 0;
 
-        if (keys[this.fireKey] || keys[this.fireKeyAlt]) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && this.empDamp > 0.5) {
 
             accel = 1;
 

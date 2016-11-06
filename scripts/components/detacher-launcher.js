@@ -224,7 +224,7 @@ BSWG.component_DetacherLauncher = {
                 this.obj.body.ApplyForceToCenter(force);
             }
 
-            this.fireT -= dt;
+            this.fireT -= dt * this.empDamp;
 
         }
         else
@@ -238,7 +238,7 @@ BSWG.component_DetacherLauncher = {
 
     handleInput: function(keys) {
 
-        if ((keys[this.launchKey] || keys[this.launchKeyAlt]) && !this.fireT) {
+        if ((keys[this.launchKey] || keys[this.launchKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
 
             for (var k=0; k<this.jpoints.length; k++) {
                 if (this.welds[k] && k !== 3) {

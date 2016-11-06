@@ -53,6 +53,37 @@ BSWG.specialEffect_torpedo = {
 
 };
 
+BSWG.specialEffect_empTorpedo = {
+
+    init: function(args) {
+
+        this._init(args);
+
+        new BSWG.specProj(BSWG.specProj_TorpedoOrEMP, {
+            type: 'emp',
+            follow: false,
+            startP: args.owner.obj.body.GetWorldCenter().clone(),
+            endP: args.p.clone(),
+            hitRadius: args.r,
+            source: args.owner
+        });
+
+        return false;
+    },
+
+    destroy: function () {
+
+        this._destroy();
+
+    },
+
+    updateRender: function(ctx, dt) {
+
+    }
+
+};
+
+
 BSWG.specialEffect_torpedoSpread = {
 
     init: function(args) {

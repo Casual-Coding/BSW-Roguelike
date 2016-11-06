@@ -109,7 +109,7 @@ BSWG.component_MissileLauncher = {
         }
 
         if (this.fireT) {
-            this.fireT -= dt * ((this.onCC && this.onCC.fury) ? 1.35 : 1.0);
+            this.fireT -= dt * ((this.onCC && this.onCC.fury) ? 1.35 : 1.0) * this.empDamp;
             if (this.fireT <= 0)
                 this.fireT = 0.0;
         }
@@ -155,7 +155,7 @@ BSWG.component_MissileLauncher = {
 
         var accel = 0;
 
-        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
 
             var pl = new b2Vec2(0.0,  1.5);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;

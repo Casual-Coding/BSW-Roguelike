@@ -222,7 +222,7 @@ BSWG.component_Minigun = {
         this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
 
         if (this.fireT) {
-            this.fireT -= dt * ((this.onCC && this.onCC.fury) ? 1.35 : 1.0);
+            this.fireT -= dt * ((this.onCC && this.onCC.fury) ? 1.35 : 1.0) * this.empDamp;
             if (this.fireT <= 0)
                 this.fireT = 0.0;
         }
@@ -269,7 +269,7 @@ BSWG.component_Minigun = {
         var accel = 0;
 
         this.firing = false;
-        if (keys[this.fireKey] || keys[this.fireKeyAlt]) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && this.empDamp > 0.5) {
             this.firing = true;
         }
         

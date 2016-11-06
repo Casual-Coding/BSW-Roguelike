@@ -294,6 +294,8 @@ BSWG.component = function (desc, args) {
     this.initTime = Date.timeStamp();
     this.handleInput = function(key) {};
     this.frontOffset = 0.0;
+    this.empEffect = 0.0;
+    this.empDamp = 1.0;
 
     for (var key in desc) {
         this[key] = desc[key];
@@ -567,6 +569,11 @@ BSWG.component.prototype.p = function (v) {
 
 BSWG.component.prototype.remove = function() {
 
+    if (this._lightning) {
+        this._lightning.destroy();
+        this._lightning = null;
+    }
+
     if (BSWG.game.attractorOn === this) {
         BSWG.game.attractorOn = null;
     }
@@ -814,6 +821,59 @@ BSWG.component.prototype.updateJCache = function() {
 };   
 
 BSWG.component.prototype.baseUpdate = function(dt) {
+
+    this.empEffect -= dt;
+    if (this.empEffect <= 0) {
+        this.empEffect = 0;
+    }
+    this.empDamp = 1.0 - Math.clamp(this.empEffect, 0, 1);
+
+    if (this.empEffect > 0 && !this.destroyed) {
+        var just = false;
+        if (!this._lightning) {
+            this._lightning = new BSWG.lightning(this.p(), new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, 1));
+            this._lightning.lp = new b2Vec2(0, 0);
+            this._lightning.lep = new b2Vec2(0, 0);
+            just = true;
+        }
+
+        if (just || (Math._random() < 1/20)) {
+            for (var k=0; k<32; k++) {
+                var a = Math._random() * Math.PI * 2.0;
+                var r = Math._random() * (this.obj.radius || 1.0);
+                var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+                var p = this.p(lp);
+                if (BSWG.componentList.atPoint(p, this)) {
+                    this._lightning.lp = lp;
+                    break;
+                }
+            }
+        }
+        if (just || (Math._random() < 1/20)) {
+            for (var k=0; k<32; k++) {
+                var a = Math._random() * Math.PI * 2.0;
+                var r = Math._random() * (this.obj.radius || 1.0);
+                var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+                var p = this.p(lp);
+                if (BSWG.componentList.atPoint(p, this)) {
+                    this._lightning.lep = lp;
+                    break;
+                }
+            }
+        }
+
+        this._lightning.p = this.p(this._lightning.lp).THREE(0.2);
+        this._lightning.ep = this.p(this._lightning.lep).THREE(0.2);
+        this._lightning.n = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, 1);
+        this._lightning.alpha = 1.0 - this.empDamp;
+        this._lightning.update(dt);
+    }
+    else {
+        if (this._lightning) {
+            this._lightning.destroy();
+            this._lightning = null;
+        }
+    }
 
     this.canEquip = true;
     if (this.onCC) {

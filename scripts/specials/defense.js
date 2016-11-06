@@ -51,3 +51,35 @@ BSWG.specialEffect_defenseScreen = {
     }
 
 };
+
+BSWG.specialEffect_empDefend = {
+
+    init: function(args) {
+
+        this._init(args);
+
+        new BSWG.specProj(BSWG.specProj_TorpedoOrEMP, {
+            type: 'emp',
+            follow: false,
+            startP: args.cc.p().clone(),
+            endP: args.cc.p().clone(),
+            hitRadius: null,
+            noSelfDamage: true,
+            scale: 4.0,
+            source: args.cc
+        });
+
+        return false;
+    },
+
+    destroy: function () {
+
+        this._destroy();
+
+    },
+
+    updateRender: function(ctx, dt) {
+
+    }
+
+};

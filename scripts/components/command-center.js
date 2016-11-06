@@ -87,7 +87,7 @@ BSWG.component_CommandCenter = {
         if (!this.hasSpecial(key) || !this.specialEquipped(key)) {
             return 0.0;
         }
-        return this.specials.all[key].t;
+        return this.specials.all[key].t * this.empDamp;
     },
 
     canUseSpecial: function(key) {
@@ -677,6 +677,9 @@ BSWG.component_CommandCenter = {
             accel *= 2.5;
             rot *= 1.5;
         }
+
+        accel *= this.empDamp;
+        rot *= this.empDamp;
 
         if (this.sound) {
             this.sound.volume(0.2 * (Math.abs(rot) + Math.abs(accel)) * (this.speed ? 1.5 : 1));

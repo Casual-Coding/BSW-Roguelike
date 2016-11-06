@@ -224,6 +224,8 @@ BSWG.component_Thruster = {
 
         if (keys[this.thrustKey] || keys[this.thrustKeyAlt]) accel += 1;
 
+        accel *= this.empDamp;
+
         if (accel && this.thrustT < 0.025) { // add shockwave
             for (var i=-10; i<=10; i++) {
                 var p = Math.rotVec2(new b2Vec2(0.0, -0.55 * this.size));
