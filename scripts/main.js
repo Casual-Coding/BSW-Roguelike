@@ -40,6 +40,7 @@ var BSWG = new function(){
         'exaust.js',
         'orb.js',
         'clouds.js',
+        'special-projectile.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/minigun.js',
@@ -197,7 +198,8 @@ var BSWG = new function(){
             'shadowFragment',
             'weatherFragment',
             'weatherFragmentShadow',
-            'cloudFragment'
+            'cloudFragment',
+            'torpedoFragment'
         ]
     };
     var ai = [

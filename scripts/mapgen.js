@@ -397,7 +397,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             ret.maxMazeLevel = Math.max(ret.maxMazeLevel, z.mazeLevel);
             var x = id % a;
             var y = ~~(id / a);
-            var ord = [ [-1, 0], [1, 0], [0, -1], [0, 1]];
+            var ord = [ [-1, 0], [1, 0], [0, -1], [0, 1] ];
             while (ord.length) {
                 var idx = Math.floor(Math.random()*10000) % ord.length;
                 var vec = ord[idx];
@@ -568,8 +568,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
         for (var x=0; x<size; x++) {
             for (var y=0; y<size; y++) {
                 var xy = new b2Vec2(x,y);
-                for (var i=0; i<numPlanets; i++) {
-                    var p = ret.planets[i];
+                for (var i=0; i<ret.zones.length; i++) {
+                    var p = ret.zones[i];
                     var dist = Math.distVec2(p.p, xy);
                     if (dist < 3) {
                         ret.terMap[x][y] = 0;

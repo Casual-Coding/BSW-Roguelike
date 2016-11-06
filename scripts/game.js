@@ -647,6 +647,7 @@ BSWG.game = new function(){
         BSWG.componentList.clear();
         BSWG.componentList.clearStatic();
         BSWG.blasterList.clear();
+        BSWG.specProjList.clear();
         BSWG.laserList.clear();
         BSWG.planets.init();
         BSWG.ui.clear();
@@ -2010,6 +2011,7 @@ BSWG.game = new function(){
             }
             BSWG.componentList.render(ctx, self.cam, dt);
             BSWG.blasterList.updateRender(ctx, self.cam, dt);
+            BSWG.specProjList.updateRender(ctx, self.cam, dt);
             BSWG.laserList.updateRender(ctx, self.cam, dt);
             BSWG.render.boom.render(dt);
             BSWG.render.weather.render(dt);

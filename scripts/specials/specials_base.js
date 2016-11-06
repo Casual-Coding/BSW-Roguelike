@@ -220,6 +220,7 @@ BSWG.specialList = new (function(){
             'torpedo': {
                 name: 'Torpedo',
                 controller: BSWG.specialCont_circleRange,
+                effect: BSWG.specialEffect_torpedo,
                 minRadius: 3,
                 maxRadius: 3,
                 color: new THREE.Vector4(1, .5, 0, 0.75),
@@ -268,6 +269,7 @@ BSWG.specialList = new (function(){
             'torpedo-spread': {
                 name: 'Torpedo Spread',
                 controller: BSWG.specialCont_circleRange,
+                effect: BSWG.specialEffect_torpedoSpread,
                 minRadius: 6,
                 maxRadius: 6,
                 color: new THREE.Vector4(1, .5, 0, 0.75),
@@ -683,6 +685,7 @@ BSWG.startSpecial = function(key, who, btn) {
             }
             if (data) {
                 if (who.hasSpecial(key) && who.energy >= BSWG.specialsInfo[key].energy) {
+                    data.owner = who;
                     if (BSWG.specialsInfo[key].effect) {
                         new BSWG.soundSample().play('use-special', who.obj.body.GetWorldCenter().THREE(0.4), 4.0, 1.0/(((BSWG.specialsInfo[key].energy||0)+Math._random())/50));
                         new BSWG.specialEffect(BSWG.specialsInfo[key].effect, data);
