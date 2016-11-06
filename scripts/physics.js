@@ -959,7 +959,7 @@ BSWG.physics = new function(){
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
 
-        if (ba.__comp && bb.__comp) {
+        if (ba.__comp || bb.__comp) {
 
             var impulse = 0;
             for (var i=0; i<_impulse.normalImpulses.length; i++) {
@@ -975,29 +975,35 @@ BSWG.physics = new function(){
 
             var A = ba.__comp, B = bb.__comp;
 
-            if (!A.__if) { A.__if = new Map(); }
-            if (!B.__if) { B.__if = new Map(); }
-            if (!A.__if.has(B.id)) {
-                A.__if.set(B.id, {
-                    f: forceA,
-                    p: p
-                });
+            if (A) {
+                if (!A.__if) { A.__if = new Map(); }
+                var bid = B ? B.id : -1;
+                if (!A.__if.has(bid)) {
+                    A.__if.set(bid, {
+                        f: forceA,
+                        p: p
+                    });
+                }
+                else {
+                    var t = A.__if.get(bid);
+                    t.f += forceA;
+                    t.p = p;
+                }
             }
-            else {
-                var t = A.__if.get(B.id);
-                t.f += forceA;
-                t.p = p;
-            }
-            if (!B.__if.has(A.id)) {
-                B.__if.set(A.id, {
-                    f: forceB,
-                    p: p
-                });
-            }
-            else {
-                var t = B.__if.get(A.id);
-                t.f += forceB;
-                t.p = p;
+            if (B) {
+                if (!B.__if) { B.__if = new Map(); }
+                var aid = A ? A.id : -1;
+                if (!B.__if.has(aid)) {
+                    B.__if.set(aid, {
+                        f: forceB,
+                        p: p
+                    });
+                }
+                else {
+                    var t = B.__if.get(aid);
+                    t.f += forceB;
+                    t.p = p;
+                }
             }
         }
 
