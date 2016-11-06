@@ -523,7 +523,7 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
-    var last60dt = new Array(20);
+    var last60dt = new Array(BSWG.options.vsync ? 3 : 60);
     for (var i=0; i<last60dt.length; i++) {
         last60dt[i] = 1.0/60;
     }
@@ -556,6 +556,8 @@ BSWG.render = new function() {
 
         var self = this;
         var renderFrame = function () {
+
+            var lvsync = BSWG.options.vsync;
 
             if (BSWG.options.vsync) {
                 self.animFrameID = window.requestAnimationFrame(renderFrame);
@@ -694,6 +696,14 @@ BSWG.render = new function() {
             if (BSWG.options.vsync !== newVsync) {
                 BSWG.options.vsync = newVsync;
                 BSWG.saveOptions();
+            }
+
+            if (BSWG.options.vsync !== lvsync) {
+                last60dt = new Array(BSWG.options.vsync ? 3 : 60);
+                for (var i=0; i<last60dt.length; i++) {
+                    last60dt[i] = 1.0/60;
+                }
+                l60ptr = 0;
             }
         };
 
