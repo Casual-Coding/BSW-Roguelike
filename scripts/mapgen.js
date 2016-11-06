@@ -38,7 +38,7 @@ BSWG.enemySettings = [
         bosses: [ // ordered by difficulty
             {
                 who: 161,
-                enemies: [ { type: 'missile-boss', levelInc: 2 } ],
+                enemies: [ { type: 'missile-boss', levelInc: 2.0 } ],
                 dialog: {
                     who: 161,
                     friend: false,
@@ -64,7 +64,7 @@ BSWG.enemySettings = [
             },
             {
                 who: 54,
-                enemies: [ { type: 'mele-boss', levelInc: 2 } ],
+                enemies: [ { type: 'mele-boss', levelInc: 2.0 } ],
                 dialog: {
                     who: 54,
                     friend: false,
@@ -1282,10 +1282,15 @@ BSWG.pickEnemyLevel = function(zone, E) {
         return ((zone.maxLevel + zone.minLevel) * 0.5) + E.levelInc;
     }
 
+    var maxLevel = zone.maxLevel;
+    if (Math.floor(BSWG.game.ccblock.level()) >= Math.floor(maxLevel)) {
+        maxLevel = Math.floor(maxLevel) + 1;
+    }
+
     var possible = new Array();
     for (var j=0; j<E.levels.length; j++) {
-        if (E.levels[j] >= zone.minLevel && E.levels[j] <= zone.maxLevel) {
-            possible.push(E.levels[j] + Math.random() * (zone.maxLevel - E.levels[j]));
+        if (E.levels[j] >= zone.minLevel && E.levels[j] <= maxLevel) {
+            possible.push(E.levels[j] + Math.random() * (maxLevel - E.levels[j]));
         }
     }
     if (possible.length === 0) {

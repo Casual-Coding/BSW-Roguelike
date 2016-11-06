@@ -2911,8 +2911,6 @@ BSWG.game = new function(){
 
             if (self.switchScene) {
 
-                cancelAnimationFrame(BSWG.render.nextVSync);
-
                 var ss = self.switchScene;
                 var t = 0.0;
                 if (ss.timeOut > 0) {
@@ -2920,12 +2918,18 @@ BSWG.game = new function(){
                     t = 1.0 - (ss.timeOut / ss.fadeTime);
                     if (ss.timeOut < 0) {
                         ss.timeOut = 0;
-                        ctx.fillStyle = ss.color;
-                        ctx.fillRect(0, 0, viewport.w, viewport.h);
+                        var grd = ctx.createLinearGradient(0, 0, 0, BSWG.render.viewport.h);
+                        grd.addColorStop(0, "#111");
+                        grd.addColorStop(1, "#000");
+                        ctx.fillStyle = grd;
+                        ctx.fillRect(0, 0, BSWG.render.viewport.w, BSWG.render.viewport.h);
                         ctx.font = '48px Orbitron';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillStyle = '#ddd';
+                        ctx.textAlign = 'center';
+                        ctx.fillTextB('Loading ...', BSWG.render.viewport.w/2, BSWG.render.viewport.h - 48, true);
+                        ctx.drawImage(BSWG.titleImage, 0, 0, BSWG.titleImage.width, BSWG.titleImage.height, BSWG.render.viewport.w/2 - BSWG.titleImage.width/3.0, 48, BSWG.titleImage.width/1.5, BSWG.titleImage.height/1.5);
                         ctx.textAlign = 'left';
-                        ctx.fillStyle = '#77d';
-                        ctx.fillTextB('Loading ...', 48, viewport.h - 48, true);
                         BSWG.render.setCustomCursor(false);
                         t = 0.0;
                     }

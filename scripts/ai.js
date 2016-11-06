@@ -45,7 +45,7 @@ BSWG.getEnemy = function(type, statsOnly) {
         case 'little-charger':  title = 'Little Charger Y'; break;
         case 'little-cruncher': title = 'Little Cruncher'; break;
         case 'mele-boss':       title = 'Mele Monster'; break;
-        case 'missile-boss':    title = 'Flail'; break;
+        case 'missile-boss':    title = 'Thorne'; break;
         case 'missile-spinner': title = 'Missile Spinner'; break;
         case 'msl-fighter':     title = 'Missile Fighter'; break;
         case 'scorpion':        title = 'Scorpion'; break;
@@ -375,7 +375,7 @@ BSWG.aiSensor.prototype.moveTo = function (p, keyDown, left, right, forward, rev
 
     var angDiff = Math.angleBetween(mp, vel) - (this.comp.obj.body.GetAngleWrapped() + this.comp.frontOffset + this.forwardOffset);
     angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
-    if (Math.abs(angDiff) > Math.PI*0.5 && reverse && distance < revRadius && !this.tracker) {
+    if (Math.abs(angDiff) > Math.PI*0.5 && reverse && distance < this.revRadius && !this.tracker) {
         doReverse = true;
         angDiff = Math.atan2(Math.sin(angDiff+Math.PI), Math.cos(angDiff+Math.PI));
     }
@@ -402,7 +402,7 @@ BSWG.aiSensor.prototype.moveTo = function (p, keyDown, left, right, forward, rev
 
     if (distance > radius || this.tracker) {
         if (this.spinner) {
-            if (this.computeVel(aDists) > 0) {
+            if (this.computeVel(this.aDists) > 0) {
                 keyDown[right] = true;
             }
             else {

@@ -42,7 +42,11 @@
                 Detector.addGetWebGLMessage();
             }
             else {
-                BSWG.init();
+                BSWG.titleImage = new Image();
+                BSWG.titleImage.onload = function() {
+                    BSWG.init();
+                }
+                BSWG.titleImage.src = "/images/logo.png";
             }
             
         </script>
