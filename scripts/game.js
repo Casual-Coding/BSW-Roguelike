@@ -927,11 +927,11 @@ BSWG.game = new function(){
                     for (var i=0; i<this.initComponents.length; i++) {
                         this.map.updateMinLevelComp(this.initComponents[i], 0);
                     }
+                    this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
                     this.ccblock = BSWG.componentList.load(args.load.comp, null, null, null, null, true);
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
                     this.cam.y = p.y;
-                    this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
                     BSWG.specialList.load(args.load.specials || null);
                     this.noDefault = true;
                 }

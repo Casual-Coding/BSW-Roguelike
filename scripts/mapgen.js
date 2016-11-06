@@ -1018,7 +1018,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 distanceLeft = this.gridSize * 2.5;
             }
             else {
-                distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+                distanceLeft = Math._random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
             }
         }
 
@@ -1031,7 +1031,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             if (zone.hasPlanet && zone.boss) {
                 this.escapeDistance = this.gridSize * 1000.0;
                 lastBattleZone = zone;
-                distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+                distanceLeft = Math._random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
                 if (zone.boss.dialog) {
                     BSWG.game.linearDialog(zone.boss.dialog, true);
                 }
@@ -1041,8 +1041,9 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 if (distanceLeft <= 0) {
                     this.escapeDistance = this.gridSize * 4.0 / 1.35;
                     lastBattleZone = zone;
-                    distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-                    Math.seedrandom(Math.floor(p.x / (this.gridSize*8)) + 10000 * Math.floor(p.y / (this.gridSize*8)) + this.getTType(p)*0.1);
+                    distanceLeft = Math._random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
+                    var _ex = ((Math._random() < 0.15) ? .01 + ((Math._random() < 0.25) ? .01 : 0) : 0);
+                    Math.seedrandom(Math.floor(p.x / (this.gridSize*8)) + 10000 * Math.floor(p.y / (this.gridSize*8)) + this.getTType(p)*0.1 + _ex);
                     var e = zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
                     Math.seedrandom();
                     return e;

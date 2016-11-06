@@ -172,7 +172,7 @@ BSWG.component_DetacherLauncher = {
             if (!this.exaust) {
                 this.exaust = new BSWG.exaust(this.obj.body, new b2Vec2(0.2 * this.size, 0.0), 0.5 * this.size, 0.0, 0.125, BSWG.exaustBlue);
             }
-            this.exaust.strength = Math.clamp(Math.clamp(this.fireT-6,0,1)*3.0, 0, 1);
+            this.exaust.strength = Math.clamp(Math.clamp(this.fireT-6,0,1)*3.0*this.empDamp, 0, 1);
         }
         else {
             if (this.sound) {
@@ -218,7 +218,7 @@ BSWG.component_DetacherLauncher = {
                     false
                 );*/
                 var a = this.obj.body.GetAngle() + Math.PI;
-                var accel = 20.0 * [1,3,7][this.size-1];
+                var accel = 20.0 * [1,3,7][this.size-1] * this.empDamp;
                 this.obj.body.SetAwake(true);
                 var force = new b2Vec2(Math.cos(a)*accel, Math.sin(a)*accel);
                 this.obj.body.ApplyForceToCenter(force);

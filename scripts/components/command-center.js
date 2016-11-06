@@ -31,6 +31,9 @@ BSWG.component_CommandCenter = {
     name: 'Command Center',
 
     maxHP: 100,
+    calcMaxEnergy: function() {
+        return Math.round(100 + 100 * this.level() / 5);
+    },
 
     sortOrder: 2,
 
@@ -181,7 +184,9 @@ BSWG.component_CommandCenter = {
         this.downKeyAlt = args.downKeyAlt || this.downKey;
         this.specials = args.specials || BSWG.newCCSpecialsObj();
 
-        this.energy = this.maxEnergy = 100;
+        this.maxEnergy = this.calcMaxEnergy();
+        this.energy = this.maxEnergy;
+        this.energyRegen = .05;
 
         // special effects
         for (var i=0; i<this._spkeys.length; i++) {
@@ -434,6 +439,21 @@ BSWG.component_CommandCenter = {
 
     update: function(dt) {
 
+        this.maxEnergy = this.calcMaxEnergy();
+        if (this.maxEnergy > this.lMaxEnergy) {
+            this.energy = Math.clamp(this.energy + (this.maxEnergy - this.lMaxEnergy), 0, this.maxEnergy);
+        }
+        this.lMaxEnergy = this.maxEnergy;
+
+        this.energyRegen = .05;
+
+        var p = this.p();
+        if (this.lERP) {
+            this.energy = Math.clamp(this.energy + this.energyRegen * (Math.distVec2(p, this.lERP) / 3), 0, this.maxEnergy)
+        }
+        this.lERP = p.clone();
+        p = null;
+
         for (var i=0; i<this._spkeys.length; i++) {
             var key = this._spkeys[i];
             if (this[key]) {
@@ -472,7 +492,7 @@ BSWG.component_CommandCenter = {
         }
 
         if (BSWG.game.saveHealAdded) {
-            this.energy = Math.clamp(this.energy + 5*dt, 0, this.maxEnergy);
+            this.energy = Math.clamp(this.energy + (this.maxEnergy/10)*dt, 0, this.maxEnergy);
         }
 
         /*if (this.escapeFrom) {
