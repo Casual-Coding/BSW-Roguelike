@@ -1,6 +1,7 @@
 // BSWR - Missile object
 
-BSWG.missileDmg = 7;
+BSWG.missileDmg = 7.0;
+BSWG.missileSplashRadius = 1.5;
 
 BSWG.component_Missile = {
 
@@ -122,9 +123,13 @@ BSWG.component_Missile = {
                 if (this.fireT > 0.0) {
                     var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
                     if (this.obj.body.__lastHit) {
-                        if (this.obj.body.__lastHit.__comp) {
-                            this.obj.body.__lastHit.__comp.takeDamage(BSWG.missileDmg, this.source || null);
+                        var list = BSWG.componentList.withinRadius(this.obj.body.GetWorldCenter().clone(), BSWG.missileSplashRadius);
+                        for (var i=0; i<list.length; i++) {
+                            if (list[i] !== this) {
+                                list[i].takeDamage(BSWG.missileDmg, this.source || null);
+                            }
                         }
+                        list = null;
                     }
                     BSWG.render.boom.palette = chadaboom3D.fire_bright;
                     BSWG.render.boom.add(

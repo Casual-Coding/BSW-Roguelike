@@ -1,4 +1,4 @@
-BSWG.blasterDmg = 3.0;
+BSWG.blasterDmg = 4.5;
 BSWG.minigunDmg = {
     1: 1.25,
     2: 3.0

@@ -389,18 +389,13 @@ BSWG.component_CommandCenter = {
         if (this.usedSpecial && this.usedSpecialT > 0 && this.obj && this.obj.body) {
             var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
             ctx.globalAlpha = Math.clamp(this.usedSpecialT*2.0, 0, 1);
-            ctx.font = '18px Orbitron';
-            ctx.fillStyle = this.usedSpecialClr;
-            ctx.strokeStyle = 'rgba(0,0,0,.4)';
-            ctx.textAlign = 'center';
-            ctx.fillTextB('"' + this.usedSpecial + '"', p.x, p.y-9);
-            ctx.textAlign = 'left';
+            BSWG.renderSpecialIcon(ctx, this.usedSpecial, p.x, p.y, BSWG.render.viewport.h * 0.1, 0.0, null, true);
             ctx.globalAlpha = 1.0;
             this.usedSpecialT -= dt;
             p = null;
         }
         else {
-            this.usedSpecial = this.usedSpecialT = this.usedSpecialClr = null;
+            this.usedSpecial = this.usedSpecialT = this.usedSpecialClr = this.usedSpecialName = null;
         }
     },
 

@@ -839,6 +839,7 @@ BSWG.physics = new function(){
                 if (C.obj && C.obj.body && C.__if) {
                     for (var [K, V] of C.__if.entries()) {
                         var forceMe = V.f;
+                        V.f = 0;
                         var cp = V.p;
                         if (forceMe > 0.5) {
                             var ba = C.obj.body;
@@ -876,8 +877,8 @@ BSWG.physics = new function(){
                                     C: C
                                 };
                                 S.v = Math.min(S.v, 1/S.r);
-                                S.s.play('scrape', S.lp, S.v, S.r, true);
-                                new BSWG.soundSample().play('bump', S.lp, S.v/1.5, S.r);
+                                S.s.play('scrape', S.lp, Math.min(S.v, 1), S.r, true);
+                                new BSWG.soundSample().play('bump', S.lp, S.v/0.35, S.r);
                                 BSWG.render.addScreenShake(S.lp, S.v*C.obj.body.GetMass()*10.0);
                                 this.scrapes.push(S);
                                 C.__hs.set(K, S);
@@ -890,7 +891,7 @@ BSWG.physics = new function(){
                                 S.r = (0.35 / (C.obj.body.GetMass() / 2.5)) / 2.0;
                                 S.v = Math.min(S.v, 1/S.r);
                                 S.lp.set(cp.x, cp.y, 0.2);
-                                S.s.volume(S.v);
+                                S.s.volume(Math.min(S.v, 1));
                                 S.s.rate(S.r);
                                 S.s.position(S.lp);
                                 p = null;
@@ -973,6 +974,7 @@ BSWG.physics = new function(){
             var p = wm.m_points[0].clone();
 
             var A = ba.__comp, B = bb.__comp;
+
             if (!A.__if) { A.__if = new Map(); }
             if (!B.__if) { B.__if = new Map(); }
             if (!A.__if.has(B.id)) {

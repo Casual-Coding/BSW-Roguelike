@@ -363,6 +363,19 @@ BSWG.component = function (desc, args) {
 
 };
 
+BSWG.component.prototype.directlyConnectedTo = function(b) {
+    if (this.welds) {
+        for (var key in this.welds) {
+            if (this.welds[key]) {
+                if (this.welds[key].other === b) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+};
+
 BSWG.component.prototype.getKey = function () {
     
     var key = this.type;

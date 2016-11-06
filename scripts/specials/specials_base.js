@@ -689,8 +689,9 @@ BSWG.startSpecial = function(key, who, btn) {
                     }
                     who.energy = Math.max(who.energy - BSWG.specialsInfo[key].energy || 0, 0);
                     who.specials.all[key].t = 0.0;
-                    who.usedSpecial = BSWG.specialsInfo[key].name || '';
-                    who.usedSpecialT = 3.0;
+                    who.usedSpecial = key;
+                    who.usedSpecialName = BSWG.specialsInfo[key].name || '';
+                    who.usedSpecialT = 2.0;
                     var clr = BSWG.specialsInfo[key].color;
                     var r = Math.clamp(Math.floor(clr.x*255), 0, 255);
                     var g = Math.clamp(Math.floor(clr.y*255), 0, 255);

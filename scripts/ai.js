@@ -66,6 +66,7 @@ BSWG.getEnemy = function(type, statsOnly) {
         case 'mini-gunner':     title = 'Gunner'; break;
         case 'mini-gunner-m2':  title = 'Gunner MII'; break;
         case 'mini-gunner-m3':  title = 'Gunner MIII'; break;
+        case 'fighter-mg-2':    title = 'Fighter MG II'; break;
         default: break;
     }
 
