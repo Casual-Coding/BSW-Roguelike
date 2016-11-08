@@ -1274,6 +1274,7 @@ BSWG.game = new function(){
                                 }
                                 self.battleMode = true;
                             } catch (err) {
+                                console.log(err, err.stack);
                                 self.tileMap.clear();
                                 BSWG.componentList.clear();
                                 self.ccblock = BSWG.componentList.load(backup);

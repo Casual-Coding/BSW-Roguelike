@@ -72,7 +72,7 @@ BSWG.physics = new function(){
         this.world = new b2World( new b2Vec2(0.0, 0.0) );
         this.ground = this.world.CreateBody(new b2BodyDef());
         this.chandler = new b2ContactListener();
-        //this.chandler.PreSolve = this.collisionCallbackPre;
+        this.chandler.PreSolve = this.collisionCallbackPre;
         this.chandler.PostSolve = this.collisionCallback;
         this.world.SetContactListener(this.chandler);
 
@@ -944,13 +944,18 @@ BSWG.physics = new function(){
 
     var wm = null;
 
-    /*this.collisionCallbackPre = function(contact) {
+    this.collisionCallbackPre = function(contact) {
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
-        ba.__lastForce = 0;
-        bb.__lastForce = 0;
+        if ((ba.__comp && ba.__comp.ghost) || (bb.__comp && bb.__comp.ghost)) {
+            if (contact.IsTouching()) {
+                ba.__lastHit = bb;
+                bb.__lastHit = ba;
+                contact.SetEnabled(false);
+            }
+        }
         ba = bb = contact = null;
-    }*/
+    }
 
     var self = this;
 

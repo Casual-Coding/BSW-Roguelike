@@ -1,6 +1,6 @@
 BSWG.torpedoSpeed = 25;
 BSWG.torpedoArcHeight = 8;
-BSWG.torpedoRange = 60;
+BSWG.torpedoRange = 50;
 BSWG.torpedoDPS = 80/2;
 
 BSWG.eTorpedoSpeed = 20;
@@ -131,6 +131,7 @@ BSWG.specProj_TorpedoOrEMP = {
             this.follow = args.follow;
             this.totalDistance = this.range;
             this.distance = 0;
+            this.startP = this.follow.p().clone();
         }
         else {
             this.startP = args.startP;
@@ -180,21 +181,36 @@ BSWG.specProj_TorpedoOrEMP = {
         l = null;
     },
 
+    detonate: function(v) {
+        if (!this.detonated) {
+            this.finalVel = (v || new b2Vec2(0, 0)).clone();
+            this.finalPos = this.mesh.position.clone();
+            this.dampT = 0.0;
+            this.detonated = true;
+            this.distance = this.totalDistance;
+            this.explodeT = 0.0;
+            if (this.type === 'emp') {
+                for (var k=0; k<10; k++) {
+                    this.addLightning();
+                }                        
+            }
+        }
+    },
+
     updateRender: function(ctx, cam, dt) {
 
         if (!this.detonated) {
-            this.distance += this.speed * dt;
+            if (this.follow) {
+                if (this.follow.p()) {
+                    this.distance = Math.distVec2(this.follow.p().clone(), this.startP);
+                }
+            }
+            else {
+                this.distance += this.speed * dt;
+            }
             if (this.distance > this.totalDistance) {
                 this.distance = this.totalDistance;
-                if (!this.detonated) {
-                    this.detonated = true;
-                    this.explodeT = 0.0;
-                    if (this.type === 'emp') {
-                        for (var k=0; k<10; k++) {
-                            this.addLightning();
-                        }                        
-                    }
-                }
+                this.detonate();
             }
         }
 
@@ -210,6 +226,9 @@ BSWG.specProj_TorpedoOrEMP = {
             alpha *= 1.0 - (this.explodeT / 2.0);
             scale += this.scale * Math.sqrt(this.explodeT * 10);
         }
+        else {
+            scale *= Math.max(0.01, alpha);
+        }
 
         if (!this.follow) {
             var t = (this.totalDistance > 0) ? (this.distance / this.totalDistance) : 0.0;
@@ -217,6 +236,18 @@ BSWG.specProj_TorpedoOrEMP = {
             var p2 = Math.interpolate(this.startP, this.endP, t);
             p.x = p2.x; p.y = p2.y;
             p2 = null;
+        }
+        else if (this.follow.obj && this.follow.obj.body && !this.detonated) {
+            var p2 = this.follow.p().clone();
+            p.x = p2.x; p.y = p2.y;
+            p2 = null;
+        }
+        else if (this.finalVel) {
+            this.dampT += dt;
+            var vt = Math.max(0, (Math.pow(Math.max(BSWG.physics.baseDamping, 0.0), Math.max(this.dampT, 0.0)) - 1.0) / Math.log(BSWG.physics.baseDamping));
+            console.log(vt);
+            p.x = this.finalPos.x + this.finalVel.x * vt;
+            p.y = this.finalPos.y + this.finalVel.y * vt;
         }
 
         for (var i=0; i<this.lightning.length; i++) {

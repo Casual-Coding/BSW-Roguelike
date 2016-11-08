@@ -1,9 +1,25 @@
 // BSWR - Missile Launcher component
 
+BSWG.MSL_TYPE = {
+    MISSILE: 0,
+    TORPEDO: 1,
+    EMP:     2
+};
+BSWG.MSL_SCALE = {
+    0: 1.0, // Missile
+    1: 2.0, // Torpedo
+    2: 2.0  // EMP
+};
+BSWG.MSL_COOLDOWN = {
+    0: 1.5/2, // Missile
+    1: 6,     // Torpedo
+    2: 8,     // EMP
+}
+
 BSWG.component_MissileLauncher = {
 
     type: 'missile-launcher',
-    name: 'Missile Launcher',
+    name: 'Launchers',
 
     maxHP: 50,
 
@@ -13,11 +29,18 @@ BSWG.component_MissileLauncher = {
 
     serialize: [
         'fireKey',
-        'fireKeyAlt'
+        'fireKeyAlt',
+        'ltype'
+    ],
+
+    sbkey: [
+        'ltype'
     ],
 
     sbadd: [
-        { title: 'Add', value: 25 }
+        { title: 'Missile', ltype: BSWG.MSL_TYPE.MISSILE, value: 25 },
+        { title: 'Torpedo', ltype: BSWG.MSL_TYPE.TORPEDO, value: 75 },
+        { title: 'EMP',     ltype: BSWG.MSL_TYPE.EMP,     value: 75 }
     ],
 
     frontOffset: Math.PI/2,
@@ -25,36 +48,70 @@ BSWG.component_MissileLauncher = {
     category: 'weapon',
 
     getIconPoly: function (args) {
-        return [[
-            new b2Vec2(-0.45,  -0.3),
-            new b2Vec2(-0.4,  0.85),
-            new b2Vec2( 0.4,  0.85),
-            new b2Vec2( 0.45,  -0.3)
-        ].reverse()];
+        var scale = BSWG.MSL_SCALE[args.ltype||0];
+        if (args.type === BSWG.MSL_TYPE.EMP) {
+            return [[
+                new b2Vec2(-0.45 * scale, -0.3  * scale),
+                new b2Vec2(-0.35 * scale,  0.85 * scale),
+                new b2Vec2( 0.35 * scale,  0.85 * scale),
+                new b2Vec2( 0.45 * scale, -0.3  * scale)
+            ].reverse()];
+        }
+        else {
+            return [[
+                new b2Vec2(-0.45 * scale,  -0.3 * scale),
+                new b2Vec2(-0.4  * scale,  0.85 * scale),
+                new b2Vec2( 0.4  * scale,  0.85 * scale),
+                new b2Vec2( 0.45 * scale,  -0.3 * scale)
+            ].reverse()];
+        }
     },
 
     init: function(args) {
 
+        this.ltype = args.ltype || 0;
+
+        if (this.ltype > 0) {
+            this.maxHP *= 4;
+        }
+
         var offsetAngle = this.offsetAngle = 0.0;
 
-        var verts = [
-            Math.rotVec2(new b2Vec2(-0.45,  -0.3), offsetAngle),
-            Math.rotVec2(new b2Vec2(-0.4,  0.85), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.4,  0.85), offsetAngle),
-            Math.rotVec2(new b2Vec2( 0.45,  -0.3), offsetAngle)
-        ].reverse();
+        var scale = BSWG.MSL_SCALE[this.ltype];
+        var verts = this.ltype === BSWG.MSL_TYPE.EMP ?
+            [
+                Math.rotVec2(new b2Vec2(-0.45 * scale,  -0.3 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2(-0.35 * scale,  0.85 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2( 0.35 * scale,  0.85 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2( 0.45 * scale,  -0.3 * scale), offsetAngle)
+            ].reverse()
+                :
+            [
+                Math.rotVec2(new b2Vec2(-0.45 * scale,  -0.3 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2(-0.4  * scale,  0.85 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2( 0.4  * scale,  0.85 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2( 0.45 * scale,  -0.3 * scale), offsetAngle)
+            ].reverse();
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
             verts: verts
         });
 
-        this.fireKey = args.fireKey || BSWG.KEY.SPACE;
+        var defKey = BSWG.KEY.SPACE;
+        if (this.ltype === BSWG.MSL_TYPE.TORPEDO) {
+            defKey = BSWG.KEY.T;
+        }
+        else if (this.ltype === BSWG.MSL_TYPE.EMP) {
+            defKey = BSWG.KEY.E;
+        }
+
+        this.fireKey = args.fireKey || defKey;
         this.fireKeyAlt = args.fireKeyAlt || this.fireKey;
         this.dispKeys = {
             'fire': [ '', new b2Vec2(0.0, 0.0) ],
         };
 
-        this.jpoints = [ new b2Vec2(0.0, -0.3) ];
+        this.jpoints = [ new b2Vec2(0.0, -0.3 * scale) ];
 
         this.thrustT = 0.0;
         this.kickBack = 0.0;
@@ -88,7 +145,15 @@ BSWG.component_MissileLauncher = {
             this.kickBack = 0.0;
         }
 
-        this.meshObj.update([1.0, 0.9, 0.6, 1], 4, BSWG.compAnchored(this));
+        if (this.ltype === BSWG.MSL_TYPE.MISSILE) {
+            this.meshObj.update([1.0, 0.9, 0.6, 1], 4, BSWG.compAnchored(this));
+        }
+        else if (this.ltype === BSWG.MSL_TYPE.TORPEDO) {
+            this.meshObj.update([1.0, 0.5 * Math.clamp(1-this.fireT,0,1), 0.0, 1], 4, BSWG.compAnchored(this));   
+        }
+        else if (this.ltype === BSWG.MSL_TYPE.EMP) {
+            this.meshObj.update([0.0, 0.5 * Math.clamp(1-this.fireT,0,1), 1.0, 1], 4, BSWG.compAnchored(this));   
+        }
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
         
         //BSWG.drawBlockPoly(ctx, this.obj, 0.5, null, BSWG.componentHoverFn(this));
@@ -129,7 +194,7 @@ BSWG.component_MissileLauncher = {
             w: 450, h: 50+32,
             key: this.fireKey,
             altKey: this.fireKeyAlt,
-            title: 'Missile fire',
+            title: 'Launch',
             close: function (key, alt) {
                 if (key) {
                     if (alt) {
@@ -157,7 +222,7 @@ BSWG.component_MissileLauncher = {
 
         if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
 
-            var pl = new b2Vec2(0.0,  1.5);
+            var pl = new b2Vec2(0.0, this.ltype === BSWG.MSL_TYPE.MISSILE ? 1.5 : 2.25);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
             var av = this.obj.body.GetAngularVelocity();
@@ -169,7 +234,8 @@ BSWG.component_MissileLauncher = {
                 angle: a,
                 angVel: av * 0.5,
                 vel: new b2Vec2(-Math.cos(a)*1.0 + v.x, -Math.sin(a)*1.0 + v.y),
-                source: this
+                source: this,
+                ltype: this.ltype
 
             });
 
@@ -197,10 +263,10 @@ BSWG.component_MissileLauncher = {
 
             pl = a = v = av = p = null;
 
-            accel = 1;
+            accel = 1 * (this.ltype > 0 ? 4 : 1);
 
-            this.fireT = 1.5/2;
-            this.kickBack = 1.5;
+            this.fireT = BSWG.MSL_COOLDOWN[this.ltype];
+            this.kickBack = 1.5 * (this.ltype > 0 ? 4 : 1);
         }
         
         if (accel)
