@@ -49,19 +49,20 @@ BSWG.component_MissileLauncher = {
 
     getIconPoly: function (args) {
         var scale = BSWG.MSL_SCALE[args.ltype||0];
-        if (args.type === BSWG.MSL_TYPE.EMP) {
+        var scaley = scale * ((args.ltype||0) > 0 ? 0.5 : 1);
+        if (args.ltype === BSWG.MSL_TYPE.EMP) {
             return [[
                 new b2Vec2(-0.45 * scale, -0.3  * scale),
-                new b2Vec2(-0.35 * scale,  0.85 * scale),
-                new b2Vec2( 0.35 * scale,  0.85 * scale),
+                new b2Vec2(-0.35 * scale,  0.85 * scaley),
+                new b2Vec2( 0.35 * scale,  0.85 * scaley),
                 new b2Vec2( 0.45 * scale, -0.3  * scale)
             ].reverse()];
         }
         else {
             return [[
                 new b2Vec2(-0.45 * scale,  -0.3 * scale),
-                new b2Vec2(-0.4  * scale,  0.85 * scale),
-                new b2Vec2( 0.4  * scale,  0.85 * scale),
+                new b2Vec2(-0.4  * scale,  0.85 * scaley),
+                new b2Vec2( 0.4  * scale,  0.85 * scaley),
                 new b2Vec2( 0.45 * scale,  -0.3 * scale)
             ].reverse()];
         }
@@ -78,18 +79,19 @@ BSWG.component_MissileLauncher = {
         var offsetAngle = this.offsetAngle = 0.0;
 
         var scale = BSWG.MSL_SCALE[this.ltype];
+        var scaley = scale * (this.ltype > 0 ? 0.5 : 1);
         var verts = this.ltype === BSWG.MSL_TYPE.EMP ?
             [
                 Math.rotVec2(new b2Vec2(-0.45 * scale,  -0.3 * scale), offsetAngle),
-                Math.rotVec2(new b2Vec2(-0.35 * scale,  0.85 * scale), offsetAngle),
-                Math.rotVec2(new b2Vec2( 0.35 * scale,  0.85 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2(-0.35 * scale,  0.85 * scaley), offsetAngle),
+                Math.rotVec2(new b2Vec2( 0.35 * scale,  0.85 * scaley), offsetAngle),
                 Math.rotVec2(new b2Vec2( 0.45 * scale,  -0.3 * scale), offsetAngle)
             ].reverse()
                 :
             [
                 Math.rotVec2(new b2Vec2(-0.45 * scale,  -0.3 * scale), offsetAngle),
-                Math.rotVec2(new b2Vec2(-0.4  * scale,  0.85 * scale), offsetAngle),
-                Math.rotVec2(new b2Vec2( 0.4  * scale,  0.85 * scale), offsetAngle),
+                Math.rotVec2(new b2Vec2(-0.4  * scale,  0.85 * scaley), offsetAngle),
+                Math.rotVec2(new b2Vec2( 0.4  * scale,  0.85 * scaley), offsetAngle),
                 Math.rotVec2(new b2Vec2( 0.45 * scale,  -0.3 * scale), offsetAngle)
             ].reverse();
 
@@ -110,6 +112,7 @@ BSWG.component_MissileLauncher = {
         this.dispKeys = {
             'fire': [ '', new b2Vec2(0.0, 0.0) ],
         };
+        this.fireT = 0.0;
 
         this.jpoints = [ new b2Vec2(0.0, -0.3 * scale) ];
 
@@ -117,8 +120,10 @@ BSWG.component_MissileLauncher = {
         this.kickBack = 0.0;
 
         BSWG.bpmReflect = 0.4;
-        //BSWG.bpmSmoothNormals = true;
-        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, 0.6));
+        if (this.ltype > 0) {
+            BSWG.bpmSmoothNormals = true;
+        }
+        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, this.ltype > 0 ? 0.05 : 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, this.ltype > 0 ? 0.85 * scale * 0.5 : 0.6 * scale));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
