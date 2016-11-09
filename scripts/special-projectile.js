@@ -459,9 +459,13 @@ BSWG.specProjList = new (function(){
     this.clear = function() {
         if (!BSWG.torpedoGeom) {
             BSWG.torpedoGeom = new THREE.IcosahedronGeometry(1, 2);
+            BSWG.torpedoGeom.computeVertexNormals();
+            BSWG.torpedoGeom.needsUpdate = true;
         }
         else if (!BSWG.shieldGeom) {
             BSWG.shieldGeom = new THREE.IcosahedronGeometry(1, 3);
+            BSWG.shieldGeom.computeVertexNormals();
+            BSWG.shieldGeom.needsUpdate = true;
         }
         while (this.list.length) {
             this.remove(this.list[0]);

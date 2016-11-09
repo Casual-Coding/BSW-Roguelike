@@ -84,12 +84,25 @@ BSWG.component_Shield = {
             'toggle': [ '', new b2Vec2(0.0, 0.0) ],
         };
 
+        var circle = [];
+        var nPoints = [12, 18, 24][this.size-1];
+        var r = 0.425 * this.size;
+        for (var  i=0; i<nPoints; i++) {
+            var a = i/nPoints * Math.PI * 2.0;
+            circle.push(new b2Vec2(
+                r * Math.cos(a),
+                r * Math.sin(a)
+            ));
+        }
+
         BSWG.bpmReflect = 0.8;
         BSWG.bpmSmoothNormals = true;
         this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.05);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
-
+        BSWG.bpmReflect = 0.1;
+        BSWG.bpmRotating = true;
+        this.meshObj2 = BSWG.generateBlockPolyMesh({body: this.obj.body, verts: circle, comp: this}, 0.5, new b2Vec2(0, 0), 0.1*this.size);
         this.xpBase = 0.05 * this.size * this.size;
 
         this.shieldR = 0.01;
@@ -97,22 +110,29 @@ BSWG.component_Shield = {
 
         this.shieldOn = false;
 
-        this.shmat = BSWG.render.newMaterial("basicVertex", "torpedoFragment", {
+        this.shmat = BSWG.render.newMaterial("basicVertex", "shieldFragment", {
             clr: {
                 type: 'v4',
                 value: new THREE.Vector4(0, .5, 1, 0)
             },
-        }, THREE.AdditiveBlending, THREE.DoubleSide);
+            extra: {
+                type: 'v4',
+                value: new THREE.Vector4(1.0/BSWG.shieldSizeFactor, 0, 0, 0)
+            }
+        }, THREE.AdditiveBlending);
         this.shmat.transparent = true;
         this.shmat.needsUpdate = true;
         this.shsmat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
-        }, THREE.NormalBlending, THREE.DoubleSide);
+        }, THREE.NormalBlending);
         this.shgeom = BSWG.shieldGeom;
         this.shmesh = new THREE.Mesh(BSWG.shieldGeom, this.shmat);
-        this.shmesh.renderOrder = 1600.0;
+        this.shmesh.renderOrder = 1602.0;
         BSWG.render.scene.add(this.shmesh);
         this.shsmesh = new THREE.Mesh(BSWG.shieldGeom, this.shsmat);
         //BSWG.render.sceneS.add(this.shsmesh);
+
+        this.topRot = 0;
+        this.topRotSpeed = Math.PI * 2 * 4;
 
     },
 
@@ -123,6 +143,7 @@ BSWG.component_Shield = {
         }
         this.meshObj.destroy();
         this.selMeshObj.destroy();
+        this.meshObj2.destroy();
 
         BSWG.render.scene.remove(this.shmesh);
         //BSWG.render.sceneS.remove(this.shsmesh);
@@ -145,15 +166,17 @@ BSWG.component_Shield = {
         this.meshObj.update([0.4, 0.5, this.shieldEnergy / this.maxShieldEnergy, 1], 4, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
+        this.meshObj2.update([0.0, 0.0, 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
+
         this.shmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
         this.shsmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
         this.shmesh.rotation.set(0, 0, this.obj.body.GetAngle(), 'ZXY');
         this.shsmesh.rotation.set(0, 0, this.obj.body.GetAngle(), 'ZXY');
 
-        this.shmesh.scale.set(this.shieldR, this.shieldR, this.shieldR);
-        this.shsmesh.scale.set(this.shieldR, this.shieldR, this.shieldR);
+        this.shmesh.scale.set(this.shieldR, this.shieldR, 1.0);
+        this.shsmesh.scale.set(this.shieldR, this.shieldR, 1.0);
 
-        this.shmat.uniforms.clr.value.set(0, .5, 1, this.shieldAlpha*0.4);
+        this.shmat.uniforms.clr.value.set(0, .5, 1, this.shieldAlpha);
     },
 
     addShield: function() {
@@ -181,6 +204,11 @@ BSWG.component_Shield = {
             this.shieldObj.body.SetLinearVelocity(this.obj.body.GetLinearVelocity().clone());
         }
 
+        if (this.udsound) {
+            this.udsound.stop();
+        }
+        this.udsound = new BSWG.soundSample().play('shield-up', this.p().THREE(0.2), 1.0*this.size, (2.0+Math._random()*0.1+0.35)/this.size);
+
         BSWG.componentList.makeQueryable(this, this.shmesh);
     },
 
@@ -193,6 +221,11 @@ BSWG.component_Shield = {
 
         this.shieldObj = null;
         this.shieldWeld = null;
+
+        if (this.udsound) {
+            this.udsound.stop();
+        }
+        this.udsound = new BSWG.soundSample().play('shield-down', this.p().THREE(0.2), 1.0*this.size, (2.0+Math._random()*0.1+0.35)/this.size);
 
         BSWG.componentList.removeQueryable(this, this.shmesh, true);  
     },
@@ -251,6 +284,15 @@ BSWG.component_Shield = {
         talpha *= Math.min(this.shieldR, this.size);
 
         this.shieldAlpha += (talpha - this.shieldAlpha) * Math.min(dt*8, 1.0);
+
+        if (this.shieldEnergy > this.maxShieldEnergy * (1/2.75) && this.empDamp > 0.5 && this.onCC) {
+            this.topRotSpeed += (Math.PI * 2 * 4 - this.topRotSpeed) * Math.min(dt*4, 1.0);
+        }
+        else {
+            this.topRotSpeed += (0- this.topRotSpeed) * Math.min(dt*4, 1.0);
+        }
+
+        this.topRot += this.topRotSpeed * dt;
 
     },
 

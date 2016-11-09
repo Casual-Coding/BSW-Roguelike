@@ -47,6 +47,9 @@ BSWG.blasterList = new function () {
                 if (!comp && BSWG.game.map && BSWG.game.map.getColMap(B.p)) {
                     comp = static;
                 }
+                if (B.source && comp && comp.type === 'shield' && comp.onCC === B.source.onCC) {
+                    comp = null;
+                }
             //}
             if (B.t <= 0.0 || comp) {
                 if (B.t <= 0.0 || comp !== B.source) {

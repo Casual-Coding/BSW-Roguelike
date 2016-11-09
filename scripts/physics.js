@@ -948,18 +948,19 @@ BSWG.physics = new function(){
     this.collisionCallbackPre = function(contact) {
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
-        if ((ba.__comp && ba.__comp.ghost) || (bb.__comp && bb.__comp.ghost)) {
+        var ca = ba.__comp, cb = bb.__comp;
+        if (ba.__shielding && cb && (!cb.onCC || (cb.onCC === ba.__shielding) || (cb.source && cb.source.onCC === ba.__shielding))) {
+            contact.SetEnabled(false);
+        }
+        else if (bb.__shielding && ca && (!ca.onCC || (ca.onCC === bb.__shielding) || (ca.source && ca.source.onCC === bb.__shielding))) {
+            contact.SetEnabled(false);
+        }
+        else if ((ca && ca.ghost) || (cb && cb.ghost)) {
             if (contact.IsTouching()) {
                 ba.__lastHit = bb;
                 bb.__lastHit = ba;
                 contact.SetEnabled(false);
             }
-        }
-        if (ba.__shielding && bb.__comp && bb.__comp.onCC === ba.__shielding) {
-            contact.SetEnabled(false);
-        }
-        else if (bb.__shielding && ba.__comp && ba.__comp.onCC === bb.__shielding) {
-            contact.SetEnabled(false);
         }
         ba = bb = contact = null;
     };

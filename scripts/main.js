@@ -200,7 +200,8 @@ var BSWG = new function(){
             'weatherFragment',
             'weatherFragmentShadow',
             'cloudFragment',
-            'torpedoFragment'
+            'torpedoFragment',
+            'shieldFragment'
         ]
     };
     var ai = [

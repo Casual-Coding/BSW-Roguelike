@@ -105,7 +105,7 @@ BSWG.laserList = new function () {
             this.mat.uniforms.clr.value.set(white, white, 1.0, 1.0);
 
             var p2 = new b2Vec2(this.p.x + Math.cos(this.angle+Math.PI/2) * BSWG.laserRange, this.p.y + Math.sin(this.angle+Math.PI/2) * BSWG.laserRange);
-            var ret = BSWG.componentList.withRay(this.p.THREE(0.0), p2.THREE(0.0));
+            var ret = BSWG.componentList.withRay(this.p.THREE(0.0), p2.THREE(0.0), this.source);
 
             if (ret) {
                 ret.comp.takeDamage(BSWG.laserDmg * dt, source, true);

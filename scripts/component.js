@@ -1815,7 +1815,7 @@ BSWG.componentList = new function () {
         found = null;
     };
 
-    this.withRay = function (p, p2) {
+    this.withRay = function (p, p2, shieldFilterSource) {
 
         var raycaster = BSWG.render.raycaster;
 
@@ -1828,6 +1828,9 @@ BSWG.componentList = new function () {
         var best = null, bestP = null;
         this.inLine(p.x, p.y, p2.x, p2.y, function(C){
             if (!C || !C.queryMeshes) {
+                return;
+            }
+            if (C && shieldFilterSource && C.type === 'shield' && C.onCC === shieldFilterSource.onCC) {
                 return;
             }
             var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
