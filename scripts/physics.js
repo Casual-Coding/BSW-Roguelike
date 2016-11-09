@@ -657,6 +657,7 @@ BSWG.physics = new function(){
         obj.comp = null;
         if (obj.body) {
             obj.body.__comp = null;
+            obj.body.__shielding = null;
         }
 
         while (obj.welds && obj.welds.length > 0) {
@@ -954,8 +955,14 @@ BSWG.physics = new function(){
                 contact.SetEnabled(false);
             }
         }
+        if (ba.__shielding && bb.__comp && bb.__comp.onCC === ba.__shielding) {
+            contact.SetEnabled(false);
+        }
+        else if (bb.__shielding && ba.__comp && ba.__comp.onCC === bb.__shielding) {
+            contact.SetEnabled(false);
+        }
         ba = bb = contact = null;
-    }
+    };
 
     var self = this;
 

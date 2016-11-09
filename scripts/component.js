@@ -272,6 +272,9 @@ BSWG.compImplied = function (a, b) {
         case 'spikes':
             return a.size <= b.size && a.pike === b.pike;
             break;
+        case 'shield':
+            return a.size <= b.size;
+            break;
         case 'thruster':
             return a.size <= b.size;
             break;
@@ -471,6 +474,12 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
 
     if (disolve) {
         amt = this.hp * 1000 + 1000;
+    }
+
+    if (this.type === 'shield' && this.shieldOn && !disolve) {
+        this.shieldEnergy -= amt;
+        this.shieldEnergy = Math.clamp(this.shieldEnergy, 0, this.maxShieldEnergy);
+        return;
     }
 
     this.hp -= amt;
@@ -1248,7 +1257,8 @@ BSWG.componentList = new function () {
             'sawmotor':         BSWG.component_SawMotor,
             'spikes':           BSWG.component_Spikes,
             'thruster':         BSWG.component_Thruster,
-            'minigun':          BSWG.component_Minigun
+            'minigun':          BSWG.component_Minigun,
+            'shield':           BSWG.component_Shield,
         };
 
         this.sbTypes = [];
@@ -1884,13 +1894,13 @@ BSWG.componentList = new function () {
 
     };
 
-    this.removeQueryable = function (comp, mesh) {
+    this.removeQueryable = function (comp, mesh, meshOnly) {
 
         if (!comp.queryMeshes) {
             return false;
         }
         for (var i=0; i<comp.queryMeshes.length; i++) {
-            if (comp.queryMeshes[i].__compid === comp.id) {
+            if (comp.queryMeshes[i].__compid === comp.id && (!meshOnly || mesh === comp.queryMeshes[i])) {
                 comp.queryMeshes.splice(i, 1);
                 return true;
             }

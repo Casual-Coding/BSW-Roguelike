@@ -460,6 +460,9 @@ BSWG.specProjList = new (function(){
         if (!BSWG.torpedoGeom) {
             BSWG.torpedoGeom = new THREE.IcosahedronGeometry(1, 2);
         }
+        else if (!BSWG.shieldGeom) {
+            BSWG.shieldGeom = new THREE.IcosahedronGeometry(1, 3);
+        }
         while (this.list.length) {
             this.remove(this.list[0]);
         }

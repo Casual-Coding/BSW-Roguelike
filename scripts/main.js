@@ -56,6 +56,7 @@ var BSWG = new function(){
         'components/missile-launcher.js',
         'components/missile.js',
         'components/laser.js',
+        'components/shield.js',
         'components/util-jpoints.js',
         'components/util-render.js',
         'specials/specials_base.js',
