@@ -340,14 +340,37 @@ BSWG.component_Shield = {
     handleInput: function(keys) {
 
         if ((keys[this.onKey] || keys[this.onKeyAlt]) && !this.lastOn) {
-            if (!this.shieldOn) {
-                if (this.shieldEnergy > this.maxShieldEnergy * (1/2.75)) {
-                    this.shieldOn = true;
+            var cl = BSWG.componentList.compList;
+            var count = 0, total = 0;
+            var first = true, control = false;
+            for (var i=0; i<cl.length; i++) {
+                if (cl[i].onCC === this.onCC && cl[i].type === 'shield' && cl[i].onKey === this.onKey) {
+                    if (cl[i] === this && first) {
+                        control = true;
+                    }
+                    else {
+                        break;
+                    }
+                    count += cl[i].shieldOn ? 1 : 0;
+                    total += 1;
+                    first = false;
                 }
             }
-            else {
-                this.shieldOn = false;
+            if (control) {
+                for (var i=0; i<cl.length; i++) {
+                    if (cl[i].onCC === this.onCC && cl[i].type === 'shield' && cl[i].onKey === this.onKey) {
+                        if ((count*2) <= total) {
+                            if (cl[i].shieldEnergy > cl[i].maxShieldEnergy * (1/2.75)) {
+                                cl[i].shieldOn = true;
+                            }
+                        }
+                        else {
+                            cl[i].shieldOn = false;
+                        }
+                    }
+                }
             }
+            cl = null;
         }
         this.lastOn = keys[this.onKey] || keys[this.onKeyAlt];
     },
