@@ -351,7 +351,8 @@ BSWG.soundLoad = function (onload) {
         { name: 'use-special', url: 'sounds/use-special.wav' },
         { name: 'lightning', url: 'sounds/lightning.wav' },
         { name: 'shield-up', url: 'sounds/shield-up.wav' },
-        { name: 'shield-down', url: 'sounds/shield-down.wav' }
+        { name: 'shield-down', url: 'sounds/shield-down.wav' },
+        { name: 'shield-hit', url: 'sounds/shield-hit.wav' }
     ];
 
     var urls = [];

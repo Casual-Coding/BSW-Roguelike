@@ -477,6 +477,13 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
     }
 
     if (this.type === 'shield' && this.shieldOn && !disolve) {
+        if (amt > 0) {
+            if (this.__shHitSound) {
+                this.__shHitSound.stop();
+            }
+            this.__shHitSound = new BSWG.soundSample().play('shield-hit', this.p().THREE(0.2), this.size/2*amt*5, 2.0 / this.size);
+            this.shieldHit += amt * 10;
+        }
         this.shieldEnergy -= amt;
         this.shieldEnergy = Math.clamp(this.shieldEnergy, 0, this.maxShieldEnergy);
         return;

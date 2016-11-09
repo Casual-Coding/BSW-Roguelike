@@ -132,7 +132,8 @@ BSWG.component_Shield = {
         //BSWG.render.sceneS.add(this.shsmesh);
 
         this.topRot = 0;
-        this.topRotSpeed = Math.PI * 2 * 4;
+        this.topRotSpeed = 0;
+        this.shieldHit = 0;
 
     },
 
@@ -166,7 +167,7 @@ BSWG.component_Shield = {
         this.meshObj.update([0.4, 0.5, this.shieldEnergy / this.maxShieldEnergy, 1], 4, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
-        this.meshObj2.update([0.0, 0.0, 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
+        this.meshObj2.update([0.0, (this.shieldEnergy / this.maxShieldEnergy), 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
 
         this.shmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
         this.shsmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
@@ -176,7 +177,10 @@ BSWG.component_Shield = {
         this.shmesh.scale.set(this.shieldR, this.shieldR, 1.0);
         this.shsmesh.scale.set(this.shieldR, this.shieldR, 1.0);
 
-        this.shmat.uniforms.clr.value.set(0, .5, 1, this.shieldAlpha);
+        var t = Math.clamp(this.shieldHit/16, 0, 1);
+        this.shmat.uniforms.clr.value.set(0*(1-t)+t, .5*(1-t)+t, 1*(1-t)+t, this.shieldAlpha);
+
+        this.shieldHit += (0 - this.shieldHit) * Math.min(dt*16, 1.0)
     },
 
     addShield: function() {

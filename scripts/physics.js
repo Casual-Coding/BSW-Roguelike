@@ -949,10 +949,10 @@ BSWG.physics = new function(){
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
         var ca = ba.__comp, cb = bb.__comp;
-        if (ba.__shielding && cb && (!cb.onCC || (cb.onCC === ba.__shielding) || (cb.source && cb.source.onCC === ba.__shielding))) {
+        if (ba.__shielding && cb && ((!cb.onCC && !cb.source) || (cb.onCC === ba.__shielding) || (cb.source && cb.source.onCC === ba.__shielding))) {
             contact.SetEnabled(false);
         }
-        else if (bb.__shielding && ca && (!ca.onCC || (ca.onCC === bb.__shielding) || (ca.source && ca.source.onCC === bb.__shielding))) {
+        else if (bb.__shielding && ca && ((!ca.onCC && !ca.source) || (ca.onCC === bb.__shielding) || (ca.source && ca.source.onCC === bb.__shielding))) {
             contact.SetEnabled(false);
         }
         else if ((ca && ca.ghost) || (cb && cb.ghost)) {
