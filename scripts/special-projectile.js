@@ -46,7 +46,7 @@ BSWG.lightning.prototype.playsound = function() {
 
     var len = Math.sqrt(this.n.x * this.n.x + this.n.y * this.n.y + this.n.z * this.n.z);
 
-    new BSWG.soundSample().play('lightning', this.p.clone(), 1.5 * len * (Math.random() * 0.5 + 0.5), 2/(Math.clamp(len-Math.random()*0.5, 1, 3)));
+    new BSWG.soundSample().play('lightning', this.p.clone(), 1.5 * len * (Math.random() * 0.5 + 0.5) * this.alpha, 2/(Math.clamp(len-Math.random()*0.5, 1, 3)));
 
     this.nosoundyet = false;
 }
@@ -54,7 +54,9 @@ BSWG.lightning.prototype.playsound = function() {
 BSWG.lightning.prototype.update = function(dt) {
 
     if (this.nosoundyet || Math.random() < dt*1.1) {
-        this.playsound();
+        if (!this.nosound) {
+            this.playsound();
+        }
     }
 
     var clr = (~~(Math._random()*1000000)) % 4;

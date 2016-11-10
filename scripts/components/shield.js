@@ -115,6 +115,30 @@ BSWG.component_Shield = {
                 type: 'v4',
                 value: new THREE.Vector4(0, .5, 1, 0)
             },
+            envMap: {
+                type: 't',
+                value: BSWG.render.envMap.texture
+            },
+            envMap2: {
+                type: 't',
+                value: BSWG.render.envMap2.texture
+            },
+            envMapT: {
+                type: 'f',
+                value: BSWG.render.envMapT
+            },
+            envMapTint: {
+                type: 'v4',
+                value: BSWG.render.envMapTint
+            },
+            envMapParam: {
+                type: 'v4',
+                value: BSWG.render.envMapParam
+            },      
+            viewport: {
+                type: 'v2',
+                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+            },
             extra: {
                 type: 'v4',
                 value: new THREE.Vector4(1.0/BSWG.shieldSizeFactor, 0, 0, 0)
@@ -160,6 +184,10 @@ BSWG.component_Shield = {
         this.shmesh = null;
         this.shsmesh = null;
 
+        if (this.sound) {
+            this.sound.stop();
+            this.sound = null;
+        }
     },
 
     render: function(ctx, cam, dt) {
@@ -173,6 +201,7 @@ BSWG.component_Shield = {
         this.shsmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
         this.shmesh.rotation.set(0, 0, this.obj.body.GetAngle(), 'ZXY');
         this.shsmesh.rotation.set(0, 0, this.obj.body.GetAngle(), 'ZXY');
+        this.shmat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);           
 
         this.shmesh.scale.set(this.shieldR, this.shieldR, 1.0);
         this.shsmesh.scale.set(this.shieldR, this.shieldR, 1.0);
@@ -236,6 +265,16 @@ BSWG.component_Shield = {
 
     update: function(dt) {
 
+        if (!this.sound) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('shield-spin', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, 0.1, true);
+        }
+        else {
+            this.sound.volume(Math.clamp(this.size/9*this.topRotSpeed*0.01, 0, 1));
+            this.sound.rate(Math.clamp(this.topRotSpeed*0.1/this.size, 0.1, 20));
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+        }
+
         if (this.dispKeys) {
             if (this.onKey !== this.onKeyAlt) {
                 this.dispKeys['toggle'][0] = BSWG.KEY_NAMES[this.onKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.onKeyAlt].toTitleCase();
@@ -255,7 +294,7 @@ BSWG.component_Shield = {
                 }
             }
             else {
-                this.shieldEnergy += dt * this.maxShieldEnergy / 30;
+                this.shieldEnergy += dt * this.maxShieldEnergy / 15;
             }
         }
         else {
@@ -293,7 +332,7 @@ BSWG.component_Shield = {
             this.topRotSpeed += (Math.PI * 2 * 4 - this.topRotSpeed) * Math.min(dt*4, 1.0);
         }
         else {
-            this.topRotSpeed += (0- this.topRotSpeed) * Math.min(dt*4, 1.0);
+            this.topRotSpeed += (0 - this.topRotSpeed) * Math.min(dt*4, 1.0);
         }
 
         this.topRot += this.topRotSpeed * dt;
