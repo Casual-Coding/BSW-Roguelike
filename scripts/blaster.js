@@ -3,6 +3,9 @@ BSWG.minigunDmg = {
     1: 1.25,
     2: 3.0
 };
+BSWG.railgunDmg = {
+    1: 300
+};
 
 BSWG.blasterList = new function () {
 
@@ -21,7 +24,8 @@ BSWG.blasterList = new function () {
     this.idx = 0;
 
     var static = {
-        takeDamage: function () {}
+        takeDamage: function () { return 0; },
+        combinedHP: function () { return 1000000; }
     };
 
     this.updateRender = function (ctx, cam, dt) {
@@ -35,8 +39,68 @@ BSWG.blasterList = new function () {
             B.p.x += B.v.x * dt;
             B.p.y += B.v.y * dt;
             B.t -= dt;
-            var comp = null;
-            //if ((this.idx % 3) === B.off) {
+            if (B.railgun) {
+                var removed = false;
+                while (B.rgPower > 0) {
+                    var comp = null;
+                    var ret = BSWG.componentList.withRay(B.lp.THREE(0.0), new b2Vec2(B.p.x+B.v.x*dt*2, B.p.y+B.v.y*dt*2).THREE(0.0));
+                    comp = ret ? ret.comp : null;
+                    if (ret && ret.d > Math.sqrt(B.v.x*B.v.x+B.v.y*B.v.y)*dt) {
+                        comp = null;
+                    }
+                    if (!comp && BSWG.game.map && BSWG.game.map.getColMap(B.p)) {
+                        comp = static;
+                    }
+                    if (B.source && comp && comp.type === 'shield' && comp.onCC === B.source.onCC) {
+                        comp = null;
+                    }
+                    if (B.t <= 0.0 || comp) {
+                        if (B.t <= 0.0 || comp !== B.source) {
+                            var oPower = B.rgPower;
+                            if (comp && comp !== B.source) {
+                                B.rgPower -= comp.takeDamage(B.rgPower, B.source, true);
+                            }
+                            if (B.t > 0.0) {
+                                BSWG.render.boom.palette = chadaboom3D.fire;
+                                BSWG.render.boom.add(
+                                    new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
+                                    4.0*oPower/BSWG.railgunDmg[B.railgun],
+                                    128,
+                                    0.5,
+                                    1.5,
+                                    comp.obj ? comp.obj.body.GetLinearVelocity().clone().THREE(0.0) : new THREE.Vector3(0., 0., 0.),
+                                    null,
+                                    comp && comp !== B.source
+                                );
+                            }
+                            if (comp && comp.combinedHP() > 0) {
+                                B.rgPower = 0.0;
+                            }
+                            if (B.t <= 0.0 || B.rgPower <= 0) {
+                                B.source = null;
+                                if (B.exaust) {
+                                    B.exaust.remove();
+                                    B.exaust = null;
+                                }
+                                this.list.splice(i, 1);
+                                i -= 1;
+                                removed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!comp || B.rgPower <= 0) {
+                        break;
+                    }
+                }
+                if (removed) {
+                    continue;
+                }
+                B.lp.x = B.p.x;
+                B.lp.y = B.p.y;
+            }
+            else {
+                var comp = null;
                 var ret = BSWG.componentList.withRay(B.lp.THREE(0.0), new b2Vec2(B.p.x+B.v.x*dt*2, B.p.y+B.v.y*dt*2).THREE(0.0));
                 B.lp.x = B.p.x;
                 B.lp.y = B.p.y;
@@ -50,33 +114,33 @@ BSWG.blasterList = new function () {
                 if (B.source && comp && comp.type === 'shield' && comp.onCC === B.source.onCC) {
                     comp = null;
                 }
-            //}
-            if (B.t <= 0.0 || comp) {
-                if (B.t <= 0.0 || comp !== B.source) {
-                    if (comp && comp !== B.source) {
-                        comp.takeDamage(B.minigun ? BSWG.minigunDmg[B.minigun] : BSWG.blasterDmg, B.source, true);
+                if (B.t <= 0.0 || comp) {
+                    if (B.t <= 0.0 || comp !== B.source) {
+                        if (comp && comp !== B.source) {
+                            comp.takeDamage(B.minigun ? BSWG.minigunDmg[B.minigun] : BSWG.blasterDmg, B.source, true);
+                        }
+                        if (B.t > 0.0) {
+                            BSWG.render.boom.palette = B.minigun ? chadaboom3D.fire : chadaboom3D.blue_bright;
+                            BSWG.render.boom.add(
+                                new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
+                                2.0,
+                                32,
+                                0.5,
+                                1.5,
+                                comp.obj ? comp.obj.body.GetLinearVelocity().clone().THREE(0.0) : new THREE.Vector3(0., 0., 0.),
+                                null,
+                                comp && comp !== B.source
+                            );
+                        }
+                        B.source = null;
+                        if (B.exaust) {
+                            B.exaust.remove();
+                            B.exaust = null;
+                        }
+                        this.list.splice(i, 1);
+                        i -= 1;
+                        continue;
                     }
-                    if (B.t > 0.0) {
-                        BSWG.render.boom.palette = B.minigun ? chadaboom3D.fire : chadaboom3D.blue_bright;
-                        BSWG.render.boom.add(
-                            new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
-                            2.0,
-                            32,
-                            0.5,
-                            1.5,
-                            comp.obj ? comp.obj.body.GetLinearVelocity().clone().THREE(0.0) : new THREE.Vector3(0., 0., 0.),
-                            null,
-                            comp && comp !== B.source
-                        );
-                    }
-                    B.source = null;
-                    if (B.exaust) {
-                        B.exaust.remove();
-                        B.exaust = null;
-                    }
-                    this.list.splice(i, 1);
-                    i -= 1;
-                    continue;
                 }
             }
 
@@ -85,7 +149,22 @@ BSWG.blasterList = new function () {
             var p = cam.toScreen(BSWG.render.viewport, B.p);
 
             if (!B.exaust) {
-                B.exaust = new BSWG.exaust(B.p, null, 0.25*(B.minigun||1), 0, 0.05, B.minigun ? BSWG.exaustWhite : BSWG.exaustBlue, B.minigun);
+                B.exaust = new BSWG.exaust(B.p, null, 0.25*(B.minigun||1+(B.railgun||0)*0.5), 0, 0.05, B.railgun ? BSWG.exaustFire : (B.minigun ? BSWG.exaustWhite : BSWG.exaustBlue), B.minigun);
+            }
+
+            for (var j=0; j<Math.floor(B.railgunCharge*40); j++) {
+                var pt = Math.pow(Math._random(), 2.0);
+                BSWG.render.boom.palette = chadaboom3D.fire;
+                BSWG.render.boom.add(
+                    new b2Vec2((ox-B.p.x)*pt+B.p.x, (oy-B.p.y)*pt+B.p.y).particleWrap(0.2),
+                    (1.0+Math._random()*2.0)/2.0,
+                    128,
+                    2.5,
+                    10.0,
+                    new THREE.Vector3(0,0,0),
+                    null,
+                    Math._random() < 0.05
+                );                
             }
 
             B.exaust.strength = Math.clamp(t * 3.0, 0., 1.);
@@ -114,7 +193,7 @@ BSWG.blasterList = new function () {
 
     };
 
-    this.add = function (p, v, baseV, source, minigun) {
+    this.add = function (p, v, baseV, source, minigun, railgun, railgunCharge) {
 
         BSWG.render.boom.palette = chadaboom3D.fire;
         BSWG.render.boom.add(
@@ -134,12 +213,19 @@ BSWG.blasterList = new function () {
             lp: p.clone(),
             source: source,
             off: ~~(Math._random() * 3),
-            minigun: minigun || null
+            minigun: minigun || null,
+            railgun: railgun || null,
+            railgunCharge: railgunCharge || null,
+            rgPower: railgun ? BSWG.railgunDmg[railgun] : null
 
         });
 
         if (minigun) {
             new BSWG.soundSample().play('minigun-fire', p.THREE(0.2), 0.5/minigun, (Math._random()*0.1+0.35)*3.0/minigun);
+        }
+        else if (railgun) {
+            new BSWG.soundSample().play('railgun-fire', p.THREE(0.2), 12.5/railgun*railgunCharge, (Math._random()*0.1+0.35)*0.5/railgun);
+            BSWG.render.addScreenShake(p.THREE(0.2), 350.0*railgunCharge);
         }
         else {
             new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0, Math._random()*0.1+0.35);

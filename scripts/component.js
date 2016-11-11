@@ -245,6 +245,9 @@ BSWG.compImplied = function (a, b) {
         case 'blaster':
             return true;
             break;
+        case 'railgun':
+            return true;
+            break;
         case 'block':
             return Math.max(a.width, a.height) <= Math.max(b.width, b.height);
             break;
@@ -401,7 +404,7 @@ BSWG.component.prototype.getKey = function () {
 BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
 
     if (BSWG.game.scene === BSWG.SCENE_TITLE || this.type === 'missile') {
-        return;
+        return amt;
     }
 
     if (!fromC || !fromC.onCC || fromC.destroyed || !fromC.obj || !fromC.obj.body) {
@@ -468,13 +471,15 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
         }
 
         if (amt < 1 && !noMin) {
-            return;
+            return 0;
         }
     }
 
     if (disolve) {
         amt = this.hp * 1000 + 1000;
     }
+
+    var damageExtra = 0;
 
     if (this.type === 'shield' && this.shieldOn && !disolve) {
         if (amt > 0) {
@@ -485,11 +490,14 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             this.shieldHit += amt * 10;
         }
         this.shieldEnergy -= amt * 0.5;
+        if (this.shieldEnergy < 0) {
+            damageExtra += -this.shieldEnergy / 0.5;
+        }
         this.shieldEnergy = Math.clamp(this.shieldEnergy, 0, this.maxShieldEnergy);
         
         amt /= 4;
         if (amt < 1 && !noMin) {
-            return;
+            return damageExtra;
         }
     }
 
@@ -497,7 +505,12 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
     if (this.hp > this.maxHP) {
         this.hp = this.maxHP;
     }
+    if (this.hp < 0) {
+        damageExtra += -this.hp;
+    }
     if (amt > 0 && this.hp <= 0 && !this.destroyed) {
+
+
         if (this.obj && this.obj.body) {
 
             var p = this.obj.body.GetWorldCenter();
@@ -571,6 +584,19 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
         this.removeSafe();
     }
 
+    return damageExtra;
+
+};
+
+BSWG.component.prototype.combinedHP = function() {
+    if (this.destroyed) {
+        return 0.0;
+    }
+    var hp = this.hp;
+    if (this.type === 'shield' && this.obj && this.shieldR > this.obj.radius) {
+        hp = this.shieldEnergy;
+    }
+    return Math.max(0, hp);
 };
 
 BSWG.component.prototype.p = function (v) {
@@ -970,8 +996,10 @@ BSWG.component.prototype.baseUpdate = function(dt) {
         }
     }
     if (!BSWG.game.battleMode && BSWG.game.ccblock && (!BSWG.game.scene === BSWG.SCENE_GAME1 || BSWG.game.saveHealAdded) && this.hp < this.maxHP) {
-        this.repairing = true;
-        this.takeDamage(-dt*5.0, null, true);
+        if (BSWG.game.scene !== BSWG.SCENE_GAME2 || this.onCC) {
+            this.repairing = true;
+            this.takeDamage(-dt*5.0, null, true);
+        }
     }
 
     if (BSWG.compAnchored(this)) {
@@ -1270,6 +1298,7 @@ BSWG.componentList = new function () {
             'thruster':         BSWG.component_Thruster,
             'minigun':          BSWG.component_Minigun,
             'shield':           BSWG.component_Shield,
+            'railgun':          BSWG.component_Railgun,
         };
 
         this.sbTypes = [];
@@ -1842,6 +1871,9 @@ BSWG.componentList = new function () {
                 return;
             }
             if (C && shieldFilterSource && C.type === 'shield' && C.onCC === shieldFilterSource.onCC) {
+                return;
+            }
+            if (C.combinedHP() <= 0) {
                 return;
             }
             var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
