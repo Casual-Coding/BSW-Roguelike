@@ -320,11 +320,11 @@ Math.polyCentroid = function(p) {
     return ret;    
 };
 
-Math.scalePoly = function(poly, s, sy) {
+Math.scalePoly = function(poly, s, sy, cz) {
 
     sy = sy || s;
 
-    var c = Math.polyCentroid(poly);
+    var c = cz ? new b2Vec2(0, 0) : Math.polyCentroid(poly);
     var len = poly.length;
     var ret = new Array(len);
     for (var i=0; i<len; i++) {
@@ -336,6 +336,10 @@ Math.scalePoly = function(poly, s, sy) {
     return ret;
 
 };
+
+Math.scalePolyZC = function(poly, s, sy) {
+    return Math.scalePoly(poly, s, sy, true);
+}
 
 Math.translatePoly = function(poly, x, y) {
 

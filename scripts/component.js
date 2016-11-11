@@ -243,7 +243,7 @@ BSWG.compImplied = function (a, b) {
 
     switch (a.type) {
         case 'blaster':
-            return true;
+            return a.size <= b.size;
             break;
         case 'railgun':
             return true;

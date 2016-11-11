@@ -18,7 +18,7 @@ BSWG.exaustWhite = [
     new THREE.Vector4(.1, .1, .1, 1)
 ];
 
-BSWG.exaust = function (body, local, size, angle, z, palette, minigun) {
+BSWG.exaust = function (body, local, size, angle, z, palette, minigun, blasterSize) {
 
     if (!palette) {
         palette = BSWG.exaustFire;
@@ -39,7 +39,7 @@ BSWG.exaust = function (body, local, size, angle, z, palette, minigun) {
     this.mat = mat;
     this.time = 0.0;
     this.strength = 0;
-    this.narrow = minigun ? 0.2 : 1.0;
+    this.narrow = blasterSize > 1 ? 0.5 : (minigun ? 0.2 : 1.0);
     this.size = size || 1.0;
     this.body = body || null;
     this.local = local || new b2Vec2(0, 0);

@@ -12,11 +12,16 @@ BSWG.component_Blaster = {
     hasConfig: true,
 
     serialize: [
-        'fireKey', 'fireKeyAlt'
+        'fireKey', 'fireKeyAlt', 'size'
     ],
 
     sbadd: [
-        { title: 'Add', value: 10 }
+        { title: 'Size 1', size: 1, value: 10 },
+        { title: 'Size 2', size: 2, value: 40 }
+    ],
+
+    sbkey: [
+        'size'
     ],
 
     frontOffset: Math.PI/2,
@@ -24,24 +29,26 @@ BSWG.component_Blaster = {
     category: 'weapon',
 
     getIconPoly: function (args) {
-        return [[
+        return [Math.scalePolyZC([
             new b2Vec2(-0.245,  -0.3),
             new b2Vec2(-0.1,  0.3),
             new b2Vec2( 0.1,  0.3),
             new b2Vec2( 0.245,  -0.3)
-        ].reverse()];
+        ].reverse(), args.size||1)];
     },
 
     init: function(args) {
 
+        this.size = args.size || 1;
+
         var offsetAngle = this.offsetAngle = 0.0;
 
-        var verts = [
+        var verts = Math.scalePolyZC([
             Math.rotVec2(new b2Vec2(-0.245,  -0.3), offsetAngle),
             Math.rotVec2(new b2Vec2(-0.1,  0.3), offsetAngle),
             Math.rotVec2(new b2Vec2( 0.1,  0.3), offsetAngle),
             Math.rotVec2(new b2Vec2( 0.245,  -0.3), offsetAngle)
-        ].reverse();
+        ].reverse(), this.size);
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
             verts: verts
@@ -53,18 +60,19 @@ BSWG.component_Blaster = {
             'fire': [ '', new b2Vec2(0.0, 0.0) ],
         };
 
-        this.jpoints = [ new b2Vec2(0.0, -0.3) ];
+        this.jpoints = [ new b2Vec2(0.0, -0.3*this.size) ];
 
         this.thrustT = 0.0;
         this.kickBack = 0.0;
 
         BSWG.bpmReflect = 0.5;
         //BSWG.bpmSmoothNormals = true;
-        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, -0.25));
+        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.6, new b2Vec2((verts[0].x+verts[3].x)*0.5, -0.25*this.size));
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
-        this.xpBase = 0.01;
+        this.hp = this.maxHP = 20 * this.size * this.size;
+        this.xpBase = 0.01 * this.size * this.size;
 
     },
 
@@ -156,18 +164,18 @@ BSWG.component_Blaster = {
 
         if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
 
-            var pl = new b2Vec2(0.0, 0.35);
+            var pl = new b2Vec2(0.0, 0.35*this.size);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
             var p = BSWG.physics.localToWorld([pl], this.obj.body);
             p[0].x -= v.x*0.01;
             p[0].y -= v.y*0.01;
 
-            BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*51.0 + v.x, -Math.sin(a)*51.0 + v.y), v, this);
+            BSWG.blasterList.add(p[0], new b2Vec2(-Math.cos(a)*51.0*(this.size*0.5+0.5) + v.x, -Math.sin(a)*51.0*(this.size*0.5+0.5) + v.y), v, this, null, null, null, this.size);
             accel = 1;
 
             this.fireT = 1.15 / 2;
-            this.kickBack = 1.0;
+            this.kickBack = 1.0 * this.size;
 
             p[0] = null;
             p = null;

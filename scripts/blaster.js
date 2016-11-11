@@ -1,4 +1,7 @@
-BSWG.blasterDmg = 4.5;
+BSWG.blasterDmg = {
+    1: 4.5,
+    2: 10.0
+}
 BSWG.minigunDmg = {
     1: 1.25,
     2: 3.0
@@ -134,10 +137,10 @@ BSWG.blasterList = new function () {
                 if (B.t <= 0.0 || comp) {
                     if (B.t <= 0.0 || comp !== B.source) {
                         if (comp && comp !== B.source) {
-                            comp.takeDamage(B.minigun ? BSWG.minigunDmg[B.minigun] : BSWG.blasterDmg, B.source, true);
+                            comp.takeDamage(B.minigun ? BSWG.minigunDmg[B.minigun] : BSWG.blasterDmg[B.blasterSize], B.source, true);
                         }
                         if (B.t > 0.0) {
-                            BSWG.render.boom.palette = B.minigun ? chadaboom3D.fire : chadaboom3D.blue_bright;
+                            BSWG.render.boom.palette = (B.minigun || B.blasterSize === 2) ? chadaboom3D.fire : chadaboom3D.blue_bright;
                             BSWG.render.boom.add(
                                 new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
                                 2.0,
@@ -166,7 +169,7 @@ BSWG.blasterList = new function () {
             var p = cam.toScreen(BSWG.render.viewport, B.p);
 
             if (!B.exaust) {
-                B.exaust = new BSWG.exaust(B.p, null, 0.25*(B.minigun||1+(B.railgun||0)*0.5), 0, 0.05, B.railgun ? BSWG.exaustFire : (B.minigun ? BSWG.exaustWhite : BSWG.exaustBlue), B.minigun);
+                B.exaust = new BSWG.exaust(B.p, null, 0.25*(B.minigun||1+(B.railgun||0)*0.5)*B.blasterSize, 0, 0.05, (B.railgun || B.blasterSize === 2) ? BSWG.exaustFire : (B.minigun ? BSWG.exaustWhite : BSWG.exaustBlue), B.minigun, B.blasterSize);
             }
 
             B.exaust.strength = Math.clamp(t * 3.0, 0., 1.);
@@ -195,7 +198,7 @@ BSWG.blasterList = new function () {
 
     };
 
-    this.add = function (p, v, baseV, source, minigun, railgun, railgunCharge) {
+    this.add = function (p, v, baseV, source, minigun, railgun, railgunCharge, blasterSize) {
 
         BSWG.render.boom.palette = chadaboom3D.fire;
         BSWG.render.boom.add(
@@ -218,7 +221,8 @@ BSWG.blasterList = new function () {
             minigun: minigun || null,
             railgun: railgun || null,
             railgunCharge: railgunCharge || null,
-            rgPower: railgun ? (BSWG.railgunDmg[railgun]*railgunCharge) : null
+            rgPower: railgun ? (BSWG.railgunDmg[railgun]*railgunCharge) : null,
+            blasterSize: blasterSize || 1
 
         });
 
@@ -230,7 +234,7 @@ BSWG.blasterList = new function () {
             BSWG.render.addScreenShake(p.THREE(0.2), 350.0*railgunCharge);
         }
         else {
-            new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0, Math._random()*0.1+0.35);
+            new BSWG.soundSample().play('blaster', p.THREE(0.2), 1.0*(blasterSize||1), (Math._random()*0.1+0.35)/((blasterSize||1)*0.5+0.5));
         }
 
     };
