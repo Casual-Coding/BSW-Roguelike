@@ -170,10 +170,10 @@ BSWG.component_Missile = {
                     var v = (this.obj.body.__lastHit ? this.obj.body.__lastHit.GetLinearVelocity() : new b2Vec2(0,0)).clone();
                     if (this.ltype === BSWG.MSL_TYPE.MISSILE) {
                         if (this.obj.body.__lastHit) {
-                            var list = BSWG.componentList.withinRadius(this.obj.body.GetWorldCenter().clone(), BSWG.missileSplashRadius);
+                            var list = BSWG.componentList.withinRadiusShielded(this.obj.body.GetWorldCenter().clone(), BSWG.missileSplashRadius);
                             for (var i=0; i<list.length; i++) {
                                 if (list[i] !== this) {
-                                    list[i].takeDamage(BSWG.missileDmg, this.source || null);
+                                    list[i].takeDamage(BSWG.missileDmg * (1.0 - (list[i].__shieldedPercent || 0.0)), this.source || null);
                                 }
                             }
                             list = null;

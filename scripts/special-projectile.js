@@ -1,7 +1,7 @@
 BSWG.torpedoSpeed = 25;
 BSWG.torpedoArcHeight = 8;
 BSWG.torpedoRange = 50;
-BSWG.torpedoDPS = 80/2;
+BSWG.torpedoDPS = 130/2; // 130 damage to 2s exposure
 
 BSWG.eTorpedoSpeed = 20;
 BSWG.eTorpedoArcHeight = 10;
@@ -247,7 +247,6 @@ BSWG.specProj_TorpedoOrEMP = {
         else if (this.finalVel) {
             this.dampT += dt;
             var vt = Math.max(0, (Math.pow(Math.max(BSWG.physics.baseDamping, 0.0), Math.max(this.dampT, 0.0)) - 1.0) / Math.log(BSWG.physics.baseDamping));
-            console.log(vt);
             p.x = this.finalPos.x + this.finalVel.x * vt;
             p.y = this.finalPos.y + this.finalVel.y * vt;
         }
@@ -294,12 +293,12 @@ BSWG.specProj_TorpedoOrEMP = {
 
         if (this.type === 'torpedo') {
             if (this.detonated) {
-                var list = BSWG.componentList.withinRadius(new b2Vec2(p.x, p.y), scale);
+                var list = BSWG.componentList.withinRadiusShielded(new b2Vec2(p.x, p.y), scale);
                 for (var i=0; i<list.length; i++) {
                     if (list[i].onCC === this.source.onCC && this.noSelfDamage) {
                         continue;
                     }
-                    list[i].takeDamage(BSWG.torpedoDPS * dt, this.source || null, true);
+                    list[i].takeDamage(BSWG.torpedoDPS * dt * (1.0 - (list[i].__shieldedPercent || 0.0)), this.source || null, true);
                 }
                 list = null;                
             }
@@ -338,12 +337,12 @@ BSWG.specProj_TorpedoOrEMP = {
         }
         else if (this.type === 'emp') {
             if (this.detonated) {
-                var list = BSWG.componentList.withinRadius(new b2Vec2(p.x, p.y), scale);
+                var list = BSWG.componentList.withinRadiusShielded(new b2Vec2(p.x, p.y), scale);
                 for (var i=0; i<list.length; i++) {
                     if (list[i].onCC === this.source.onCC && this.noSelfDamage) {
                         continue;
                     }
-                    list[i].empEffect += BSWG.eTorpedoEPS * dt;
+                    list[i].empEffect += BSWG.eTorpedoEPS * dt * (1.0 - (list[i].__shieldedPercent || 0.0));
                 }
                 list = null;                
             }

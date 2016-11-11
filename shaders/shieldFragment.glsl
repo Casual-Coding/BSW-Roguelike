@@ -20,7 +20,7 @@ void main() {
 
     vec3 incident = normalize(vSPosition.xyz);
     vec3 reflected = reflect(incident, vec3(vNormal.x, vNormal.y, max(0.1, abs(vNormal.z))));
-    vec2 envCoord = reflected.xy*0.5;
+    vec2 envCoord = reflected.xy*0.25;
     envCoord.y *= viewport.y/viewport.x;
     envCoord += vec2(0.5, 0.5);
     vec3 envClr = mix(texture2D(envMap, envCoord).rgb, texture2D(envMap2, envCoord).rgb, envMapT);

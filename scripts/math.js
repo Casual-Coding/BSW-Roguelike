@@ -253,6 +253,42 @@ Math.distVec2 = function(a, b) {
     return Math.sqrt(x*x + y*y);
 };
 
+// http://stackoverflow.com/questions/4247889/area-of-intersection-between-two-circles
+Math.circleIntersectionArea = function(p0, p1, r0, r1) {
+    var rr0 = r0 * r0;
+    var rr1 = r1 * r1;
+    var d = Math.sqrt((p1.x - p0.x) * (p1.x - p0.x) + (p1.y - p0.y) * (p1.y - p0.y));
+
+    // Circles do not overlap
+    if (d > r1 + r0)
+    {
+        return 0;
+    }
+    // Circle1 is completely inside circle0
+    else if (d <= Math.abs(r0 - r1) && r0 >= r1)
+    {
+        // Return area of circle1
+        return Math.PI * rr1;
+    }
+    // Circle0 is completely inside circle1
+    else if (d <= Math.abs(r0 - r1) && r0 < r1)
+    {
+        // Return area of circle0
+        return Math.PI * rr0;
+    }
+    // Circles partially overlap
+    else
+    {
+        var phi = (Math.acos((rr0 + (d * d) - rr1) / (2 * r0 * d))) * 2;
+        var theta = (Math.acos((rr1 + (d * d) - rr0) / (2 * r1 * d))) * 2;
+        var area1 = 0.5 * theta * rr1 - 0.5 * rr1 * Math.sin(theta);
+        var area2 = 0.5 * phi * rr0 - 0.5 * rr0 * Math.sin(phi);
+
+        // Return area of intersection
+        return area1 + area2;
+    }
+};
+
 Math.distSqVec2 = function(a, b) {
     var x = a.x - b.x, y = a.y - b.y;
     return x*x + y*y;

@@ -484,9 +484,13 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             this.__shHitSound = new BSWG.soundSample().play('shield-hit', this.p().THREE(0.2), this.size/2*amt*5, 2.0 / this.size);
             this.shieldHit += amt * 10;
         }
-        this.shieldEnergy -= amt;
+        this.shieldEnergy -= amt * 0.5;
         this.shieldEnergy = Math.clamp(this.shieldEnergy, 0, this.maxShieldEnergy);
-        return;
+        
+        amt /= 4;
+        if (amt < 1 && !noMin) {
+            return;
+        }
     }
 
     this.hp -= amt;
@@ -1968,6 +1972,35 @@ BSWG.componentList = new function () {
             }
         }, static);
         return ret;
+    };
+
+    this.withinRadiusShielded = function (p, r, static) {
+        var list = this.withinRadius(p, r, static);
+        var shields = [];
+        for (var i=0; i<list.length; i++) {
+            if (list[i].type === 'shield') {
+                shields.push(list[i]);
+            }
+        }
+        shields.sort(function(a, b){
+            return b.shieldR - a.shieldR;
+        });
+        for (var i=0; i<list.length; i++) {
+            var obR = Math.max(list[i].shieldR||0, list[i].obj.radius);
+            var obArea = Math.PI * obR * obR;
+            list[i].__shieldedPercent = Math.clamp(Math.circleIntersectionArea(p, list[i].p(), r, obR) / obArea, 0, 1);
+            for (var j=0; j<shields.length; j++) {
+                if (list[i] !== shields[j]) {
+                    if (list[i].type !== 'shield' || obR < shields[j].shieldR) {
+                        var shR = shields[j].shieldR;
+                        var percent = Math.clamp(Math.circleIntersectionArea(shields[j].p(), list[i].p(), shR, obR) / obArea, 0, 1);
+                        list[i].__shieldedPercent = Math.max(list[i].__shieldedPercent, percent);
+                    }
+                }
+            }
+        }
+        shields = null;
+        return list;
     };
 
     this.withinRadiusPlayerOnly = function (p, r) {
