@@ -4,7 +4,7 @@ BSWG.minigunDmg = {
     2: 3.0
 };
 BSWG.railgunDmg = {
-    1: 300
+    1: 600
 };
 
 BSWG.blasterList = new function () {
@@ -39,6 +39,22 @@ BSWG.blasterList = new function () {
             B.p.x += B.v.x * dt;
             B.p.y += B.v.y * dt;
             B.t -= dt;
+
+            for (var j=0; j<Math.floor(B.railgunCharge*40); j++) {
+                var pt = Math.pow(Math._random(), 2.0);
+                BSWG.render.boom.palette = chadaboom3D.fire;
+                BSWG.render.boom.add(
+                    new b2Vec2((ox-B.p.x)*pt+B.p.x, (oy-B.p.y)*pt+B.p.y).particleWrap(0.2),
+                    (1.0+Math._random()*2.0)/2.0,
+                    128,
+                    2.5,
+                    10.0,
+                    new THREE.Vector3(0,0,0),
+                    null,
+                    Math._random() < 0.01
+                );                
+            }
+
             if (B.railgun) {
                 var removed = false;
                 while (B.rgPower > 0) {
@@ -58,7 +74,8 @@ BSWG.blasterList = new function () {
                         if (B.t <= 0.0 || comp !== B.source) {
                             var oPower = B.rgPower;
                             if (comp && comp !== B.source) {
-                                B.rgPower -= comp.takeDamage(B.rgPower, B.source, true);
+                                comp.takeDamage(B.rgPower, B.source, true);
+                                B.rgPower /= 2.0;
                             }
                             if (B.t > 0.0) {
                                 BSWG.render.boom.palette = chadaboom3D.fire;
@@ -152,21 +169,6 @@ BSWG.blasterList = new function () {
                 B.exaust = new BSWG.exaust(B.p, null, 0.25*(B.minigun||1+(B.railgun||0)*0.5), 0, 0.05, B.railgun ? BSWG.exaustFire : (B.minigun ? BSWG.exaustWhite : BSWG.exaustBlue), B.minigun);
             }
 
-            for (var j=0; j<Math.floor(B.railgunCharge*40); j++) {
-                var pt = Math.pow(Math._random(), 2.0);
-                BSWG.render.boom.palette = chadaboom3D.fire;
-                BSWG.render.boom.add(
-                    new b2Vec2((ox-B.p.x)*pt+B.p.x, (oy-B.p.y)*pt+B.p.y).particleWrap(0.2),
-                    (1.0+Math._random()*2.0)/2.0,
-                    128,
-                    2.5,
-                    10.0,
-                    new THREE.Vector3(0,0,0),
-                    null,
-                    Math._random() < 0.05
-                );                
-            }
-
             B.exaust.strength = Math.clamp(t * 3.0, 0., 1.);
             B.exaust.angle = Math.atan2(B.p.y - oy, B.p.x - ox) + Math.PI;
 
@@ -216,7 +218,7 @@ BSWG.blasterList = new function () {
             minigun: minigun || null,
             railgun: railgun || null,
             railgunCharge: railgunCharge || null,
-            rgPower: railgun ? BSWG.railgunDmg[railgun] : null
+            rgPower: railgun ? (BSWG.railgunDmg[railgun]*railgunCharge) : null
 
         });
 

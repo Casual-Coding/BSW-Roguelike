@@ -63,7 +63,7 @@ BSWG.component_Shield = {
     init: function(args) {
 
         this.size = args.size || 1;
-        this.maxHP = this.size * this.size * 250 / 2.5;
+        this.maxHP = this.size * 250 / 2.5;
         this.maxShieldEnergy = this.maxHP * BSWG.shieldSizeFactor * 2;
         this.shieldEnergy = this.maxShieldEnergy;
 
@@ -110,50 +110,55 @@ BSWG.component_Shield = {
 
         this.shieldOn = false;
 
-        this.shmat = BSWG.render.newMaterial("basicVertex", "shieldFragment", {
-            clr: {
-                type: 'v4',
-                value: new THREE.Vector4(0, .5, 1, 0)
-            },
-            envMap: {
-                type: 't',
-                value: BSWG.render.envMap.texture
-            },
-            envMap2: {
-                type: 't',
-                value: BSWG.render.envMap2.texture
-            },
-            envMapT: {
-                type: 'f',
-                value: BSWG.render.envMapT
-            },
-            envMapTint: {
-                type: 'v4',
-                value: BSWG.render.envMapTint
-            },
-            envMapParam: {
-                type: 'v4',
-                value: BSWG.render.envMapParam
-            },      
-            viewport: {
-                type: 'v2',
-                value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
-            },
-            extra: {
-                type: 'v4',
-                value: new THREE.Vector4(1.0/BSWG.shieldSizeFactor, 0, 0, 0)
-            }
-        }, THREE.AdditiveBlending);
-        this.shmat.transparent = true;
-        this.shmat.needsUpdate = true;
-        this.shsmat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
-        }, THREE.NormalBlending);
-        this.shgeom = BSWG.shieldGeom;
-        this.shmesh = new THREE.Mesh(BSWG.shieldGeom, this.shmat);
-        this.shmesh.renderOrder = 1602.0;
-        BSWG.render.scene.add(this.shmesh);
-        this.shsmesh = new THREE.Mesh(BSWG.shieldGeom, this.shsmat);
-        //BSWG.render.sceneS.add(this.shsmesh);
+        if (BSWG.shieldGeom) {
+            this.shmat = BSWG.render.newMaterial("basicVertex", "shieldFragment", {
+                clr: {
+                    type: 'v4',
+                    value: new THREE.Vector4(0, .5, 1, 0)
+                },
+                envMap: {
+                    type: 't',
+                    value: BSWG.render.envMap.texture
+                },
+                envMap2: {
+                    type: 't',
+                    value: BSWG.render.envMap2.texture
+                },
+                envMapT: {
+                    type: 'f',
+                    value: BSWG.render.envMapT
+                },
+                envMapTint: {
+                    type: 'v4',
+                    value: BSWG.render.envMapTint
+                },
+                envMapParam: {
+                    type: 'v4',
+                    value: BSWG.render.envMapParam
+                },      
+                viewport: {
+                    type: 'v2',
+                    value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+                },
+                extra: {
+                    type: 'v4',
+                    value: new THREE.Vector4(1.0/BSWG.shieldSizeFactor, 0, 0, 0)
+                }
+            }, THREE.AdditiveBlending);
+            this.shmat.transparent = true;
+            this.shmat.needsUpdate = true;
+            this.shsmat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
+            }, THREE.NormalBlending);
+
+            this.shgeom = BSWG.shieldGeom;
+            this.shgeom.computeBoundingSphere();
+            this.shgeom.needsUpdate = true;
+            this.shmesh = new THREE.Mesh(BSWG.shieldGeom, this.shmat);
+            this.shmesh.renderOrder = 1602.0;
+            BSWG.render.scene.add(this.shmesh);
+            this.shsmesh = new THREE.Mesh(BSWG.shieldGeom, this.shsmat);
+            //BSWG.render.sceneS.add(this.shsmesh);
+        }
 
         this.topRot = 0;
         this.topRotSpeed = 0;
@@ -173,16 +178,18 @@ BSWG.component_Shield = {
         BSWG.render.scene.remove(this.shmesh);
         //BSWG.render.sceneS.remove(this.shsmesh);
 
-        this.shmesh.material = null;
-        this.shmesh.geometry = null;
-        this.shsmesh.material = null;
-        this.shsmesh.geometry = null;
-        this.shmat.dispose();
-        this.shsmat.dispose();
-        this.shmat = null;
-        this.shsmat = null;
-        this.shmesh = null;
-        this.shsmesh = null;
+        if (this.shmesh) {
+            this.shmesh.material = null;
+            this.shmesh.geometry = null;
+            this.shsmesh.material = null;
+            this.shsmesh.geometry = null;
+            this.shmat.dispose();
+            this.shsmat.dispose();
+            this.shmat = null;
+            this.shsmat = null;
+            this.shmesh = null;
+            this.shsmesh = null;
+        }
 
         if (this.sound) {
             this.sound.stop();

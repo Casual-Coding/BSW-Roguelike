@@ -312,9 +312,9 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         if (BSWG.bpmSmoothNormals) {
             ret.geom.computeVertexNormals();
         }
+        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
         ret.geom.computeBoundingSphere();
         ret.geom.needsUpdate = true;
-        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
         ret.geom.__zoffset = zoffset;
         BSWG.bpmGeomCache[key] = ret.geom;
     }
@@ -738,9 +738,9 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
         }
 
         ret.geom.computeFaceNormals();
+        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
         ret.geom.computeBoundingSphere();
         ret.geom.needsUpdate = true;
-        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
         BSWG.bpmGeomCache[key] = ret.geom;
     }
     else {

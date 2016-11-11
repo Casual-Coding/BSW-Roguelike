@@ -151,7 +151,7 @@ BSWG.component_Railgun = {
                 this.fireT = 0.0;
         }
         else {
-            var pl = new b2Vec2(0.0, (this.charging ? 0.85 : 1.05) * this.size * 3);
+            var pl = new b2Vec2(0.0, (this.charging ? 0.85 : 0.85) * this.size * 3);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(pl);
             var p = BSWG.physics.localToWorld([pl], this.obj.body);

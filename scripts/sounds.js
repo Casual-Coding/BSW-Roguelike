@@ -102,7 +102,7 @@ BSWG.soundSample = BSWG.soundBase({
     play: function (name, pos, amp, rate, loop, delay) {
 
         if (BSWG.curSounds >= BSWG.maxSounds) {
-            if (!loop) {
+            if (!loop && amp < 4) {
                 return;
             }
         }
