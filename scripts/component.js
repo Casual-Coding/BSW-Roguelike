@@ -424,11 +424,13 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             }
         }
 
-        if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
-            amt /= BSWG.orphanDefense;
-        }
-        if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
-            amt /= BSWG.orphanDefense;
+        if (BSWG.game.scene !== BSWG.SCENE_GAME2 || this.onCC) {
+            if (fromC && !fromC.onCC && fromC.type != 'missile' && !BSWG.game.battleMode) {
+                amt /= BSWG.orphanDefense;
+            }
+            if (!this.onCC && this.type != 'missile' && !BSWG.game.battleMode) {
+                amt /= BSWG.orphanDefense;
+            }
         }
 
         if (this.onCC && !isFriendly) {
