@@ -69,7 +69,7 @@ BSWG.component_Razor = {
 
         this.obj = BSWG.physics.createObject('multipoly', args.pos, args.angle || 0, {
             verts:        [verts1, verts2],
-            frictionList: [0.75, 0.05],
+            frictionList: [0.1, 0.5],
             density:      0.5,
             isMele:       true
         });

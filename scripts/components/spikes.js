@@ -28,7 +28,8 @@ BSWG.component_Spikes = {
         { title: 'Spikes 3', size: 3, pike: false, value: 50 },
         { title: 'Pike 1', size: 1, pike: true, value: 5 },
         { title: 'Pike 2', size: 2, pike: true, value: 20 },
-        { title: 'Pike 3', size: 3, pike: true, value: 50 }
+        { title: 'Pike 3', size: 3, pike: true, value: 50 },
+        { title: 'Pike 4', size: 4, pike: true, value: 100 },
     ],
 
     frontOffset: Math.PI/2 - Math.PI/16 - Math.PI/50,
@@ -37,8 +38,8 @@ BSWG.component_Spikes = {
 
     getIconPoly: function(args) {
         var size      = args.size || 1;
-        var nteeth    = [6, 6, 8][size-1];
-        var toothSize = [0.8, 1.6, 2.8][size-1];
+        var nteeth    = [6, 6, 8, 10][size-1];
+        var toothSize = [0.8, 1.6, 2.8, 4.0][size-1];
         var pike      = args.pike || false;
 
         if (pike) {
@@ -85,8 +86,8 @@ BSWG.component_Spikes = {
     init: function(args) {
 
         this.size      = args.size || 1;
-        this.nteeth    = [6, 6, 8][this.size-1];
-        this.toothSize = [0.8, 1.6, 2.8][this.size-1];
+        this.nteeth    = [6, 6, 8, 10][this.size-1];
+        this.toothSize = [0.8, 1.6, 2.8, 4.0][this.size-1];
         this.pike      = args.pike || false;
 
         this.maxHP = this.size * 90 / 3;
