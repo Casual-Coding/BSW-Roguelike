@@ -651,6 +651,9 @@ BSWG.ai = new function() {
 
     var EDITOR_WIDTH = 550;
 
+    this.aiTestLevel = 0;
+    this.playerTestLevel = 0;
+
     this.getFile = false;
     this.testOtherShip = null;
 

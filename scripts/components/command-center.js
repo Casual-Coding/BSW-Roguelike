@@ -328,7 +328,10 @@ BSWG.component_CommandCenter = {
 
     buff: function() {
         if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
-            if (BSWG.game.xpInfo) {
+            if (BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.battleMode && BSWG.xpInfo[BSWG.ai.playerTestLevel]) {
+                return BSWG.xpInfo[BSWG.ai.playerTestLevel].buff;
+            }
+            else if (BSWG.game.xpInfo) {
                 return BSWG.game.xpInfo.buff();
             }
             else {
@@ -438,6 +441,10 @@ BSWG.component_CommandCenter = {
     _spkeys: [ 'fury', 'overpowered', 'defenseScreen', 'speed', 'lightweight', 'massive', 'massive2', 'spinUp', 'doublePunch' ],
 
     update: function(dt) {
+
+        if (BSWG.game.battleMode && BSWG.game.scene === BSWG.SCENE_GAME2 && self !== BSWG.game.ccblock) {
+            this.enemyLevel = BSWG.ai.aiTestLevel;
+        }
 
         this.maxEnergy = this.calcMaxEnergy();
         if (this.maxEnergy > this.lMaxEnergy) {

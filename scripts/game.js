@@ -1258,6 +1258,8 @@ BSWG.game = new function(){
 
                         if (obj) {
                             this.backup = BSWG.componentList.serialize(null, true);
+                            BSWG.ai.aiTestLevel = 0;
+                            BSWG.ai.playerTestLevel = 0;
                             try {
                                 self.ccblock = null;
                                 self.tileMap.clear();
@@ -1288,6 +1290,8 @@ BSWG.game = new function(){
                             self.ccblock = BSWG.componentList.load(this.backup);
                             self.aiship = null;
                             self.battleMode = false;
+                            BSWG.ai.aiTestLevel = 0;
+                            BSWG.ai.playerTestLevel = 0;
                             //window.gc();
                         }
 
