@@ -93,7 +93,7 @@ BSWG.blasterList = new function () {
                                     comp && comp !== B.source
                                 );
                             }
-                            if (comp && comp.combinedHP() > 0) {
+                            if (comp && comp.combinedHP && comp.combinedHP() > 0) {
                                 B.rgPower = 0.0;
                             }
                             if (B.t <= 0.0 || B.rgPower <= 0) {

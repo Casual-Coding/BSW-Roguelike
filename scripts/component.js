@@ -1983,7 +1983,8 @@ BSWG.componentList = new function () {
             fn({
                 id: 10000000,
                 isStatic: true,
-                takeDamage: function() {}
+                takeDamage: function() {return 0;},
+                combinedHP: function() {return 1000000;}
             });
         }
 

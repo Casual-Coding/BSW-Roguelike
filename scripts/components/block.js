@@ -123,7 +123,7 @@ BSWG.component_Block = {
         //ctx.fillStyle = '#444';
         //BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
         if (this.armour) {
-            this.meshObj.update([1.5,1.5,1.5,1], 256, BSWG.compAnchored(this));
+            this.meshObj.update([1.0,1.0,1.0,1], 4, BSWG.compAnchored(this));
         }
         else {
             this.meshObj.update([0.6,0.6,0.6,1], null, BSWG.compAnchored(this));
