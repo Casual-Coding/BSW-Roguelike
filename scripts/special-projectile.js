@@ -20,7 +20,31 @@ BSWG.lightning = function(p, n, lw) {
             type: 'v4',
             value: new THREE.Vector4(0, 0, 0, 0)
         },
-    }, THREE.AdditiveBlending, THREE.DoubleSide);
+        envMap: {
+            type: 't',
+            value: BSWG.render.envMap.texture
+        },
+        envMap2: {
+            type: 't',
+            value: BSWG.render.envMap2.texture
+        },
+        envMapT: {
+            type: 'f',
+            value: BSWG.render.envMapT
+        },
+        envMapTint: {
+            type: 'v4',
+            value: BSWG.render.envMapTint
+        },
+        envMapParam: {
+            type: 'v4',
+            value: BSWG.render.envMapParam
+        },      
+        viewport: {
+            type: 'v2',
+            value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+        }
+    }, THREE.AdditiveBlending);
     this.mat.needsUpdate = true;
     this.geom = new THREE.Geometry();
     this.geom.vertices.push(new THREE.Vector3(0, 0, 0));
@@ -73,6 +97,8 @@ BSWG.lightning.prototype.update = function(dt) {
     else {
         this.mat.uniforms.clr.value.set(0, 0, 1, 1.0 * this.alpha * Math._random());
     }
+
+    this.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);           
 
     this.line.position.set(this.p.x, this.p.y, this.p.z);
     var n = this.n.clone();
@@ -459,7 +485,7 @@ BSWG.specProjList = new (function(){
 
     this.clear = function() {
         if (!BSWG.torpedoGeom) {
-            BSWG.torpedoGeom = new THREE.IcosahedronGeometry(1, 2);
+            BSWG.torpedoGeom = new THREE.IcosahedronGeometry(1, 3);
             BSWG.torpedoGeom.computeVertexNormals();
             BSWG.torpedoGeom.needsUpdate = true;
         }
