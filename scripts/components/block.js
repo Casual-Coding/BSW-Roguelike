@@ -38,7 +38,22 @@ BSWG.component_Block = {
         { title: 'Tri 1x3', width: 1, height: 3, triangle: 1, armour: false, value: 3*2 },
         { title: 'Tri 3x1', width: 3, height: 1, triangle: 1, armour: false, value: 3*2 },
         { title: 'Tri 2x3', width: 2, height: 3, triangle: 1, armour: false, value: 6*2 },
-        { title: 'Tri 3x2', width: 3, height: 2, triangle: 1, armour: false, value: 6*2 }
+        { title: 'Tri 3x2', width: 3, height: 2, triangle: 1, armour: false, value: 6*2 },
+        { title: 'Armoured Box 1x1', width: 1, height: 1, triangle: 0, armour: true, value: 1*2*4 },
+        { title: 'Armoured Box 2x2', width: 2, height: 2, triangle: 0, armour: true, value: 4*2*4 },
+        { title: 'Armoured Box 3x3', width: 3, height: 3, triangle: 0, armour: true, value: 9*2*4 },
+        { title: 'Armoured Box 1x2', width: 1, height: 2, triangle: 0, armour: true, value: 2*2*4 },
+        { title: 'Armoured Box 1x3', width: 1, height: 3, triangle: 0, armour: true, value: 3*2*4 },
+        { title: 'Armoured Box 2x3', width: 2, height: 3, triangle: 0, armour: true, value: 6*2*4 },
+        { title: 'Armoured Tri 1x1', width: 1, height: 1, triangle: 1, armour: true, value: 1*2*4 },
+        { title: 'Armoured Tri 2x2', width: 2, height: 2, triangle: 1, armour: true, value: 2*2*4 },
+        { title: 'Armoured Tri 3x3', width: 3, height: 3, triangle: 1, armour: true, value: 9*2*4 },
+        { title: 'Armoured Tri 1x2', width: 1, height: 2, triangle: 1, armour: true, value: 2*2*4 },
+        { title: 'Armoured Tri 2x1', width: 2, height: 1, triangle: 1, armour: true, value: 2*2*4 },
+        { title: 'Armoured Tri 1x3', width: 1, height: 3, triangle: 1, armour: true, value: 3*2*4 },
+        { title: 'Armoured Tri 3x1', width: 3, height: 1, triangle: 1, armour: true, value: 3*2*4 },
+        { title: 'Armoured Tri 2x3', width: 2, height: 3, triangle: 1, armour: true, value: 6*2*4 },
+        { title: 'Armoured Tri 3x2', width: 3, height: 2, triangle: 1, armour: true, value: 6*2*4 }
     ],
 
     category: 'block',
@@ -61,7 +76,7 @@ BSWG.component_Block = {
         else if (triangle === 1)
             verts.splice(1, 1);
 
-        return [Math.smoothPoly(verts, 0.03)];
+        return [Math.smoothPoly(verts, armour ? 0.08 : 0.03)];
     },
 
     init: function(args) {
@@ -71,7 +86,7 @@ BSWG.component_Block = {
         this.armour   = args.armour || false;
         this.triangle = args.triangle || 0;
 
-        this.maxHP = this.width * this.height * 250 / 9;
+        this.maxHP = this.width * this.height * 250 / 9 * (this.armour ? 4 : 1);
         if (this.triangle) {
             this.maxHP /= 2.0;
         }
@@ -80,19 +95,19 @@ BSWG.component_Block = {
             width:    this.width,
             height:   this.height,
             triangle: this.triangle,
-            smooth:   0.03
+            smooth:   this.armour ? 0.08 : 0.03
         });
 
         this.jpoints = BSWG.createBoxJPoints(this.width, this.height, this.triangle);
 
         //BSWG.blockPolySmooth = 0.03;
-        BSWG.bpmReflect = 0.4;
-        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7);
+        BSWG.bpmReflect = this.armour ? 0.85 : 0.4;
+        this.meshObj = BSWG.generateBlockPolyMesh(this.obj, 0.7, null, null, this.armour ? 0.025 : null);
         this.selMeshObj = BSWG.genereteBlockPolyOutline(this.obj);
         //BSWG.blockPolySmooth = null;
         BSWG.componentList.makeQueryable(this, this.meshObj.mesh);
 
-        this.xpBase = 0.01 * this.width * this.height / 9;
+        this.xpBase = 0.01 * this.width * this.height / 9 * (this.armour ? 4 : 1);
 
     },
 
@@ -107,7 +122,12 @@ BSWG.component_Block = {
 
         //ctx.fillStyle = '#444';
         //BSWG.drawBlockPoly(ctx, this.obj, 0.7, null, BSWG.componentHoverFn(this));
-        this.meshObj.update([0.6,0.6,0.6,1], null, BSWG.compAnchored(this));
+        if (this.armour) {
+            this.meshObj.update([3.2,3.2,3.2,1], null, BSWG.compAnchored(this));
+        }
+        else {
+            this.meshObj.update([0.6,0.6,0.6,1], null, BSWG.compAnchored(this));
+        }
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
     },

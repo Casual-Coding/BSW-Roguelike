@@ -1872,7 +1872,7 @@ BSWG.componentList = new function () {
             if (C && shieldFilterSource && C.type === 'shield' && C.onCC === shieldFilterSource.onCC) {
                 return;
             }
-            if (C.combinedHP() <= 0) {
+            if (C && C.combinedHP && C.combinedHP() <= 0) {
                 return;
             }
             var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);

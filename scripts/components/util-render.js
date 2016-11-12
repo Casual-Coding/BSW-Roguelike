@@ -59,6 +59,12 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
         BSWG.renderCompIconRecenter = false;
     }
 
+    if (key.indexOf('armour=true') >= 0) {
+        baseR += 0.25;
+        baseG += 0.25;
+        baseB += 0.25;
+    }
+
     if (!scale && scale !== 0) {
         scale = 1.0;
     }
