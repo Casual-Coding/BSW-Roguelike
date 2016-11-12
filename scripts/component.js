@@ -281,6 +281,9 @@ BSWG.compImplied = function (a, b) {
         case 'thruster':
             return a.size <= b.size;
             break;
+        case 'razor':
+            return a.size <= b.size;
+            break;
         default:
             return false;
     }
@@ -1298,6 +1301,7 @@ BSWG.componentList = new function () {
             'minigun':          BSWG.component_Minigun,
             'shield':           BSWG.component_Shield,
             'railgun':          BSWG.component_Railgun,
+            'razor':            BSWG.component_Razor,
         };
 
         this.sbTypes = [];

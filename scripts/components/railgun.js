@@ -25,6 +25,8 @@ BSWG.component_Railgun = {
 
     category: 'weapon',
 
+    attStrength: 2.0,
+
     getIconPoly: function (args) {
         var size = args.size || 1;
         return [Math.scalePoly([
