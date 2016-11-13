@@ -2693,7 +2693,7 @@ BSWG.control_KeyConfig = {
     update: function () {
 
         var keys = BSWG.input.getKeyMap();
-        if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left') || (!BSWG.game.editMode && (!this.uiKey || !BSWG.game.showControls))) {
+        if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left') || (!BSWG.game.editMode && !BSWG.game.showControls)) {
             BSWG.input.EAT_KEY(BSWG.KEY.ESC);
             BSWG.input.EAT_MOUSE('left');
             this.close(null, this.alt);
