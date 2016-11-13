@@ -155,6 +155,23 @@ BSWG.aiBase.prototype.player_comp = function () {
     return list;
 };
 
+BSWG.aiBase.prototype.set_specials = function (list) {
+    if (this.ccblock) {
+        this.ccblock.setSpecialsAI(list);
+    }
+};
+
+BSWG.aiBase.prototype.use_special = function (key, data) {
+    if (this.ccblock) {
+        this.ccblock.useSpecialAI(key, data);
+    }  
+};
+
+BSWG.aiBase.prototype.set_test_levels = function (enemy, player) {
+    BSWG.ai.aiTestLevel = enemy || 0;
+    BSWG.ai.playerTestLevel = player || 0;
+};
+
 BSWG.aiBase.prototype.make_sensor = function (type, args) {
 
     var sensor = new BSWG.aiSensor(type, args, this);

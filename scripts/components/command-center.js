@@ -32,7 +32,7 @@ BSWG.component_CommandCenter = {
 
     maxHP: 100,
     calcMaxEnergy: function() {
-        return Math.round(100 + 100 * this.level() / 5);
+        return Math.round(100 + 100 * this.level() / 5) * (this === BSWG.game.ccblock ? 1 : 10);
     },
 
     sortOrder: 2,
@@ -112,6 +112,22 @@ BSWG.component_CommandCenter = {
         return false;
     },
 
+    setSpecialsAI: function(list) {
+        if (!list) {
+            return;
+        }
+        for (var i=0; i<4 && i<list.length; i++) {
+            if (list[i]) {
+                this.giveSpecial(list[i]);
+                this.equipSpecial(list[i], i);
+            }
+        }
+    },
+
+    useSpecialAI: function(key, data) {
+        BSWG.useSpecial(key, this, data || {});
+    },
+
     equipSpecial: function(key, row) {
         if (this.hasSpecial(key)) {
             if (row >= 0 && row < this.specials.equipped.length) {
@@ -186,7 +202,7 @@ BSWG.component_CommandCenter = {
 
         this.maxEnergy = this.calcMaxEnergy();
         this.energy = this.maxEnergy;
-        this.energyRegen = .05;
+        this.energyRegen = (this === BSWG.game.ccblock) ? .05 : .5;
 
         // special effects
         for (var i=0; i<this._spkeys.length; i++) {

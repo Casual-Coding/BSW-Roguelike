@@ -134,6 +134,10 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             type: 't',
             value: BSWG.render.images['grass_nm'].texture
         },
+        zpos: {
+            type: 'f',
+            value: 0.0001
+        },
         clr: {
             type: 'v4',
             value: new THREE.Vector4(
@@ -157,6 +161,8 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             value: new THREE.Vector4(w/vp.w, h/vp.h, this.x/vp.w, this.y/vp.h)
         }
     });
+    this.hudMat.depthWrite = false;
+    this.hudMat.depthTest = false;
     var oldGeom = this.hudGeom;
     this.hudGeom = new THREE.BufferGeometry().fromGeometry(this.hudGeom);
     oldGeom.dispose();

@@ -691,30 +691,34 @@ BSWG.startSpecial = function(key, who, btn) {
             if (btn) {
                 btn.selected = false;
             }
-            if (!who || who.destroyed || !who.obj || !who.obj.body) {
-                return;
-            }
-            if (data) {
-                if (who.hasSpecial(key) && who.energy >= BSWG.specialsInfo[key].energy) {
-                    data.owner = who;
-                    if (BSWG.specialsInfo[key].effect) {
-                        new BSWG.soundSample().play('use-special', who.obj.body.GetWorldCenter().THREE(0.4), 4.0, 1.0/(((BSWG.specialsInfo[key].energy||0)+Math._random())/50));
-                        new BSWG.specialEffect(BSWG.specialsInfo[key].effect, data);
-                    }
-                    who.energy = Math.max(who.energy - BSWG.specialsInfo[key].energy || 0, 0);
-                    who.specials.all[key].t = 0.0;
-                    who.usedSpecial = key;
-                    who.usedSpecialName = BSWG.specialsInfo[key].name || '';
-                    who.usedSpecialT = 2.0;
-                    var clr = BSWG.specialsInfo[key].color;
-                    var r = Math.clamp(Math.floor(clr.x*255), 0, 255);
-                    var g = Math.clamp(Math.floor(clr.y*255), 0, 255);
-                    var b = Math.clamp(Math.floor(clr.z*255), 0, 255);
-                    who.usedSpecialClr = 'rgb(' + r + ',' + g + ',' + b + ')';;
-                }
-            }
+            BSWG.useSpecial(key, who, data);
         }
     );
+};
+
+BSWG.useSpecial = function(key, who, data) {
+    if (!who || who.destroyed || !who.obj || !who.obj.body) {
+        return;
+    }
+    if (data) {
+        if (who.hasSpecial(key) && who.energy >= BSWG.specialsInfo[key].energy) {
+            data.owner = who;
+            if (BSWG.specialsInfo[key].effect) {
+                new BSWG.soundSample().play('use-special', who.obj.body.GetWorldCenter().THREE(0.4), 4.0, 1.0/(((BSWG.specialsInfo[key].energy||0)+Math._random())/50));
+                new BSWG.specialEffect(BSWG.specialsInfo[key].effect, data);
+            }
+            who.energy = Math.max(who.energy - BSWG.specialsInfo[key].energy || 0, 0);
+            who.specials.all[key].t = 0.0;
+            who.usedSpecial = key;
+            who.usedSpecialName = BSWG.specialsInfo[key].name || '';
+            who.usedSpecialT = 2.0;
+            var clr = BSWG.specialsInfo[key].color;
+            var r = Math.clamp(Math.floor(clr.x*255), 0, 255);
+            var g = Math.clamp(Math.floor(clr.y*255), 0, 255);
+            var b = Math.clamp(Math.floor(clr.z*255), 0, 255);
+            who.usedSpecialClr = 'rgb(' + r + ',' + g + ',' + b + ')';;
+        }
+    }    
 }
 
 BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {

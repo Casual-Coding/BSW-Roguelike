@@ -2029,7 +2029,7 @@ BSWG.componentList = new function () {
         for (var i=0; i<list.length; i++) {
             var obR = Math.max(list[i].shieldR||0, list[i].obj.radius);
             var obArea = Math.PI * obR * obR;
-            list[i].__shieldedPercent = Math.clamp(Math.circleIntersectionArea(p, list[i].p(), r, obR) / obArea, 0, 1);
+            list[i].__shieldedPercent = 1.0 - Math.clamp(Math.circleIntersectionArea(p, list[i].p(), r, obR) / obArea, 0, 1);
             for (var j=0; j<shields.length; j++) {
                 if (list[i] !== shields[j]) {
                     if (list[i].type !== 'shield' || obR < shields[j].shieldR) {
