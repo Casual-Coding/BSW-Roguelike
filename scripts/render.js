@@ -252,7 +252,7 @@ BSWG.render = new function() {
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
-        this.cam3DS = new THREE.OrthographicCamera(-110, 110, 110, -110, 0, 256);
+        this.cam3DS = new THREE.OrthographicCamera(-110, 110, 110, -110, 0, 512);
         this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
@@ -643,10 +643,10 @@ BSWG.render = new function() {
 
             self.cam3DS.updateProjectionMatrix();
 
-            self.cam3DS.position.set(self.cam3D.position.x + 25.0, self.cam3D.position.y + 8.0, 100.0);
+            self.cam3DS.position.set(self.cam3D.position.x + 50.0, self.cam3D.position.y + 4.0, 100.0);
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
-            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 25.0, self.cam3D.position.y - 8.0, 0.0));
+            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 50.0, self.cam3D.position.y - 4.0, 0.0));
             self.cam3DS.updateProjectionMatrix();
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);

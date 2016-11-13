@@ -69,10 +69,11 @@ var BSWG = new function(){
         'specials/mele.js'
     ];
     var images = {
-        'test_nm': 'test-normalmap.png',
+        'test_nm': 'ship-nm.png',
         'grass_nm': 'grass-nm.png',
         'water_nm': 'water-nm.png',
         'damage_nm': 'damage-nm.png',
+        'hud_nm': 'hud-nm.png',
         'env-map-1': 'env-map-1.png',
         'env-map-2': 'env-map-2.png',
         'env-map-3': 'env-map-3.png',
@@ -128,6 +129,7 @@ var BSWG = new function(){
         'grass_nm',
         'water_nm',
         'damage_nm',
+        'hud_nm',
         'env-map-1',
         'env-map-2',
         'env-map-3',

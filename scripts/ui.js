@@ -132,7 +132,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
         },
         texNm: {
             type: 't',
-            value: BSWG.render.images['grass_nm'].texture
+            value: BSWG.render.images['hud_nm'].texture
         },
         zpos: {
             type: 'f',

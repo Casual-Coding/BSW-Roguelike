@@ -252,7 +252,7 @@ switch (type) {
             }
         }
 
-        for (var i=0; i<50; i++) {
+        for (var i=0; i<50*Math.pow(sz/256, 1.5); i++) {
 
             var w = Math.pow(Math.random(), 3.0) * 3 + 1;
 
