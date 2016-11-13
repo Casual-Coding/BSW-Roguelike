@@ -245,13 +245,26 @@ BSWG.render = new function() {
         this.cam3D.matrixAutoUpdate = true;
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: false });
         this.renderer.autoClearColor = false;
         //this.renderer.setClearColor( 0x000000, 0x00 );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
     
+        this.composer = new THREE.EffectComposer( this.renderer );
+        this.renderPass = new THREE.RenderPass( this.scene, this.cam3D )
+        this.renderPass.renderToScreen = false;
+        this.composer.addPass( this.renderPass );
+        this.effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+        this.effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight );
+        this.composer.addPass( this.effectFXAA );
+        this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.4, 0.4, 0.85);
+        this.composer.addPass( this.bloomPass );
+        this.copyShader = new THREE.ShaderPass(THREE.CopyShader);
+        this.copyShader.renderToScreen = true;
+        this.composer.addPass( this.copyShader );
+
         this.cam3DS = new THREE.OrthographicCamera(-110, 110, 110, -110, 0, 512);
         this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
@@ -518,6 +531,9 @@ BSWG.render = new function() {
             this.renderer.setSize( this.viewport.w, this.viewport.h );
             this.cam3D.aspect = this.viewport.w / this.viewport.h;
             this.cam3D.updateProjectionMatrix();
+            this.composer.setSize(this.viewport.w, this.viewport.h);
+            this.effectFXAA.uniforms['resolution'].value.set(1 / this.viewport.w, 1 / this.viewport.h );
+            this.bloomPass.resolution.set(1 / this.viewport.w, 1 / this.viewport.h );
             this.resized = true;
             this.renderer.setPixelRatio( window.devicePixelRatio );
         }
@@ -656,7 +672,8 @@ BSWG.render = new function() {
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
 
-            self.renderer.render(self.scene, self.cam3D);
+            self.composer.render();
+            //self.renderer.render(self.scene, self.cam3D);
 
             self.ctx.save();
 
