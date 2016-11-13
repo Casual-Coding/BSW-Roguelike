@@ -96,13 +96,13 @@ BSWG.KEY = (function(){
 
     var names = {} // title for backward compat
 
-    // Create reverse mapping
-    for (i in codes) names[codes[i]] = i;
-
     // Add aliases
     for (var alias in aliases) {
         codes[alias] = aliases[alias]
     }
+
+    // Create reverse mapping
+    for (i in codes) names[codes[i]] = i;
 
     BSWG.KEY_NAMES = names;
 

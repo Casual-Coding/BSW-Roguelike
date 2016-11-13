@@ -631,7 +631,8 @@ BSWG.game = new function(){
             'special1': BSWG.KEY[1],
             'special2': BSWG.KEY[2],
             'special3': BSWG.KEY[3],
-            'special4': BSWG.KEY[4]
+            'special4': BSWG.KEY[4],
+            'escmenu': BSWG.KEY.F1
         }
 
         BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-1'];
@@ -948,7 +949,11 @@ BSWG.game = new function(){
                     }
                     this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
                     this.ccblock = BSWG.componentList.load(args.load.comp, null, null, null, null, true);
-                    this.buttonBinds = args.load.buttonBinds || this.buttonBinds;
+                    this.buttonBinds = {} || this.buttonBinds;
+                    var tmp = args.load.buttonBinds;
+                    for (var key in tmp) {
+                        this.buttonBinds[key] = tmp[key];
+                    }
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
                     this.cam.y = p.y;
@@ -1500,7 +1505,7 @@ BSWG.game = new function(){
             w: 100, h: 65,
             text: BSWG.render.images['menu'],
             selected: false,
-            //clickKey: BSWG.KEY.ESC,
+            userKeyBind: 'escmenu',
             click: function (me) {
                 if (self.escMenu) {
                     self.escMenu.remove();

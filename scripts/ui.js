@@ -2665,6 +2665,19 @@ BSWG.control_KeyConfig = {
 
     render: function (ctx, viewport) {
 
+        if (this.p.x < 0) {
+            this.p.x = 0;
+        }
+        else if ((this.p.x+this.w) > BSWG.render.viewport.w) {
+            this.p.x = BSWG.render.viewport.w - this.w;
+        }
+        if (this.p.y < 0) {
+            this.p.y = 0;
+        }
+        else if ((this.p.y+this.h) > BSWG.render.viewport.h) {
+            this.p.y = BSWG.render.viewport.h - this.h;
+        }
+
         ctx.font = '16px Orbitron';
 
         ctx.strokeStyle = '#aaa';
@@ -2672,11 +2685,22 @@ BSWG.control_KeyConfig = {
 
         ctx.lineWidth = 2.0;
 
-        ctx.globalAlpha = 0.75;
-        BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, true ? 'rgba(255,255,255,0.45)' : null);
         ctx.globalAlpha = 1.0;
+        //BSWG.draw3DRect(ctx, this.p.x, this.p.y, this.w, this.h, 5, true, true ? 'rgba(255,255,255,0.45)' : null);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.strokeStyle = 'rgba(128, 128, 128, 0.75)';
+        ctx.fillRect(this.p.x+4, this.p.y+4, this.w, this.h);
+        ctx.fillStyle = 'rgba(64, 64, 64, 0.75)';
 
-        ctx.lineWidth = 1.0;
+        var grd = ctx.createLinearGradient(this.p.x, this.p.y, this.p.x, this.p.y+this.h);
+        grd.addColorStop(0, 'rgba(64, 64, 64, 0.75)');
+        grd.addColorStop(1, 'rgba(96, 96, 96, 0.75)');
+        ctx.fillStyle = grd;
+        grd = null;
+        ctx.fillRect(this.p.x, this.p.y, this.w, this.h);
+        ctx.strokeRect(this.p.x, this.p.y, this.w, this.h);
+
+        ctx.lineWidth = 2.0;
 
         ctx.beginPath();
         ctx.moveTo(this.p.x + 16, this.p.y + 30);
@@ -2685,16 +2709,18 @@ BSWG.control_KeyConfig = {
         ctx.strokeStyle = '#aaa';
         ctx.stroke();
 
-        ctx.strokeStyle = '#111';
+        ctx.strokeStyle = '#000';
         ctx.textAlign = 'left';
         ctx.fillStyle = '#fff';
         ctx.fillTextB(this.title, this.p.x + 16, this.p.y + 25);
         ctx.fillStyle = '#ddd';
         ctx.fillTextB("Bound to ", this.p.x + 16, this.p.y + 25 + 25);
         ctx.fillStyle = '#afa';
-        ctx.fillTextB("" + BSWG.KEY_NAMES[this.key].toTitleCase(), this.p.x + 16 + 93, this.p.y + 25 + 25);
+        ctx.fillTextB("" + (BSWG.KEY_NAMES[this.key] || '').toTitleCase(), this.p.x + 16 + 93, this.p.y + 25 + 25);
         ctx.fillStyle = '#d8d8f';
-        ctx.fillTextB("Press a key to bind" + (this.okey ? ", " + BSWG.KEY_NAMES[this.okey].toTitleCase() + ' to remove alt.' : ''), this.p.x + 16, this.p.y + 25 + 44);
+        ctx.fillTextB("Press a key to bind" + (this.okey ? ", " + (BSWG.KEY_NAMES[this.okey] || '').toTitleCase() + ' to remove alt.' : ''), this.p.x + 16, this.p.y + 25 + 44);
+
+        ctx.lineWidth = 1.0;
 
         ctx.textAlign = 'left';
 
