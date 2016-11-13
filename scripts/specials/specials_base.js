@@ -15,6 +15,15 @@ BSWG.specialList = new (function(){
 
     };
 
+    this.contActive = function(cont) {
+        for (var i=0; i<this.contList.length; i++) {
+            if (this.contList[i] === cont) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     this.curCont = function () {
         if (this.contList && this.contList[0]) {
             return this.contList[0].key;

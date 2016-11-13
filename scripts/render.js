@@ -662,7 +662,7 @@ BSWG.render = new function() {
 
             if (self.customCursor && !self.dlgOpen) {
                 document.body.style.cursor = 'none';
-                if (BSWG.input.MOUSE('mousein') && BSWG.specialList.contList.length === 0) {
+                if (BSWG.input.MOUSE('mousein') && (BSWG.specialList.contList.length === 0 || BSWG.ui.mouseBlock || BSWG.ui_DlgBlock)) {
                     self.ctx.drawImage(
                         self.images[
                             self.cursorNo ? 'cursor-custom-' + self.cursorNo :
@@ -680,6 +680,7 @@ BSWG.render = new function() {
             else {
                 document.body.style.cursor = null;
             }
+            self.cursorLock = false;
 
             if (self.dlgOpen) {
                 self.ctx.fillStyle = 'rgba(0,0,0,.5)';
@@ -1083,10 +1084,14 @@ BSWG.render = new function() {
         return obj;
     }
 
-    this.setCustomCursor = function(flag, number, scale) {
+    this.setCustomCursor = function(flag, number, scale, lock) {
+        if (this.cursorLock) {
+            return;
+        }
         this.cursorScale = scale || 1;
         this.cursorNo = number || 0;
         this.customCursor = !!flag;
+        this.cursorLock = !!lock;
     };
 
     this.test = function () {

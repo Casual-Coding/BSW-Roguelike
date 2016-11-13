@@ -126,19 +126,21 @@ BSWG.specialCont_circleRange = {
         this.mat.uniforms.clr.value.set(this.color.x, this.color.y, this.color.z, this.color.w * Math.clamp(this.time*4, 0, 1));
         this.mat.uniforms.warp.value.set(1.0, this.time, 0.0, 0.0);
 
-        if (BSWG.input.MOUSE_PRESSED('left')) {
-            BSWG.input.EAT_MOUSE('left');
-            this.output = {
-                p: this.pos,
-                r: this.radius
-            };
-        }
-        else if (BSWG.input.MOUSE_PRESSED('right')) {
-            BSWG.input.EAT_MOUSE('right');
-            this.output = null;
-            this.userAction = true;
-            if (this.callback) {
-                this.callback(this.output);
+        if (!(BSWG.ui.mouseBlock || BSWG.ui_DlgBlock)) {
+            if (BSWG.input.MOUSE_PRESSED('left')) {
+                BSWG.input.EAT_MOUSE('left');
+                this.output = {
+                    p: this.pos,
+                    r: this.radius
+                };
+            }
+            else if (BSWG.input.MOUSE_PRESSED('right')) {
+                BSWG.input.EAT_MOUSE('right');
+                this.output = null;
+                this.userAction = true;
+                if (this.callback) {
+                    this.callback(this.output);
+                }
             }
         }
 

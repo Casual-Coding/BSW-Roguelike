@@ -429,6 +429,8 @@ BSWG.draw3DRect = function(ctx, x1, y1, w, h, insz, pressedIn, outline) {
 
 BSWG.control_UnlockTree = {
 
+    noEat: false,
+
     init: function (args) {
 
         this.w = BSWG.render.viewport.h / 1.5;
@@ -863,6 +865,9 @@ BSWG.control_Button = {
     init: function (args) {
 
         this.z = args.z || 0.1;
+        if (args.userKeyBind) {
+            this.userKeyBind = args.userKeyBind;
+        }
 
     },
 
@@ -980,6 +985,21 @@ BSWG.control_Button = {
         }
         else {
             ctx.fillTextB(this.text, this.p.x + this.w*0.5, this.p.y + this.h*0.5+6);
+        }
+
+        if (BSWG.game.showControls && this.userKeyBind) {
+            var str = BSWG.KEY_NAMES[BSWG.game.buttonBinds[this.userKeyBind]];
+            if (str && str.length) {
+                var fs = Math.min(~~(this.h * 0.3), 12);
+                ctx.fillStyle = BSWG.input.KEY_DOWN(BSWG.game.buttonBinds[this.userKeyBind]) ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(this.p.x+5, this.p.y+this.h-8-fs, this.w-10, 8+fs);
+                ctx.font = (fs-1) + 'px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000';
+                ctx.fillTextB(str, this.p.x + this.w*0.5, this.p.y + this.h - 6);
+                ctx.textAlign = 'left';
+            }
         }
 
         ctx.textAlign = 'left';
@@ -1402,6 +1422,8 @@ BSWG.control_Dialogue = {
 
 BSWG.control_CompPalette = {
 
+    noEat: false,
+
     init: function (args) {
 
         this.compClr = {
@@ -1778,6 +1800,8 @@ BSWG.control_CompPalette = {
 };
 
 BSWG.control_TradeWindow = {
+
+    noEat: false,
 
     init: function (args) {
 
@@ -2611,6 +2635,8 @@ BSWG.control_KeyConfig = {
             self.remove();
         };
 
+        this.uiKey = !!args.uiKey;
+
         this.title = args.title || 'Keybinding';
 
         this.alt = BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT);
@@ -2667,7 +2693,7 @@ BSWG.control_KeyConfig = {
     update: function () {
 
         var keys = BSWG.input.getKeyMap();
-        if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left') || !BSWG.game.editMode) {
+        if (keys[BSWG.KEY.ESC] || BSWG.input.MOUSE_PRESSED('left') || (!BSWG.game.editMode && (!this.uiKey || !BSWG.game.showControls))) {
             BSWG.input.EAT_KEY(BSWG.KEY.ESC);
             BSWG.input.EAT_MOUSE('left');
             this.close(null, this.alt);
@@ -2765,11 +2791,39 @@ BSWG.uiControl = function (desc, args) {
         else
             this.mouseIn = false;
 
+        var KD = this.userKeyBind ? !!BSWG.input.KEY_DOWN(BSWG.game.buttonBinds[this.userKeyBind]) : false
+        var KP = this.userKeyBind ? !!BSWG.input.KEY_PRESSED(BSWG.game.buttonBinds[this.userKeyBind]) : false;
+        var KR = this.userKeyBind ? !!BSWG.input.KEY_RELEASED(BSWG.game.buttonBinds[this.userKeyBind]) : false;
+
+        if (this.mouseIn && this.userKeyBind && BSWG.game.showControls) {
+            BSWG.render.setCustomCursor(true, 3, null, true);
+            if (BSWG.input.MOUSE_PRESSED('right')) {
+                BSWG.input.EAT_MOUSE('right');
+                var self = this;
+                BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
+                    x: this.p.x-150, y: this.p.y-25,
+                    w: 450, h: 50+32,
+                    key: BSWG.game.buttonBinds[this.userKeyBind],
+                    title: 'Change keybinding',
+                    uiKey: true,
+                    close: function (key) {
+                        if (key) {
+                            BSWG.game.buttonBinds[self.userKeyBind] = key;
+                        }
+                    }
+                });
+            }
+        }
+
+        if (KD || KR) {
+            this.mouseIn = true;
+        }
+
         if (this.mouseIn && !omousein && this.hoverClickSound && this.click) {
             //new BSWG.soundSample().play('hover', null, 0.1, 1.45+Math.random()*0.05);
         }
 
-        if (this.click && ((this.mouseIn && BSWG.input.MOUSE_RELEASED('left')) || (this.clickKey && BSWG.input.KEY_PRESSED(this.clickKey))) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
+        if (this.click && ((this.mouseIn && (BSWG.input.MOUSE_RELEASED('left') || KR)) || (this.clickKey && BSWG.input.KEY_PRESSED(this.clickKey))) && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn)
         {
             if (this.hoverClickSound) {
                 new BSWG.soundSample().play('click', null, 0.15, 1.45+Math.random()*0.05);
@@ -2778,8 +2832,11 @@ BSWG.uiControl = function (desc, args) {
         }
 
         this.mouseDown = this.mouseIn && BSWG.input.MOUSE('left') && !BSWG.game.grabbedBlock && !BSWG.game.attractorOn;
+        if (KD) {
+            this.mouseDown = true;
+        }
 
-        if (BSWG.input.MOUSE_PRESSED('left') && this.mouseDown) {
+        if ((BSWG.input.MOUSE_PRESSED('left')||KP) && this.mouseDown) {
             if (this.hoverClickSound && this.click) {
                 new BSWG.soundSample().play('click', null, 0.15, 0.95+Math.random()*0.05);
             }

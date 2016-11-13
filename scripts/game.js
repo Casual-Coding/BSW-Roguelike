@@ -303,6 +303,8 @@ BSWG.game = new function(){
     this.scene = null;
     this.switchScene = null;
 
+    this.buttonBinds = {};
+
     this.changeScene = function (scene, args, fadeColor, fadeTime, force) {
 
         this.stopMusic(1.0);
@@ -428,6 +430,7 @@ BSWG.game = new function(){
             obj.comp = BSWG.componentList.serialize(null, true);
             obj.xpInfo = this.xpInfo.serialize();
             obj.specials = BSWG.specialList.serialize();
+            obj.buttonBinds = this.buttonBinds;
 
             localStorage.game_save = JSON.stringify(obj);
 
@@ -617,6 +620,20 @@ BSWG.game = new function(){
         this._mmMiny = null;
         this._mmMaxy = null;
 
+        this.buttonBinds = {
+            'build': BSWG.KEY.B,
+            'store': BSWG.KEY.V,
+            'anchor': BSWG.KEY.N,
+            'controls': BSWG.KEY.M,
+            'trade': BSWG.KEY.H,
+            'points': BSWG.KEY.J,
+            'specials': BSWG.KEY.TICK,
+            'special1': BSWG.KEY[1],
+            'special2': BSWG.KEY[2],
+            'special3': BSWG.KEY[3],
+            'special4': BSWG.KEY[4]
+        }
+
         BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-1'];
 
         if (scene === BSWG.SCENE_TITLE) {
@@ -752,6 +769,8 @@ BSWG.game = new function(){
                     this.newGameBtn.add();
                     this.loadGameBtn.add();
                     this.sandBoxBtn.add();
+                    this.loadGameBtn.color = localStorage.game_save ? [0.35, 0.6, 1., 1.0] : [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0];
+                    this.loadGameBtn.hoverColor = localStorage.game_save ? [0.95, 0.95, 0.95, 1.0] : [0.3, 0.3, 0.3, 1.0];
                 }
                 else {
                     var yoff = 42/(BSWG.render.viewport.h/1080);
@@ -929,6 +948,7 @@ BSWG.game = new function(){
                     }
                     this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
                     this.ccblock = BSWG.componentList.load(args.load.comp, null, null, null, null, true);
+                    this.buttonBinds = args.load.buttonBinds || this.buttonBinds;
                     var p = this.ccblock.obj.body.GetWorldCenter();
                     this.cam.x = p.x;
                     this.cam.y = p.y;
@@ -964,6 +984,7 @@ BSWG.game = new function(){
                     w: 65, h: 65,
                     text: BSWG.render.images['build-mode'],
                     selected: this.editMode,
+                    userKeyBind: 'build',
                     click: function (me) {
                         me.selected = !me.selected;
                         self.editMode = me.selected;
@@ -980,6 +1001,7 @@ BSWG.game = new function(){
                     w: 65, h: 65,
                     text: BSWG.render.images['anchor'],
                     selected: false,
+                    userKeyBind: 'anchor',
                     click: function (me) {
                         if (self.ccblock) {
                             self.ccblock.anchored = !self.ccblock.anchored;
@@ -998,6 +1020,7 @@ BSWG.game = new function(){
                     w: 65, h: 65,
                     text: BSWG.render.images['show-controls'],
                     selected: this.showControls,
+                    userKeyBind: 'controls',
                     click: function (me) {
                         me.selected = !me.selected;
                         self.showControls = me.selected;
@@ -1015,6 +1038,7 @@ BSWG.game = new function(){
                         w: 65, h: 65,
                         text: BSWG.render.images['store-mode'],
                         selected: this.storeMode,
+                        userKeyBind: 'store',
                         click: function (me) {
                             me.selected = !me.selected;
                             self.storeMode = me.selected;
@@ -1038,6 +1062,7 @@ BSWG.game = new function(){
                         w: 64, h: 65,
                         text: '',
                         selected: this.tradeMode,
+                        userKeyBind: 'trade',
                         click: function (me) {
                             if (self.bossFight || self.dialogPause) {
                                 me.selected = false;
@@ -1072,6 +1097,7 @@ BSWG.game = new function(){
                         w: 65, h: 65,
                         text: 'Specials',
                         selected: self.specialMode,
+                        userKeyBind: 'specials',
                         click: function (me) {
                             self.specialMode = !self.specialMode;
                             me.selected = self.specialMode;
@@ -1091,6 +1117,7 @@ BSWG.game = new function(){
                         w: 65, h: 65,
                         text: 'Points',
                         selected: self.unlockMode,
+                        userKeyBind: 'points',
                         click: function (me) {
                             self.unlockMode = !self.unlockMode;
                             me.selected = self.unlockMode;
@@ -1345,12 +1372,17 @@ BSWG.game = new function(){
                                 };
                             }(i),
                             selected: false,
+                            userKeyBind: 'special' + (i+1),
                             click: function (me) {
                                 if (self.ccblock && !self.ccblock.destroyed) {
                                     var idx = me._idx;
                                     var key = self.ccblock.equippedSpecialNo(idx);
-                                    if (key) {
-                                        BSWG.startSpecial(key, self.ccblock, me);
+                                    if (BSWG.specialList.contActive(self.curSpecial)) {
+                                        self.curSpecial.destroy();
+                                        self.curSpecial = null;
+                                    }
+                                    else if (key) {
+                                        self.curSpecial = BSWG.startSpecial(key, self.ccblock, me);
                                     }
                                 }
                             }
