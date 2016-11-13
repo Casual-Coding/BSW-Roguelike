@@ -125,8 +125,9 @@ BSWG.component_Blaster = {
 
     openConfigMenu: function() {
 
-        if (BSWG.compActiveConfMenu)
+        if (BSWG.compActiveConfMenu) {
             BSWG.compActiveConfMenu.remove();
+        }
 
         var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
 

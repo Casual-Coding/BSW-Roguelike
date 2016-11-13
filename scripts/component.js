@@ -674,9 +674,13 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
                 ctx.font = '11px Orbitron';
 
                 var p = BSWG.render.project3D(BSWG.physics.localToWorld(info[1], this.obj.body), 0.0);
-                var w = Math.floor(6 + ctx.textWidth(text));
-                ctx.globalAlpha = 0.75;
-                ctx.fillStyle = info[2] ? '#777' : '#444';
+                var w = Math.floor(30 + ctx.textWidth(text));
+                ctx.globalAlpha = 1.0;
+                var grad = ctx.createLinearGradient(p.x - w * 0.5, p.y, p.x + w * 0.5, p.y);
+                grad.addColorStop(0,   info[2] ? 'rgba(0, 0, 0, 0.0)' : 'rgba(255, 255, 255, 0.0)');
+                grad.addColorStop(0.5, info[2] ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)');
+                grad.addColorStop(1,   info[2] ? 'rgba(0, 0, 0, 0.0)' : 'rgba(255, 255, 255, 0.0)');
+                ctx.fillStyle = grad;
                 ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
 
                 ctx.save();
@@ -686,9 +690,10 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
                 ctx.translate(0, 3);
 
                 ctx.globalAlpha = 1.0;
-                ctx.fillStyle = info[2] ? '#6f6' : '#fff';
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000';
                 ctx.textAlign = 'center';
-                ctx.fillText(text, 0, 0);
+                ctx.fillTextB(text, 0, 0);
                 ctx.textAlign = 'left';
 
                 ctx.restore();

@@ -991,13 +991,17 @@ BSWG.control_Button = {
             var str = BSWG.KEY_NAMES[BSWG.game.buttonBinds[this.userKeyBind]];
             if (str && str.length) {
                 var fs = Math.min(~~(this.h * 0.3), 12);
-                ctx.fillStyle = BSWG.input.KEY_DOWN(BSWG.game.buttonBinds[this.userKeyBind]) ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)';
-                ctx.fillRect(this.p.x+5, this.p.y+this.h-8-fs, this.w-10, 8+fs);
+                var grad = ctx.createLinearGradient(this.p.x,this.p.y,this.p.x+this.w, this.p.y);
+                grad.addColorStop(0,   BSWG.input.KEY_DOWN(BSWG.game.buttonBinds[this.userKeyBind]) ? 'rgba(0, 0, 0, 0.0)' : 'rgba(255, 255, 255, 0.0)');
+                grad.addColorStop(0.5, BSWG.input.KEY_DOWN(BSWG.game.buttonBinds[this.userKeyBind]) ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)');
+                grad.addColorStop(1,   BSWG.input.KEY_DOWN(BSWG.game.buttonBinds[this.userKeyBind]) ? 'rgba(0, 0, 0, 0.0)' : 'rgba(255, 255, 255, 0.0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(this.p.x+5, this.p.y+this.h-8-fs-5, this.w-10, 8+fs);
                 ctx.font = (fs-1) + 'px Orbitron';
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#fff';
                 ctx.strokeStyle = '#000';
-                ctx.fillTextB(str, this.p.x + this.w*0.5, this.p.y + this.h - 6);
+                ctx.fillTextB(str, this.p.x + this.w*0.5, this.p.y + this.h - 6 - 5);
                 ctx.textAlign = 'left';
             }
         }
@@ -2800,6 +2804,9 @@ BSWG.uiControl = function (desc, args) {
             if (BSWG.input.MOUSE_PRESSED('right')) {
                 BSWG.input.EAT_MOUSE('right');
                 var self = this;
+                if (BSWG.compActiveConfMenu) {
+                    BSWG.compActiveConfMenu.remove();
+                }
                 BSWG.compActiveConfMenu = this.confm = new BSWG.uiControl(BSWG.control_KeyConfig, {
                     x: this.p.x-150, y: this.p.y-25,
                     w: 450, h: 50+32,
