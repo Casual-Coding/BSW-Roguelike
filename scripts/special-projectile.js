@@ -490,7 +490,7 @@ BSWG.specProjList = new (function(){
             BSWG.torpedoGeom.needsUpdate = true;
         }
         else if (!BSWG.shieldGeom) {
-            BSWG.shieldGeom = new THREE.IcosahedronGeometry(1, 3);
+            BSWG.shieldGeom = new THREE.IcosahedronGeometry(1, 4);
             BSWG.shieldGeom.computeVertexNormals();
             BSWG.shieldGeom.needsUpdate = true;
         }

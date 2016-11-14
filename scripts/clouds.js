@@ -162,7 +162,7 @@ BSWG.cloudMap = new function (){
                 },
                 texture: {
                     type: 't',
-                    value: BSWG.render.images['grass_nm'].texture
+                    value: BSWG.render.images['cloud_nm'].texture
                 },
             });
             this.mat.needsUpdate = true;

@@ -245,7 +245,7 @@ BSWG.render = new function() {
         this.cam3D.matrixAutoUpdate = true;
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: false });
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
         this.renderer.autoClearColor = false;
         //this.renderer.setClearColor( 0x000000, 0x00 );
         this.renderer.setPixelRatio( window.devicePixelRatio );
@@ -650,19 +650,20 @@ BSWG.render = new function() {
             self.renderer.sortObjects = true;
             //self.renderer.clear();
             
-            var frange = 135;
-            self.cam3DS.left = -(frange+27.5);
-            self.cam3DS.right = frange+30.0;
-            self.cam3DS.top = (frange*0.75);
-            self.cam3DS.bottom = -(frange*0.75);
+            var Z = Math.clamp(self.cam3D.position.z/1.5+1, 7.1, 10);
+            var frange = 150;
+            self.cam3DS.left = -(frange+27.5) * (Z/10);
+            self.cam3DS.right = (frange+30.0) * (Z/10);
+            self.cam3DS.top = (frange*0.75) * (Z/10);
+            self.cam3DS.bottom = -(frange*0.75) * (Z/10);
             self.cam3DS.zoom = 1.0;
 
             self.cam3DS.updateProjectionMatrix();
 
-            self.cam3DS.position.set(self.cam3D.position.x + 50.0, self.cam3D.position.y + 4.0, 100.0);
+            self.cam3DS.position.set(self.cam3D.position.x + 5.0*Z, self.cam3D.position.y + 0.4*Z, 10.0*Z);
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
-            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 50.0, self.cam3D.position.y - 4.0, 0.0));
+            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 5.0*Z, self.cam3D.position.y - 0.4*Z, 0.0));
             self.cam3DS.updateProjectionMatrix();
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);

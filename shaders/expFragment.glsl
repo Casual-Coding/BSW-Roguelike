@@ -81,6 +81,6 @@ void main() {
         clr = mix(pal3.rgb, pal4.rgb, (amp-pal3.a) / (1.0 - pal3.a));
     }
 
-    gl_FragColor = clamp(vec4(pow(clr.r, 4.0), pow(clr.g, 4.0), pow(clr.b, 4.0), amp*2.), 0., 1.);
+    gl_FragColor = clamp(vec4(pow(clr.r, 4.0), pow(clr.g, 4.0), pow(clr.b, 4.0), amp), 0., 1.);
 
 }

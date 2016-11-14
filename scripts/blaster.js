@@ -62,6 +62,7 @@ BSWG.blasterList = new function () {
                 var removed = false;
                 while (B.rgPower > 0) {
                     var comp = null;
+                    var isStatic = false;
                     var ret = BSWG.componentList.withRay(B.lp.THREE(0.0), new b2Vec2(B.p.x+B.v.x*dt*2, B.p.y+B.v.y*dt*2).THREE(0.0));
                     comp = ret ? ret.comp : null;
                     if (ret && ret.d > Math.sqrt(B.v.x*B.v.x+B.v.y*B.v.y)*dt) {
@@ -69,6 +70,10 @@ BSWG.blasterList = new function () {
                     }
                     if (!comp && BSWG.game.map && BSWG.game.map.getColMap(B.p)) {
                         comp = static;
+                        isStatic = true;
+                    }
+                    else if (comp && comp.type === 'missile') {
+                        comp = null;
                     }
                     if (B.source && comp && comp.type === 'shield' && comp.onCC === B.source.onCC) {
                         comp = null;
@@ -94,9 +99,9 @@ BSWG.blasterList = new function () {
                                 );
                             }
                             if (comp && comp.combinedHP && comp.combinedHP() > 0) {
-                                B.rgPower = 0.0;
+                                B.rgPower = -.5;
                             }
-                            if (B.t <= 0.0 || B.rgPower <= 0) {
+                            if (B.t <= 0.0 || B.rgPower <= 0 || isStatic) {
                                 B.source = null;
                                 if (B.exaust) {
                                     B.exaust.remove();

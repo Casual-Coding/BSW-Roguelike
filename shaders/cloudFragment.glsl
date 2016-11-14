@@ -15,8 +15,8 @@ uniform vec4 envMapParam;
 
 void main() {
 
-    gl_FragColor.a = clr.a * (0.25*texture2D(texture, vLocal.xy/4. + vec2(.1,.25)).a+0.75);
-    gl_FragColor.rgb = mix(clr.rgb * (texture2D(texture, vLocal.xy/2.).a+0.5*0.5), envMapTint.rgb, envMapTint.a);
+    gl_FragColor.a = clr.a * (0.25*texture2D(texture, vLocal.xy/3. + vec2(.1,.25)).a+0.75);
+    gl_FragColor.rgb = mix(clr.rgb * (texture2D(texture, vLocal.xy/1.5).a+0.75*0.25), envMapTint.rgb, envMapTint.a);
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
@@ -37,10 +37,10 @@ void main() {
         svec.a = (SA.a + SB.a + SC.a + SD.a + SE.a) / 5.0;
     }
     if (zval > Z) {
-        gl_FragColor.rgb *= (1.0 - svec.a) * 0.5 + 0.5;
+        gl_FragColor.rgb *= (1.0 - svec.a) * 0.6 + 0.4;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*50.+1.0)) * 0.5 + 0.5;
+        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*6.+1.0)) * 0.6 + 0.4;
     }
     gl_FragColor.rgb -= 0.1;
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
