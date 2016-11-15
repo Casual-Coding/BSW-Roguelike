@@ -204,8 +204,8 @@ BSWG.component_Shield = {
 
         this.meshObj2.update([0.0, (this.shieldEnergy / this.maxShieldEnergy), 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
 
-        this.shmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
-        this.shsmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, this.meshObj.mesh.position.z);
+        this.shmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, 0.0);
+        this.shsmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, 0.0);
         this.shmesh.rotation.set(0, 0, this.obj.body.GetAngle(), 'ZXY');
         this.shsmesh.rotation.set(0, 0, this.obj.body.GetAngle(), 'ZXY');
         this.shmat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);           

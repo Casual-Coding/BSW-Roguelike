@@ -43,21 +43,6 @@ BSWG.blasterList = new function () {
             B.p.y += B.v.y * dt;
             B.t -= dt;
 
-            for (var j=0; j<Math.floor(B.railgunCharge*40); j++) {
-                var pt = Math.pow(Math._random(), 2.0);
-                BSWG.render.boom.palette = chadaboom3D.fire;
-                BSWG.render.boom.add(
-                    new b2Vec2((ox-B.p.x)*pt+B.p.x, (oy-B.p.y)*pt+B.p.y).particleWrap(0.2),
-                    (1.0+Math._random()*2.0)/2.0,
-                    128,
-                    2.5,
-                    10.0,
-                    new THREE.Vector3(0,0,0),
-                    null,
-                    Math._random() < 0.01
-                );                
-            }
-
             if (B.railgun) {
                 var removed = false;
                 while (B.rgPower > 0) {
@@ -78,6 +63,7 @@ BSWG.blasterList = new function () {
                     if (B.source && comp && comp.type === 'shield' && comp.onCC === B.source.onCC) {
                         comp = null;
                     }
+                    var p2 = ret ? new b2Vec2(B.lp.x + B.n.x * ret.d, B.lp.y + B.n.y * ret.d) : null;
                     if (B.t <= 0.0 || comp) {
                         if (B.t <= 0.0 || comp !== B.source) {
                             var oPower = B.rgPower;
@@ -88,7 +74,7 @@ BSWG.blasterList = new function () {
                             if (B.t > 0.0) {
                                 BSWG.render.boom.palette = chadaboom3D.fire;
                                 BSWG.render.boom.add(
-                                    new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
+                                    (p2 ? p2 : new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5)).particleWrap(0.2),
                                     4.0*oPower/BSWG.railgunDmg[B.railgun],
                                     128,
                                     0.5,
@@ -102,6 +88,9 @@ BSWG.blasterList = new function () {
                                 B.rgPower = -.5;
                             }
                             if (B.t <= 0.0 || B.rgPower <= 0 || isStatic) {
+                                if (p2) {
+                                    B.p = p2;
+                                }
                                 B.source = null;
                                 if (B.exaust) {
                                     B.exaust.remove();
@@ -118,6 +107,22 @@ BSWG.blasterList = new function () {
                         break;
                     }
                 }
+
+                for (var j=0; j<Math.floor(B.railgunCharge*80); j++) {
+                    var pt = Math.pow(Math._random(), 2.0);
+                    BSWG.render.boom.palette = chadaboom3D.fire;
+                    BSWG.render.boom.add(
+                        new b2Vec2((ox-B.p.x)*pt+B.p.x, (oy-B.p.y)*pt+B.p.y).particleWrap(0.2),
+                        (1.0+Math._random()*2.0)/2.0,
+                        128,
+                        2.5,
+                        10.0,
+                        new THREE.Vector3(0,0,0),
+                        null,
+                        Math._random() < 0.01
+                    );                
+                }
+
                 if (removed) {
                     continue;
                 }
@@ -139,6 +144,7 @@ BSWG.blasterList = new function () {
                 if (B.source && comp && comp.type === 'shield' && comp.onCC === B.source.onCC) {
                     comp = null;
                 }
+                var p2 = ret ? new b2Vec2(ox + B.n.x * ret.d, oy + B.n.y * ret.d) : null;
                 if (B.t <= 0.0 || comp) {
                     if (B.t <= 0.0 || comp !== B.source) {
                         if (comp && comp !== B.source) {
@@ -147,7 +153,7 @@ BSWG.blasterList = new function () {
                         if (B.t > 0.0) {
                             BSWG.render.boom.palette = (B.minigun || B.blasterSize === 2) ? chadaboom3D.fire : chadaboom3D.blue_bright;
                             BSWG.render.boom.add(
-                                new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5).particleWrap(0.2),
+                                (p2 ? p2 : new b2Vec2((ox+B.p.x)*0.5, (oy+B.p.y)*0.5)).particleWrap(0.2),
                                 2.0,
                                 32,
                                 0.5,
@@ -215,10 +221,17 @@ BSWG.blasterList = new function () {
             baseV.THREE(0.0)
         );
 
+        var n = null;
+        if (v) {
+            var len = Math.sqrt(v.x*v.x+v.y*v.y);
+            n = new b2Vec2(v.x/len, v.y/len);
+        }
+
         this.list.push({
 
             p: p,
             v: v,
+            n: n,
             t: minigun ? 0.75 : 1.5,
             lp: p.clone(),
             source: source,
