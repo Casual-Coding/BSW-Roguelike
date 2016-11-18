@@ -13,6 +13,7 @@ attribute vec4 attr1;
 varying vec4 vAttr1;
 varying vec4 vPosition;
 varying vec4 vSPosition;
+varying float sZ;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -70,4 +71,6 @@ void main() {
     
     // UV
     vUv = position.xy;
+
+    sZ = (gl_Position.z / gl_Position.w) * 0.5 + 0.5;
 }

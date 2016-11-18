@@ -148,6 +148,10 @@ BSWG.component_Shield = {
             this.shmat.transparent = true;
             this.shmat.needsUpdate = true;
             this.shsmat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
+                strength: {
+                    type: 'f',
+                    value: 0.25
+                }
             }, THREE.NormalBlending);
 
             this.shgeom = BSWG.shieldGeom;
@@ -203,6 +207,7 @@ BSWG.component_Shield = {
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
         this.meshObj2.update([0.0, (this.shieldEnergy / this.maxShieldEnergy), 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
+        this.shsmat.uniforms.strength.value = 0.25 * this.shieldAlpha;
 
         this.shmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, 0.0);
         this.shsmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, 0.0);
@@ -321,14 +326,14 @@ BSWG.component_Shield = {
                 this.addShield();
             }
             this.shieldR += ((BSWG.shieldSizeFactor * this.size) - this.shieldR) * Math.min(dt*8, 1.0);
-            talpha = Math.clamp(((this.shieldEnergy / this.maxShieldEnergy) - (1/3)) * 4, 0, 1);
+            talpha = Math.clamp(((this.shieldEnergy / this.maxShieldEnergy) - (1/3)) * 4, 0.1, 1);
         }
         else {
             if (this.shieldObj) {
                 this.removeShield();
             }
             this.shieldR += (0.01 - this.shieldR) * Math.min(dt*8, 1.0);
-            talpha = 1.0;
+            talpha = 0.1;
         }
 
         talpha *= Math.min(this.shieldR, this.size);

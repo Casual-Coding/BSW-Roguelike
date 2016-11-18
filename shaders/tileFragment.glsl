@@ -16,7 +16,7 @@ uniform vec2 viewport;
 uniform vec3 cam;
 uniform float vreflect, waterLevel;
 uniform vec4 waterClr;
-varying float vFragDepth;
+varying float vShadowZ;
 varying vec4 vShadowCoord;
 
 uniform vec4 envMapTint;
@@ -40,7 +40,7 @@ void main() {
                 texture2D(exMap, texCoord.xz) * blending.y * 0.5 + 
                 texture2D(exMap, texCoord.yz) * blending.x * 0.5;
     clrw = clamp(clrw, 0.0, 1.0);
-    clrw = vec4(pow(clrw.r, 2.0), pow(clrw.g, 2.0), pow(clrw.b, 2.0), pow(clrw.a, 2.0));
+    clrw = vec4(pow(clrw.r, 2.5), pow(clrw.g, 2.5), pow(clrw.b, 2.5), pow(clrw.a, 2.5));
 
     //vec4 clrn = texture2D(map, vUv);
     //vec3 tNormal = vNormalMatrix * (normalize(clrn.xyz) * 2.0 - vec3(1.0, 1.0, 1.0));
@@ -54,8 +54,8 @@ void main() {
 
     float l0 = clrn.a * 0.5 + 0.5 * pow(clrw.a, 2.0);
     float l1 = pow(max(dot(normalize((normalize(clrw.xyz) * 2.0 - vec3(1., 1., 1.))), lightDir), 0.0), 0.7) * extra.z;
-    float l2 = (pow(max(dot(normalize(N), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.5;
-    float l = min(l0 * ((l1*0.4+0.4) * l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
+    float l2 = (pow(max(dot(normalize(N), lightDir), 0.0), 3.0) + pow(topFactor, 2.5)) * 0.25;
+    float l = min(l0 * ((l1*0.4+0.4)*l2) * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 0.75);
     l = pow(max(l, 0.0), 2.5) + 0.3;
     gl_FragColor = vec4(clr.rgb*l, 1.0);
 
@@ -74,7 +74,7 @@ void main() {
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
     vec4 svec = vec4(0., 0., 0., 1.);
-    float Z = vPosition.z / vPosition.w;
+    float Z = vShadowZ;
     float zval = Z-0.05;
     if (svp.x > 0. && svp.y > 0. && svp.x < 1. && svp.y < 1.) {
         vec4 SA = texture2D(shadowMap, svp);
@@ -82,22 +82,23 @@ void main() {
         vec4 SC = texture2D(shadowMap, svp + vec2(1./16384., 0.));
         vec4 SD = texture2D(shadowMap, svp - vec2(0., 1./16384.));
         vec4 SE = texture2D(shadowMap, svp + vec2(0., 1./16384.));
-        float ZA = (SA.r * 65536.0 + SA.g * 256.0 + SA.b) / 256.0 - 256.0;
-        float ZB = (SB.r * 65536.0 + SB.g * 256.0 + SB.b) / 256.0 - 256.0;
-        float ZC = (SC.r * 65536.0 + SC.g * 256.0 + SC.b) / 256.0 - 256.0;
-        float ZD = (SD.r * 65536.0 + SD.g * 256.0 + SD.b) / 256.0 - 256.0;
-        float ZE = (SE.r * 65536.0 + SE.g * 256.0 + SE.b) / 256.0 - 256.0;
-        zval = (ZA+ZB+ZC+ZD+ZE) / 5.0;
+        float ZA = (SA.r * 4096.0 + SA.g * 64.0 + SA.b) / 64.0;
+        float ZB = (SB.r * 4096.0 + SB.g * 64.0 + SB.b) / 64.0;
+        float ZC = (SC.r * 4096.0 + SC.g * 64.0 + SC.b) / 64.0;
+        float ZD = (SD.r * 4096.0 + SD.g * 64.0 + SD.b) / 64.0;
+        float ZE = (SE.r * 4096.0 + SE.g * 64.0 + SE.b) / 64.0;
+        zval = (ZA + ZB + ZC + ZD + ZE) / 5.0;
         svec.a = (SA.a + SB.a + SC.a + SD.a + SE.a) / 5.0;
     }
-    if (zval > Z) {
-        gl_FragColor.rgb *= (1.0 - svec.a) * 0.5 + 0.5;
+    gl_FragColor.rgb *= 1.25;
+    gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
+
+    if (zval < Z) {
+        gl_FragColor.rgb *= (1.0 - svec.a) * 0.75 + 0.25;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((Z-zval)*25.+1.0)) * 0.5 + 0.5;
+        gl_FragColor.rgb *= (1.0 - svec.a / ((zval-Z)*5000.0+1.0)) * 0.75 + 0.25;
     }
-    gl_FragColor.rgb -= 0.1;
-    gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
 
     if (vPosition.z > 0.0) {
         gl_FragColor.rgb /= (vPosition.z*15.0 + 1.0);
@@ -105,4 +106,6 @@ void main() {
     gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, pow(vSPosition.z/200., 0.5)*envMapTint.a);
 
     gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1., 0., 0.), pow(1.0 / (1.0 + abs(vPosition.z - 0.0) / 5.0), 10.5));
+
+    gl_FragColor.rgb *= l2 * 0.5 + 0.5;
 }

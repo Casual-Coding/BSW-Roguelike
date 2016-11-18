@@ -16,6 +16,7 @@ varying vec4 pal2;
 varying vec4 pal3;
 varying vec4 pal4;
 varying vec4 vPosition;
+varying float sZ;
 
 void main() {
 
@@ -59,4 +60,6 @@ void main() {
     else {
         gl_Position = vec4(1000000.0, 0.0, 0.0, 1.0);
     }
+
+    sZ = (gl_Position.z / gl_Position.w) * 0.5 + 0.5;
 }

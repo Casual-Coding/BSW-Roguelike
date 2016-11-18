@@ -413,7 +413,7 @@ BSWG.component_CommandCenter = {
         if (this.usedSpecial && this.usedSpecialT > 0 && this.obj && this.obj.body) {
             var p = BSWG.game.cam.toScreen(BSWG.render.viewport, this.obj.body.GetWorldCenter());
             ctx.globalAlpha = Math.clamp(this.usedSpecialT*2.0, 0, 1);
-            BSWG.renderSpecialIcon(ctx, this.usedSpecial, p.x, p.y, BSWG.render.viewport.h * 0.1, 0.0, null, true);
+            BSWG.renderSpecialIcon(ctx, this.usedSpecial, p.x, p.y, BSWG.render.viewport.h * 0.05, 0.0, null, true);
             ctx.globalAlpha = 1.0;
             this.usedSpecialT -= dt;
             p = null;

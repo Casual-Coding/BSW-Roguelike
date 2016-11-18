@@ -4,6 +4,7 @@ varying vec4 vPosition;
 varying vec4 vSPosition;
 varying vec3 vLocal;
 varying mat3 vNormalMatrix;
+varying float sZ;
 
 uniform vec4 clri, clrm, clro;
 uniform vec4 extra;
@@ -32,10 +33,10 @@ void main() {
     str *= rand(vec2(str, extra.y)) * 0.25 + 0.875;
     str = clamp(str, 0., 1.);
 
-    float z = (vPosition.z/vPosition.w+256.0) * 256.0;
+    float z = sZ * 64.0;
     float a = mod(z, 1.0);
-    float b = mod(floor(z)/256.0, 1.0);
-    float c = floor(z/256.0)/256.0;
+    float b = mod(floor(z)/64.0, 1.0);
+    float c = floor(z/64.0)/64.0;
     gl_FragColor = clamp(vec4(c, b, a, clamp(str*0.275, 0., 1.)*0.5), 0., 1.);
     if (gl_FragColor.a < 0.1) {
         discard;

@@ -201,7 +201,12 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                         value: BSWG.render.envMapParam
                     },
                 }),
-                matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
+                matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {
+                    strength: {
+                        type: 'f',
+                        value: 1.0
+                    }                    
+                }),
                 used: false
             };
         }
@@ -314,11 +319,12 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             faces[cf++] = new THREE.Face3(OUTER(i), MIDDLE(j), MIDDLE(i));
         }
 
-        ret.geom.computeFaceNormals();
-        if (BSWG.bpmSmoothNormals) {
-            ret.geom.computeVertexNormals();
-        }
         ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
+        ret.geom.computeFaceNormals();
+        //if (BSWG.bpmSmoothNormals) {
+            ret.geom.computeVertexNormals();
+        //}
+        ret.geom.attributes.normal.needsUpdate = true;
         ret.geom.computeBoundingSphere();
         ret.geom.needsUpdate = true;
         ret.geom.__zoffset = zoffset;
@@ -401,7 +407,12 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     value: BSWG.render.envMapParam
                 },
             }),
-            matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {}),
+            matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {
+                strength: {
+                    type: 'f',
+                    value: 1.0
+                }                
+            }),
             used: false
         });
         matIdx = BSWG.bpmMatCache.length - 1;
@@ -464,19 +475,17 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         self.mesh.position.y = center.y + (offset?offset.y:0);
         self.mesh.position.z = zoffset + zo2;
         self.mesh.rotation.z = angle + (exRot || 0);
-        self.mesh.updateMatrix();
 
         self.meshS.position.x = center.x + (offset?offset.x:0);
         self.meshS.position.y = center.y + (offset?offset.y:0);
         self.meshS.position.z = zoffset + zo2;
         self.meshS.rotation.z = angle + (exRot || 0);
-        self.meshS.updateMatrix();
 
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
 
         self.mat.uniforms.light.value.x = lp.x;
         self.mat.uniforms.light.value.y = lp.y;
-        self.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
+        self.mat.uniforms.light.value.z = 4.0;
 
         self.mat.uniforms.extra.value.x = texScale || 1.0;
 

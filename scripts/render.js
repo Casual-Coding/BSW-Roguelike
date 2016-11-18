@@ -246,8 +246,7 @@ BSWG.render = new function() {
         this.cam3D.position.z = 10.0;
         this.scene = new THREE.Scene();
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas3D, alpha: true, antialias: true });
-        this.renderer.autoClearColor = false;
-        //this.renderer.setClearColor( 0x000000, 0x00 );
+        this.renderer.setClearColor( 0x000000, 0x00 );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.loader = new THREE.JSONLoader();
         this.raycaster = new THREE.Raycaster();
@@ -362,6 +361,7 @@ BSWG.render = new function() {
 
                 if (Math.isPow2(parseInt(this.width)) && Math.isPow2(parseInt(this.height)) && this.makeTexture) {
                     this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
+                    //this.texture.anisotropy = Math.min(2, self.renderer.getMaxAnisotropy());
                     this.texture.needsUpdate = true;
                 }
 
@@ -660,10 +660,12 @@ BSWG.render = new function() {
 
             self.cam3DS.updateProjectionMatrix();
 
-            self.cam3DS.position.set(self.cam3D.position.x + 5.0*Z, self.cam3D.position.y + 0.4*Z, 10.0*Z);
+            var XZ = 1.0;
+
+            self.cam3DS.position.set(self.cam3D.position.x + 10.0*Z*XZ, self.cam3D.position.y + 0.4*Z, 10.0*Z);
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
-            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 5.0*Z, self.cam3D.position.y - 0.4*Z, 0.0));
+            self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 5.0*Z*XZ, self.cam3D.position.y - 0.4*Z, 0.0));
             self.cam3DS.updateProjectionMatrix();
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
@@ -952,7 +954,7 @@ BSWG.render = new function() {
         bgeom = null;
 
         geom.computeBoundingBox();
-        geom.computeFaceNormals();
+        geom.computeVertexNormals();
 
         var xOffset = -(geom.boundingBox.max.x - geom.boundingBox.min.x) / 2.0;
 

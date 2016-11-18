@@ -5,6 +5,7 @@ uniform float size;
 varying vec4 vAttr1;
 varying vec4 vPosition;
 varying vec4 vSPosition;
+varying float sZ;
 uniform sampler2D envMap;
 
 void main() {
@@ -18,9 +19,9 @@ void main() {
         amp = color.a * 1./(1.+2.*length(vUv));
     }
 
-    float z = (vPosition.z/vPosition.w+256.0) * 256.0;
+    float z = sZ * 64.0;
     float a = mod(z, 1.0);
-    float b = mod(floor(z)/256.0, 1.0);
-    float c = floor(z/256.0)/256.0;
-    gl_FragColor = clamp(vec4(c, b, a, clamp(amp*2., 0., 1.)*0.25), 0., 1.);
+    float b = mod(floor(z)/64.0, 1.0);
+    float c = floor(z/64.0)/64.0;
+    gl_FragColor = vec4(c, b, a, 1.0);
 }
