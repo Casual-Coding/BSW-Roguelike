@@ -27,7 +27,7 @@
   "dependencies": {
   },
   "js-flags": "",
-  "chromium-args": "--in-process-gpu --ignore-gpu-blacklist --winhttp-proxy-resolver --process-per-site --single-process",
+  "chromium-args": "--in-process-gpu --winhttp-proxy-resolver --process-per-site --single-process",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",
