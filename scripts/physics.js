@@ -123,6 +123,9 @@ BSWG.physics = new function(){
             var pA = bA.GetWorldPoint(PW.anchorA),
                 pB = bB.GetWorldPoint(PW.anchorB);
 
+            bA.SetAwake(true);
+            bB.SetAwake(true);
+
             var dx = pA.x - pB.x,
                 dy = pA.y - pB.y;
             var lenSq = dx * dx + dy * dy;
@@ -271,6 +274,9 @@ BSWG.physics = new function(){
                 obj.jointDef.maxMotorTorque = bodyA.GetMass() * 90.0;
             }
         }
+
+        bodyA.SetAwake(true);
+        bodyB.SetAwake(true);
     
         obj.jointDef.bodyA = bodyA;
         obj.jointDef.bodyB = bodyB;
@@ -343,6 +349,9 @@ BSWG.physics = new function(){
         }
 
         var remWeld = function(obj, search) {
+            if (obj.body) {
+                obj.body.SetAwake(true);
+            }
             for (var j=0; j<obj.welds.length; j++) {
                 if (obj.welds[j].id === search.id) {
                     obj.welds.splice(j, 1);
@@ -390,6 +399,8 @@ BSWG.physics = new function(){
         mouseJointDef.maxForce = maxForce || 10.0;
         mouseJointDef.target = this.mousePosWorld();
         this.mouseJoint = this.world.CreateJoint(mouseJointDef);
+
+        body.SetAwake(true);
 
     };
 
