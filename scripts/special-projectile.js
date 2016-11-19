@@ -485,13 +485,17 @@ BSWG.specProjList = new (function(){
 
     this.clear = function() {
         if (!BSWG.torpedoGeom) {
-            BSWG.torpedoGeom = new THREE.IcosahedronGeometry(1, 3);
+            BSWG.torpedoGeom = new THREE.BufferGeometry();
+            BSWG.torpedoGeom.fromGeometry(new THREE.IcosahedronGeometry(1, 2));
             BSWG.torpedoGeom.computeVertexNormals();
+            BSWG.torpedoGeom.computeBoundingSphere();
             BSWG.torpedoGeom.needsUpdate = true;
         }
         else if (!BSWG.shieldGeom) {
-            BSWG.shieldGeom = new THREE.IcosahedronGeometry(1, 4);
+            BSWG.shieldGeom = new THREE.BufferGeometry();
+            BSWG.shieldGeom.fromGeometry(new THREE.SphereGeometry(1, 10, 25));
             BSWG.shieldGeom.computeVertexNormals();
+            BSWG.shieldGeom.computeBoundingSphere();
             BSWG.shieldGeom.needsUpdate = true;
         }
         while (this.list.length) {

@@ -181,9 +181,9 @@ BSWG.orb.prototype.updateRender = function (dt) {
 
     var t = this.activeT * (Math.sin(this.time*6.0)*0.5+0.5);
     this.mat.uniforms.clr.value.set(
-        (0.3 * (1-t) + 4.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
-        (1.0 * (1-t) + 4.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
-        (0.5 * (1-t) + 4.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
+        (0.3 * (1-t) + 2.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
+        (1.0 * (1-t) + 2.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
+        (0.5 * (1-t) + 2.0 * t) * this.activeT + 0.15 * (1 - this.activeT),
         1.0
     );
 

@@ -3,6 +3,7 @@ varying vec3 vNormal;
 varying vec3 vLocal;
 varying vec4 vPosition;
 varying mat3 vNormalMatrix;
+varying mat4 vNormalMatrix2;
 varying vec4 vSPosition;
 varying float vFragDepth;
 varying vec4 vShadowCoord;
@@ -10,10 +11,24 @@ varying vec2 vN;
 varying float vShadowZ;
 uniform mat4 shadowMatrix;
 
+mat4 rotationMatrix(vec3 axis, float angle)
+{
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
+
 void main() {
 
     vUv = uv;
     vNormal = normalMatrix * normal;
+    vNormalMatrix2 = rotationMatrix(vNormal, 0.0);
     vPosition = modelMatrix * vec4( position, 1.0 );
     vLocal = position;
     vNormalMatrix = normalMatrix;

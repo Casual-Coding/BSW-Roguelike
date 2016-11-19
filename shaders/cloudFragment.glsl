@@ -22,7 +22,7 @@ void main() {
 
     vec3 blending = abs( vNormal );
     float topFactor = blending.z / (blending.x + blending.y + blending.z);
-    vec3 lightDir = normalize(vec3(10., 0, 1.));
+    vec3 lightDir = normalize(vec3(10., 0, 3.));
     float l2 = pow(max(dot(normalize(vNormal), lightDir), 0.0), 0.3) + min(pow(topFactor, 2.5), 1.0) * 0.5;
 
     vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
@@ -58,5 +58,5 @@ void main() {
     }
     gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, pow(vSPosition.z/200., 0.5)*envMapTint.a);
 
-    gl_FragColor.rgb *= l2 * 0.5 + 0.5;
+    gl_FragColor.rgb *= l2 * 0.75 + 0.25;
 }

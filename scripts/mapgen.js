@@ -612,18 +612,18 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
             },
             collision: true,
-            color: [1.0, 1.0, 1.0],
-            reflect: 0.1,
-            normalMapAmp: 3.5,
+            color: [0.75, 0.75, 0.75],
+            reflect: 0.0,
+            normalMapAmp: 1.0,
             zscale: 2.0
         },
         'tileset-land': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
             },
-            color: [0.4, 0.75, 0.2],
+            color: [0.3, 0.75, 0.2],
             relfect: 0.1,
-            normalMapAmp: 3.0,
+            normalMapAmp: 1.5,
         },
         'tileset-sand': {
             map: function(x,y) {
