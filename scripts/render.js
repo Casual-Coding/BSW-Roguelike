@@ -264,22 +264,23 @@ BSWG.render = new function() {
         this.copyShader.renderToScreen = true;
         this.composer.addPass( this.copyShader );
 
-        this.cam3DS = new THREE.OrthographicCamera(-110, 110, 110, -110, 0, 512);
+        this.cam3DS = new THREE.OrthographicCamera(-110, 110, 110, -110, 0, 256);
         this.cam3DS.matrixAutoUpdate = true;
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
         this.cam3DS.position.z = 10.0;
         this.shadowMatrix = new THREE.Matrix4();
+        this.shadowViewMatrix = new THREE.Matrix4();
         this.sceneS = new THREE.Scene();
 
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize, {
-            format: THREE.RGBAFormat,
-            minFilter: THREE.LinearFilter,
-            magFilter: THREE.LinearFilter,
             stencilBuffer: false,
             depthBuffer: true
         });
-
+        this.shadowMap.depthTexture = new THREE.DepthTexture(BSWG.shadowMapSize, BSWG.shadowMapSize);
+        this.shadowMap.depthTexture.magFilter = THREE.LinearFilter;
+        this.shadowMap.depthTexture.minFilter = THREE.LinearFilter;
+        
         this.cloudColor = new THREE.Vector4(0, 0, 0, 0.9);
 
         this.sizeViewport();
@@ -361,7 +362,9 @@ BSWG.render = new function() {
 
                 if (Math.isPow2(parseInt(this.width)) && Math.isPow2(parseInt(this.height)) && this.makeTexture) {
                     this.texture = new THREE.Texture(this, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
-                    //this.texture.anisotropy = Math.min(2, self.renderer.getMaxAnisotropy());
+                    this.texture.magFilter = THREE.LinearFilter;
+                    this.texture.minFilter = THREE.LinearMipMapLinearFilter;
+                    //this.texture.anisotropy = Math.min(1, self.renderer.getMaxAnisotropy());
                     this.texture.needsUpdate = true;
                 }
 
@@ -546,7 +549,7 @@ BSWG.render = new function() {
     this.cursorNo = 0;
     this.cursorScale = 1.0;
 
-    var last60dt = new Array(BSWG.options.vsync ? 3 : 60);
+    var last60dt = new Array(BSWG.options.vsync ? 20 : 60);
     for (var i=0; i<last60dt.length; i++) {
         last60dt[i] = 1.0/60;
     }
@@ -647,10 +650,10 @@ BSWG.render = new function() {
             var tmp = Math.random;
             Math.random = Math._random;
 
-            self.renderer.sortObjects = true;
+            self.renderer.sortObjects = false;
             //self.renderer.clear();
             
-            var Z = Math.clamp(self.cam3D.position.z/1.5+1, 7.1, 10);
+            var Z = 10.0;//Math.clamp(self.cam3D.position.z/1.5+1, 7.1, 10);
             var frange = 150;
             self.cam3DS.left = -(frange+27.5) * (Z/10);
             self.cam3DS.right = (frange+30.0) * (Z/10);
@@ -662,7 +665,7 @@ BSWG.render = new function() {
 
             var XZ = 1.0;
 
-            self.cam3DS.position.set(self.cam3D.position.x + 10.0*Z*XZ, self.cam3D.position.y + 0.4*Z, 10.0*Z);
+            self.cam3DS.position.set(self.cam3D.position.x + 5.0*Z*XZ, self.cam3D.position.y + 0.4*Z, 10.0*Z);
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
             self.cam3DS.lookAt(new THREE.Vector3(self.cam3D.position.x - 5.0*Z*XZ, self.cam3D.position.y - 0.4*Z, 0.0));
@@ -672,8 +675,10 @@ BSWG.render = new function() {
 
             self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap);
 
+            self.renderer.sortObjects = true;
+
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
-            self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
+            self.shadowViewMatrix.copy(self.cam3DS.matrixWorldInverse);
 
             self.composer.render();
             //self.renderer.render(self.scene, self.cam3D);
@@ -727,7 +732,7 @@ BSWG.render = new function() {
             }
 
             if (BSWG.options.vsync !== lvsync) {
-                last60dt = new Array(BSWG.options.vsync ? 3 : 60);
+                last60dt = new Array(BSWG.options.vsync ? 20 : 60);
                 for (var i=0; i<last60dt.length; i++) {
                     last60dt[i] = 1.0/60;
                 }
@@ -780,9 +785,9 @@ BSWG.render = new function() {
                 rz = 0; //(Math.random() - 0.5) * 0.1 * this.screenShake;
             this.cam3D.position.set(cam.x+offset.x + rx, cam.y+offset.y + ry, f/cam.z + rz);
             this.cam3D.lookAt(new THREE.Vector3(cam.x + rx, cam.y + ry, 0.0));
-            this.cam3D.updateProjectionMatrix();
-            this.cam3D.updateMatrix();
+            this.cam3D.updateMatrix(true);
             this.cam3D.updateMatrixWorld(true);
+            this.cam3D.updateProjectionMatrix();
             p1 = p2 = null;
         }
     };

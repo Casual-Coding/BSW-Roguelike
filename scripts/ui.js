@@ -538,7 +538,6 @@ BSWG.control_UnlockTree = {
                             if (me.canHave && !me.has) {
                                 ctx.globalAlpha = Math.sin(BSWG.render.time*5*(me.mouseIn ? 2 : 1))*0.35+0.65;
                             }
-                            ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(BSWG.render.time);
                             ctx.translate(-me.w/2, -me.h/2);
@@ -546,23 +545,21 @@ BSWG.control_UnlockTree = {
                                 ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w, me.h);
                             }
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w, me.h);
-                            ctx.restore();
+                            ctx.resetTransform();
                             if (BSWG.game.specialMode && BSWG.game.ccblock.specialEquipped(key)) {
-                                ctx.save();
                                 ctx.translate(x+me.w/2, y+me.h/2);
                                 ctx.rotate(BSWG.render.time*2);
                                 ctx.translate(-me.w*1.125/2, -me.h*1.125/2);
                                 ctx.drawImage(BSWG.render.images['unlock-equipped'], 0, 0, me.w*1.125, me.h*1.125);
-                                ctx.restore();
+                                ctx.resetTransform();
                             }
                             
                             ctx.globalAlpha *= 0.5;
-                            ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(-BSWG.render.time);
                             ctx.translate(-me.w/2, -me.h/2);
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w, me.h);
-                            ctx.restore();
+                            ctx.resetTransform();
                             ctx.globalAlpha = 1.0;
 
                             ctx.globalAlpha = me.canHave ? 1.0 : 0.5;
@@ -593,7 +590,6 @@ BSWG.control_UnlockTree = {
                             if (me.canHave && !me.has) {
                                 ctx.globalAlpha = Math.sin(BSWG.render.time*5*(me.mouseIn ? 2 : 1))*0.35+0.65;
                             }
-                            ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(BSWG.render.time*3);
                             ctx.translate(-me.w/4, -me.h/4);
@@ -601,14 +597,13 @@ BSWG.control_UnlockTree = {
                                 ctx.drawImage(BSWG.render.images['unlock-hover'], 0, 0, me.w*.5, me.h*.5);
                             }
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w*.5, me.h*.5);
-                            ctx.restore();
+                            ctx.resetTransform();
                             ctx.globalAlpha *= 0.5;
-                            ctx.save();
                             ctx.translate(x+me.w/2, y+me.h/2);
                             ctx.rotate(-BSWG.render.time);
                             ctx.translate(-me.w/4, -me.h/4);
                             ctx.drawImage(BSWG.render.images['unlock-icon'], 0, 0, me.w*.5, me.h*.5);
-                            ctx.restore();
+                            ctx.resetTransform();
                             ctx.globalAlpha = 1.0;
                         }
                     };
@@ -741,9 +736,9 @@ BSWG.control_UnlockTree = {
             x += w;
         }
 
-        ctx.save();
-        ctx.rect(this.p.x+5, this.p.y+5+this.bWidth, this.w-10, this.h-10-this.bWidth);
-        ctx.clip();
+        //ctx.save();
+        //ctx.rect(this.p.x+5, this.p.y+5+this.bWidth, this.w-10, this.h-10-this.bWidth);
+        //ctx.clip();
 
         for (var i=0; i<this.cats.length; i++) {
             var cat = this.cats[i];
@@ -771,7 +766,7 @@ BSWG.control_UnlockTree = {
             this.buttons[i].render(ctx);
         }
 
-        ctx.restore();
+        //ctx.restore();
 
         for (var i=0; i<this.buttons.length; i++) {
             if (this.buttons[i].mouseIn) {

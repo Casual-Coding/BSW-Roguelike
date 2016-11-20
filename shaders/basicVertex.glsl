@@ -5,7 +5,6 @@ varying vec4 vPosition;
 varying mat3 vNormalMatrix;
 varying vec4 vSPosition;
 varying float vFragDepth;
-varying float sZ;
 
 void main() {
 
@@ -16,6 +15,6 @@ void main() {
     vNormalMatrix = normalMatrix;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     vSPosition = gl_Position;
-    vFragDepth = (gl_Position.z / gl_Position.w) * 0.5 + 0.5;
-    sZ = vFragDepth;
+    vFragDepth = (gl_Position.z/gl_Position.w) * 0.5 + 0.5;
+
 }

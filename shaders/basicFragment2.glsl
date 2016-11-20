@@ -4,8 +4,7 @@ varying vec4 vPosition;
 varying vec4 vSPosition;
 varying vec3 vLocal;
 varying mat3 vNormalMatrix;
-varying vec4 vShadowCoord;
-varying float vShadowZ;
+varying highp vec4 vShadowCoord;
 
 uniform sampler2D map;
 uniform sampler2D dmgMap;
@@ -21,40 +20,23 @@ uniform float vreflect;
 uniform vec4 envMapTint;
 uniform vec4 envMapParam;
 
-#define _F1 (1./16384.0)
-#define _F2 (1./16384.0)
+#define _F1 (1./8192.0)
+#define _F2 (1./8192.0)
 
-vec2 shadowSample(vec2 svp) {
-    vec4 SA = texture2D(shadowMap, svp);
-    float ZA = (SA.r * 4096.0 + SA.g * 64.0 + SA.b) / 64.0;
-    return vec2(ZA, SA.a);  
+highp float shadowSample(vec2 svp) {
+    return texture2D(shadowMap, svp).x;
 }
 
-vec2 shadowSample1(vec2 svp) {
-    vec2 ret = shadowSample(svp);
-    ret += shadowSample(svp - vec2(_F2, 0.0));
-    ret += shadowSample(svp + vec2(_F2, 0.0));
-    ret += shadowSample(svp - vec2(0.0, _F2));
-    ret += shadowSample(svp + vec2(0.0, _F2));
-    ret += shadowSample(svp - vec2(_F2, _F2));
-    ret += shadowSample(svp + vec2(_F2, _F2));
-    ret += shadowSample(svp + vec2(-_F2, _F2));
-    ret += shadowSample(svp + vec2(_F2, -_F2));
-    ret /= 9.0;
-    return ret;
-}
-
-vec2 shadowSample2(vec2 svp) {
-    vec2 ret = shadowSample1(svp);
-    ret += shadowSample1(svp - vec2(_F1, 0.0));
-    ret += shadowSample1(svp + vec2(_F1, 0.0));
-    ret += shadowSample1(svp - vec2(0.0, _F1));
-    ret += shadowSample1(svp + vec2(0.0, _F1));
-    ret += shadowSample1(svp - vec2(_F1, _F1));
-    ret += shadowSample1(svp + vec2(_F1, _F1));
-    ret += shadowSample1(svp + vec2(-_F1, _F1));
-    ret += shadowSample1(svp + vec2(_F1, -_F1));
-    ret /= 9.0;
+highp float shadowSample1(vec2 svp) {
+    highp float ret = texture2D(shadowMap, svp).x * 0.4;
+    ret += texture2D(shadowMap, svp - vec2(_F2, 0.0)).x * 0.1;
+    ret += texture2D(shadowMap, svp + vec2(_F2, 0.0)).x * 0.1;
+    ret += texture2D(shadowMap, svp - vec2(0.0, _F2)).x * 0.1;
+    ret += texture2D(shadowMap, svp + vec2(0.0, _F2)).x * 0.1;
+    ret += texture2D(shadowMap, svp - vec2(_F2, _F2)).x * 0.05;
+    ret += texture2D(shadowMap, svp + vec2(_F2, _F2)).x * 0.05;
+    ret += texture2D(shadowMap, svp + vec2(-_F2, _F2)).x * 0.05;
+    ret += texture2D(shadowMap, svp + vec2(_F2, -_F2)).x * 0.05;
     return ret;
 }
 
@@ -79,14 +61,13 @@ void main() {
     float l = min(l0 * (l1*0.8-l1d*0.8*dmg+0.6) * l2 * 1.0, 1.0) / max(length(vSPosition.xy)*0.015 + 0.2, 1.0);
     l = pow(max(l, 0.), 2.0);
 
+    gl_FragColor = vec4(clr.rgb*l, 1.0);
     if (warpIn > 0.9) {
         gl_FragColor = vec4(1., 1., 1., 1.0 - (warpIn - 0.9) / 0.1);
     }
     else {
         gl_FragColor = mix(gl_FragColor, vec4(1.,1.,1.,1.), (warpIn - 0.1) / 0.9);
     }
-
-    gl_FragColor = vec4(clr.rgb*l, 1.0);
     if (extra.y > 0.0) {
         float al = pow(sin(vLocal.x * vLocal.y * 30.0 + extra.z*6.0) * 0.5 + 0.5, 0.75) * extra.y * 0.75;
         gl_FragColor = vec4(al*1.0+(1.0-al)*gl_FragColor.r, al*1.0+(1.0-al)*gl_FragColor.g, 0.0*al+(1.0-al)*gl_FragColor.b, 1.0);
@@ -100,23 +81,18 @@ void main() {
     envCoord += vec2(0.5, 0.5);
     vec3 envClr = mix(texture2D(envMap, envCoord).rgb*envCoord.x, texture2D(envMap2, envCoord).rgb*envCoord.x, envMapT);
     envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 0.8)) * 1.25;
+    gl_FragColor.rgb = clamp(mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 0.8)) * 1.25, 0., 1.);
 
-    vec2 svp = vShadowCoord.xy + vec2(1./512., 0.);
-    vec4 svec = vec4(0., 0., 0., 1.);
-    float Z = vShadowZ;
-    float zval = Z-0.05;
-    if (svp.x > 0. && svp.y > 0. && svp.x < 1. && svp.y < 1.) {
-        vec2 ret = shadowSample2(svp);
-        zval = ret.x;
-        svec.a = ret.y;
+    highp float Z = vShadowCoord.z - 0.001;
+    highp float zval = Z+0.05;
+    if (vShadowCoord.x > 0. && vShadowCoord.y > 0. && vShadowCoord.x < 1. && vShadowCoord.y < 1.) {
+        zval = shadowSample1(vShadowCoord.xy);
     }
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
     if (zval < Z) {
-        gl_FragColor.rgb *= (1.0 - svec.a) * 0.7 + 0.3;
+        gl_FragColor.rgb *= (1.0 - 1.0) * 0.7 + 0.3;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - svec.a / ((zval-Z)*10000.0+1.0)) * 0.7 + 0.3;
+        gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*10000.0+1.0)) * 0.7 + 0.3;
     }
-    //gl_FragColor.rgb *= l2 * 0.5 + 0.5;
-}
+ }

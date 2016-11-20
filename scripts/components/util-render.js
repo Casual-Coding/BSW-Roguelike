@@ -164,9 +164,13 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                         type: 'm4',
                         value: BSWG.render.shadowMatrix
                     },
+                    shadowViewMatrix: {
+                        type: 'm4',
+                        value: BSWG.render.shadowViewMatrix
+                    },
                     shadowMap: {
                         type: 't',
-                        value: BSWG.render.shadowMap
+                        value: BSWG.render.shadowMap.depthTexture
                     },
                     warpIn: {
                         type: 'f',
@@ -370,9 +374,13 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     type: 'm4',
                     value: BSWG.render.shadowMatrix
                 },
+                shadowViewMatrix: {
+                    type: 'm4',
+                    value: BSWG.render.shadowViewMatrix
+                },
                 shadowMap: {
                     type: 't',
-                    value: BSWG.render.shadowMap
+                    value: BSWG.render.shadowMap.depthTexture
                 },
                 warpIn: {
                     type: 'f',
@@ -408,10 +416,6 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                 },
             }),
             matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {
-                strength: {
-                    type: 'f',
-                    value: 1.0
-                }                
             }),
             used: false
         });
@@ -435,6 +439,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     //ret.mat.needsUpdate = true;
     ret.mesh.needsUpdate = true;
+    ret.meshS.needsUpdate = true;
 
     BSWG.render.scene.add( ret.mesh );
 
@@ -459,27 +464,25 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             }
         }
 
-        var matrix = self.mesh.matrix;
-
         center = body.GetWorldPoint((center || body.GetLocalCenter()).clone());
         var angle  = body.GetAngle();
 
         var offset = BSWG.drawBlockPolyOffset || null;
         var zo2 = 0;
 
-        /*if (obj && obj.comp && obj.comp.onCC && obj.comp.onCC !== BSWG.game.ccblock) {
-            zo2 -= Math.pow(self.mat.uniforms.warpIn.value, 6.0) * 12;
-        }*/
-
         self.mesh.position.x = center.x + (offset?offset.x:0);
         self.mesh.position.y = center.y + (offset?offset.y:0);
         self.mesh.position.z = zoffset + zo2;
         self.mesh.rotation.z = angle + (exRot || 0);
+        self.mesh.updateMatrix(true);
+        self.mesh.updateMatrixWorld(true);
 
         self.meshS.position.x = center.x + (offset?offset.x:0);
         self.meshS.position.y = center.y + (offset?offset.y:0);
         self.meshS.position.z = zoffset + zo2;
         self.meshS.rotation.z = angle + (exRot || 0);
+        self.meshS.updateMatrix(true);
+        self.meshS.updateMatrixWorld(true);
 
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
 

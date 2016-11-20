@@ -886,17 +886,18 @@ BSWG.game = new function(){
                         map: function(x,y) {
                             return BSWG.mapPerlin(x+sx, y+sy);
                         },
+                        normalMap: BSWG.render.images['rock_nm'].texture,
                         color: [0.5, 0.0, 0.0],
-                        reflect: 0.2,
-                        normalMapAmp: 4.0,
-                        normalMapScale: 2.0
+                        reflect: 0.0,
+                        normalMapAmp: 1.0,
+                        normalMapScale: 1.0
                     },
                     'tileset-below': {
                         map: function(x,y) {
                             return true
                         },
                         color: [0.6, 0.0, 0.0],
-                        normalMapAmp: 1.5,
+                        normalMapAmp: 0.75,
                         normalMapScale: 0.5,
                         isBelow: true
                     },
@@ -1417,7 +1418,7 @@ BSWG.game = new function(){
                                 decals: BSWG.makeCityTiles(1),
                                 normalMap: BSWG.render.images['test_nm'].texture,
                                 normalMapScale: 24.0,
-                                normalMapAmp: 5.0,
+                                normalMapAmp: 1.0,
                                 map: function(x, y) {
                                     if (!BSWG.mapPerlinSparse(x+100,y+414) &&
                                         BSWG.mapPerlinSparse(x-100,y-414)) {
@@ -1433,17 +1434,19 @@ BSWG.game = new function(){
                             },
                             'tileset-mountain': {
                                 map: BSWG.mapPerlinSparse,
-                                color: [0.0, 0.15, 0.5],
-                                reflect: 0.2,
-                                normalMapAmp: 4.0,
-                                normalMapScale: 2.0
+                                normalMap: BSWG.render.images['rock_nm'].texture,
+                                color: [0.0, 0.05, 0.2],
+                                reflect: 0.0,
+                                normalMapAmp: 1.0,
+                                normalMapScale: 1.0
                             },
                             'tileset-below': {
                                 map: function(x,y) {
                                     return true
                                 },
-                                color: [0.0, 0.2, 0.6],
-                                normalMapAmp: 1.5,
+                                color: [0.0, 0.1, 0.3],
+                                normalMap: BSWG.render.images['rock_nm'].texture,
+                                normalMapAmp: 0.75,
                                 normalMapScale: 0.5,
                                 isBelow: true
                             },
@@ -1849,7 +1852,7 @@ BSWG.game = new function(){
                             ccs = null;
 
                             self.cam.zoomTo(dt*1.25*2, toZ);
-                            self.cam.zoomTo(dt*0.15*2, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.125 : 0.15), 1.25));
+                            self.cam.zoomTo(dt*0.15*2, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.14 : 0.15), 1.15));
 
                             var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 

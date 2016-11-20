@@ -89,7 +89,7 @@ BSWG.cloud = function (pos, toPos, size, life) {
     this.mesh.scale.set(size*1.2, size*1.2, size/8);
     this.mesh.rotation.set(0, 0, a, 'ZXY');
     this.smesh.position.set(this.p.x, this.p.y, this.p.z);
-    this.smesh.scale.set(size*1.6, size*1.6, size/8);
+    this.smesh.scale.set(size*1.2, size*1.2, size/8);
     this.smesh.rotation.set(0, 0, a, 'ZXY');
 
     BSWG.render.scene.add(this.mesh);
@@ -146,11 +146,15 @@ BSWG.cloudMap = new function (){
                 },
                 shadowMap: {
                     type: 't',
-                    value: BSWG.render.shadowMap
+                    value: BSWG.render.shadowMap.depthTexture
                 },
                 shadowMatrix: {
                     type: 'm4',
                     value: BSWG.render.shadowMatrix
+                },
+                shadowViewMatrix: {
+                    type: 'm4',
+                    value: BSWG.render.shadowViewMatrix
                 },
                 envMapTint: {
                     type: 'v4',

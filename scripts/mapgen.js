@@ -348,8 +348,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 var sc = ret.size / a;
                 p.x *= sc;
                 p.y *= sc;
-                p.x += Math.random()*12-6;
-                p.y += Math.random()*12-6;
+                p.x += Math.random()*6-3;
+                p.y += Math.random()*6-3;
                 var valid = true;
                 if (true) {
                     ret.zones[i] = new Object();
@@ -611,56 +611,64 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y];
             },
+            normalMap: BSWG.render.images['rock_nm'].texture,
             collision: true,
-            color: [0.75, 0.75, 0.75],
-            reflect: 0.0,
+            color: [0.2, 0.2, 0.2],
+            reflect: 0.1,
             normalMapAmp: 1.0,
+            normalMapScale: 1.0,
             zscale: 2.0
         },
         'tileset-land': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
             },
-            color: [0.3, 0.75, 0.2],
-            relfect: 0.1,
-            normalMapAmp: 1.5,
+            color: [0.4*.85, 0.75*.85, 0.25*.85],
+            normalMap: BSWG.render.images['rock_nm'].texture,
+            relfect: 0.05,
+            normalMapAmp: 1.0,
+            normalMapScale: 1.0
         },
         'tileset-sand': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
             },
-            color: [1.75, 1.25, 0.1],
+            color: [1.75*0.35, 1.25*0.35, 0.1*0.35],
             reflect: 0.1,
-            normalMap: BSWG.render.images['water_nm'].texture,
-            normalMapScale: 3.0,
-            normalMapAmp: 1.0,
+            normalMap: BSWG.render.images['grass_nm'].texture,
+            normalMapScale: 0.25,
+            normalMapAmp: 0.15,
         },
         'tileset-rockland': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
             },
+            normalMap: BSWG.render.images['rock_nm'].texture,
             color: [0.75/3, 0.6/3, 0.6/3],
             reflect: 0.15,
-            normalMapAmp: 5.0,
+            normalMapScale: 1.5,
+            normalMapAmp: 0.5,
         },
         'tileset-snow': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
-            color: [2.25, 2.3, 2.5],
+            color: [2.25*0.35, 2.3*0.35, 2.5*0.35],
             reflect: 0.225,
-            normalMap: BSWG.render.images['water_nm'].texture,
-            normalMapScale: 2.5,
-            normalMapAmp: 0.75,
+            normalMap: BSWG.render.images['grass_nm'].texture,
+            normalMapScale: 0.5,
+            normalMapAmp: 0.1,
         },
         'tileset-below': {
             map: function(x,y) {
                 return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
             },
-            color: [0.75, 0.75, 0.20],
+            color: [0.75/2, 0.75/2, 0.20/2],
+            normalMap: BSWG.render.images['rock_nm'].texture,
             isBelow: true,
             reflect: 0.25,
-            normalMapAmp: 1.5
+            normalMapAmp: 0.5,
+            normalMapScale: 2.0
         },
         'water': {
             color: [0.05*0.5, 0.4*0.25, 0.75*0.5, 0.85],
@@ -1092,7 +1100,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
 BSWG.map_genBiome = function() {
 
-    Math.seedrandom();
+    Math.seedrandom(Math.random());
 
     var ret = new Object();
     ret.water = Math.random();

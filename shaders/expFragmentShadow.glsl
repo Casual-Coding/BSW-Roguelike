@@ -17,7 +17,6 @@ varying vec3 frame;
 varying float tex;
 
 varying vec4 vPosition;
-varying float sZ;
 
 void main() {
 
@@ -68,13 +67,7 @@ void main() {
     amp = pow(max(amp, 0.), 1.0-amp*0.9);
     amp = min(amp, 1.0);
 
-    float z = sZ * 64.0;
-    float a = mod(z, 1.0);
-    float b = mod(floor(z)/256.0, 1.0);
-    float c = floor(z/256.0)/256.0;
-    gl_FragColor = clamp(vec4(c, b, a, clamp(amp*2., 0., 1.)*0.25), 0., 1.);
-    if (gl_FragColor.a < 0.1) {
+    if (amp < 0.05) {
         discard;
-    }
-    
+    }   
 }

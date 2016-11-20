@@ -250,11 +250,15 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             },
             shadowMap: {
                 type: 't',
-                value: BSWG.render.shadowMap
+                value: BSWG.render.shadowMap.depthTexture
             },
             shadowMatrix: {
                 type: 'm4',
                 value: BSWG.render.shadowMatrix
+            },
+            shadowViewMatrix: {
+                type: 'm4',
+                value: BSWG.render.shadowViewMatrix
             },
             extra: {
                 type: 'v4',
@@ -324,9 +328,13 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 'm4',
                 value: BSWG.render.shadowMatrix
             },
+            shadowViewMatrix: {
+                type: 'm4',
+                value: BSWG.render.shadowViewMatrix
+            },
             shadowMap: {
                 type: 't',
-                value: BSWG.render.shadowMap
+                value: BSWG.render.shadowMap.depthTexture
             },
             extra: {
                 type: 'v4',
@@ -349,7 +357,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 value: BSWG.render.envMapParam
             },
         });
-        this.mat.shading = THREE.FlatShading;
+        this.mat.shading = THREE.SmoothShading;
         this.mat.needsUpdate = true;
     }
 

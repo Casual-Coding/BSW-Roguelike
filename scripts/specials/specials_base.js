@@ -797,7 +797,6 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
     var c4 = 'rgb(' + r4 + ',' + g4 + ',' + b4 + ')';
 
     if (T && !nobg) {
-        ctx.save();
         ctx.translate(x, y);
         ctx.scale(iscale, iscale);
 
@@ -835,10 +834,9 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
         if (T < 1) {
             ctx.stroke();   
         }
-        ctx.restore();
+        ctx.resetTransform();
     }
 
-    ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
     ctx.rotate(angle);
@@ -878,7 +876,7 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
         ctx.closePath();
         ctx.fill();
     }
-    ctx.restore();
+    ctx.resetTransform();
 
     ctx.globalAlpha = oAlpha;
 };
