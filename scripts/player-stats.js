@@ -194,7 +194,7 @@ BSWG.playerStats = function(load) {
         levelUp:    false,
         money:      100,
         store:      null,
-        pointBonus: 1
+        pointBonus: 2
     };
 
     if (!load.store) {

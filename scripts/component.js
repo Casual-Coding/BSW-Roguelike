@@ -541,6 +541,9 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
             if (this.type === 'cc') {
                 r *= 1.5;
             }
+            if (!disolve) {
+                BSWG.componentList.pushAwayFrom(p.clone(), r*2, this);
+            }
             for (var i=0; i<(disolve ? 1 : 40); i++) {
                 var a = Math._random() * Math.PI * 2.0;
                 var r2 = Math._random() * r * 0.5;
@@ -1421,6 +1424,27 @@ BSWG.componentList = new function () {
         return false;
 
     };
+
+    this.pushAwayFrom = function (p, r, src) {
+        var cl = this.withinRadius(p, r);
+        for (var i=0; i<cl.length; i++) {
+            if (cl[i] === src || !cl[i].obj || !cl[i].obj.body) {
+                continue;
+            }
+            var p2 = cl[i].obj.body.GetWorldCenter();
+            var d = Math.distVec2(p2, p);
+            if (d < 0.01) {
+                continue;
+            }
+            if (src) {
+                d -= (src.obj.radius || 0.0) * 1.5;
+                d = Math.max(d, 0.3);
+            }
+            var dx = (p2.x - p.x) / d, dy = (p2.y - p.y) / d;
+            var mag = Math.pow(r/24, 2.0) / Math.pow(d / r, 2.5);
+            cl[i].obj.body.ApplyForceToCenter(new b2Vec2(dx*mag, dy*mag));
+        }
+    },
 
     this.handleInput = function (cc, keys) {
 

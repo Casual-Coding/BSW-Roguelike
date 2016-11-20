@@ -347,10 +347,11 @@ BSWG.specProj_TorpedoOrEMP = {
                 var r2 = Math._random() * r;
                 var v = new THREE.Vector3(Math._random() * 8 - 4, Math._random() * 8 - 4, Math._random() * 8 - 4);
                 var p2 = new THREE.Vector3(p.x + Math.cos(a) * r2, p.y + Math.sin(a) * r2, p.z);
+                var r3 = r*(1.5 + 4.5*Math._random())*0.5;
                 BSWG.render.boom.palette = chadaboom3D.fire_bright;
                 BSWG.render.boom.add(
                     p2,
-                    r*(1.5 + 4.5*Math._random())*0.5,
+                    r3,
                     256,
                     1 + Math.pow(r, 1/3) * Math._random(),
                     2.0,
@@ -358,6 +359,9 @@ BSWG.specProj_TorpedoOrEMP = {
                     null,
                     Math.random() < 0.2
                 );
+                if (this.detonated) {
+                    BSWG.componentList.pushAwayFrom(new b2Vec2(p2.x, p2.y), r3/2);
+                }
                 p2 = v = null;
             }
         }

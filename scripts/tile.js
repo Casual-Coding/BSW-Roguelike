@@ -1,5 +1,5 @@
-BSWG.tileSize = 420;
-BSWG.tileMeshSize = 42;
+BSWG.tileSize = 44;
+BSWG.tileMeshSize = 44;
 BSWG.tileSizeWorld = 48.0;
 BSWG.tileHeightWorld = 32.0;
 BSWG.minimapTileSize = 4;
@@ -49,8 +49,8 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     for (var iy = 0; iy <= BSWG.tileSize; iy += gSize) {
         for (var ix = 0; ix <= BSWG.tileSize; ix += gSize) {
 
-            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
-            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.005 / BSWG.tileSize));
+            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 1.00005 / BSWG.tileSize));
+            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.00005 / BSWG.tileSize));
 
             var x2 = ~~(ix / (BSWG.tileSize) * (BSWG.tileSize-0.001));
             var y2 = ~~(iy / (BSWG.tileSize) * (BSWG.tileSize-0.001));
@@ -357,7 +357,6 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 value: BSWG.render.envMapParam
             },
         });
-        this.mat.shading = THREE.SmoothShading;
         this.mat.needsUpdate = true;
     }
 
@@ -604,10 +603,10 @@ BSWG.tileMap = function (layers, zoff) {
         };
 
         if (this.minimap) {
-            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3 - 2,
-                ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2 - 4,
-                tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2 + 2,
-                ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2 + 4;
+            var tx1 = (~~(Math.min(p1.x, p2.x) / BSWG.tileSizeWorld)) - 3 - 0,
+                ty1 = (~~(Math.min(p1.y, p2.y) / BSWG.tileSizeWorld)) - 2 - 2,
+                tx2 = (~~(Math.max(p1.x, p2.x) / BSWG.tileSizeWorld)) + 2 + 0,
+                ty2 = (~~(Math.max(p1.y, p2.y) / BSWG.tileSizeWorld)) + 2 + 2;
             var change = false;
             for (var x=tx1; x<=tx2; x++) {
                 for (var y=ty1; y<=ty2; y++) {
@@ -740,10 +739,10 @@ BSWG.makeCityTiles = function (seed) {
 
     Math.seedrandom(seed);
 
-    var image = BSWG.render.proceduralImage(BSWG.tileSize*3, BSWG.tileSize*3, function(ctx, w, h){
+    var image = BSWG.render.proceduralImage(512*3, 512*3, function(ctx, w, h){
 
-        var W = BSWG.tileSize,
-            H = BSWG.tileSize;
+        var W = 512,
+            H = 512;
 
         var l = ~~(0.0 * 255);
         ctx.fillStyle = 'rgba(' + l + ',' + l + ',' + l + ', 1.0)';
@@ -752,7 +751,7 @@ BSWG.makeCityTiles = function (seed) {
         for (var cn=0; cn<9; cn++) {
             var x1 = (cn%3) * W, y1 = ((cn-(cn%3))/3) * H;
 
-            var minh = 0.4, maxh = 0.5;
+            var minh = 0.5, maxh = 0.85;
             if (cn === 0) {
                 maxh = minh;
             }

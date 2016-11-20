@@ -634,10 +634,10 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
             },
             color: [1.75*0.35, 1.25*0.35, 0.1*0.35],
-            reflect: 0.1,
+            reflect: 0.05,
             normalMap: BSWG.render.images['grass_nm'].texture,
-            normalMapScale: 0.125,
-            normalMapAmp: 0.15,
+            normalMapScale: 0.1,
+            normalMapAmp: 0.75,
         },
         'tileset-rockland': {
             map: function(x,y) {
@@ -647,17 +647,17 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             color: [0.75/3, 0.6/3, 0.6/3],
             reflect: 0.15,
             normalMapScale: 1.5,
-            normalMapAmp: 0.5,
+            normalMapAmp: 1.0,
         },
         'tileset-snow': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
             color: [2.25*0.5, 2.3*0.5, 2.5*0.5],
-            reflect: 0.15,
-            normalMap: BSWG.render.images['grass_nm'].texture,
+            reflect: 0.05,
+            normalMap: BSWG.render.images['rock_nm'].texture,
             normalMapScale: 0.2,
-            normalMapAmp: 0.1,
+            normalMapAmp: 0.5,
         },
         'tileset-below': {
             map: function(x,y) {
@@ -667,8 +667,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             normalMap: BSWG.render.images['rock_nm'].texture,
             isBelow: true,
             reflect: 0.25,
-            normalMapAmp: 0.5,
-            normalMapScale: 2.0
+            normalMapAmp: 1.0,
+            normalMapScale: 1.25
         },
         'water': {
             color: [0.05*0.5, 0.4*0.25, 0.75*0.5, 0.85],

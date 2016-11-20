@@ -59,9 +59,8 @@ void main() {
     float shoreT = pow(1.0 / (1.0 + abs(vPosition.z - waterLevel) / 3.5), 15.);
 
     vec3 tNormal = normalize(reflect(normalize(vNormalMatrix * (clrw.xyz * 2.0 - vec3(1.0, 1.0, 1.0))), vNormal) * vec3(-1.0, 1.0, 1.0));
-    tNormal = mix(tNormal, vNormal, 0.5-extra.z*0.5);
 
-    float l = max(dot(tNormal, lightDir), 0.0) * 0.5 + 0.5;
+    float l = (max(dot(tNormal, lightDir), 0.0) * 0.5 + 0.5) * extra.z + (1.0 - extra.z);
     gl_FragColor = vec4(clr.rgb*l*0.5, clr.a);
 
     float _reflect = vreflect * (1. - shoreT) + 0.75 * shoreT;
