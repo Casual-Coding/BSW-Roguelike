@@ -1,5 +1,5 @@
-BSWG.tileSize = 512;
-BSWG.tileMeshSize = 64;
+BSWG.tileSize = 420;
+BSWG.tileMeshSize = 42;
 BSWG.tileSizeWorld = 48.0;
 BSWG.tileHeightWorld = 32.0;
 BSWG.minimapTileSize = 4;
@@ -829,7 +829,7 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
         };
     }
 
-    this.image = BSWG.render.proceduralImage(image.width, image.height, function(ctx, w, h){
+    this.image = BSWG.render.proceduralImage(BSWG.tileSize*3, BSWG.tileSize*3, function(ctx, w, h){
         ctx.globalAlpha = 1.0;
         if (waterLevel) {
             var l = ~~(waterLevel * 255);
@@ -837,12 +837,13 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
             ctx.fillRect(0, 0, w, h);
         }
         else {
+            var _W = image.width/3, _H = image.height/3;
             var ovr = 1;
-            ctx.drawImage(image, 0, 0);
-            ctx.drawImage(image, BSWG.tileSize-1, 0,    1, h,   BSWG.tileSize-ovr, 0,     ovr*2, h);
-            ctx.drawImage(image, BSWG.tileSize*2-1, 0,  1, h,   BSWG.tileSize*2-ovr, 0,   ovr*2, h);
-            ctx.drawImage(image, 0, BSWG.tileSize-1,    w, 1,   0, BSWG.tileSize-ovr,     w, ovr*2);
-            ctx.drawImage(image, 0, BSWG.tileSize*2-1,  w, 1,   0, BSWG.tileSize*2-ovr,   w, ovr*2);
+            ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, w, h);
+            ctx.drawImage(image, _W-1, 0,    1, _H*3,   BSWG.tileSize-ovr, 0,     ovr*2, h);
+            ctx.drawImage(image, _W*2-1, 0,  1, _H*3,   BSWG.tileSize*2-ovr, 0,   ovr*2, h);
+            ctx.drawImage(image, 0, _H-1,    _W*3, 1,   0, BSWG.tileSize-ovr,     w, ovr*2);
+            ctx.drawImage(image, 0, _H*2-1,  _W*3, 1,   0, BSWG.tileSize*2-ovr,   w, ovr*2);
         }
     }, true);
 

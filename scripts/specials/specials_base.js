@@ -723,6 +723,8 @@ BSWG.useSpecial = function(key, who, data) {
 
 BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
 
+    ctx.save();
+
     var desc = BSWG.specialsInfo[key];
     var poly = desc.polys;
     var baseR = desc.color.x;
@@ -879,4 +881,6 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
     ctx.resetTransform();
 
     ctx.globalAlpha = oAlpha;
+
+    ctx.restore();
 };
