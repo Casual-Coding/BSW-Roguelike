@@ -9,7 +9,7 @@ BSWG.generateCloudGeom = function (size) {
     ];
 
     var R = C[0].r;
-    for (var k=0; k<16; k++) {
+    for (var k=0; k<12; k++) {
         R *= 0.92;
         var k2 = 1000;
         while (k2--) {
@@ -45,21 +45,21 @@ BSWG.generateCloudGeom = function (size) {
         }
     }
 
-    var geom = new THREE.Geometry();
+    var geom = [];
 
     for (var i=0; i<C.length; i++) {
-        var sz = Math.floor(Math.max(Math.round(C[i].r*12), 5));
-        //var sphere = new THREE.SphereGeometry(C[i].r, Math.min(6, sz), sz);
-        var sphere = new THREE.IcosahedronGeometry(C[i].r, 2)
+        var sz = Math.floor(Math.max(Math.round(C[i].r*12), 5))*3.5;
+        var cloud = new THREE.PlaneGeometry(C[i].r*2, C[i].r*2, 1, 1)
         var matrix = new THREE.Matrix4();
-        matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, C[i].z - size);
-        geom.merge(sphere, matrix);
+        matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, C[i].z - size).multiply(new THREE.Matrix4().makeRotationZ(Math.random()*Math.PI*2.0));
+        cloud.applyMatrix(matrix);
+        cloud.normalsNeedUpdate = true;
+        cloud.needsUpdate = true;
+        cloud.__Z = C[i].z - size;
+        geom.push(cloud);
     }
 
-    geom.normalsNeedUpdate = true;
-    geom.needsUpdate = true;
-
-    return new THREE.BufferGeometry().fromGeometry(geom);
+    return geom;
 
 };
 
@@ -73,15 +73,23 @@ BSWG.cloud = function (pos, toPos, size, life) {
 
     var geom = BSWG.cloudMap.geom[~~(Math.random()*0.999*BSWG.cloudMap.geom.length)];
 
-    this.mesh = new THREE.Mesh(
-        geom,
-        BSWG.cloudMap.mat
-    );
+    this.mesh = new THREE.Group();
+    this.smesh = new THREE.Group();
 
-    this.smesh = new THREE.Mesh(
-        geom,
-        BSWG.cloudMap.shadowMat
-    );
+    var matIndex = ~~(Math.random()*0.999*BSWG.cloudMap.matList.length);
+
+    for (var i=0; i<geom.length; i++) {
+        var mesh = new THREE.Mesh(
+            geom[i],
+            BSWG.cloudMap.matList[matIndex]
+        );
+        mesh.renderOrder = 1200 + ((geom[i].__Z || 0.0) + this.p.z) / 64.0;
+        this.mesh.add(mesh);
+        this.smesh.add(new THREE.Mesh(
+            geom[i],
+            BSWG.cloudMap.shadowMatList[matIndex]
+        ));
+    }
 
     var a = Math.random() * Math.PI * 2;
 
@@ -125,55 +133,72 @@ BSWG.cloudMap = new function (){
             Math.seedrandom(666.666);
 
             this.geom = [
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.4),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.45),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.45),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.45),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5),
-                BSWG.generateCloudGeom(BSWG.tileHeightWorld/4*0.5)
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.4),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.45),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.45),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.45),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.5),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.5),
+                BSWG.generateCloudGeom(BSWG.tileHeightWorld/3*0.5)
             ];
 
             Math.seedrandom();
 
-            this.mat = BSWG.render.newMaterial("basicVertex2", "cloudFragment", {
-                clr: {
-                    type: 'v4',
-                    value: BSWG.render.cloudColor
-                },
-                shadowMap: {
-                    type: 't',
-                    value: BSWG.render.shadowMap.depthTexture
-                },
-                shadowMatrix: {
-                    type: 'm4',
-                    value: BSWG.render.shadowMatrix
-                },
-                shadowViewMatrix: {
-                    type: 'm4',
-                    value: BSWG.render.shadowViewMatrix
-                },
-                envMapTint: {
-                    type: 'v4',
-                    value: BSWG.render.envMapTint
-                },
-                envMapParam: {
-                    type: 'v4',
-                    value: BSWG.render.envMapParam
-                },
-                texture: {
-                    type: 't',
-                    value: BSWG.render.images['cloud_nm'].texture
-                },
-            });
-            this.mat.needsUpdate = true;
+            this.matList = [];
+            this.shadowMatList = [];
 
-            this.shadowMat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {});
-            this.shadowMat.needsUpdate = true;
+            for (var i=0; i<5; i++) {
+                this.matList.push(
+                    BSWG.render.newMaterial("basicVertex2", "cloudFragment", {
+                        clr: {
+                            type: 'v4',
+                            value: BSWG.render.cloudColor
+                        },
+                        shadowMap: {
+                            type: 't',
+                            value: BSWG.render.shadowMap.depthTexture
+                        },
+                        shadowMatrix: {
+                            type: 'm4',
+                            value: BSWG.render.shadowMatrix
+                        },
+                        shadowViewMatrix: {
+                            type: 'm4',
+                            value: BSWG.render.shadowViewMatrix
+                        },
+                        envMapTint: {
+                            type: 'v4',
+                            value: BSWG.render.envMapTint
+                        },
+                        envMapParam: {
+                            type: 'v4',
+                            value: BSWG.render.envMapParam
+                        },
+                        texture: {
+                            type: 't',
+                            value: BSWG.render.images['cloud-' + i].texture
+                        },
+                    })
+                );
+                this.shadowMatList.push(
+                    BSWG.render.newMaterial("basicVertex", "cloudShadowFragment", {
+                        texture: {
+                            type: 't',
+                            value: BSWG.render.images['cloud-' + i].texture
+                        },                        
+                    })
+                )
+            }
+            for (var i=0; i<this.matList.length; i++) {
+                this.matList[i].side = THREE.DoubleSide;
+                this.matList[i].needsUpdate = true;
+                this.shadowMatList[i].needsUpdate = true;
+            }
 
+            this.mat = new THREE.MeshFaceMaterial(this.matList);
             Math.seedrandom();
         }
 
@@ -215,7 +240,6 @@ BSWG.cloudMap = new function (){
             C.smesh.position.set(C.p.x, C.p.y, C.p.z + this.cloudZOffset);
             C.mesh.updateMatrix();
             C.smesh.updateMatrix();
-
             var dx = C.p.x - BSWG.render.cam3D.position.x,
                 dy = C.p.y - BSWG.render.cam3D.position.y;
             var dist = Math.sqrt(dx*dx+dy*dy);

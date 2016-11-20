@@ -639,20 +639,20 @@ BSWG.game = new function(){
 
         if (scene === BSWG.SCENE_TITLE) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-2'];
-            BSWG.render.cloudColor.set(0.2, 0, 0, 1.0);
+            BSWG.render.cloudColor.set(1.0, 0, 0, 1.0);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
         else if (scene === BSWG.SCENE_GAME2) {
             BSWG.render.envMap = BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(0.0, 0.02, 0.4, 1.0);
+            BSWG.render.cloudColor.set(0.0, 0.1, 1.0, 1.0);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
             BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(0.8, 0.8, 0.8, 0.95);
+            BSWG.render.cloudColor.set(1.4, 1.4, 1.4, 1.0);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
@@ -1845,14 +1845,14 @@ BSWG.game = new function(){
                                 avgP.y /= w;
                                 avgDist = Math.clamp(avgDist/ccs.length, 0.0, BSWG.lookRange);
                                 toZ /= Math.max(Math.log(avgDist), 1.0);
-                                toZ = Math.max(toZ, 0.007);
+                                toZ = Math.max(toZ, 0.009);
                                 self.cam.panTo(0.75*dt*(self.ccblock.anchored ? 0.15 : 1.0), avgP);
                             }
 
                             ccs = null;
 
                             self.cam.zoomTo(dt*1.25*2, toZ);
-                            self.cam.zoomTo(dt*0.15*2, toZ / Math.min(1.0+self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.14 : 0.15), 1.15));
+                            self.cam.zoomTo(dt*0.15*2, toZ / Math.min(1.0+0.5*self.ccblock.obj.body.GetLinearVelocity().Length()*(self.battleMode ? 0.14 : 0.15), 1.15));
 
                             var ccp = self.ccblock.obj.body.GetWorldCenter().clone();
 
@@ -2942,7 +2942,7 @@ BSWG.game = new function(){
                 ctx.fillRect(0, 0, BSWG.render.viewport.w, BSWG.render.viewport.h);
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#f00';
-                ctx.strokeStyle = '#444';
+                ctx.strokeStyle = '#000';
                 ctx.font = '64px Orbitron';
                 ctx.fillTextB("Annihilated ...", viewport.w/2, viewport.h/2+32);
                 ctx.textAlign = 'left';

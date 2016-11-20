@@ -91,9 +91,11 @@ var prepComp = function(v) {
     return Math.max(0, Math.min(255, Math.floor(v * 255)));
 };
 
+Math.random2dSeed = Math.random();
+
 Math.random2d = function(x,y) {
     var x2 = 12.9898, y2 = 78.233;
-    x += 1000; y += 1000;
+    x += 1000*Math.random2dSeed; y += 1000;
     if (x === 0)
         x = 0.0001;
     var dot = (x*x2 + y*y2);// / (Math.sqrt(x*x+y*y) * Math.sqrt(x2*x2+y2*y2));
@@ -235,6 +237,27 @@ switch (type) {
                 }
                 hmap.setRot(x, y, v);
                 bmap.setRot(x, y, v);
+            }
+        }
+        break;
+
+    case 'cloud':
+        Math.random2dSeed = Math.random()*40;
+        var p = genPerlin(sz, 0.0, 1.0, 12);
+        var r = sz/2-2;
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var dx = x-sz/2, dy = y-sz/2;
+                var len = Math.sqrt(dx*dx+dy*dy);
+                if (len <= r) {
+                    var t = Math.pow((1-len/r)*Math.max(p.get(x,y)-0.65, 0), 2.0);
+                    hmap.set(x, y, t);
+                    bmap.set(x, y, t);
+                }
+                else {
+                    hmap.set(x, y, 0.);
+                    bmap.set(x, y, 0.);                  
+                }
             }
         }
         break;

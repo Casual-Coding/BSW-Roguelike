@@ -124,7 +124,12 @@ var BSWG = new function(){
         'tileset-rockland': 'tileset-rockland-512.png',
         'unlock-icon': 'unlock-icon.png',
         'unlock-hover': 'unlock-hover.png',
-        'unlock-equipped': 'unlock-equipped.png'
+        'unlock-equipped': 'unlock-equipped.png',
+        'cloud-0': 'cloud-256-0.png',
+        'cloud-1': 'cloud-256-1.png',
+        'cloud-2': 'cloud-256-2.png',
+        'cloud-3': 'cloud-256-3.png',
+        'cloud-4': 'cloud-256-4.png'
     };
     var makeTexture = [
         'test_nm',
@@ -137,7 +142,12 @@ var BSWG = new function(){
         'env-map-1',
         'env-map-2',
         'env-map-3',
-        'env-map-4'
+        'env-map-4',
+        'cloud-0',
+        'cloud-1',
+        'cloud-2',
+        'cloud-3',
+        'cloud-4'
     ];
     var shaders = {
         'vertex': [
@@ -177,6 +187,7 @@ var BSWG = new function(){
             'weatherFragment',
             'weatherFragmentShadow',
             'cloudFragment',
+            'cloudShadowFragment',
             'torpedoFragment',
             'shieldFragment'
         ]

@@ -37,33 +37,38 @@ highp float shadowSample1(vec2 svp) {
 
 void main() {
 
-    gl_FragColor.a = clr.a * (0.25*texture2D(texture, vLocal.xy/1.5 + vec2(.1,.25)).a+0.75);
-    gl_FragColor.rgb = mix(clr.rgb * (texture2D(texture, vLocal.xy/0.75).a*0.25+0.75), envMapTint.rgb, envMapTint.a);
+    vec4 clrw = texture2D(texture, vUv);
 
-    vec3 blending = abs( vNormal );
-    float topFactor = blending.z / (blending.x + blending.y + blending.z);
+    gl_FragColor = clr;
+
     vec3 lightDir = normalize(vec3(10., 0, 3.));
-    float l2 = pow(max(dot(normalize(vNormal), lightDir), 0.0), 0.3) + min(pow(topFactor, 2.5), 1.0) * 0.5;
+    vec3 tNormal = normalize(reflect(normalize(vNormalMatrix * (clrw.xyz * 2.0 - vec3(1.0, 1.0, 1.0))), vNormalMatrix * normalize(vec3(vUv * 2.0 - vec2(1.0, 1.0), -1.))) * vec3(1.0, 1.0, 1.0));
+    
+    float l = max(dot(tNormal, lightDir), 0.0) * 0.5 + 0.5;
+    gl_FragColor = vec4(clr.rgb*l*pow(clrw.a, 0.2)*1.5, pow(clrw.a, 0.25));
 
-    gl_FragColor.rgb -= 0.1;
-    gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
+    if (gl_FragColor.a < .15) {
+        discard;
+    }
+    else {
+        gl_FragColor.a = (gl_FragColor.a - 0.15) * 2.65;
+        gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
+    }
 
-    float Z = vShadowCoord.z - 0.0001;
+    float Z = vShadowCoord.z - 0.001;
     highp float zval = Z+0.05;
     if (vShadowCoord.x > 0. && vShadowCoord.y > 0. && vShadowCoord.x < 1. && vShadowCoord.y < 1.) {
         zval = shadowSample1(vShadowCoord.xy);
     }
     if (zval < Z) {
-        gl_FragColor.rgb *= (1.0 - 1.0) * 0.5 + 0.5;
+        gl_FragColor.rgb *= (1.0 - 1.0) * 0.25 + 0.75;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*5000.0+1.0)) * 0.5 + 0.5;
+        gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*10000.0+1.0)) * 0.25 + 0.75;
     }
 
     if (vPosition.z > 0.0) {
         gl_FragColor.rgb /= (vPosition.z*15.0 + 1.0);
     }
     gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, pow(vSPosition.z/200., 0.5)*envMapTint.a);
-
-    gl_FragColor.rgb *= l2 * 0.75 + 0.25;
 }
