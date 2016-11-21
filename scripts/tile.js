@@ -837,7 +837,7 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
         }
         else {
             var _W = image.width/3, _H = image.height/3;
-            var ovr = 1;
+            var ovr = 2;
             ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, w, h);
             ctx.drawImage(image, _W-1, 0,    1, _H*3,   BSWG.tileSize-ovr, 0,     ovr*2, h);
             ctx.drawImage(image, _W*2-1, 0,  1, _H*3,   BSWG.tileSize*2-ovr, 0,   ovr*2, h);

@@ -617,7 +617,7 @@ BSWG.aiBase.prototype.__update_sensors = function (ctx, dt) {
     for (var i=0; i<this.sensors.length; i++) {
         var S = this.sensors[i];
         if (S.updateRender) {
-            S.updateRender(ctx, dt, (this.frameIdx % this.sensors.length) !== i);
+            S.updateRender(ctx, dt, (this.frameIdx % (this.sensors.length*5)) !== i);
         }
     }
 

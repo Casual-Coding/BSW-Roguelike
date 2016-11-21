@@ -946,7 +946,7 @@ BSWG.game = new function(){
                     this.map = BSWG.genMap(args.load.map);
                     this.tileMap = new BSWG.tileMap(this.map.tm_desc, -8);
                     for (var i=0; i<this.initComponents.length; i++) {
-                        this.map.updateMinLevelComp(this.initComponents[i], 0);
+                        this.map.updateMinLevelComp(BSWG.componentList.fixKey(this.initComponents[i]), 0);
                     }
                     this.xpInfo = new BSWG.playerStats(args.load.xpInfo);
                     this.ccblock = BSWG.componentList.load(args.load.comp, null, null, null, null, true);
@@ -970,7 +970,7 @@ BSWG.game = new function(){
                     startPos = this.map.planets[0].worldP.clone();
                 }
                 for (var i=0; i<this.initComponents.length; i++) {
-                    this.map.updateMinLevelComp(this.initComponents[i], 0);
+                    this.map.updateMinLevelComp(BSWG.componentList.fixKey(this.initComponents[i]), 0);
                 }
                 BSWG.xpDisplay.xpInfo = this.xpInfo;
                 this.mapImage = this.tileMap.minimap.image;
@@ -1479,7 +1479,7 @@ BSWG.game = new function(){
 
                     if (this.xpInfo) {
                         for (var i=0; i<this.initComponents.length; i++) {
-                            this.xpInfo.addStoreKey(this.initComponents[i], 1);
+                            this.xpInfo.addStoreKey(BSWG.componentList.fixKey(this.initComponents[i]), 1);
                         }
                     }
 
@@ -1676,7 +1676,8 @@ BSWG.game = new function(){
                     self.hudObj.set_clr([(0.85+(1-t)*0.05) * 0.7, (0.85+(1-t)*0.05) * 0.7, (1.0+(t)*0.1) * 0.7, 1]);
                 }
                 else {
-                    self.hudObj.set_clr([0.85+(1-t)*0.05 + self.bmodeTint * 0.2, 0.85+(1-t)*0.05 - self.bmodeTint * 0.2, 1.0+(t)*0.1 - self.bmodeTint * 0.2, 1]);
+                    var t =  Math.sin(Date.timeStamp()*Math.PI*2.0) * 0.25 + 0.25;
+                    self.hudObj.set_clr([0.85+(1-t)*0.05 + self.bmodeTint * t, 0.85+(1-t)*0.05 - self.bmodeTint * t, 1.0+(t)*0.1 - self.bmodeTint * t, 1]);
                 }
             }
 
@@ -1812,7 +1813,7 @@ BSWG.game = new function(){
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
-                    self.editCam = self.ccblock && (self.editMode || self.storeMode) && !self.battleMode;
+                    self.editCam = self.ccblock && (self.editMode || self.storeMode);
                     if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause)) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);

@@ -830,7 +830,7 @@ BSWG.physics = new function(){
         //    this.dtACC -= this.physicsDT;
         //}
 
-        if (!(this.framen % 3)) {
+        if (!(this.framen % 4)) {
 
             var CL = BSWG.componentList.compList;
             var len = CL.length;
@@ -882,7 +882,7 @@ BSWG.physics = new function(){
                                 var S = {
                                     s: new BSWG.soundSample(),
                                     lframe: this.framen,
-                                    v: Math.clamp(forceMe / 2, 0, 1.75)*0.8/3,
+                                    v: Math.clamp(forceMe / 2, 0, 1.75)*0.8/4,
                                     r: (0.35 / (C.obj.body.GetMass() / 2.5)) / 2.0,
                                     lp: cp.THREE(0.2),
                                     K: K,
@@ -899,7 +899,7 @@ BSWG.physics = new function(){
                             else {
                                 S = C.__hs.get(K);
                                 S.lframe = this.framen;
-                                S.v = Math.clamp(forceMe / 2, 0, 1.75)*0.8/3;
+                                S.v = Math.clamp(forceMe / 2, 0, 1.75)*0.8/4;
                                 S.r = (0.35 / (C.obj.body.GetMass() / 2.5)) / 2.0;
                                 S.v = Math.min(S.v, 1/S.r);
                                 S.lp.set(cp.x, cp.y, 0.2);

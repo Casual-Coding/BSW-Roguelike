@@ -193,7 +193,7 @@ BSWG.cloudMap = new function (){
                 )
             }
             for (var i=0; i<this.matList.length; i++) {
-                this.matList[i].side = THREE.DoubleSide;
+                //this.matList[i].side = THREE.DoubleSide;
                 this.matList[i].needsUpdate = true;
                 this.shadowMatList[i].needsUpdate = true;
             }

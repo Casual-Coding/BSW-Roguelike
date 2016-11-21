@@ -406,6 +406,10 @@ BSWG.component.prototype.getKey = function () {
 
 BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
 
+    if (!this.onCC) {
+        noMin = true;
+    }
+
     if (BSWG.game.scene === BSWG.SCENE_TITLE || this.type === 'missile') {
         return amt;
     }
@@ -2121,6 +2125,9 @@ BSWG.componentList = new function () {
                 value = tdesc.sbadd[k].value || 0;
             }
         }
+        if (!found) {
+            value = tdesc.sbadd[0].value;
+        }
         return value;
     };
 
@@ -2159,8 +2166,51 @@ BSWG.componentList = new function () {
                 value = tdesc.sbadd[k].count || 0;
             }
         }
+        if (!found) {
+            value = tdesc.sbadd[0].count || 0;
+        }
         return value;
     };
+
+    this.fixKey = function(str) {
+        var tok = str.split(',');
+        var type = tok[0];
+        var desc = {};
+        for (var i=1; i<tok.length; i++) {
+            var tok2 = tok[i].split('=');
+            desc[tok2[0]] = eval(tok2[1]); // JSON.parse doesn't like strings?
+        }
+        var value = 0;
+        var tdesc = this.typeMap[type];
+        var found = false;
+        for (var k=0; k<tdesc.sbadd.length && !found; k++) {
+            var any = false;
+            for (var i=0; tdesc.sbkey && i<tdesc.sbkey.length && !any; i++) {
+                var key = tdesc.sbkey[i];
+                if (tdesc.sbadd[k][key] !== desc[key]) {
+                    any = true;
+                }
+            }
+            if (!any) {
+                return str;
+            }
+        }
+        if (!found) {
+            var key = type;
+            var desc = BSWG.componentList.typeMap[type];
+            if (desc.sbkey) {
+                var ob = tdesc.sbadd[0];
+                for (var j=0; j<desc.sbkey.length; j++) {
+                    var k2 = desc.sbkey[j];
+                    if (ob[k2] || ob[k2] == false) {
+                        key += ',' + k2 + '=' + ob[k2];
+                    }
+                }
+            }
+
+            return key;
+        }        
+    }
 
     this.compStrName = function(str) {
         var tok = str.split(',');
@@ -2185,6 +2235,9 @@ BSWG.componentList = new function () {
                 found = true;
                 name = tdesc.sbadd[k].title || 'Add';
             }
+        }
+        if (!found) {
+            name = tdesc.sbadd[0].title || 'Add';
         }
         if (name === 'Add') {
             return tdesc.name;

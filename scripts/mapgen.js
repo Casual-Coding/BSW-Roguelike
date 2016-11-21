@@ -1320,9 +1320,10 @@ BSWG.genMap_ComputeCompCount = function(zone, eInfo, isFirst) {
         var stats = BSWG.getEnemyStats(type); // cached
         for (var key in stats) {
             if (key.split(',')[0] !== 'cc') {
-                zone.compHist[key] = (zone.compHist[key] ? zone.compHist[key] : 0) + stats[key];
+                var fkey = BSWG.componentList.fixKey(key);
+                zone.compHist[fkey] = (zone.compHist[fkey] ? zone.compHist[fkey] : 0) + stats[key];
                 if (boss) {
-                    zone.compHistBoss[key] = (zone.compHistBoss[key] ? zone.compHistBoss[key] : 0) + stats[key];
+                    zone.compHistBoss[fkey] = (zone.compHistBoss[fkey] ? zone.compHistBoss[fkey] : 0) + stats[key];
                 }
             }
         }
@@ -1331,7 +1332,8 @@ BSWG.genMap_ComputeCompCount = function(zone, eInfo, isFirst) {
     if (isFirst) {
         for (var i=0; i<BSWG.game.initComponents.length; i++) {
             var key = BSWG.game.initComponents[i];
-            zone.compHist[key] = (zone.compHist[key] ? zone.compHist[key] : 0) + 4;
+            var fkey = BSWG.componentList.fixKey(key);
+            zone.compHist[fkey] = (zone.compHist[fkey] ? zone.compHist[fkey] : 0) + 4;
         }
     }
 
