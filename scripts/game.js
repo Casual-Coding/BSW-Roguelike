@@ -897,6 +897,7 @@ BSWG.game = new function(){
                             return true
                         },
                         color: [0.6, 0.0, 0.0],
+                        normalMap: BSWG.render.images['rock_nm'].texture,
                         normalMapAmp: 0.75,
                         normalMapScale: 0.5,
                         isBelow: true

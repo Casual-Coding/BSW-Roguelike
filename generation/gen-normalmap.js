@@ -81,6 +81,22 @@ var newArr = function(size, val) {
         x = rot(x); y = rot(y);
         return ret.inc(x,y,val);
     };
+    ret.normalize = function() {
+        var minv = 10000, maxv = -10000;
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                var v = this.get(x, y);
+                minv = Math.min(minv, v);
+                maxv = Math.max(maxv, v);
+            }
+        }
+        for (var x=0; x<size; x++) {
+            for (var y=0; y<size; y++) {
+                var v = this.get(x, y);
+                this.set(x, y, (v-minv) / (maxv-minv));
+            }
+        }
+    };
     return ret;
 };
 
@@ -207,17 +223,7 @@ switch (type) {
 
     case 'grass':
         var p = genPerlin(sz, 0.0, 1.0, 12);
-        for (var x=0; x<sz; x++) {
-            for (var y=0; y<sz; y++) {
-                var v = p.get(x, y);
-                hmap.set(x, y, v);
-                bmap.set(x, y, v);
-            }
-        }
-        break;
-
-    case 'water':
-        var lst = new Array(32);
+        var lst = new Array(256);
         for (var i=0; i<lst.length; i++) {
             lst[i] = {
                 str: Math.pow(Math.random(), 0.3),
@@ -225,21 +231,153 @@ switch (type) {
                 y: Math.random()*sz
             };
         }
-        for (var x=-sz/2; x<sz*1.5; x++) {
-            for (var y=-sz/2; y<sz*1.5; y++) {
-                var xx = (x + sz) % sz,
-                    yy = (y + sz) % sz;
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var xx = x, yy = y;
                 var v = 0;
                 for (var i=0; i<lst.length; i++) {
                     var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                    dx = Math.min(Math.abs(dx), Math.min(Math.abs(dx+sz), Math.abs(dx-sz)));
+                    dy = Math.min(Math.abs(dy), Math.min(Math.abs(dy+sz), Math.abs(dy-sz)));
                     var d = Math.sqrt(dx*dx+dy*dy);
-                    v += (Math.sin((d/lst[i].str)/12) * 0.5 + 0.5) * lst[i].str * 0.2;
+                    var r = lst[i].str * sz/3;
+                    if (d <= r) {
+                        v = Math.max(v, Math.sin((r - d)/r*Math.PI*0.5) * lst[i].str * 0.8 * (p.getRot(x,y)*0.3+0.7));
+                    }
                 }
                 hmap.setRot(x, y, v);
                 bmap.setRot(x, y, v);
             }
         }
+        hmap.normalize();
         break;
+
+    case 'water':
+        var lst = new Array(48);
+        for (var i=0; i<lst.length; i++) {
+            lst[i] = {
+                str: Math.pow(Math.random(), 0.3),
+                x: Math.random()*sz,
+                y: Math.random()*sz
+            };
+        }
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var xx = x, yy = y;
+                var v = 0;
+                for (var i=0; i<lst.length; i++) {
+                    var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                    dx = Math.min(Math.abs(dx), Math.min(Math.abs(dx+sz), Math.abs(dx-sz)));
+                    dy = Math.min(Math.abs(dy), Math.min(Math.abs(dy+sz), Math.abs(dy-sz)));
+                    var d = Math.sqrt(dx*dx+dy*dy);
+                    if (d <= sz/2) {
+                        v += (Math.sin((d/lst[i].str)/12) * 0.5 + 0.5) * lst[i].str * 0.2 * (1-d/(sz/2));
+                    }
+                }
+                hmap.setRot(x, y, v);
+                bmap.setRot(x, y, v);
+            }
+        }
+        hmap.normalize();
+        break;
+
+    case 'snow':
+        var lst = new Array(256);
+        for (var i=0; i<lst.length; i++) {
+            lst[i] = {
+                str: Math.pow(Math.random(), 0.3),
+                x: Math.random()*sz,
+                y: Math.random()*sz
+            };
+        }
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var xx = x, yy = y;
+                var v = 0;
+                for (var i=0; i<lst.length; i++) {
+                    var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                    dx = Math.min(Math.abs(dx), Math.min(Math.abs(dx+sz), Math.abs(dx-sz)));
+                    dy = Math.min(Math.abs(dy), Math.min(Math.abs(dy+sz), Math.abs(dy-sz)));
+                    var d = Math.sqrt(dx*dx+dy*dy);
+                    var r = lst[i].str * sz/3;
+                    if (d <= r) {
+                        v = Math.max(v, Math.sin((r - d)/r*Math.PI*0.5) * lst[i].str * 0.8 * (Math.random()*0.05+0.95));
+                    }
+                }
+                hmap.setRot(x, y, v);
+                bmap.setRot(x, y, v);
+            }
+        }
+        hmap.normalize();
+        break;
+
+    case 'sand':
+        var lst = new Array(1024);
+        for (var i=0; i<lst.length; i++) {
+            lst[i] = {
+                str: Math.pow(Math.random(), 0.3) / 3,
+                x: Math.random()*sz,
+                y: Math.random()*sz
+            };
+        }
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var xx = x, yy = y;
+                var v = 0;
+                for (var i=0; i<lst.length; i++) {
+                    var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                    dx = Math.min(Math.abs(dx), Math.min(Math.abs(dx+sz), Math.abs(dx-sz)));
+                    dy = Math.min(Math.abs(dy), Math.min(Math.abs(dy+sz), Math.abs(dy-sz)));
+                    var d = Math.sqrt(dx*dx+dy*dy);
+                    var r = lst[i].str * sz/3;
+                    if (d <= r) {
+                        v = Math.max(v, Math.sin((r - d)/r*Math.PI*0.5) * lst[i].str * 0.8 * 3.0 * (Math.random()*0.2+0.8));
+                    }
+                }
+                hmap.setRot(x, y, v);
+                bmap.setRot(x, y, v);
+            }
+        }
+        hmap.normalize();
+        break;        
+
+    case 'rock':
+        var lst = new Array(512);
+        for (var i=0; i<lst.length; i++) {
+            lst[i] = {
+                str: Math.pow(Math.random(), 0.3) / 3,
+                x: Math.random()*sz,
+                y: Math.random()*sz,
+                a: Math.random()*Math.PI*2.0
+            };
+            if (i>256) {
+                lst[i].str /= 5.0;
+            }
+            lst[i].ca = Math.cos(lst[i].a);
+            lst[i].sa = Math.sin(lst[i].a);
+        }
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var xx = x, yy = y;
+                var v = 0;
+                for (var i=0; i<lst.length; i++) {
+                    var _dx = (xx-lst[i].x), _dy = (yy-lst[i].y);
+                    var dx = _dx * lst[i].ca - _dy * lst[i].sa;
+                    var dy = _dy * lst[i].ca + _dx * lst[i].sa;
+                    dx = Math.min(Math.abs(dx), Math.min(Math.abs(dx+sz), Math.abs(dx-sz)));
+                    dy = Math.min(Math.abs(dy), Math.min(Math.abs(dy+sz), Math.abs(dy-sz)));
+                    var d = Math.max(dx, dy);
+                    var r = lst[i].str * sz/3;
+                    if (d <= r) {
+                        v = Math.max(v, Math.sin((r - d)/r*Math.PI*0.5) * lst[i].str * 0.8 * 3.0 * (Math.random()*0.1+0.9));
+                    }
+                }
+                hmap.setRot(x, y, v);
+                bmap.setRot(x, y, v);
+            }
+        }
+        hmap.normalize();
+        break; 
 
     case 'cloud':
         Math.random2dSeed = Math.random()*40;
@@ -260,6 +398,7 @@ switch (type) {
                 }
             }
         }
+        hmap.normalize();
         break;
 
     case 'death-metal':

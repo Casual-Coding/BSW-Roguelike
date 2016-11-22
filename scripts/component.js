@@ -7,7 +7,7 @@ BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
 BSWG.friendlyFactor = 1/16;
 // attack/defense bias to level difference
-BSWG.adBiasArr = [1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0];
+BSWG.adBiasArr = [1, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
 BSWG.adBias = function(p, e) { // (p)layer (e)nemy
     var diff = Math.clamp(e-p, -7, 7);
     var bias1 = BSWG.adBiasArr[Math.floor(Math.abs(diff))];
@@ -21,7 +21,7 @@ BSWG.adBias = function(p, e) { // (p)layer (e)nemy
         return bias;
     }
 };
-BSWG.defenseBias = 0.5;
+BSWG.defenseBias = 0.75;
 
 BSWG.archiveRange = 200.0;
 BSWG.arch_hashSize = 25.0;
