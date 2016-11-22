@@ -1445,7 +1445,7 @@ BSWG.componentList = new function () {
                 d = Math.max(d, 0.3);
             }
             var dx = (p2.x - p.x) / d, dy = (p2.y - p.y) / d;
-            var mag = Math.pow(r/24, 2.0) / Math.pow(d / r, 2.5);
+            var mag = Math.pow(r/32, 2.0) / Math.pow(d / r, 2.5);
             cl[i].obj.body.ApplyForceToCenter(new b2Vec2(dx*mag, dy*mag));
         }
     },

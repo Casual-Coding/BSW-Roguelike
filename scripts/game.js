@@ -2968,13 +2968,13 @@ BSWG.game = new function(){
                     if (ss.timeOut < 0) {
                         ss.timeOut = 0;
                         var grd = ctx.createLinearGradient(0, 0, 0, BSWG.render.viewport.h);
-                        grd.addColorStop(0, "#111");
+                        grd.addColorStop(0, "#000");
                         grd.addColorStop(1, "#000");
                         ctx.fillStyle = grd;
                         ctx.fillRect(0, 0, BSWG.render.viewport.w, BSWG.render.viewport.h);
                         ctx.font = '48px Orbitron';
                         ctx.strokeStyle = '#000';
-                        ctx.fillStyle = '#ddd';
+                        ctx.fillStyle = '#aaf';
                         ctx.textAlign = 'center';
                         ctx.fillTextB('Loading ...', BSWG.render.viewport.w/2, BSWG.render.viewport.h - 48, true);
                         ctx.drawImage(BSWG.titleImage, 0, 0, BSWG.titleImage.width, BSWG.titleImage.height, BSWG.render.viewport.w/2 - BSWG.titleImage.width/3.0, 48, BSWG.titleImage.width/1.5, BSWG.titleImage.height/1.5);

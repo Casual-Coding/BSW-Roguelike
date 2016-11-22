@@ -1,5 +1,5 @@
-BSWG.tileSize = 96;
-BSWG.tileMeshSize = 96;
+BSWG.tileSize = 80;
+BSWG.tileMeshSize = 80;
 BSWG.tileSizeWorld = 48.0;
 BSWG.tileHeightWorld = 32.0;
 BSWG.minimapTileSize = 4;

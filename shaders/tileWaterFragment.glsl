@@ -57,7 +57,7 @@ void main() {
     float l1w = max(dot(envNormal, normalize(lightDir)), 0.0);
 
     gl_FragColor.rgb = clr.rgb * (0.2 + 5.0*pow(l1w, 2.0)) * 0.5;
-    gl_FragColor.a = clr.a;
+    gl_FragColor.a = (clr.a + 0.5) / 1.5;
 
     vec3 incident = normalize(vSPosition.xyz);
     vec3 reflected = reflect(incident, envNormal);
@@ -73,7 +73,7 @@ void main() {
     if (vShadowCoord.x > 0. && vShadowCoord.y > 0. && vShadowCoord.x < 1. && vShadowCoord.y < 1.) {
         zval = shadowSample1(vShadowCoord.xy);
     }
-if (zval < Z) {
+    if (zval < Z) {
         gl_FragColor.rgb *= (1.0 - 1.0) * 0.6 + 0.4;
     }
     else {

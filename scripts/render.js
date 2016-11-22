@@ -289,14 +289,14 @@ BSWG.render = new function() {
 
         this.ctx.globalAlpha = 1.0;
         var grd = this.ctx.createLinearGradient(0, 0, 0, this.viewport.h);
-        grd.addColorStop(0, "#111");
+        grd.addColorStop(0, "#000");
         grd.addColorStop(1, "#000");
         this.ctx.fillStyle = grd;
         this.ctx.fillRect(0, 0, this.viewport.w, this.viewport.h);
         this.ctx.font = '48px Orbitron';
         this.ctx.textAlign = 'center';
         this.ctx.strokeStyle = '#000';
-        this.ctx.fillStyle = '#ddd';
+        this.ctx.fillStyle = '#aaf';
         this.ctx.fillTextB('Loading ...', this.viewport.w*.5, this.viewport.h - 48, true);
         this.ctx.textAlign = 'left';
         this.ctx.drawImage(BSWG.titleImage, 0, 0, BSWG.titleImage.width, BSWG.titleImage.height, this.viewport.w/2 - BSWG.titleImage.width/3.0, 48, BSWG.titleImage.width/1.5, BSWG.titleImage.height/1.5);
