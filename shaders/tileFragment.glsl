@@ -81,10 +81,10 @@ void main() {
         zval = shadowSample1(vShadowCoord.xy);
     }
     if (zval < Z) {
-        gl_FragColor.rgb *= (1.0 - 1.0) * 0.6 + 0.4;
+        gl_FragColor.rgb *= (1.0 - 1.0) * 0.45 + 0.55;
     }
     else {
-        gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*5000.0+1.0)) * 0.6 + 0.4;
+        gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*5000.0+1.0)) * 0.45 + 0.55;
     }
 
     if (vPosition.z > 0.0) {

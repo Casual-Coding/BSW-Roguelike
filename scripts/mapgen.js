@@ -623,18 +623,18 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 1;
             },
-            color: [0.4*.85, 0.75*.85, 0.25*.85],
+            color: [0.4*0.65, 0.75*0.65, 0.25*0.65],
             normalMap: BSWG.render.images['grass_nm'].texture,
             relfect: 0.05,
             normalMapAmp: 2.0,
-            normalMapScale: 0.7
+            normalMapScale: 0.5
         },
         'tileset-sand': {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 2;
             },
-            color: [1.75*0.35, 1.25*0.35, 0.1*0.35],
-            reflect: 0.05,
+            color: [1.75*0.5, 1.25*0.5, 0.1*0.5],
+            reflect: 0.15,
             normalMap: BSWG.render.images['sand_nm'].texture,
             normalMapScale: 0.1,
             normalMapAmp: 1.0,
@@ -644,7 +644,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 3;
             },
             normalMap: BSWG.render.images['rock_nm'].texture,
-            color: [0.75/3, 0.6/3, 0.6/3],
+            color: [0.75/2.5, 0.6/2.5, 0.6/2.5],
             reflect: 0.15,
             normalMapScale: 2.0,
             normalMapAmp: 1.0,
@@ -653,8 +653,8 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
-            color: [2.25*0.5, 2.3*0.5, 2.5*0.5],
-            reflect: 0.05,
+            color: [2.25*0.65, 2.3*0.65, 2.5*0.65],
+            reflect: 0.2,
             normalMap: BSWG.render.images['snow_nm'].texture,
             normalMapScale: 0.2,
             normalMapAmp: 0.75,
@@ -663,7 +663,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return !(x < 0 || y < 0 || x >= size || y >= size || ret.colMap[x][y]);
             },
-            color: [0.75/2, 0.75/2, 0.20/2],
+            color: [0.75/3, 0.75/3, 0.20/2],
             normalMap: BSWG.render.images['rock_nm'].texture,
             isBelow: true,
             reflect: 0.25,

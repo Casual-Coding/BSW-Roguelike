@@ -70,7 +70,7 @@ var BSWG = new function(){
     ];
     var images = {
         'test_nm': 'ship-nm.png',
-        'grass_nm': 'grass-nm-512.png',
+        'grass_nm': 'grass-nm-1024.png',
         'water_nm': 'water-nm-1024.png',
         'snow_nm': 'snow-nm-512.png',
         'sand_nm': 'sand-nm-512.png',
