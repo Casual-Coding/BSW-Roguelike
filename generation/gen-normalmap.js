@@ -398,7 +398,7 @@ switch (type) {
                 }
             }
         }
-        hmap.normalize();
+        //hmap.normalize();
         break;
 
     case 'death-metal':
