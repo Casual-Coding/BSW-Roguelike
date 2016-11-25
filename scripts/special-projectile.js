@@ -180,8 +180,8 @@ BSWG.specProj_TorpedoOrEMP = {
         this.mat.transparent = true;
         this.mat.needsUpdate = true;
 
-        this.smat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
-        }, THREE.NormalBlending, THREE.DoubleSide);
+        /*this.smat = BSWG.render.newMaterial("basicVertex", "shadowFragment", {
+        }, THREE.NormalBlending, THREE.DoubleSide);*/
 
         this.geom = BSWG.torpedoGeom;
 
@@ -189,8 +189,8 @@ BSWG.specProj_TorpedoOrEMP = {
         this.mesh.renderOrder = 1600.0;
         BSWG.render.scene.add(this.mesh);
 
-        this.smesh = new THREE.Mesh(BSWG.torpedoGeom, this.smat);
-        BSWG.render.sceneS.add(this.smesh);
+        /*this.smesh = new THREE.Mesh(BSWG.torpedoGeom, this.smat);
+        BSWG.render.sceneS.add(this.smesh);*/
 
         if (this.type === 'emp') {
             for (var k=0; k<10; k++) {
@@ -313,9 +313,9 @@ BSWG.specProj_TorpedoOrEMP = {
         this.mesh.scale.set(scale, scale, scale);
         this.mesh.rotation.set(a1, a2, a3, 'XYZ');
 
-        this.smesh.position.set(p.x, p.y, p.z);
+        /*this.smesh.position.set(p.x, p.y, p.z);
         this.smesh.scale.set(scale, scale, scale);
-        this.smesh.rotation.set(a1, a2, a3, 'XYZ');
+        this.smesh.rotation.set(a1, a2, a3, 'XYZ');*/
 
         if (this.type === 'torpedo') {
             if (this.detonated) {
@@ -426,14 +426,14 @@ BSWG.specProj_TorpedoOrEMP = {
 
         this.mesh.material = null;
         this.mesh.geometry = null;
-        this.smesh.material = null;
-        this.smesh.geometry = null;
+        /*this.smesh.material = null;
+        this.smesh.geometry = null;*/
         this.mat.dispose();
-        this.smat.dispose();
+        //this.smat.dispose();
         this.mat = null;
-        this.smat = null;
+        //this.smat = null;
         this.mesh = null;
-        this.smesh = null;
+        //this.smesh = null;
 
         this._destroy();
 

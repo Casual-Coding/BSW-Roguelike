@@ -18,10 +18,6 @@ BSWG.orb = function (pos, zone) {
             type: 'v4',
             value: new THREE.Vector4(0.3, 1.0, 0.5, 1.0)
         },
-        light: {
-            type: 'v4',
-            value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
-        },
         map: {
             type: 't',
             value: BSWG.render.images['test_nm'].texture
@@ -146,9 +142,6 @@ BSWG.orb.prototype.updateRender = function (dt) {
     this.smesh.updateMatrix();
 
     var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
-    this.mat.uniforms.light.value.x = lp.x;
-    this.mat.uniforms.light.value.y = lp.y;
-    this.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
     this.mat.uniforms.envMapT.value = BSWG.render.envMapT;
 
     this.active = false;

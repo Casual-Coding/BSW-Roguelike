@@ -180,8 +180,8 @@ BSWG.render = new function() {
     this.cam3D = null;
     this.dlgOpen = false;
     this.resized = true;
-    this.envMapTint = new THREE.Vector4(0,0,0,0);
-    this.envMapParam = new THREE.Vector4(0,0,0,0);
+    this.envMapTint = THREE.CACHE(new THREE.Vector4(0,0,0,0));
+    this.envMapParam = THREE.CACHE(new THREE.Vector4(0,0,0,0));
     this.envMapT = this.tileDark = 0.0;
     this.screenShake = 0.0;
 
@@ -269,8 +269,8 @@ BSWG.render = new function() {
         this.cam3DS.aspect = 1.0;
         this.cam3DS.updateProjectionMatrix();
         this.cam3DS.position.z = 10.0;
-        this.shadowMatrix = new THREE.Matrix4();
-        this.shadowViewMatrix = new THREE.Matrix4();
+        this.shadowMatrix = THREE.CACHE(new THREE.Matrix4());
+        this.shadowViewMatrix = THREE.CACHE(new THREE.Matrix4());
         this.sceneS = new THREE.Scene();
 
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize, {
@@ -281,7 +281,7 @@ BSWG.render = new function() {
         this.shadowMap.depthTexture.magFilter = THREE.LinearFilter;
         this.shadowMap.depthTexture.minFilter = THREE.LinearFilter;
         
-        this.cloudColor = new THREE.Vector4(0, 0, 0, 0.9);
+        this.cloudColor = THREE.CACHE(new THREE.Vector4(0, 0, 0, 0.9));
 
         this.sizeViewport();
 
@@ -679,6 +679,12 @@ BSWG.render = new function() {
 
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
             self.shadowViewMatrix.copy(self.cam3DS.matrixWorldInverse);
+            
+            self.shadowMatrix.CACHE();
+            self.shadowViewMatrix.CACHE();
+            self.cloudColor.CACHE();
+            self.envMapTint.CACHE();
+            self.envMapParam.CACHE();
 
             self.composer.render();
             //self.renderer.render(self.scene, self.cam3D);

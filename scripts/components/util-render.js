@@ -133,8 +133,7 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     ctx.restore();
 };
 
-BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
-
+BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
     if (!BSWG.bpmMatCache) {
         BSWG.bpmMatCache = new Array(BSWG.bpmMatCacheISize);
         for (var i=0; i<BSWG.bpmMatCache.length; i++) {
@@ -143,10 +142,6 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     clr: {
                         type: 'v4',
                         value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
-                    },
-                    light: {
-                        type: 'v4',
-                        value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
                     },
                     map: {
                         type: 't',
@@ -216,54 +211,54 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         }
     }
 
-    var ret = new Object();
-
-    var body  = obj.body,
-        verts = obj.verts;
+    this.obj = obj;
+    this.body = this.obj.body;
+    this.verts = this.obj.verts;
+    this.zoffset = zoffset;
 
     var K = function(v) { return ',' + Math.floor(v*1000); };
     var key = 'M';
     if (zcenter) { key += 'z' + K(zcenter.x) + K(zcenter.y); }
     else { key += 'z,0,0'; }
-    key += 'l' + K(body.GetLocalCenter().x) + K(body.GetLocalCenter().y);
-    if (zoffset) { key += 'o' + K(zoffset); }
+    key += 'l' + K(this.body.GetLocalCenter().x) + K(this.body.GetLocalCenter().y);
+    if (this.zoffset) { key += 'o' + K(this.zoffset); }
     if (BSWG.bpmRotating) { key += 'R'; }
     if (depth) { key += 'd' + K(depth); }
     if (iscale) { key += 'i' + K(iscale); }
     if (BSWG.bpmSmoothNormals) { key += 'f'; }
     if (BSWG.blockPolySmooth) { key += 'x' + K(BSWG.blockPolySmooth||-1); }
-    for (var i=0; i<verts.length; i++) { key += K(verts[i].x) + K(verts[i].y); }
+    for (var i=0; i<this.verts.length; i++) { key += K(this.verts[i].x) + K(this.verts[i].y); }
 
     var cacheGeom = BSWG.bpmGeomCache[key];
 
     if (!cacheGeom) {
 
         if (BSWG.blockPolySmooth) {
-            verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
+            this.verts = Math.smoothPoly(this.verts, BSWG.blockPolySmooth);
         }
 
-        var len = verts.length;
+        var len = this.verts.length;
 
         var offset = null;
 
         if (!zcenter) {
-            zcenter = BSWG.bpmRotating ? new b2Vec2(0, 0) : body.GetLocalCenter();
+            zcenter = BSWG.bpmRotating ? new b2Vec2(0, 0) : this.body.GetLocalCenter();
         }
         else {
-            var bc = BSWG.bpmRotating ? new b2Vec2(0, 0) : body.GetLocalCenter();
+            var bc = BSWG.bpmRotating ? new b2Vec2(0, 0) : this.body.GetLocalCenter();
             offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
         }
 
-        if (!zoffset) {
-            zoffset = 0.0;
+        if (!this.zoffset) {
+            this.zoffset = 0.0;
         }
 
-        zoffset *= BSWG.polyMesh_baseHeight;
+        this.zoffset *= BSWG.polyMesh_baseHeight;
 
         if (!depth) {
             var total = 1000.0;
             for (var i=0; i<len; i++) {
-                total = Math.min(total, Math.distVec2(verts[i], zcenter));
+                total = Math.min(total, Math.distVec2(this.verts[i], zcenter));
             }
             depth = total * 0.3;
         }
@@ -275,18 +270,18 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             mverts = new Array(len);
         for (var i=0; i<len; i++) {
             overts[i] = new THREE.Vector3(
-                verts[i].x - zcenter.x + (offset?offset.x:0),
-                verts[i].y - zcenter.y + (offset?offset.y:0),
+                this.verts[i].x - zcenter.x + (offset?offset.x:0),
+                this.verts[i].y - zcenter.y + (offset?offset.y:0),
                 0.0
             );
             mverts[i] = new THREE.Vector3(
-                (verts[i].x - zcenter.x) * (iscale*0.1+0.9) + (offset?offset.x:0),
-                (verts[i].y - zcenter.y) * (iscale*0.1+0.9) + (offset?offset.y:0),
+                (this.verts[i].x - zcenter.x) * (iscale*0.1+0.9) + (offset?offset.x:0),
+                (this.verts[i].y - zcenter.y) * (iscale*0.1+0.9) + (offset?offset.y:0),
                 depth*0.35
             );
             iverts[i] = new THREE.Vector3(
-                (verts[i].x - zcenter.x) * iscale + (offset?offset.x:0),
-                (verts[i].y - zcenter.y) * iscale + (offset?offset.y:0),
+                (this.verts[i].x - zcenter.x) * iscale + (offset?offset.x:0),
+                (this.verts[i].y - zcenter.y) * iscale + (offset?offset.y:0),
                 depth
             );
         }
@@ -300,9 +295,9 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         var MIDDLE = function(idx) { return idx+len+1; };
         var OUTER = function(idx) { return idx+1; };
 
-        ret.geom = new THREE.Geometry();
+        this.geom = new THREE.Geometry();
 
-        var vertices = ret.geom.vertices;
+        var vertices = this.geom.vertices;
         vertices.length = len*3 + 1;
         vertices[0] = cvert;
         for (var i=0; i<len; i++) {
@@ -311,7 +306,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             vertices[INNER(i)] = iverts[i];
         }
 
-        var faces = ret.geom.faces;
+        var faces = this.geom.faces;
         var cf = 0;
         faces.length = len*5;
         for (var i=0; i<len; i++) {
@@ -323,20 +318,20 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             faces[cf++] = new THREE.Face3(OUTER(i), MIDDLE(j), MIDDLE(i));
         }
 
-        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
-        ret.geom.computeFaceNormals();
+        this.geom = new THREE.BufferGeometry().fromGeometry(this.geom);
+        this.geom.computeFaceNormals();
         //if (BSWG.bpmSmoothNormals) {
-            ret.geom.computeVertexNormals();
+            this.geom.computeVertexNormals();
         //}
-        ret.geom.attributes.normal.needsUpdate = true;
-        ret.geom.computeBoundingSphere();
-        ret.geom.needsUpdate = true;
-        ret.geom.__zoffset = zoffset;
-        BSWG.bpmGeomCache[key] = ret.geom;
+        this.geom.attributes.normal.needsUpdate = true;
+        this.geom.computeBoundingSphere();
+        this.geom.needsUpdate = true;
+        this.geom.__zoffset = this.zoffset;
+        BSWG.bpmGeomCache[key] = this.geom;
     }
     else {
-        ret.geom = cacheGeom;
-        zoffset = ret.geom.__zoffset;
+        this.geom = cacheGeom;
+        this.zoffset = this.geom.__zoffset;
     }
 
     var matIdx = -1;
@@ -346,17 +341,13 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
             break;
         }
     }
-    var reflect = BSWG.bpmReflect;
+    this.reflect = BSWG.bpmReflect;
     if (matIdx < 0) {
         BSWG.bpmMatCache.push({
             mat: BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
                 clr: {
                     type: 'v4',
                     value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
-                },
-                light: {
-                    type: 'v4',
-                    value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
                 },
                 map: {
                     type: 't',
@@ -422,293 +413,302 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         matIdx = BSWG.bpmMatCache.length - 1;
     }
 
-    ret.mat = BSWG.bpmMatCache[matIdx].mat;
-    ret.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
-    ret.mat.uniforms.vreflect.value = BSWG.bpmReflect;
-    ret.mesh = new THREE.Mesh(ret.geom, ret.mat);
+    this.mat = BSWG.bpmMatCache[matIdx].mat;
+    this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
+    this.mat.uniforms.vreflect.value = BSWG.bpmReflect;
+    this.mesh = new THREE.Mesh(this.geom, this.mat);
 
-    ret.matS = BSWG.bpmMatCache[matIdx].matS;
-    ret.meshS = new THREE.Mesh(ret.geom, ret.matS);
+    this.matS = BSWG.bpmMatCache[matIdx].matS;
+    this.meshS = new THREE.Mesh(this.geom, this.matS);
 
-    BSWG.render.sceneS.add( ret.meshS );
+    BSWG.render.sceneS.add( this.meshS );
 
-    ret.mat.uniforms.warpIn.value = 1.0;
-    ret.mat.uniforms.clr.value.set(0.2, 0.2, 0.2, 1.0);
-    ret.mat.uniforms.extra.value.set(1,0,0,0);
-    ret.mat.uniforms.light.value.set(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0);
+    this.mat.uniforms.warpIn.value = 1.0;
+    this.mat.uniforms.clr.value.set(0.2, 0.2, 0.2, 1.0);
+    this.mat.uniforms.extra.value.set(1,0,0,0);
 
-    //ret.mat.needsUpdate = true;
-    ret.mesh.needsUpdate = true;
-    ret.meshS.needsUpdate = true;
+    //this.mat.needsUpdate = true;
+    this.mesh.needsUpdate = true;
+    this.meshS.needsUpdate = true;
 
-    BSWG.render.scene.add( ret.mesh );
+    BSWG.render.scene.add( this.mesh );
 
     BSWG.bpmMatCache[matIdx].used = true;
-    ret.matIdx = matIdx;
+    this.matIdx = matIdx;
 
-    var self = ret;
+    this.anchorT = 0.0;
 
-    self.anchorT = 0.0;
+    this.enemyT = 0.0;
+    this.lclr = null;
 
-    self.enemyT = 0.0;
-    self.lclr = null;
-
-    ret.update = function(clr, texScale, anchor, exRot, center) {
-
-        if (obj && obj.comp) {
-            if (obj.comp.onCC && (obj.comp.onCC !== BSWG.game.ccblock || obj.comp.onCC.ai)) {
-                self.enemyT += (1 - self.enemyT) * BSWG.render.dt;
-            }
-            else {
-                self.enemyT += (0 - self.enemyT) * BSWG.render.dt;
-            }
-        }
-
-        center = body.GetWorldPoint((center || body.GetLocalCenter()).clone());
-        var angle  = body.GetAngle();
-
-        var offset = BSWG.drawBlockPolyOffset || null;
-        var zo2 = 0;
-
-        self.mesh.position.x = center.x + (offset?offset.x:0);
-        self.mesh.position.y = center.y + (offset?offset.y:0);
-        self.mesh.position.z = zoffset + zo2;
-        self.mesh.rotation.z = angle + (exRot || 0);
-        self.mesh.updateMatrix(true);
-        self.mesh.updateMatrixWorld(true);
-
-        self.meshS.position.x = center.x + (offset?offset.x:0);
-        self.meshS.position.y = center.y + (offset?offset.y:0);
-        self.meshS.position.z = zoffset + zo2;
-        self.meshS.rotation.z = angle + (exRot || 0);
-        self.meshS.updateMatrix(true);
-        self.meshS.updateMatrixWorld(true);
-
-        var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
-
-        self.mat.uniforms.light.value.x = lp.x;
-        self.mat.uniforms.light.value.y = lp.y;
-        self.mat.uniforms.light.value.z = 4.0;
-
-        self.mat.uniforms.extra.value.x = texScale || 1.0;
-
-        if (anchor && (!obj || !obj.comp || obj.comp.onCC === BSWG.game.ccblock)) {
-            self.anchorT += (1.0 - self.anchorT) * 0.25;
-        }
-        else {
-            self.anchorT += (0.0 - self.anchorT) * 0.25;   
-        }
-
-        self.mat.uniforms.extra.value.y = Math.clamp(self.anchorT, 0, 1);
-        self.mat.uniforms.extra.value.z = BSWG.render.time;
-        var dmg = (obj && obj.comp) ? (1.0 - (obj.comp.hp / obj.comp.maxHP)) : 0.0;
-
-        self.mat.uniforms.extra.value.w = dmg;
-        self.mat.uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
-
-        self.mat.uniforms.envMapT.value = BSWG.render.envMapT;
-
-        if (obj && obj.comp && obj.comp.p && obj.comp.repairing) {
-            if (Math.pow(Math._random(), 0.25) < 0.85) {
-                var a = Math._random() * Math.PI * 2.0;
-                var r = Math._random() * (obj.radius || 1.0);
-                var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
-                var p = obj.comp.p(lp);
-                if (BSWG.componentList.atPoint(p, obj.comp)) {
-                    var v = obj.body.GetLinearVelocityFromLocalPoint(lp).clone();
-                    v.x *= 0.75;
-                    v.y *= 0.75;
-                    BSWG.render.boom.palette = chadaboom3D.green;
-                    BSWG.render.boom.add(
-                        p.particleWrap(0.1),
-                        (Math._random()*0.5+0.1)*2,
-                        32,
-                        Math._random()*0.5+1.0,
-                        4.0,
-                        v.THREE(Math._random()*2.0),
-                        null,
-                        Math.random() < 0.25
-                    );
-                }
-            }
-        }
-        if (obj && obj.comp && obj.comp.p && dmg > 0.25) {
-            if (Math.pow(Math._random(), 0.25) < dmg) {
-                var a = Math._random() * Math.PI * 2.0;
-                var r = Math._random() * (obj.radius || 1.0);
-                var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
-                var p = obj.comp.p(lp);
-                if (BSWG.componentList.atPoint(p, obj.comp)) {
-                    var v = obj.body.GetLinearVelocityFromLocalPoint(lp).clone();
-                    v.x *= 0.75;
-                    v.y *= 0.75;
-                    BSWG.render.boom.palette = chadaboom3D.fire;
-                    BSWG.render.boom.add(
-                        p.particleWrap(0.1),
-                        Math._random()*0.5+0.1,
-                        32,
-                        Math._random()*0.5+1.0,
-                        4.0,
-                        v.THREE(Math._random()*2.0)
-                    );
-                }
-            }
-        }
-
-        self.mat.uniforms.warpIn.value -= BSWG.render.dt * 2.0;
-        if (self.mat.uniforms.warpIn.value < 0.0) {
-            self.mat.uniforms.warpIn.value = 0.0;
-        }
-
-        if (BSWG.game.storeMode && !BSWG.game.editMode && obj && obj.comp && obj.comp.onCC === null && obj.comp.type !== 'missile') {
-            if (self.mat.uniforms.warpIn.value < 0.25) {
-                self.mat.uniforms.warpIn.value += 0.6;
-            }
-        }
-
-        if (clr) {
-            self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
-            self.lclr = clr;
-        }
-
-        if (self.lclr) {
-            var t = self.enemyT * 0.5;
-            var clr2 = self.mat.uniforms.clr.value;
-            var br = self.lclr[0], bg = self.lclr[1], bb = self.lclr[2];
-            var r = 1, g = 0, b = 0;
-            if (BSWG.game.bossFight) {
-                r = 0.2;
-                g = b = -0.07;
-                self.mat.uniforms.vreflect.value = reflect * 0.125;
-            }
-            else {
-                self.mat.uniforms.vreflect.value = reflect;
-            }
-            if (obj && obj.comp && obj.comp.p) {
-                if (obj.comp.repairing) {
-                    bg = Math.clamp(bg + obj.comp.healHP, 0, 1);
-                    br = Math.clamp(br - bg * 0.5, 0, 1);
-                    bb = Math.clamp(bb - bg * 0.5, 0, 1);
-                }
-                if (obj.comp.onCC) {
-                    if (obj.comp.onCC.fury) {
-                        br = Math.clamp(br + Math.min(obj.comp.onCC.fury, 1) * 0.75, 0, 1);
-                        bg = Math.clamp(bg - br * 0.5, 0, 1);
-                        bb = Math.clamp(bb - br * 0.5, 0, 1);
-                    }
-                    if (obj.comp.onCC.overpowered) {
-                        br = Math.clamp(br + Math.min(obj.comp.onCC.overpowered, 1) * 1.5, 0, 1);
-                        bg = Math.clamp(bg - br * 0.75, 0, 1);
-                        bb = Math.clamp(bb - br * 0.75, 0, 1);
-                    }
-                    if (obj.comp.onCC.defenseScreen) {
-                        bb = Math.clamp(bb + Math.min(obj.comp.onCC.defenseScreen, 1) * 0.25, 0, 1);
-                        bg = Math.clamp(bg - bb * 0.25, 0, 1);
-                        br = Math.clamp(br - bb * 0.25, 0, 1);
-                    }
-                    if (obj.comp.onCC.lightweight) {
-                        br = Math.clamp(br + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
-                        bg = Math.clamp(bg + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
-                        bb = Math.clamp(bb + Math.min(obj.comp.onCC.lightweight, 1) * 0.75, 0, 1);
-                    }
-                    if (obj.comp.onCC.massive) {
-                        br = Math.clamp(br - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
-                        bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
-                        bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive, 1) * 0.65, 0, 1);
-                    }
-                    if (obj.comp.onCC.massive2) {
-                        br = Math.clamp(br - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
-                        bg = Math.clamp(bg - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
-                        bb = Math.clamp(bb - Math.min(obj.comp.onCC.massive2, 1) * 1.0, 0, 1);
-                    }
-                    if (obj.comp.onCC.doublePunch && obj.comp.isMele) {
-                        br = Math.clamp(br + Math.min(obj.comp.onCC.doublePunch, 1) * 1.5, 0, 1);
-                        bg = Math.clamp(bg - br * 0.75, 0, 1);
-                        bb = Math.clamp(bb - br * 0.75, 0, 1);
-                    }
-                    if (obj.comp.onCC.spinUp && obj.comp.isMele && obj.comp.isSpinner) {
-                        br = Math.clamp(br + Math.min(obj.comp.onCC.spinUp, 1) * 1.5, 0, 1);
-                        bg = Math.clamp(bg - br * 0.75, 0, 1);
-                        bb = Math.clamp(bb - br * 0.75, 0, 1);
-                    }
-                }
-
-            }
-            clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, self.lclr[3]*(1-self.mat.uniforms.warpIn.value));
-        }
-        else {
-            self.mat.uniforms.vreflect.value = reflect;
-        } 
-
-        //self.mat.needsUpdate = true;
-
-        BSWG.bpmReflect = BSWG.bpmReflectDefault;
-    };
-
-    ret.destroy = function() {
-
-        BSWG.bpmMatCache[self.matIdx].used = false;
-
-        BSWG.render.scene.remove( self.mesh );
-        BSWG.render.sceneS.remove( self.meshS );
-
-        //self.mesh.geometry.dispose();
-        //self.mesh.material.dispose();
-        self.mesh.geometry = null;
-        self.mesh.material = null;
-        self.mesh = null;
-        self.mat = null;
-        self.geom = null;
-
-        //self.meshS.material.dispose();
-        self.meshS.material = null;
-        self.meshS.geometry = null;
-        self.meshS = null;
-
-    };
-
-    ret.update();
+    this.update();
 
     BSWG.bpmSmoothNormals = false;
     BSWG.bpmRotating = false;
 
-    return ret;
+}
+
+BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, center) {
+
+    var obj = this.obj;
+    var comp = (obj ? obj.comp : null) || null;
+    var body = this.body;
+
+    if (comp) {
+        if (comp.onCC && (comp.onCC !== BSWG.game.ccblock || comp.onCC.ai)) {
+            this.enemyT += (1 - this.enemyT) * BSWG.render.dt;
+        }
+        else {
+            this.enemyT += (0 - this.enemyT) * BSWG.render.dt;
+        }
+    }
+
+    center = body.GetWorldPoint((center || body.GetLocalCenter()).clone());
+    var angle  = body.GetAngle();
+
+    var offset = BSWG.drawBlockPolyOffset || null;
+    var mesh = this.mesh;
+    var position = mesh.position;
+
+    position.x = center.x + (offset?offset.x:0);
+    position.y = center.y + (offset?offset.y:0);
+    position.z = this.zoffset;
+    mesh.rotation.z = angle + (exRot || 0);
+    mesh.updateMatrix(true);
+    mesh.updateMatrixWorld(true);
+
+    var meshS = this.meshS;
+    position = meshS.position;
+
+    position.x = center.x + (offset?offset.x:0);
+    position.y = center.y + (offset?offset.y:0);
+    position.z = this.zoffset;
+    meshS.rotation.z = angle + (exRot || 0);
+    meshS.updateMatrix(true);
+    meshS.updateMatrixWorld(true);
+
+    var uniforms = this.mat.uniforms;
+
+    uniforms.extra.value.x = texScale || 1.0;
+
+    if (anchor && (!comp || comp.onCC === BSWG.game.ccblock)) {
+        this.anchorT += (1.0 - this.anchorT) * 0.25;
+    }
+    else {
+        this.anchorT += (0.0 - this.anchorT) * 0.25;   
+    }
+
+    uniforms.extra.value.y = Math.clamp(this.anchorT, 0, 1);
+    uniforms.extra.value.z = BSWG.render.time;
+    var dmg = comp ? (1.0 - (comp.hp / comp.maxHP)) : 0.0;
+
+    uniforms.extra.value.w = dmg;
+    uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+
+    uniforms.envMapT.value = BSWG.render.envMapT;
+
+    if (comp && comp.p && comp.repairing) {
+        if (Math.pow(Math._random(), 0.25) < 0.85) {
+            var a = Math._random() * Math.PI * 2.0;
+            var r = Math._random() * (obj.radius || 1.0);
+            var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+            var p = comp.p(lp);
+            if (BSWG.componentList.atPoint(p, comp)) {
+                var v = body.GetLinearVelocityFromLocalPoint(lp).clone();
+                v.x *= 0.75;
+                v.y *= 0.75;
+                BSWG.render.boom.palette = chadaboom3D.green;
+                BSWG.render.boom.add(
+                    p.particleWrap(0.1),
+                    (Math._random()*0.5+0.1)*2,
+                    32,
+                    Math._random()*0.5+1.0,
+                    4.0,
+                    v.THREE(Math._random()*2.0),
+                    null,
+                    Math.random() < 0.25
+                );
+            }
+        }
+    }
+    if (comp &&  comp.p && dmg > 0.25) {
+        if (Math.pow(Math._random(), 0.25) < dmg) {
+            var a = Math._random() * Math.PI * 2.0;
+            var r = Math._random() * (obj.radius || 1.0);
+            var lp = new b2Vec2(Math.cos(a)*r, Math.sin(a)*r);
+            var p = comp.p(lp);
+            if (BSWG.componentList.atPoint(p, comp)) {
+                var v = body.GetLinearVelocityFromLocalPoint(lp).clone();
+                v.x *= 0.75;
+                v.y *= 0.75;
+                BSWG.render.boom.palette = chadaboom3D.fire;
+                BSWG.render.boom.add(
+                    p.particleWrap(0.1),
+                    Math._random()*0.5+0.1,
+                    32,
+                    Math._random()*0.5+1.0,
+                    4.0,
+                    v.THREE(Math._random()*2.0)
+                );
+            }
+        }
+    }
+
+    uniforms.warpIn.value -= BSWG.render.dt * 2.0;
+    if (uniforms.warpIn.value < 0.0) {
+        uniforms.warpIn.value = 0.0;
+    }
+
+    if (BSWG.game.storeMode && !BSWG.game.editMode && comp && comp.onCC === null && comp.type !== 'missile') {
+        if (uniforms.warpIn.value < 0.25) {
+            uniforms.warpIn.value += 0.6;
+        }
+    }
+
+    if (clr) {
+        uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+        this.lclr = clr;
+    }
+
+    if (this.lclr) {
+        var t = this.enemyT * 0.5;
+        var clr2 = uniforms.clr.value;
+        var br = this.lclr[0], bg = this.lclr[1], bb = this.lclr[2];
+        var r = 1, g = 0, b = 0;
+        if (BSWG.game.bossFight) {
+            r = 0.2;
+            g = b = -0.07;
+            uniforms.vreflect.value = this.reflect * 0.125;
+        }
+        else {
+            uniforms.vreflect.value = this.reflect;
+        }
+        if (comp && comp.p) {
+            if (comp.repairing) {
+                bg = Math.clamp(bg + comp.healHP, 0, 1);
+                br = Math.clamp(br - bg * 0.5, 0, 1);
+                bb = Math.clamp(bb - bg * 0.5, 0, 1);
+            }
+            if (comp.onCC) {
+                var onCC = comp.onCC;
+                if (onCC.fury) {
+                    br = (br + Math.min(onCC.fury, 1) * 0.75);
+                    bg = (bg - br * 0.5);
+                    bb = (bb - br * 0.5);
+                }
+                if (onCC.overpowered) {
+                    br = (br + Math.min(onCC.overpowered, 1) * 1.5);
+                    bg = (bg - br * 0.75);
+                    bb = (bb - br * 0.75);
+                }
+                if (onCC.defenseScreen) {
+                    bb = (bb + Math.min(onCC.defenseScreen, 1) * 0.25);
+                    bg = (bg - bb * 0.25);
+                    br = (br - bb * 0.25);
+                }
+                if (onCC.lightweight) {
+                    br = (br + Math.min(onCC.lightweight, 1) * 0.75);
+                    bg = (bg + Math.min(onCC.lightweight, 1) * 0.75);
+                    bb = (bb + Math.min(onCC.lightweight, 1) * 0.75);
+                }
+                if (onCC.massive) {
+                    br = (br - Math.min(onCC.massive, 1) * 0.65);
+                    bg = (bg - Math.min(onCC.massive, 1) * 0.65);
+                    bb = (bb - Math.min(onCC.massive, 1) * 0.65);
+                }
+                if (onCC.massive2) {
+                    br = (br - Math.min(onCC.massive2, 1) * 1.0);
+                    bg = (bg - Math.min(onCC.massive2, 1) * 1.0);
+                    bb = (bb - Math.min(onCC.massive2, 1) * 1.0);
+                }
+                if (onCC.doublePunch && comp.isMele) {
+                    br = (br + Math.min(onCC.doublePunch, 1) * 1.5);
+                    bg = (bg - br * 0.71);
+                    bb = (bb - br * 0.75);
+                }
+                if (onCC.spinUp && comp.isMele && comp.isSpinner) {
+                    br = (br + Math.min(onCC.spinUp, 1) * 1.5);
+                    bg = (bg - br * 0.75);
+                    bb = (bb - br * 0.75);
+                }
+                br = Math.clamp(br, 0, 1);
+                bg = Math.clamp(bg, 0, 1);
+                bb = Math.clamp(bb, 0, 1);
+            }
+
+        }
+        clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, this.lclr[3]*(1-this.mat.uniforms.warpIn.value));
+    }
+    else {
+        uniforms.vreflect.value = this.reflect;
+    } 
+
+    BSWG.bpmReflect = BSWG.bpmReflectDefault;
+};
+
+BSWG.blockPolyMesh.prototype.destroy = function() {
+
+    BSWG.bpmMatCache[this.matIdx].used = false;
+
+    BSWG.render.scene.remove( this.mesh );
+    BSWG.render.sceneS.remove( this.meshS );
+
+    //this.mesh.geometry.dispose();
+    //this.mesh.material.dispose();
+    this.mesh.geometry = null;
+    this.mesh.material = null;
+    this.mesh = null;
+    this.mat = null;
+    this.geom = null;
+
+    //this.meshS.material.dispose();
+    this.meshS.material = null;
+    this.meshS.geometry = null;
+    this.meshS = null;
 
 };
 
-BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
+
+BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
+
+    return new BSWG.blockPolyMesh(obj, iscale, zcenter, zoffset, depth);
+
+};
+
+BSWG.blockPolyOutline = function(obj, zcenter, oscale) {
+
+    this.obj = obj;
+    this.zcenter = zcenter;
 
     oscale = 0.1;
 
-    var ret = new Object();
-
-    var body  = obj.body,
-        verts = obj.verts;
+    this.body  = this.obj.body;
+    this.verts = this.obj.verts;
 
     /*if (BSWG.blockPolySmooth) {
-        verts = Math.smoothPoly(verts, BSWG.blockPolySmooth);
+        this.verts = Math.smoothPoly(this.verts, BSWG.blockPolySmooth);
     }*/
 
     var K = function(v) { return ',' + Math.floor(v*1000); };
     var key = '';
     if (zcenter) { key += 'a' + K(zcenter.x) + K(zcenter.y); }
-    key += 'l' + K(body.GetLocalCenter().x) + K(body.GetLocalCenter().y);
+    key += 'l' + K(this.body.GetLocalCenter().x) + K(this.body.GetLocalCenter().y);
     if (oscale) { key += 'b' + K(oscale); }
     if (BSWG.blockPolySmooth) { key += 'x' + K(BSWG.blockPolySmooth); }
-    for (var i=0; i<verts.length; i++) { key += K(verts[i].x) + K(verts[i].y); }
+    for (var i=0; i<this.verts.length; i++) { key += K(this.verts[i].x) + K(this.verts[i].y); }
 
     var cacheGeom = BSWG.bpmGeomCache[key];
 
     if (!cacheGeom) {
-        var len = verts.length;
+        var len = this.verts.length;
 
         var offset = null;
 
         if (!zcenter) {
-            zcenter = body.GetLocalCenter();
+            zcenter = this.body.GetLocalCenter();
         }
         else {
-            var bc = body.GetLocalCenter();
+            var bc = this.body.GetLocalCenter();
             offset = new b2Vec2(zcenter.x-bc.x, zcenter.y-bc.y);
         }
 
@@ -716,17 +716,17 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
             cf = 0;
         for (var i=0; i<len; i++) {
             var j = (i+1) % len;
-            var edgeLen = Math.distVec2(verts[i], verts[j]);
-            var dx = (verts[j].x - verts[i].x) / edgeLen;
-            var dy = (verts[j].y - verts[i].y) / edgeLen;
+            var edgeLen = Math.distVec2(this.verts[i], this.verts[j]);
+            var dx = (this.verts[j].x - this.verts[i].x) / edgeLen;
+            var dy = (this.verts[j].y - this.verts[i].y) / edgeLen;
             overts[cf++] = new THREE.Vector3(
-                verts[i].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
-                verts[i].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
+                this.verts[i].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
+                this.verts[i].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
                 0.001
             );
             overts[cf++] = new THREE.Vector3(
-                verts[j].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
-                verts[j].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
+                this.verts[j].x + dy * oscale + (offset ? offset.x : 0) - zcenter.x,
+                this.verts[j].y - dx * oscale + (offset ? offset.y : 0) - zcenter.y, 
                 0.001
             );
         }
@@ -739,33 +739,33 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
 
         var OUTER = function(idx) { return idx+1; };
 
-        ret.geom = new THREE.Geometry();
+        this.geom = new THREE.Geometry();
 
-        var vertices = ret.geom.vertices;
+        var vertices = this.geom.vertices;
         vertices.length = len + 1;
         vertices[0] = cvert;
         for (var i=0; i<len; i++) {
             vertices[OUTER(i)] = overts[i];
         }
 
-        var faces = ret.geom.faces;
+        var faces = this.geom.faces;
         faces.length = len;
         for (var i=0; i<len; i++) {
             var j = (i+1) % len;
             faces[i] = new THREE.Face3(OUTER(i), OUTER(j), 0);
         }
 
-        ret.geom.computeFaceNormals();
-        ret.geom = new THREE.BufferGeometry().fromGeometry(ret.geom);
-        ret.geom.computeBoundingSphere();
-        ret.geom.needsUpdate = true;
-        BSWG.bpmGeomCache[key] = ret.geom;
+        this.geom.computeFaceNormals();
+        this.geom = new THREE.BufferGeometry().fromGeometry(this.geom);
+        this.geom.computeBoundingSphere();
+        this.geom.needsUpdate = true;
+        BSWG.bpmGeomCache[key] = this.geom;
     }
     else {
-        ret.geom = cacheGeom;
+        this.geom = cacheGeom;
     }
 
-    ret.mat = BSWG.render.newMaterial("basicVertex", "selectionFragment", {
+    this.mat = BSWG.render.newMaterial("basicVertex", "selectionFragment", {
         clr: {
             type: 'v4',
             value: new THREE.Vector4(0.5, 1.0, 0.5, 0.0)
@@ -775,72 +775,73 @@ BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
             value: new THREE.Vector4(0.0, 0.0, 0.0, 0.0)
         }
     }, THREE.NormalBlending, false);
-    ret.mesh = new THREE.Mesh( ret.geom, ret.mat );
+    this.mesh = new THREE.Mesh( this.geom, this.mat );
 
-    ret.mat.needsUpdate = true;
-    ret.mesh.needsUpdate = true;
-    ret.mesh.renderOrder = 1400.0;
+    this.mat.needsUpdate = true;
+    this.mesh.needsUpdate = true;
+    this.mesh.renderOrder = 1400.0;
 
-    BSWG.render.scene.add( ret.mesh );
+    BSWG.render.scene.add( this.mesh );
 
-    var self = ret;
+    this.update();
+}
 
-    ret.update = function(clr) {
+BSWG.blockPolyOutline.prototype.update = function(clr) {
 
-        var matrix = self.mesh.matrix;
+    var matrix = this.mesh.matrix;
 
-        var center = body.GetWorldCenter(),
-            angle  = body.GetAngle();
+    var center = this.body.GetWorldCenter(),
+        angle  = this.body.GetAngle();
 
-        var offset = BSWG.drawBlockPolyOffset || null;
+    var offset = BSWG.drawBlockPolyOffset || null;
 
-        self.mesh.position.x = center.x + (offset?offset.x:0);
-        self.mesh.position.y = center.y + (offset?offset.y:0);
-        self.mesh.position.z = -0.05;
+    this.mesh.position.x = center.x + (offset?offset.x:0);
+    this.mesh.position.y = center.y + (offset?offset.y:0);
+    this.mesh.position.z = -0.05;
 
-        self.mesh.rotation.z = angle;
+    this.mesh.rotation.z = angle;
 
-        self.mesh.updateMatrix();
+    this.mesh.updateMatrix();
 
-        if (clr) {
-            self.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
-            if (clr[3] > 0) {
-                self.mesh.visible = true;
-            }
-            else {
-                self.mesh.visible = false;
-            }
+    if (clr) {
+        this.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+        if (clr[3] > 0) {
+            this.mesh.visible = true;
         }
-
-        if (obj && obj.comp && obj.comp.onCC && obj.comp.onCC.defenseScreen) {
-            var t = Math.clamp(obj.comp.onCC.defenseScreen, 0, 1);
-            var c = self.mat.uniforms.clr.value;
-            c.set(c.x*(1-t)+t*0.2, c.y*(1-t)+t*0.2, c.z*(1-t)+t, Math.max(t*0.75, c.w));
-            if (c.w > 0) {
-                self.mesh.visible = true;
-            }
+        else {
+            this.mesh.visible = false;
         }
+    }
 
-        //self.mat.needsUpdate = true;
-    };
+    if (this.obj && this.obj.comp && this.obj.comp.onCC && this.obj.comp.onCC.defenseScreen) {
+        var t = Math.clamp(this.obj.comp.onCC.defenseScreen, 0, 1);
+        var c = this.mat.uniforms.clr.value;
+        c.set(c.x*(1-t)+t*0.2, c.y*(1-t)+t*0.2, c.z*(1-t)+t, Math.max(t*0.75, c.w));
+        if (c.w > 0) {
+            this.mesh.visible = true;
+        }
+    }
 
-    ret.destroy = function() {
+    //this.mat.needsUpdate = true;
+};
 
-        BSWG.render.scene.remove( self.mesh );
+BSWG.blockPolyOutline.prototype.destroy = function() {
 
-        //self.mesh.geometry.dispose();
-        self.mesh.material.dispose();
-        self.mesh.geometry = null;
-        self.mesh.material = null;
-        self.mesh = null;
-        self.mat = null;
-        self.geom = null;
+    BSWG.render.scene.remove( this.mesh );
 
-    };
+    //this.mesh.geometry.dispose();
+    this.mesh.material.dispose();
+    this.mesh.geometry = null;
+    this.mesh.material = null;
+    this.mesh = null;
+    this.mat = null;
+    this.geom = null;
 
-    ret.update();
+};
 
-    return ret;
+BSWG.genereteBlockPolyOutline = function(obj, zcenter, oscale) {
+
+    return new BSWG.blockPolyOutline(obj, zcenter, oscale);
 
 };
 

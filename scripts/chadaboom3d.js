@@ -173,22 +173,22 @@ chadaboom3D.prototype.init = function () {
     mesh.position.z = 2.0;
     mesh.renderOrder = 1500.0;
 
-    smesh = new THREE.Mesh( geom, this.shadowMat );
+    /*smesh = new THREE.Mesh( geom, this.shadowMat );
     smesh.frustumCulled = false;
     smesh.position.z = 2.0;
-    smesh.renderOrder = 1500.0;
+    smesh.renderOrder = 1500.0;*/
 
     geom.needsUpdate = true;
     //this.mat.needsUpdate = true;
     //this.shadowMat.needsUpdate = true;
     mesh.needsUpdate = true;
-    smesh.needsUpdate = true;
+    //smesh.needsUpdate = true;
 
     BSWG.render.scene.add( mesh );
-    BSWG.render.sceneS.add( smesh );
+    //BSWG.render.sceneS.add( smesh );
 
     this.mesh = mesh;
-    this.smesh = smesh;
+    //this.smesh = smesh;
 
     this.posAttr = geom.getAttribute('position');
     this.a1Attr = geom.getAttribute('attr1');
@@ -224,7 +224,7 @@ chadaboom3D.prototype.init = function () {
 chadaboom3D.prototype.readd = function () {
 
     BSWG.render.scene.add(this.mesh);
-    BSWG.render.sceneS.add(this.smesh);
+    //BSWG.render.sceneS.add(this.smesh);
 
 };
 

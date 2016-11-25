@@ -55,8 +55,8 @@ BSWG.exaust = function (body, local, size, angle, z, palette, minigun, blasterSi
         this.mesh = new THREE.Mesh(this.geom, this.mat);
         this.mesh.renderOrder = 1600.0;
         BSWG.render.scene.add(this.mesh);
-        this.smesh = new THREE.Mesh(this.geom, this.mat.__shadowMat);
-        BSWG.render.sceneS.add(this.smesh);
+        //this.smesh = new THREE.Mesh(this.geom, this.mat.__shadowMat);
+        //BSWG.render.sceneS.add(this.smesh);
     }
 
     BSWG.exaustList.add(this);
@@ -79,9 +79,9 @@ BSWG.exaust.prototype.render = function (dt) {
         this.mesh.position.set(wp.x, wp.y, this.z);
         this.mesh.rotation.set(0., 0., a, 'ZXY');
         this.mesh.scale.set(this.size * 15, this.size * 3.5, 1.);
-        this.smesh.position.set(wp.x, wp.y, this.z);
+        /*this.smesh.position.set(wp.x, wp.y, this.z);
         this.smesh.rotation.set(0., 0., a, 'ZXY');
-        this.smesh.scale.set(this.size * 15, this.size * 3.5, 1.);
+        this.smesh.scale.set(this.size * 15, this.size * 3.5, 1.);*/
 
         wp = null;
     }
@@ -95,10 +95,10 @@ BSWG.exaust.prototype.destroy = function () {
         this.mesh = null;
     }
 
-    if (this.smesh) {
+    /*if (this.smesh) {
         BSWG.render.sceneS.remove(this.smesh);
         this.smesh = null;
-    }
+    }*/
 
     if (this.mat) {
         this.mat.__used = false;
