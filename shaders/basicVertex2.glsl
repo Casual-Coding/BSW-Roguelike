@@ -8,7 +8,7 @@ varying vec4 vSPosition;
 varying float vFragDepth;
 varying highp vec4 vShadowCoord;
 varying vec2 vN;
-uniform mat4 shadowMatrix, shadowViewMatrix;
+uniform mat4 shadowMatrix;
 
 void main() {
 
@@ -25,5 +25,5 @@ void main() {
     biasMatrix[1] = vec4(0.0, 0.5, 0.0, 0.0);
     biasMatrix[2] = vec4(0.0, 0.0, 0.5, 0.0);
     biasMatrix[3] = vec4(0.5, 0.5, 0.5, 1.0);
-    vShadowCoord = (biasMatrix * (shadowMatrix * shadowViewMatrix)) * (modelMatrix * vec4(position, 1.0)) + vec4(1./2048., 1./4096., 0., 0.);
+    vShadowCoord = (biasMatrix * shadowMatrix) * (modelMatrix * vec4(position, 1.0)) + vec4(1./2048., 1./4096., 0., 0.);
 }

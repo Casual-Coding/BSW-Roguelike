@@ -8,7 +8,6 @@ varying mat3 vNormalMatrix;
 uniform sampler2D map;
 uniform sampler2D envMap, envMap2;
 uniform float envMapT;
-uniform vec4 light;
 uniform vec4 clr;
 uniform vec4 extra;
 uniform vec2 viewport;

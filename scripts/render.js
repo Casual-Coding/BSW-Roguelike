@@ -270,7 +270,6 @@ BSWG.render = new function() {
         this.cam3DS.updateProjectionMatrix();
         this.cam3DS.position.z = 10.0;
         this.shadowMatrix = THREE.CACHE(new THREE.Matrix4());
-        this.shadowViewMatrix = THREE.CACHE(new THREE.Matrix4());
         this.sceneS = new THREE.Scene();
 
         this.shadowMap = new THREE.WebGLRenderTarget(BSWG.shadowMapSize, BSWG.shadowMapSize, {
@@ -678,10 +677,9 @@ BSWG.render = new function() {
             self.renderer.sortObjects = true;
 
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
-            self.shadowViewMatrix.copy(self.cam3DS.matrixWorldInverse);
+            self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
             
             self.shadowMatrix.CACHE();
-            self.shadowViewMatrix.CACHE();
             self.cloudColor.CACHE();
             self.envMapTint.CACHE();
             self.envMapParam.CACHE();
@@ -976,10 +974,6 @@ BSWG.render = new function() {
                 type: 'v4',
                 value: new THREE.Vector4(clr[0], clr[1], clr[2], clr[3])
             },
-            light: {
-                type: 'v4',
-                value: new THREE.Vector4(BSWG.game.cam.x, BSWG.game.cam.y, 20.0, 1.0)
-            },
             map: {
                 type: 't',
                 value: BSWG.render.images['test_nm'].texture
@@ -1086,10 +1080,6 @@ BSWG.render = new function() {
                 //this.shadowMesh.scale.set(this.mesh.scale.x, this.mesh.scale.y, this.mesh.scale.z);
                 //this.shadowMesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
                 //this.shadowMesh.updateMatrix();
-
-                this.mat.uniforms.light.value.x = lp.x;
-                this.mat.uniforms.light.value.y = lp.y;
-                this.mat.uniforms.light.value.z = BSWG.render.cam3D.position.z * 7.0;
 
                 if (fixedTScale) {
                     this.mat.uniforms.extra.value.x = fixedTScale;

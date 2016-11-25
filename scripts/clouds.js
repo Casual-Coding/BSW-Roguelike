@@ -165,10 +165,6 @@ BSWG.cloudMap = new function (){
                             type: 'm4',
                             value: BSWG.render.shadowMatrix
                         },
-                        shadowViewMatrix: {
-                            type: 'm4',
-                            value: BSWG.render.shadowViewMatrix
-                        },
                         envMapTint: {
                             type: 'v4',
                             value: BSWG.render.envMapTint

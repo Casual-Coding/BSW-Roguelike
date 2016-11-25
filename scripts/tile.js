@@ -256,10 +256,6 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 type: 'm4',
                 value: BSWG.render.shadowMatrix
             },
-            shadowViewMatrix: {
-                type: 'm4',
-                value: BSWG.render.shadowViewMatrix
-            },
             extra: {
                 type: 'v4',
                 value: new THREE.Vector4(BSWG.render.time, 1., nmapAmp || 1.0, nmapScale || 1.0)
@@ -327,10 +323,6 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
             shadowMatrix: {
                 type: 'm4',
                 value: BSWG.render.shadowMatrix
-            },
-            shadowViewMatrix: {
-                type: 'm4',
-                value: BSWG.render.shadowViewMatrix
             },
             shadowMap: {
                 type: 't',

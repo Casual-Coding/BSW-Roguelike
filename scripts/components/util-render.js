@@ -159,10 +159,6 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                         type: 'm4',
                         value: BSWG.render.shadowMatrix
                     },
-                    shadowViewMatrix: {
-                        type: 'm4',
-                        value: BSWG.render.shadowViewMatrix
-                    },
                     shadowMap: {
                         type: 't',
                         value: BSWG.render.shadowMap.depthTexture
@@ -364,10 +360,6 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                 shadowMatrix: {
                     type: 'm4',
                     value: BSWG.render.shadowMatrix
-                },
-                shadowViewMatrix: {
-                    type: 'm4',
-                    value: BSWG.render.shadowViewMatrix
                 },
                 shadowMap: {
                     type: 't',
