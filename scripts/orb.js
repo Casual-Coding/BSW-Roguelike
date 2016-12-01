@@ -141,7 +141,7 @@ BSWG.orb.prototype.updateRender = function (dt) {
     this.mat.uniforms.envMapT.value = BSWG.render.envMapT;
 
     this.active = false;
-    if (Math.abs(this.pos.x - BSWG.game.cam.x) < 100 && Math.abs(this.pos.y - BSWG.game.cam.y) < 100 && !BSWG.game.battleMode) {
+    if (Math.abs(this.pos.x - BSWG.game.cam.x) < 100 && Math.abs(this.pos.y - BSWG.game.cam.y) < 100 && !BSWG.game.battleMode && BSWG.game.inZone && !(BSWG.game.inZone.boss && !BSWG.game.inZone.bossDefeated)) {
         for (var k=0; k<8; k++) {
             var a = (this.time + Math.random() * dt) * 3.0;
             if (Math.random() < 0.5) {

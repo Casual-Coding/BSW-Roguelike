@@ -3,7 +3,7 @@ BSWG.map_minZoneEdgeDist = 20; // Minimum distance allowed from a zone center to
 BSWG.map_gridSize        = 24.0; // overwritte as BSWG.tileSizeWorld
 BSWG.map_flPlanetDist    = 0.9; // * size
 BSWG.map_minPlanetDist   = 30; // Minimum distance allowed between planets
-BSWG.map_planetSafeDist  = 8; // Size of zone surrounding planet
+BSWG.map_planetSafeDist  = 5; // Size of zone surrounding planet
 
 BSWG.enemySettings_compToStr = function (obj) {
     var str = obj.type;
@@ -1034,7 +1034,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
     };
 
     ret.resetTickSpawner = function(zone) {
-        this.nextEnemyDistance = (4 + Math.random() * 3) * this.gridSize;
+        this.nextEnemyDistance = (4 + Math.random() * 2) * this.gridSize;
     };
     ret.resetTickSpawner(null);
 
@@ -1048,7 +1048,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
                 this.nextEnemyDistance -= Math.distVec2(lastP, p) * (BSWG.game.battleMode ? 0.35 : 1.0) * (zone.boss ? 2.0 : 1.0);
             }
             lastP = p.clone();
-            if (zone !== lastZ) {
+            if (zone !== lastZ || (!BSWG.game.battleMode && BSWG.orbList.atSafe())) {
                 lastZ = zone;
                 this.resetTickSpawner(zone)
                 return -1;

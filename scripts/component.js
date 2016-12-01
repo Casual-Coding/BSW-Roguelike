@@ -410,7 +410,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
         noMin = true;
     }
 
-    if (!disolve && this.onCC !== BSWG.game.ccblock && !BSWG.game.battleMode && fromC && fromC.onCC === BSWG.game.ccblock) {
+    if (this.onCC && !disolve && this.onCC !== BSWG.game.ccblock && !BSWG.game.battleMode && fromC && fromC.onCC === BSWG.game.ccblock) {
         BSWG.game.battleMode = true;
     }
 
@@ -535,6 +535,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
                     var xpBase = (BSWG.levelXpPer[level] || 0.2) * bias;
                     var totalXP = xpi.xpi * xpBase;
 
+                    totalXP /= 4.0;
                     totalXP *= this.xpBase ? this.xpBase : 0.01;
                     totalXP = Math.floor(totalXP);
 

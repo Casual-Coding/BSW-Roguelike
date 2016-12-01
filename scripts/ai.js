@@ -657,16 +657,28 @@ BSWG.aiBase.prototype.patrol = function(dt, keyDown) {
                 charge: false,
                 hinge: true
             }
-        );        
-        this.__sensor = this.make_sensor(
-            'radius',
-            {
-                comp: CC,
-                angle: [ -Math.PI/6, Math.PI/6 ],
-                distance: [ 0, 24 ],
-                enemy: true
-            }
         );
+        if (BSWG.game.inZone && BSWG.game.inZone.boss) {
+            this.__sensor = this.make_sensor(
+                'radius',
+                {
+                    comp: CC,
+                    distance: [ 0, 24 ],
+                    enemy: true
+                }
+            );
+        }
+        else {
+            this.__sensor = this.make_sensor(
+                'radius',
+                {
+                    comp: CC,
+                    angle: [ -Math.PI/6, Math.PI/6 ],
+                    distance: [ 0, 20 ],
+                    enemy: true
+                }
+            );
+        }
         this.origin = CC.p().clone();
         this.__tp = null;
     }

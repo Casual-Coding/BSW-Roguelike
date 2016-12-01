@@ -352,13 +352,12 @@ BSWG.game = new function(){
         }
 
         var p = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetWorldCenter().clone() : new b2Vec2(0, 0);
-        var arange = Math.PI / 1.5;
-        var minr = 35.5, maxr = 62.5;
+        var arange = Math.PI / 4;
+        var minr = 40.0, maxr = 67.5;
 
         if (boss) {
             minr *= 1.5;
             maxr *= 1.5;
-            arange *= 0.65;
         }
 
         if (this.scene === BSWG.SCENE_TITLE) {
@@ -388,6 +387,10 @@ BSWG.game = new function(){
                             p.x + Math.cos(a + arange * ta) * ((maxr-minr)*tr + minr),
                             p.y + Math.sin(a + arange * ta) * ((maxr-minr)*tr + minr)
                         );
+
+                        if (self.map && self.map.getZone(p2) !== self.inZone) {
+                            continue;
+                        }
 
                         if (self.scene === BSWG.SCENE_TITLE) {
                             var _a = (i/1) * Math.PI;
@@ -2831,7 +2834,7 @@ BSWG.game = new function(){
 
                 var ccs = BSWG.componentList.allCCs();
                 for (var i=0; i<ccs.length; i++) {
-                    if (ccs[i] !== self.ccblock && !ccs[i].destroyed) {
+                    if (ccs[i] !== self.ccblock && !ccs[i].destroyed && self.battleMode) {
                         var p = self.map.worldToMap(ccs[i].obj.body.GetWorldCenter());
                         ctx.fillStyle = '#000';
                         ctx.globalAlpha = Math.sin(Date.timeStamp() * Math.PI * 7) * 0.5 + 0.5;

@@ -32,7 +32,7 @@ BSWG.component_CommandCenter = {
 
     maxHP: 100,
     calcMaxEnergy: function() {
-        return Math.round(100 + 100 * this.level() / 5) * (this === BSWG.game.ccblock ? 1 : 10);
+        return Math.round(50 + 100 * this.level() / 5) * (this === BSWG.game.ccblock ? 1 : 10);
     },
 
     sortOrder: 2,
