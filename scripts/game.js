@@ -1,3 +1,5 @@
+BSWG.maxCCs = 4; // 3 enemies + player
+
 BSWG.grabSlowdownDist      = 0.5;
 BSWG.grabSlowdownDistStart = 3.0;
 BSWG.maxGrabDistance       = 45.0;
@@ -341,19 +343,22 @@ BSWG.game = new function(){
 
     this.spawnEnemies = function (list, boss) {
 
+        if (boss && BSWG.componentList.allCCs().length > 1) {
+            return;
+        }
+
         if (this.scene !== BSWG.SCENE_TITLE && (!this.ccblock || this.ccblock.destroyed)) {
             return;
         }
 
         var p = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetWorldCenter().clone() : new b2Vec2(0, 0);
-        var arange = Math.PI;
-        var minr = 27.5, maxr = 42.5;
+        var arange = Math.PI / 1.5;
+        var minr = 35.5, maxr = 62.5;
 
         if (boss) {
-            p = new b2Vec2(this.inZone.worldP.x, this.inZone.worldP.y);
-            arange = Math.PI * 2.0;
-            minr = 0.0;
-            maxr = 32.5;
+            minr *= 1.5;
+            maxr *= 1.5;
+            arange *= 0.65;
         }
 
         if (this.scene === BSWG.SCENE_TITLE) {
@@ -361,10 +366,6 @@ BSWG.game = new function(){
         }
         var v = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetLinearVelocity().clone() : new b2Vec2(0, 0);
         var a = Math.atan2(v.y, v.x);
-
-        if (boss) {
-            a = 0.0;
-        }
 
         var self = this;
 
@@ -374,6 +375,9 @@ BSWG.game = new function(){
             window.setTimeout(function(i){
                 return function () {
                     self.spawnCount -= 1;
+                    if (BSWG.componentList.allCCs().length >= BSWG.maxCCs) {
+                        return;
+                    }
                     var aiship = null;
                     var k = 32;
                     while (!aiship && (k--) > 0) {
@@ -396,14 +400,6 @@ BSWG.game = new function(){
                             aiship.title = list[i][0].title;
                             window.setTimeout(function(ais){
                                 return function() {
-                                    if (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) {
-                                        if (!boss) {
-                                            var v = BSWG.game.ccblock.obj.body.GetLinearVelocity().clone();
-                                            v.x *= 0.85;
-                                            v.y *= 0.85;
-                                            ais.setVelAll(v);                                           
-                                        }
-                                    }
                                     ais.reloadAI();
                                 };
                             }(aiship), 111);
@@ -427,7 +423,7 @@ BSWG.game = new function(){
 
             var obj = new Object();
             obj.map = this.map.serialize();
-            obj.comp = BSWG.componentList.serialize(null, true);
+            obj.comp = BSWG.componentList.serialize(BSWG.game.ccblock, false, null, true);
             obj.xpInfo = this.xpInfo.serialize();
             obj.specials = BSWG.specialList.serialize();
             obj.buttonBinds = this.buttonBinds;
@@ -652,7 +648,7 @@ BSWG.game = new function(){
         else {
             BSWG.render.envMap = BSWG.render.images['env-map-1'];
             BSWG.render.envMap2 = BSWG.render.images['env-map-4'];
-            BSWG.render.cloudColor.set(1.4, 1.4, 1.4, 1.0);
+            BSWG.render.cloudColor.set(0.95, 0.95, 1.0, 1.0);
             BSWG.cloudMap.noClouds = false;
             BSWG.cloudMap.cloudZOffset = 5;
         }
@@ -1781,6 +1777,7 @@ BSWG.game = new function(){
                         if (e && e.obj) {
                             self.titleSpawn = true;
                             self.spawnEnemies([[e.obj, 8], [e.obj, 8]]);
+                            self.battleMode = true;
                         }
                     }
 
@@ -1821,7 +1818,7 @@ BSWG.game = new function(){
 
                         if (!self.editCam) {
 
-                            var ccs = BSWG.componentList.allCCs();
+                            var ccs = self.battleMode ? BSWG.componentList.allCCs() : [self.ccblock];
                             var avgDist = 0.0;
                             var avgP = new b2Vec2(0, 0);
                             var w = 0;
@@ -2044,7 +2041,9 @@ BSWG.game = new function(){
                     self.grabbedBlock = grabbedBlock;
 
                     if (self.ccblock && !self.ccblock.ai && !BSWG.ui_DlgBlock) {
-                        BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
+                        if (!self.dialogPause) {
+                            BSWG.componentList.handleInput(self.ccblock, BSWG.input.getKeyMap());
+                        }
                     }
                     break;
 
@@ -2544,45 +2543,46 @@ BSWG.game = new function(){
                 self.levelUpBtn.h = self.hudY(self.hudBtn[20][3]) - self.levelUpBtn.p.y - 4;
             }
 
-            /*if (self.healBtn) {
-                self.healBtn.p.x = self.hudX(self.hudBtn[9][0]) + 2;
-                self.healBtn.p.y = self.hudY(self.hudBtn[9][1]) + 2;
-                self.healBtn.w = self.hudX(self.hudBtn[9][2]) - self.healBtn.p.x - 4;
-                self.healBtn.h = self.hudY(self.hudBtn[9][3]) - self.healBtn.p.y - 4;
-            }*/
-
             self.updateHUD(dt);
 
             BSWG.ai.update(ctx, dt);
 
             if (self.map && self.ccblock && !self.ccblock.destroyed) {
                 var p = self.ccblock.obj.body.GetWorldCenter().clone();
-                var ret = self.map.tickSpawner(dt, p);
+                var v = self.ccblock.obj.body.GetLinearVelocity().clone();
 
-                if (self.battleMode && self.spawnCount === 0) {
+                if (self.spawnCount === 0) {
                     var ccs = BSWG.componentList.allCCs();
-                    if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
-                        if (self.bossFight && self.inZone === self.bossZone) {
-                            self.bossZone.bossDefeated = true;
-                            if (self.inZone.boss.wdialog) {
-                                BSWG.game.linearDialog(self.inZone.boss.wdialog, false);
+                    if (self.battleMode) {
+                        if ((ccs.length - (self.ccblock && !self.ccblock.destroyed ? 1 : 0)) === 0) {
+                            if (self.bossFight && self.inZone === self.bossZone) {
+                                self.bossZone.bossDefeated = true;
+                                if (self.inZone.boss.wdialog) {
+                                    BSWG.game.linearDialog(self.inZone.boss.wdialog, false);
+                                }
+                            }
+                            self.battleMode = false;
+                            self.bossFight = false;
+                        }
+                    }
+
+                    if (!self.bossFight) {
+                        var escapeDistance = self.map.gridSize * 4.0 / 1.35;
+                        /*if (!self.battleMode) {
+                            escapeDistance /= 1.1;
+                        }*/
+                        for (var i=0; i<ccs.length; i++) {
+                            if (self.ccblock && self.ccblock.id !== ccs[i].id && (ccs[i].obj && ccs[i].obj.body && Math.distVec2(ccs[i].obj.body.GetWorldCenter(), self.ccblock.obj.body.GetWorldCenter()) > escapeDistance)) {
+                                ccs[i].warpOut();
                             }
                         }
-                        self.battleMode = false;
-                        self.bossFight = false;
-                        //window.gc();
                     }
-                    for (var i=0; i<ccs.length; i++) {
-                        if (self.ccblock && self.ccblock.id !== ccs[i].id && (ccs[i].obj && ccs[i].obj.body && Math.distVec2(ccs[i].obj.body.GetWorldCenter(), self.ccblock.obj.body.GetWorldCenter()) > self.map.escapeDistance)) {
-                            ccs[i].warpOut();
-                        }
-                    }
+                    ccs = null;
                 }
 
-                if (ret === null) {
-                    // nop
-                }
-                else if (ret === 'escape' && self.battleMode) {
+                var ret = self.map.tickSpawner(dt, p, v);
+
+                if (ret === -1) {
                     var ccs = BSWG.componentList.allCCs();
                     for (var i=0; i<ccs.length; i++) {
                         if (self.ccblock && self.ccblock.id !== ccs[i].id) {
@@ -2590,50 +2590,18 @@ BSWG.game = new function(){
                         }
                     }
                 }
-                else if (typeof ret !== 'string') {
-                    if (self.inZone.boss) {
-                        var enemies = [];
-                        for (var i=0; i<ret.length; i++) {
-                            var e = BSWG.getEnemy(ret[i].type);
-                            var title = self.inZone.boss.who < 0 ? 'Mom' : ('Zef #' + (self.inZone.boss.who+1));
-                            e.obj.title = title + ' ( ' + e.obj.title + ' )';
-                            if (e && e.obj) {
-                                enemies.push([
-                                    e.obj,
-                                    BSWG.pickEnemyLevel(self.inZone, ret[i])
-                                ]);
-                            }
+                else if (ret === 1) {
+                    var enemies = self.map.getEnemyForPos(p);
+                    if (enemies && enemies.length) {
+                        if (self.inZone.boss) {
+                            self.bossFight = true;
+                            self.bossZone = self.inZone;
+                            self.spawnEnemies(enemies, true);
                         }
-                        self.battleMode = true;
-                        self.bossFight = true;
-                        self.bossZone = self.inZone;
-                        self.spawnEnemies(enemies, true);
-                    }
-                    else {
-                        var enemies = [];
-                        var e = BSWG.getEnemy(ret.type);
-                        if (e && e.obj) {
-                            enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
-                            //ret.max = 4;
-                            if (ret.max && ret.max > 0) {
-                                for (var i=0; i<(ret.max-1); i++) {
-                                    if (Math.random() < 0.5) {
-                                        enemies.push([e.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
-                                    }
-                                }
-                            }
-                            if (ret.with && ret.with.length) {
-                                for (var i=0; i<ret.with.length; i++) {
-                                    var ew = BSWG.getEnemy(ret.with[i]);
-                                    if (ew && ew.obj) {
-                                        enemies.push([ew.obj, BSWG.pickEnemyLevel(self.inZone, ret)]);
-                                    }
-                                }
-                            }
+                        else {
+                            self.bossFight = false;
+                            self.spawnEnemies(enemies, false);
                         }
-                        self.battleMode = true;
-                        self.bossFight = false;
-                        self.spawnEnemies(enemies);
                     }
                 }
             }
@@ -2663,10 +2631,20 @@ BSWG.game = new function(){
                 ctx.fillRect(X, Y, W, H);
                 ctx.globalAlpha = 1.0;
 
-                ctx.fillStyle = '#050';
+                var grd=ctx.createLinearGradient(X, Y, X+W, Y);
+                grd.addColorStop(0,"#000");
+                grd.addColorStop(1,'#0b0');
+                ctx.fillStyle = grd;
                 ctx.globalAlpha = 0.75;
                 ctx.fillRect(X+1, Y+1, W*lstat.t-2, H-2);
                 ctx.globalAlpha = 1.0;
+
+                var grd=ctx.createLinearGradient(X, Y, X, Y+H);
+                grd.addColorStop(0,"rgba(127, 127, 127, 0.125)");
+                grd.addColorStop(0.5,"rgba(255, 255, 255, 0.35)");
+                grd.addColorStop(1,"rgba(0, 0, 0, 0.125)");
+                ctx.fillStyle = grd;
+                ctx.fillRect(X+1, Y+1, W*lstat.t-2, H-2);
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
@@ -2694,10 +2672,20 @@ BSWG.game = new function(){
                 ctx.fillRect(X, Y, W, H);
                 ctx.globalAlpha = 1.0;
 
-                ctx.fillStyle = '#005';
+                var grd=ctx.createLinearGradient(X, Y, X+W, Y);
+                grd.addColorStop(0,"#000");
+                grd.addColorStop(1,'#00b');
+                ctx.fillStyle = grd;
                 ctx.globalAlpha = 0.75;
                 ctx.fillRect(X+1, Y+1, W*t-2, H-2);
                 ctx.globalAlpha = 1.0;
+
+                var grd=ctx.createLinearGradient(X, Y, X, Y+H);
+                grd.addColorStop(0,"rgba(127, 127, 127, 0.0)");
+                grd.addColorStop(0.5,"rgba(255, 255, 255, 0.25)");
+                grd.addColorStop(1,"rgba(0, 0, 0, 0.0)");
+                ctx.fillStyle = grd;
+                ctx.fillRect(X+1, Y+1, W*t-2, H-2);
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';

@@ -51,7 +51,7 @@ void main() {
     vec4 clrdn = texture2D(dmgMap, vLocal.xy * 0.1 + vec2(0.5, 0.5));
     vec3 tNormal = reflect(normalize(vNormalMatrix * (normalize(clrn.xyz) * 2.0 - vec3(1.0, 1.0, 1.0))), normalize(vNormal)) * vec3(-1.0, 1.0, 1.0);
     vec3 tNormald = reflect(normalize(vNormalMatrix * (normalize(clrdn.xyz) * 2.0 - vec3(1.0, 1.0, 1.0))), normalize(vNormal)) * vec3(-1.0, 1.0, 1.0);
-    vec3 lightDir = normalize(vec3(10., 0, 3.));
+    vec3 lightDir = normalize(vec3(10., 0, 1.5));
 
     float l0 = (clrn.a + clrdn.a*dmg)/(1.0+dmg) * 0.35 + 0.65;
     float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 0.5);

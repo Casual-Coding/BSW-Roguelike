@@ -442,6 +442,10 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
 BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, center) {
 
+    if (BSWG.game.dialogPause) {
+        anchor = false;
+    }
+
     var obj = this.obj;
     var comp = (obj ? obj.comp : null) || null;
     var body = this.body;

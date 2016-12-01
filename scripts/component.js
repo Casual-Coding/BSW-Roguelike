@@ -410,6 +410,10 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
         noMin = true;
     }
 
+    if (!disolve && this.onCC !== BSWG.game.ccblock && !BSWG.game.battleMode && fromC && fromC.onCC === BSWG.game.ccblock) {
+        BSWG.game.battleMode = true;
+    }
+
     if (BSWG.game.scene === BSWG.SCENE_TITLE || this.type === 'missile') {
         return amt;
     }
@@ -2073,25 +2077,10 @@ BSWG.componentList = new function () {
     };
 
     this.withinRadiusPlayerOnly = function (p, r) {
-        if (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body) {
+        var C = BSWG.game.ccblock;
+        if (!C || !C.obj || !C.obj.body) {
             return [];
         }
-        /*var ret = [];
-        var len = this.playerComps.length;
-        for (var i=0; i<len; i++) {
-            var C = this.playerComps[i];
-            if (C) {
-                var p2 = C.obj.body.GetWorldCenter();
-                var dist = Math.pow(p2.x - p.x, 2.0) +
-                           Math.pow(p2.y - p.y, 2.0);
-                if (dist < Math.pow(r+C.obj.radius, 2.0)) {
-                    ret.push(C);
-                }
-            }
-        }
-        
-        return ret;*/
-        var C = BSWG.game.ccblock;
         var p2 = C.obj.body.GetWorldCenter();
         var dist = Math.pow(p2.x - p.x, 2.0) +
                    Math.pow(p2.y - p.y, 2.0);
@@ -2410,7 +2399,7 @@ BSWG.componentList = new function () {
     };
 
     // returns JSON
-    this.serialize = function(onCC, everything, fromList) {
+    this.serialize = function(onCC, everything, fromList, andOrphan) {
 
         var comps = fromList || [];
 
@@ -2420,7 +2409,7 @@ BSWG.componentList = new function () {
             for (var i=0; i<this.compList.length; i++) {
                 var C = this.compList[i];
 
-                if (C.serialize && (everything || C.onCC === onCC)) {
+                if (C.serialize && (everything || C.onCC === onCC || (andOrphan && C.onCC === null))) {
                     comps.push(C);
                 }
             }

@@ -44,7 +44,7 @@ void main() {
     vec3 lightDir = normalize(vec3(10., 0, 3.));
     vec3 tNormal = normalize(reflect(normalize(vNormalMatrix * (clrw.xyz * 2.0 - vec3(1.0, 1.0, 1.0))), vNormalMatrix * normalize(vec3(vUv * 2.0 - vec2(1.0, 1.0), -1.))) * vec3(1.0, 1.0, 1.0));
     
-    float l = max(dot(tNormal, lightDir), 0.0) * 0.5 + 0.5;
+    float l = max(dot(tNormal, lightDir), 0.0) * 0.25 + 0.75;
     gl_FragColor = vec4(clr.rgb*l*pow(clrw.a, 0.2)*1.5, pow(clrw.a, 0.25));
 
     if (gl_FragColor.a < .15) {

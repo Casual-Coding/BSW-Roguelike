@@ -11,7 +11,7 @@ BSWG.tMask = {
     D: 8
 };
 
-BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale, nmapAmp, reflect, zscale) {
+BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap) {
 
     var _color = [ color[0], color[1], color[2], color[3] ];
 
@@ -20,18 +20,6 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     }
 
     var self = this;
-    this.heightMap = new Float32Array(BSWG.tileSize * BSWG.tileSize);
-
-    this.normalMap = BSWG.render.proceduralImage(BSWG.tileSize, BSWG.tileSize, function(ctx, w, h){
-        ctx.drawImage(image, imgX, imgY, BSWG.tileSize, BSWG.tileSize, 0, 0, BSWG.tileSize, BSWG.tileSize);
-        var imgData = ctx.getImageData(0, 0, w, h);
-        for (var i=0; i<imgData.data.length; i+=4) {
-            self.heightMap[~~(i/4)] = imgData.data[i+0];
-        }
-        imgData.data.length = 0;
-        imgData = null;
-    }, true);
-
     var mSize = water ? 2 : BSWG.tileMeshSize;
     this.geom = new THREE.PlaneBufferGeometry(BSWG.tileSizeWorld, BSWG.tileSizeWorld, mSize, mSize);
     var verts = this.geom.attributes.position;
@@ -40,28 +28,36 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     var gSize = BSWG.tileSize / mSize;
     var sSize = BSWG.tileSizeWorld / BSWG.tileSize;
 
-    if (water) {
-        //sSize *= 10.0;
-    }
-
     var offset = 0;
 
-    for (var iy = 0; iy <= BSWG.tileSize; iy += gSize) {
-        for (var ix = 0; ix <= BSWG.tileSize; ix += gSize) {
+    var x, y, x2, y2, z, ix, iy;
 
-            var x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 1.00005 / BSWG.tileSize));
-            var y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 1.00005 / BSWG.tileSize));
-
-            var x2 = ~~(ix / (BSWG.tileSize) * (BSWG.tileSize-0.001));
-            var y2 = ~~(iy / (BSWG.tileSize) * (BSWG.tileSize-0.001));
-
-            var z = zscale * BSWG.tileHeightWorld * self.heightMap[x2 + y2*BSWG.tileSize]/255;
-
-            verts.array[offset+0] = x;
-            verts.array[offset+1] = y;
+    if (water) {
+        z = zscale * BSWG.tileHeightWorld * water;
+        for (offset = 0; offset < verts.array.length; offset += 3) {
             verts.array[offset+2] = z;
-          
-            offset += 3;
+        }
+    }
+    else {
+        for (iy = 0; iy <= mSize; iy += gSize) {
+            for (ix = 0; ix <= mSize; ix += gSize) {
+
+                x = (ix * sSize - sSize*0.5) * (1 + (water ? 0 : 0.25 / BSWG.tileMeshSize));
+                y = (-(iy * sSize - sSize*0.5)) * (1 + (water ? 0 : 0.25 / BSWG.tileMeshSize));
+                x2 = ix + imgX;
+                y2 = iy + imgY;
+
+                z = 0.0;
+                if (x2 >= 0 && y2 >= 0 && x2 < (BSWG.tileSize*3) && y2 < (BSWG.tileSize*3)) {
+                    z = zscale * BSWG.tileHeightWorld * heightMap[x2 + y2*(BSWG.tileSize*3)]/255;
+                }
+
+                verts.array[offset+0] = x;
+                verts.array[offset+1] = y;
+                verts.array[offset+2] = z;
+              
+                offset += 3;
+            }
         }
     }
 
@@ -122,7 +118,7 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                 var mask = tileMask;
 
                 var x2=0, y2=0;
-                var _f = 1 + (water ? 0 : 1.005 / BSWG.tileSize);
+                var _f = 1 + (water ? 0 : 0.25 / BSWG.tileMeshSize);
                 var _c1 = (mask & 1) && (mask & 2);
                 var _c2 = (mask & 2) && (mask & 1);
                 var _c3 = (mask & 4) && (mask & 8);
@@ -136,40 +132,33 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
                     ret.x = (X * sSize - sSize*0.5) * _f;
                     ret.y = -(Y * sSize - sSize*0.5) * _f;
 
-                    if (_c1 && X<0) {
-                        X = (((X/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
+                    var x2, y2;
+                    if (water) {
+                        x2 = 0;
+                        y2 = 0;
                     }
-                    else if (X<0) {
-                        X = 0;
+                    else {
+                        x2 = X + imgX;
+                        y2 = Y + imgY;
+
+                        if (X < 0 && imgX === BSWG.tileSize) {
+                            x2 += BSWG.tileSize;
+                        }
+                        if (Y < 0 && imgY === BSWG.tileSize) {
+                            y2 += BSWG.tileSize;
+                        }
+                        if (X >= BSWG.tileSize && imgX === BSWG.tileSize) {
+                            x2 -= BSWG.tileSize;
+                        }
+                        if (Y >= BSWG.tileSize && imgY === BSWG.tileSize) {
+                            y2 -= BSWG.tileSize;
+                        }
                     }
 
-                    if (_c2 && (X/gSize)>mSize) {
-                        X = (((X/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
+                    ret.z = 0.0;
+                    if (x2 >= 0 && y2 >= 0 && x2 < (BSWG.tileSize*3) && y2 < (BSWG.tileSize*3)) {
+                        ret.z = zscale * BSWG.tileHeightWorld * heightMap[x2 + y2*(BSWG.tileSize*3)]/255;
                     }
-
-                    else if ((X/gSize)>mSize) {
-                        X = mSize*gSize;
-                    }
-
-                    if (_c3 && Y<0) {
-                        Y = (((Y/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
-                    }
-                    else if (Y<0) {
-                        Y = 0;
-                    }
-
-                    if (_c4 && (Y/gSize)>mSize) {
-                        Y = (((Y/gSize) + (mSize+1) * 100) % (mSize+1)) * gSize;
-                    }
-                    else if ((Y/gSize)>mSize) {
-                        Y = mSize*gSize;
-                    }
-
-                    x2 = ~~(X / BSWG.tileSize * (BSWG.tileSize-0.001));
-                    y2 = ~~(Y / BSWG.tileSize * (BSWG.tileSize-0.001));
-
-                    ret.z = BSWG.tileHeightWorld * self.heightMap[x2 + y2*BSWG.tileSize]/255;
-
                 };
 
                 var off = [
@@ -217,7 +206,12 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     };
 
     this.geom.computeFaceNormals();
-    this.geom.computeVertexNormalsTile();
+    if (water) {
+        this.geom.computeVertexNormals();
+    }
+    else {
+        this.geom.computeVertexNormalsTile();
+    }
     this.geom.computeBoundingBox();
 
     var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
@@ -385,10 +379,6 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
         this.geom = null;
         this.mat.dispose();
         this.mat = null;
-        this.heightMap.length = 0;
-        this.heightMap = null;
-        this.normalMap.destroy();
-        this.normalMap = null;
     };
 
 };
@@ -466,7 +456,7 @@ BSWG.tileMap = function (layers, zoff) {
         if (mmtCache[key]) {
             return mmtCache[key];
         }
-        var hm = this.sets[tileset].tiles[1][1].heightMap;
+        var hm = this.sets[tileset].heightMap;
         return mmtCache[key] = BSWG.render.proceduralImage(size, size, function(ctx, w, h){
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, w, h);
@@ -475,14 +465,14 @@ BSWG.tileMap = function (layers, zoff) {
             var minh = 1, maxh = 0;
             for (var x=0; x<w; x++) {
                 for (var y=0; y<h; y++) {
-                    var height = hm[x*BSWG.tileSize/BSWG.minimapTileSize + (y*BSWG.tileSize/BSWG.minimapTileSize) * BSWG.tileSize] / 256.0;
+                    var height = hm[x*BSWG.tileSize/BSWG.minimapTileSize+BSWG.tileSize + (y*BSWG.tileSize/BSWG.minimapTileSize+BSWG.tileSize) * BSWG.tileSize] / 256.0;
                     minh = Math.min(height, minh);
                     maxh = Math.max(height, maxh);
                 }
             }
             for (var x=0; x<w; x++) {
                 for (var y=0; y<h; y++) {
-                    var height = hm[x*BSWG.tileSize/BSWG.minimapTileSize + (y*BSWG.tileSize/BSWG.minimapTileSize) * BSWG.tileSize] / 256.0;
+                    var height = hm[x*BSWG.tileSize/BSWG.minimapTileSize+BSWG.tileSize + (y*BSWG.tileSize/BSWG.minimapTileSize+BSWG.tileSize) * BSWG.tileSize] / 256.0;
                     ctx.globalAlpha = (height-minh) / (maxh-minh) * 0.6 + 0.4;
                     ctx.fillRect(x, y, 1, 1);
                 }
@@ -820,6 +810,7 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
         };
     }
 
+    var heightMap = null;
     this.image = BSWG.render.proceduralImage(BSWG.tileSize*3, BSWG.tileSize*3, function(ctx, w, h){
         ctx.globalAlpha = 1.0;
         if (waterLevel) {
@@ -829,32 +820,38 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
         }
         else {
             var _W = image.width/3, _H = image.height/3;
-            var ovr = 1;
             ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, w, h);
-            ctx.drawImage(image, _W-1, 0,    1, _H*3,   BSWG.tileSize-ovr, 0,     ovr*2, h);
-            ctx.drawImage(image, _W*2-1, 0,  1, _H*3,   BSWG.tileSize*2-ovr, 0,   ovr*2, h);
-            ctx.drawImage(image, 0, _H-1,    _W*3, 1,   0, BSWG.tileSize-ovr,     w, ovr*2);
-            ctx.drawImage(image, 0, _H*2-1,  _W*3, 1,   0, BSWG.tileSize*2-ovr,   w, ovr*2);
         }
+        var imgData = ctx.getImageData(0, 0, w, h);
+        var hm = new Float32Array(BSWG.tileSize * BSWG.tileSize * 3 * 3);
+        for (var i=0; i<imgData.data.length; i+=4) {
+            hm[~~(i/4)] = imgData.data[i+0];
+        }
+        imgData.data.length = 0;
+        imgData = null;        
+        heightMap = hm;
+        hm = null;
     }, true);
 
     this.tiles = [
         [
-            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*0, BSWG.tMask.R | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale),
-            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale),
-            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.D, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale)
+            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*0, BSWG.tMask.R | BSWG.tMask.D, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap),
+            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap),
+            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*0, BSWG.tMask.L | BSWG.tMask.D, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap)
         ],
         [
-            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*1, BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale),
-            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale),
-            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.D | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale)
+            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*1, BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap),
+            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.D | BSWG.tMask.U, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap),
+            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*1, BSWG.tMask.L | BSWG.tMask.D | BSWG.tMask.U, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap)
         ],
         [
-            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*2, BSWG.tMask.R | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale),
-            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale),
-            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.U, color, !!waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale)
+            new BSWG.tile(this.image, BSWG.tileSize*0, BSWG.tileSize*2, BSWG.tMask.R | BSWG.tMask.U, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap),
+            new BSWG.tile(this.image, BSWG.tileSize*1, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.R | BSWG.tMask.U, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap),
+            new BSWG.tile(this.image, BSWG.tileSize*2, BSWG.tileSize*2, BSWG.tMask.L | BSWG.tMask.U, color, waterLevel, nmap, nmapScale, nmapAmp, reflect, zscale, heightMap)
         ]
     ];
+
+    this.heightMap = heightMap;
 
     this.destroy = function () {
         this.image.destroy();
@@ -869,6 +866,8 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
         }
         this.tiles.length = 0;
         this.tiles = null;
+        this.heightMap.length = 0;
+        this.heightMap = null;
     };
 
     this.update = function (dt) {

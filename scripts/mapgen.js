@@ -637,7 +637,7 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             reflect: 0.15,
             normalMap: BSWG.render.images['sand_nm'].texture,
             normalMapScale: 0.1,
-            normalMapAmp: 1.0,
+            normalMapAmp: 0.6,
         },
         'tileset-rockland': {
             map: function(x,y) {
@@ -653,11 +653,11 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
             map: function(x,y) {
                 return x >= 0 && y >= 0 && x < size && y < size && ret.terMap[x][y] === 4;
             },
-            color: [2.25*0.65, 2.3*0.65, 2.5*0.65],
-            reflect: 0.2,
+            color: [2.05*0.65, 2.05*0.65, 2.5*0.65],
+            reflect: 0.5,
             normalMap: BSWG.render.images['snow_nm'].texture,
             normalMapScale: 0.2,
-            normalMapAmp: 0.75,
+            normalMapAmp: 0.5,
         },
         'tileset-below': {
             map: function(x,y) {
@@ -978,94 +978,90 @@ BSWG.genMap = function(size, numZones, numPlanets, areaNo) {
 
     };
 
-    var lastP = null;
-    var lastBattleP = null;
-    var lastBattleZone = null;
-    var lastZone = null;
-    var distanceLeft = Math.random() * 10 * ret.gridSize / 1.35 + 6 * ret.gridSize / 1.35;
-
     ret.mapTime = 0.0;
 
-    ret.resetTickSpawner = function(zone) {
-        if (!zone) {
-            distanceLeft = this.gridSize * 8;
-            return;
-        }
-        if (zone.boss && !zone.bossDefeated) {
-            distanceLeft = this.gridSize * 2.5;
-        }
-        else {
-            distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-        }
-    };
-
-    ret.tickSpawner = function(dt, p) {
-
-        ret.mapTime += dt;
+    ret.getEnemyForPos = function(p) {
 
         var zone = this.getZone(p);
 
-        if (BSWG.game.battleMode) {
-            distanceLeft = Math.random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-            lastBattleP = p.clone();
-            lastP = p.clone();
-            lastZone = zone;
-            if (zone !== lastBattleZone) {
-                return 'escape';
+        if (zone.hasPlanet && zone.boss) {
+            if (zone.safe) {
+                return null;
             }
-            return null;
-        }
-
-        if (BSWG.orbList.atSafe() || zone.bossDefeated) {
-            this.resetTickSpawner(zone);
-            return null;
-        }
-
-        if (zone !== lastZone) {
-            if (zone.boss && !zone.bossDefeated) {
-                distanceLeft = this.gridSize * 2.5;
+            var enemies = [];
+            var r = zone.boss.enemies;
+            for (var i=0; i<r.length; i++) {
+                var e = BSWG.getEnemy(r[i].type);
+                var title = zone.boss.who < 0 ? 'Mom' : ('Zef #' + (zone.boss.who+1));
+                e.obj.title = title + ' ( ' + e.obj.title + ' )';
+                if (e && e.obj) {
+                    enemies.push([
+                        e.obj,
+                        BSWG.pickEnemyLevel(zone, r[i])
+                    ]);
+                }
             }
-            else {
-                distanceLeft = Math._random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-            }
+            return enemies;
         }
+        else {
+            var _ex = ((Math._random() < 0.15) ? .01 + ((Math._random() < 0.25) ? .01 : 0) : 0);
+            Math.seedrandom(Math.floor(p.x / (this.gridSize*8)) + 10000 * Math.floor(p.y / (this.gridSize*8)) + this.getTType(p)*0.1 + _ex);
+            var r = zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
+            Math.seedrandom(Math._random());
 
+            var enemies = [];
+            var e = BSWG.getEnemy(r.type);
+            if (e && e.obj) {
+                enemies.push([e.obj, BSWG.pickEnemyLevel(zone, r)]);
+                if (r.max && r.max > 0) {
+                    for (var i=0; i<(r.max-1); i++) {
+                        if (Math.random() < 0.5) {
+                            enemies.push([e.obj, BSWG.pickEnemyLevel(zone, r)]);
+                        }
+                    }
+                }
+                if (r.with && r.with.length) {
+                    for (var i=0; i<r.with.length; i++) {
+                        var ew = BSWG.getEnemy(r.with[i]);
+                        if (ew && ew.obj) {
+                            enemies.push([ew.obj, BSWG.pickEnemyLevel(zone, r)]);
+                        }
+                    }
+                }
+            }
+            return enemies;
+        }
+    };
+
+    ret.resetTickSpawner = function(zone) {
+        this.nextEnemyDistance = (4 + Math.random() * 3) * this.gridSize;
+    };
+    ret.resetTickSpawner(null);
+
+    var lastP = null;
+    var lastZ = null;
+    ret.tickSpawner = function(dt, p, v) {
+        this.mapTime += dt;
         if (lastP) {
-            distanceLeft -= Math.distVec2(lastP, p);
-        }
-
-        if (!lastBattleP || Math.distVec2(lastBattleP, p) > this.gridSize) {
-
-            if (zone.hasPlanet && zone.boss) {
-                this.escapeDistance = this.gridSize * 1000.0;
-                lastBattleZone = zone;
-                distanceLeft = Math._random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-                if (zone.boss.dialog) {
-                    BSWG.game.linearDialog(zone.boss.dialog, true);
-                }
-                return zone.boss.enemies;
+            var zone = this.getZone(p);
+            if (Math.lenVec2(v) > 0.5) {
+                this.nextEnemyDistance -= Math.distVec2(lastP, p) * (BSWG.game.battleMode ? 0.35 : 1.0) * (zone.boss ? 2.0 : 1.0);
             }
-            else if (zone.enemies && zone.enemies.length) {
-                if (distanceLeft <= 0) {
-                    this.escapeDistance = this.gridSize * 4.0 / 1.35;
-                    lastBattleZone = zone;
-                    distanceLeft = Math._random() * 10 * this.gridSize / 1.35 + 6 * this.gridSize / 1.35;
-                    var _ex = ((Math._random() < 0.15) ? .01 + ((Math._random() < 0.25) ? .01 : 0) : 0);
-                    Math.seedrandom(Math.floor(p.x / (this.gridSize*8)) + 10000 * Math.floor(p.y / (this.gridSize*8)) + this.getTType(p)*0.1 + _ex);
-                    var e = zone.enemies[~~(Math.random()*zone.enemies.length*0.9999)];
-                    Math.seedrandom();
-                    return e;
-                }
+            lastP = p.clone();
+            if (zone !== lastZ) {
+                lastZ = zone;
+                this.resetTickSpawner(zone)
+                return -1;
             }
-            
-
+            if (this.nextEnemyDistance <= 0.0) {
+                this.resetTickSpawner(zone);
+                return 1;
+            }
         }
-
-        lastP = p.clone();
-        lastZone = zone;
-
-        return null;
-
+        else {
+            lastP = p.clone();
+        }
+        return 0;
     };
 
     if (!ret.enemies_placed) {

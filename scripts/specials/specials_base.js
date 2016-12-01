@@ -666,6 +666,10 @@ BSWG.specialEffect.prototype.updateRender = function(ctx, dt) {
 
 BSWG.startSpecial = function(key, who, btn) {
 
+    if (BSWG.game.dialogPause) {
+       return;
+    }
+
     if (!who) {
         who = BSWG.game.ccblock;
         if (!who || who.destroyed) {
@@ -699,6 +703,9 @@ BSWG.startSpecial = function(key, who, btn) {
 BSWG.useSpecial = function(key, who, data) {
     if (!who || who.destroyed || !who.obj || !who.obj.body) {
         return;
+    }
+    if (BSWG.game.dialogPause) {
+       return;
     }
     if (data) {
         if (who.hasSpecial(key) && who.energy >= BSWG.specialsInfo[key].energy) {

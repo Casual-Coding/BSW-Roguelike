@@ -628,7 +628,21 @@ BSWG.component_CommandCenter = {
 
         }
 
-        if (BSWG.game.scene !== BSWG.SCENE_TITLE && (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body)) {
+        var patrolOnly = BSWG.game.scene !== BSWG.SCENE_TITLE && (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body || BSWG.game.ccblock.destroyed);
+
+        if (this === BSWG.game.ccblock && BSWG.game.battleMode && BSWG.game.bossFight) {
+            if (!this.bossDialogFired) {
+                if (BSWG.game.inZone.boss.dialog) {
+                    BSWG.game.linearDialog(BSWG.game.inZone.boss.dialog, true);
+                }
+            }
+            this.bossDialogFired = true;
+        }
+        else {
+            this.bossDialogFired = false;
+        }
+
+        if (BSWG.game.dialogPause) {
             return {};
         }
 
@@ -647,6 +661,7 @@ BSWG.component_CommandCenter = {
             }
 
             var keys = new Object();
+
             if (BSWG.game.scene === BSWG.SCENE_GAME2) {
                 try {
                     if (cmd && cmd.type === 'hold') {
@@ -663,7 +678,12 @@ BSWG.component_CommandCenter = {
                         }
                     }
                     else {
-                        this.ai.update(dt, keys);
+                        if (!patrolOnly && BSWG.game.battleMode) {
+                            this.ai.update(dt, keys);
+                        }
+                        else {
+                            this.ai.patrol(dt, keys);
+                        }
                         this.aiLastKeys = keys;
                     }
                     return keys;
@@ -689,7 +709,12 @@ BSWG.component_CommandCenter = {
                     }
                 }
                 else {
-                    this.ai.update(dt, keys);
+                    if (!patrolOnly && (BSWG.game.battleMode || BSWG.game.scene === BSWG.SCENE_TITLE)) {
+                        this.ai.update(dt, keys);
+                    }
+                    else {
+                        this.ai.patrol(dt, keys);
+                    }
                     this.aiLastKeys = keys;
                 }
                 return keys;                

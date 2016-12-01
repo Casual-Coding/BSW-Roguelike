@@ -180,6 +180,13 @@ BSWG.aiBase.prototype.make_sensor = function (type, args) {
 
 };
 
+BSWG.aiBase.prototype.remove_sensor = function (obj) {
+    var idx = this.sensors.indexOf(obj);
+    if (idx >= 0) {
+        this.sensors.splice(idx, 1);
+    }
+};
+
 BSWG.aiSensor = function (type, args, __this) {
 
     this.__this = __this;
@@ -247,6 +254,9 @@ BSWG.aiSensor.prototype.track = function (p, keyDown, left, right, keyFire) { //
 
     var angDiff = Math.angleBetween(mp, p) - (this.comp.obj.body.GetAngleWrapped() + this.comp.frontOffset + this.forwardOffset);
     angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
+    if (Math.cos(angDiff) <= 0) {
+        angDiff += 2*Math.PI;
+    }
 
     this.angleDistance = angDiff;
 
@@ -614,6 +624,15 @@ BSWG.aiBase.prototype.make_controller = BSWG.aiBase.prototype.make_sensor;
 
 BSWG.aiBase.prototype.__update_sensors = function (ctx, dt) {
 
+    if (BSWG.game.battleMode && (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) && this.__mover) {
+        this.remove_sensor(this.__mover);
+        this.__mover = null;
+    }
+    if (BSWG.game.battleMode && (BSWG.game.ccblock && !BSWG.game.ccblock.destroyed) && this.__sensor) {
+        this.remove_sensor(this.__sensor);
+        this.__sensor = null;
+    }
+
     for (var i=0; i<this.sensors.length; i++) {
         var S = this.sensors[i];
         if (S.updateRender) {
@@ -622,6 +641,54 @@ BSWG.aiBase.prototype.__update_sensors = function (ctx, dt) {
     }
 
     this.frameIdx += 1;
+
+};
+
+BSWG.aiBase.prototype.patrol = function(dt, keyDown) {
+
+    var CC = this.ccblock;
+
+    if (!this.__mover) {
+        this.__mover = this.make_controller(
+            'movement',
+            {
+                comp: CC,
+                radius: 3,
+                charge: false,
+                hinge: true
+            }
+        );        
+        this.__sensor = this.make_sensor(
+            'radius',
+            {
+                comp: CC,
+                angle: [ -Math.PI/6, Math.PI/6 ],
+                distance: [ 0, 24 ],
+                enemy: true
+            }
+        );
+        this.origin = CC.p().clone();
+        this.__tp = null;
+    }
+
+    if (!this.__tp || Math._random() < (1/60)/10 || (this.__mover.reached && Math._random() < (1/60))) {
+        this.__tp = this.origin.clone();
+        var a = Math._random() * Math.PI * 2.0;
+        var r = (Math._random() * 0.5 + 0.5) * 35.0;
+        this.__tp.x += Math.cos(a) * r;
+        this.__tp.y += Math.sin(a) * r;
+    }
+
+    this.__mover.moveTo(
+        this.__tp,
+        keyDown,
+        CC.leftKey, CC.rightKey,
+        CC.upKey, CC.downKey
+    );
+
+    if (this.__sensor.first) {
+        BSWG.game.battleMode = true;
+    }
 
 };
 
