@@ -92,27 +92,31 @@ Math.random2d = function(x,y) {
     return whole - Math.floor(whole);
 };
 
-var genRipples = function(sz, min, max, exSmooth) {
+var genRipples = function(sz, min, max, exSmooth, rippleScale) {
 
     var ret = newArr(sz, 0.0);
 
-    var lst = new Array(16);
+    var lst = new Array(~~(16 / (rippleScale / 0.3)));
     for (var i=0; i<lst.length; i++) {
         lst[i] = {
-            str: Math.pow(Math.random(), 0.3) * 2.0,
+            str: Math.pow(Math.random(), rippleScale),
             x: Math.random()*sz,
             y: Math.random()*sz
         };
+        lst[i].str2 = lst[i].str / (rippleScale / 0.3);
     }
-    for (var x=-sz/2; x<sz*1.5; x++) {
-        for (var y=-sz/2; y<sz*1.5; y++) {
-            var xx = (x + sz) % sz,
-                yy = (y + sz) % sz;
+    for (var x=0; x<sz; x++) {
+        for (var y=0; y<sz; y++) {
+            var xx = x, yy = y;
             var v = 0;
             for (var i=0; i<lst.length; i++) {
                 var dx = xx-lst[i].x, dy = yy-lst[i].y;
+                dx = Math.min(Math.abs(dx), Math.min(Math.abs(dx+sz), Math.abs(dx-sz)));
+                dy = Math.min(Math.abs(dy), Math.min(Math.abs(dy+sz), Math.abs(dy-sz)));
                 var d = Math.sqrt(dx*dx+dy*dy);
-                v += (Math.sin((d/lst[i].str)/12) * 0.5 + 0.5) * lst[i].str * 0.2;
+                if (d <= sz/2) {
+                    v += (Math.sin((d/lst[i].str)/(12*(rippleScale / 0.3))) * 0.5 + 0.5) * lst[i].str2 * 0.2 * (1-d/(sz/2));
+                }
             }
             ret.setRot(x, y, v);
         }
@@ -184,7 +188,7 @@ var genPerlin = function(sz, min, max, k, off, exSmooth, bleedF, iszf) {
                 }
             }
         }
-        l *= 0.75;
+        l *= 0.65;
         sz2 *= 0.5;
     }
     if (bleedF) {
@@ -280,6 +284,7 @@ var tileTypes = {
         insideVariations: 4,
         taperPower: 0.5,
         texType: 'ripples',
+        rippleScale: 0.6,
         taperComb: function(a,b) {
             return a*b;
         },
@@ -296,6 +301,7 @@ var tileTypes = {
         insideVariations: 4,
         taperPower: 0.5,
         texType: 'ripples',
+        rippleScale: 0.3,
         taperComb: function(a,b) {
             return a*b;
         },
@@ -570,7 +576,7 @@ else if (tileSize === 64) {
 }
 var P = null;
 if (tInfo.texType == 'ripples') {
-    P = genRipples(tileSize, 0.0, 1.0, tInfo.smooth||0);
+    P = genRipples(tileSize, 0.0, 1.0, tInfo.smooth||0, tInfo.rippleScale||0.3);
 } else { // 'perlin'
     P = genPerlin(tileSize, 0.0, 1.0, k, Math.random()*100000.0, tInfo.smooth||0, tInfo.bleedF||0, tInfo.iszF);
 }

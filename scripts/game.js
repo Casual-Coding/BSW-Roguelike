@@ -2634,20 +2634,22 @@ BSWG.game = new function(){
                 ctx.fillRect(X, Y, W, H);
                 ctx.globalAlpha = 1.0;
 
-                var grd=ctx.createLinearGradient(X, Y, X+W, Y);
-                grd.addColorStop(0,"#000");
-                grd.addColorStop(1,'#0b0');
-                ctx.fillStyle = grd;
-                ctx.globalAlpha = 0.75;
-                ctx.fillRect(X+1, Y+1, W*lstat.t-2, H-2);
-                ctx.globalAlpha = 1.0;
-
-                var grd=ctx.createLinearGradient(X, Y, X, Y+H);
-                grd.addColorStop(0,"rgba(127, 127, 127, 0.125)");
-                grd.addColorStop(0.5,"rgba(255, 255, 255, 0.35)");
-                grd.addColorStop(1,"rgba(0, 0, 0, 0.125)");
-                ctx.fillStyle = grd;
-                ctx.fillRect(X+1, Y+1, W*lstat.t-2, H-2);
+                var img = BSWG.render.procImageCache(self, '_lvlBar', W, H, null, function(ctx, w, h){
+                    var grd = ctx.createLinearGradient(0, 0, w, 0);
+                    grd.addColorStop(0,"#000");
+                    grd.addColorStop(1,'#0b0');
+                    ctx.fillStyle = grd;
+                    ctx.globalAlpha = 0.75;
+                    ctx.fillRect(0+1, 0+1, w-2, h-2);
+                    ctx.globalAlpha = 1.0;
+                    var grd = ctx.createLinearGradient(0, 0, 0, h);
+                    grd.addColorStop(0,"rgba(127, 127, 127, 0.125)");
+                    grd.addColorStop(0.5,"rgba(255, 255, 255, 0.35)");
+                    grd.addColorStop(1,"rgba(0, 0, 0, 0.125)");
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(0+1, 0+1, w-2, h-2);
+                });
+                ctx.drawImage(img, 0, 0, W*lstat.t, H, X, Y, W*lstat.t, H);
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
@@ -2675,20 +2677,23 @@ BSWG.game = new function(){
                 ctx.fillRect(X, Y, W, H);
                 ctx.globalAlpha = 1.0;
 
-                var grd=ctx.createLinearGradient(X, Y, X+W, Y);
-                grd.addColorStop(0,"#000");
-                grd.addColorStop(1,'#00b');
-                ctx.fillStyle = grd;
-                ctx.globalAlpha = 0.75;
-                ctx.fillRect(X+1, Y+1, W*t-2, H-2);
-                ctx.globalAlpha = 1.0;
-
-                var grd=ctx.createLinearGradient(X, Y, X, Y+H);
-                grd.addColorStop(0,"rgba(127, 127, 127, 0.0)");
-                grd.addColorStop(0.5,"rgba(255, 255, 255, 0.25)");
-                grd.addColorStop(1,"rgba(0, 0, 0, 0.0)");
-                ctx.fillStyle = grd;
-                ctx.fillRect(X+1, Y+1, W*t-2, H-2);
+                var img = BSWG.render.procImageCache(self, '_spBar', W, H, null, function(ctx, w, h){
+                    console.log('!!');
+                    var grd = ctx.createLinearGradient(0, 0, w, 0);
+                    grd.addColorStop(0,"#000");
+                    grd.addColorStop(1,'#00b');
+                    ctx.fillStyle = grd;
+                    ctx.globalAlpha = 0.75;
+                    ctx.fillRect(0+1, 0+1, w-2, h-2);
+                    ctx.globalAlpha = 1.0;
+                    var grd = ctx.createLinearGradient(0, 0, 0, h);
+                    grd.addColorStop(0,"rgba(127, 127, 127, 0.0)");
+                    grd.addColorStop(0.5,"rgba(255, 255, 255, 0.25)");
+                    grd.addColorStop(1,"rgba(0, 0, 0, 0.0)");
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(0+1, 0+1, w-2, h-2);
+                });
+                ctx.drawImage(img, 0, 0, W*t, H, X, Y, W*t, H);
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';
@@ -2795,8 +2800,6 @@ BSWG.game = new function(){
                     return (((((Y-y) / h) * self.map.size) - miny) / (maxy - miny)) * h + y;
                 };
 
-                ctx.fillStyle = 'rgba(0,0,0,0.0)';
-                ctx.fillRect(x, y, w, h);
                 ctx.drawImage(self.mapImage, (minx * iscx) + BSWG.minimapTileSize/2, (miny * iscy) + BSWG.minimapTileSize/2,
                                              ((maxx-minx) * iscx), ((maxy-miny) * iscy),
                                              x, y, w, h);
@@ -2958,10 +2961,7 @@ BSWG.game = new function(){
                     t = 1.0 - (ss.timeOut / ss.fadeTime);
                     if (ss.timeOut < 0) {
                         ss.timeOut = 0;
-                        var grd = ctx.createLinearGradient(0, 0, 0, BSWG.render.viewport.h);
-                        grd.addColorStop(0, "#000");
-                        grd.addColorStop(1, "#000");
-                        ctx.fillStyle = grd;
+                        ctx.fillStyle = '#000';
                         ctx.fillRect(0, 0, BSWG.render.viewport.w, BSWG.render.viewport.h);
                         ctx.font = '48px Orbitron';
                         ctx.strokeStyle = '#000';

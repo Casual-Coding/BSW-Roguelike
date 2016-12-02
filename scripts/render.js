@@ -413,6 +413,25 @@ BSWG.render = new function() {
         }
     };
 
+    this.procImageCache = function (self, key, w, h, ex, cbk) {
+
+        ex = ex || null;
+
+        if (self[key] && parseInt(self[key].width) === parseInt(w) && parseInt(self[key].height) === parseInt(h) && ex === self[key].__ex) {
+            return self[key];
+        }
+
+        if (self[key]) {
+            self[key].destroy();
+            self[key] = null;
+        }
+
+        self[key] = this.proceduralImage(w, h, cbk, true);
+        self[key].__ex = ex;
+        return self[key];
+
+    };
+
     this.proceduralImage = function (w, h, cbk, noTexture) {
 
         var canvas = document.createElement('canvas');

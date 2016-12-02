@@ -92,5 +92,6 @@ void main() {
     }
     gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, pow(vSPosition.z/200., 0.5)*pow(envMapTint.a, 3.0));
     gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1., 0., 0.), pow(1.0 / (1.0 + abs(vPosition.z - 0.0) / 5.0), 10.5));
-    gl_FragColor = clamp(gl_FragColor, 0.0, 0.95);
+    gl_FragColor.rgb = clamp(gl_FragColor.rgb, 0.0, 0.95);
+    gl_FragColor.a = 1.0;
 }

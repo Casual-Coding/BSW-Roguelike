@@ -347,8 +347,12 @@ BSWG.tile = function (image, imgX, imgY, tileMask, color, water, nmap, nmapScale
     }
 
     this.time = Math.random()*1000;
+    this._count = 0;
 
     this.update = function(dt) {
+        if (this._count <= 0) {
+            return;
+        }
         var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
         this.mat.uniforms.light.value.set(lp.x, lp.y, BSWG.render.cam3D.position.z * 7.0, 1.0);
         this.mat.uniforms.extra.value.x = BSWG.render.time;
@@ -906,18 +910,25 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
 
     this.addTile = function(tile, x, y, coln) {
 
+        tile._count = (tile._count || 0) + 1;
+
         var ret = new Object();
+        ret.tile = tile;
         ret.mesh = new THREE.Mesh( tile.geom, tile.mat );
+        ret.mesh.transparent = false;
         ret.mesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0+zoff);
         ret.mesh.rotation.z = Math.PI/2;
         ret.mesh.updateMatrix();
         if (tile.shadowMat) {
             ret.smesh = new THREE.Mesh( tile.geom, tile.shadowMat );
             ret.smesh.position.set(x * BSWG.tileSizeWorld, y * BSWG.tileSizeWorld, -10.0+zoff);
+            ret.smesh.transparent = false;
             ret.smesh.rotation.z = Math.PI/2;
             ret.smesh.updateMatrix();
+            ret.smesh.needsUpdate = true;
             BSWG.render.sceneS.add(ret.smesh);
         }
+        ret.mesh.needsUpdate = true;
 
         if (coln) {
             //ret.collisionMesh.visible = false;
@@ -930,6 +941,10 @@ BSWG.tileSet = function (imageName, color, waterLevel, nmap, nmapScale, nmapAmp,
     };
 
     this.removeTile = function (tile) {
+
+        if (tile.tile) {
+            tile.tile._count = (tile.tile._count || 0) - 1;
+        }
 
         if (!tile.mesh) {
             return;
