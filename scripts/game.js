@@ -44,44 +44,79 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
         return;
     }
 
-    if (!this.dragging && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && Math.distVec2(this.sellC, mousePos) < this.sellRotR) {
-        this.dragging = true;
-        this.dragStart = mousePos.clone();
-        this.sellCStart = this.sellC.clone();
-        for (var i=0; i<this.selected.length; i++) {
-            this.selected[i].dragging = true;
-        }
-    } else if (this.dragging && BSWG.input.MOUSE('left')) {
-        var delta = mousePos.clone();
-        delta.x -= this.dragStart.x + (this.sellC.x - this.sellCStart.x);
-        delta.y -= this.dragStart.y + (this.sellC.y - this.sellCStart.y);
-        var len = Math.sqrt(delta.x, delta.y);
-        if (len > 1) {
-            delta.x = (delta.x / len) * 1;
-            delta.y = (delta.y / len) * 1;
-        }
-        for (var i=0; i<this.selected.length; i++) {
-            var C = this.selected[i];
-            if (C.type === 'cc' || !C.obj || !C.obj.body) {
-                continue;
+    if (!this.startPos) {
+        if (!this.draggingRot && !this.dragging && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && Math.distVec2(this.sellC, mousePos) < this.sellRotR) {
+            this.dragging = true;
+            this.dragStart = mousePos.clone();
+            this.sellCStart = this.sellC.clone();
+            for (var i=0; i<this.selected.length; i++) {
+                this.selected[i].dragging = true;
             }
-            var mass = C.obj.body.GetMass();
-            C.obj.body.SetLinearVelocity(new b2Vec2(delta.x*10, delta.y*10));
-        }
-    } else if (this.dragging) {
-        this.dragging = false;
-        for (var i=0; i<this.selected.length; i++) {
-            var C = this.selected[i];
-            C.dragging = false;
-            if (C.type === 'cc' || !C.obj || !C.obj.body) {
-                continue;
+        } else if (this.dragging && BSWG.input.MOUSE('left')) {
+            var delta = mousePos.clone();
+            delta.x -= this.dragStart.x + (this.sellC.x - this.sellCStart.x);
+            delta.y -= this.dragStart.y + (this.sellC.y - this.sellCStart.y);
+            var len = Math.sqrt(delta.x, delta.y);
+            if (len > 1) {
+                delta.x = (delta.x / len) * 1;
+                delta.y = (delta.y / len) * 1;
             }
-            C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
-            C.obj.body.SetAngularVelocity(0);
+            for (var i=0; i<this.selected.length; i++) {
+                var C = this.selected[i];
+                if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                    continue;
+                }
+                C.obj.body.SetLinearVelocity(new b2Vec2(delta.x*10, delta.y*10));
+                C.obj.body.SetAngularVelocity(0.0);
+            }
+        } else if (this.dragging) {
+            this.dragging = false;
+            for (var i=0; i<this.selected.length; i++) {
+                var C = this.selected[i];
+                C.dragging = false;
+                if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                    continue;
+                }
+                C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
+                C.obj.body.SetAngularVelocity(0);
+            }
+        }
+
+        if (!this.dragging && !this.draggingRot && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellRotC && Math.distVec2(this.sellRotC, mousePos) < this.sellRotR) {
+            this.draggingRot = true;
+            this.sellRotAStart = this.sellRotA;
+            for (var i=0; i<this.selected.length; i++) {
+                this.selected[i].dragging = true;
+            }        
+        }
+        else if (this.draggingRot && BSWG.input.MOUSE('left')) {
+            var delta = Math.angleDist(this.sellRotA, this.sellRotAStart);
+            if (Math.abs(delta) > Math.PI/8) {
+                delta = (delta / Math.abs(delta)) * Math.PI/8;
+            }
+            for (var i=0; i<this.selected.length; i++) {
+                var C = this.selected[i];
+                if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                    continue;
+                }
+                C.obj.body.SetAngularVelocity(delta*50);
+            }
+            this.sellRotAStart = this.sellRotA;
+        } else if (this.draggingRot) {
+            this.draggingRot = false;
+            for (var i=0; i<this.selected.length; i++) {
+                var C = this.selected[i];
+                C.dragging = false;
+                if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                    continue;
+                }
+                C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
+                C.obj.body.SetAngularVelocity(0);
+            }
         }
     }
 
-    if (!this.dragging) {
+    if (!this.dragging && !this.draggingRot) {
         if (BSWG.input.MOUSE_PRESSED('left')) {
             this.startPos = mousePos.clone();
         }
@@ -119,7 +154,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
     this.sellRotC = null;
     this.sellRotR = 0.0;
 
-    if (this.selected) {
+    if (this.selected && !this.startPos) {
         var count = 0;
         for (var i=0; i<this.selected.length; i++) {
             var C = this.selected[i];
@@ -162,10 +197,11 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
                 dx /= len; dy /= len;
             }
 
+            this.sellRotA = Math.atan2(dy, dx);
             this.sellRotC = new b2Vec2(this.sellC.x + dx * this.sellR, this.sellC.y + dy * this.sellR);
             this.sellRotR = 0.75;
-            this.sellRotHover = Math.distVec2(this.sellRotC, mousePos) < this.sellRotR && !this.dragging;
-            this.sellHover = Math.distVec2(this.sellC, mousePos) < this.sellRotR || this.dragging;
+            this.sellRotHover = (Math.distVec2(this.sellRotC, mousePos) < this.sellRotR || this.draggingRot) && !this.dragging;
+            this.sellHover = (Math.distVec2(this.sellC, mousePos) < this.sellRotR || this.dragging) && !this.draggingRot;
 
         }
     }
