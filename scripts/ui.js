@@ -39,7 +39,9 @@ BSWG.ui_HM = function(w, h, aw, ah) {
             }
         }
     };
+    var rects = [];
     var box = function(sx,sy,bw,bh, depthEdge, depth) {
+        rects.push([sx, sy, bw, bh]);
         sx = ~~sx; sy = ~~sy; bw = ~~bw; bh = ~~bh;
         var mx = Math.min(w, sx+bw), my = Math.min(h, sy+bh);
         for (var x=Math.max(0, sx); x<mx; x++) {
@@ -57,6 +59,7 @@ BSWG.ui_HM = function(w, h, aw, ah) {
         }
     };
     var plate = function(sx,sy,bw,bh, depthEdge, depth) {
+        rects.push([sx, sy, bw, bh]);
         box(sx,sy,bw,bh, depthEdge, depth);
         circ(sx+11, sy+11, 4, depth+0.1, depth+0.2);
         circ(sx+bw-11, sy+bh-11, 4, depth+0.1, depth+0.2);
@@ -69,10 +72,19 @@ BSWG.ui_HM = function(w, h, aw, ah) {
     var aspect = aw/ah;
     return {
         H: H,
+        rects: rects,
         circ: circ,
         box: box,
         plate: plate,
         hudBtn: hudBtn,
+        hx: function(v, w, x) {
+            var t = (v - this.l(0)) / (this.r(0) - this.l(0));
+            return w*t + (x||0);
+        },
+        hy: function(v, h, y) {
+            var t = (v - this.t(0)) / (this.b(0) - this.t(0));
+            return h*t + (y||0);
+        },
         l: function(v) {
             if (aspect >= 1) {
                 return v;
@@ -110,7 +122,7 @@ BSWG.ui_HM = function(w, h, aw, ah) {
 
 BSWG.uiP3D_list = new Array();
 
-BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
+BSWG.uiPlate3D = function(hudNM, hudHM, x, y, w, h, z, clr, split, moving) {
 
     var vp = BSWG.render.viewport;
 
@@ -199,6 +211,17 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
         this.h = _h;
     };
 
+    this.clear_bg = function(ctx) {
+        for (var i=0; i<hudHM.rects.length; i++) {
+            var R = hudHM.rects[i];
+            var x1 = hudHM.hx(R[0], this.w, this.x),
+                y1 = hudHM.hy(R[1], this.h, this.y);
+            var x2 = hudHM.hx(R[0]+R[2], this.w, this.x),
+                y2 = hudHM.hy(R[1]+R[3], this.h, this.y);
+            ctx.clearRect(x1, y1, (x2-x1), (y2-y1));
+        }
+    };
+
     this.set_invert = function (flag) {
         if (!this.hudMat) {
             return;
@@ -262,6 +285,7 @@ BSWG.uiPlate3D = function(hudNM, x, y, w, h, z, clr, split, moving) {
             this.hudMesh.position.set(p.x, p.y, 4.0 + this.z);
             this.hudMesh.scale.set(this.w/vp.w, this.h/vp.h, 1.0);
             this.hudMesh.updateMatrix();
+            //this.hudMesh.updateMatrixWorld(true);
 
             var x = this.x;
             var y = this.y;
@@ -688,6 +712,7 @@ BSWG.control_UnlockTree = {
         if (!this.hudObj) {
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 0.15, // z
@@ -881,6 +906,7 @@ BSWG.control_Button = {
             this.hudObj.remove();
             this.hudObj = null;
         }
+        this.hudHM = null;
     },
 
     onremove: function() {
@@ -903,11 +929,14 @@ BSWG.control_Button = {
                 sz *= 2;
             }
 
+            var self = this;
             this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
 
                 var H = BSWG.ui_HM(w, h, aw, ah);
                 H.box(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.25, 0.5);
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
+
+                self.hudHM = H;
 
             });
 
@@ -923,6 +952,7 @@ BSWG.control_Button = {
 
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 this.z || 0.1, // z
@@ -936,6 +966,7 @@ BSWG.control_Button = {
             this.hudObj.set_size(this.w, this.h);
             this.hudObj.set_invert(this.selected || this.mouseDown);
             this.hudObj.set_clr(this.mouseIn ? [1.1, 1.1, 1.3, 1] : [0.9, 0.9, 1, 1]);
+            this.hudObj.clear_bg(ctx);
             if (this.flashing) {
                 this.hudObj.do_flashing();
             }
@@ -1078,11 +1109,14 @@ BSWG.control_Menu = {
                 sz *= 2;
             }
 
+            var self = this;
             this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
 
                 var H = BSWG.ui_HM(w, h, aw, ah);
                 H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
+
+                self.hudHM = H;
 
             });
 
@@ -1097,6 +1131,7 @@ BSWG.control_Menu = {
         if (!this.hudObj) {
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 0.05, // z
@@ -1108,6 +1143,7 @@ BSWG.control_Menu = {
         if (this.hudObj) {
             this.hudObj.set_pos(this.p.x, this.p.y);
             this.hudObj.set_size(this.w, this.h);
+            this.hudObj.clear_bg(ctx);
         }
 
     },
@@ -1296,6 +1332,7 @@ BSWG.control_Dialogue = {
         if (!this.hudObj) {
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 0.15, // z
@@ -1542,6 +1579,8 @@ BSWG.control_CompPalette = {
 
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
+                this.hudHM = H;
+
             });
 
             this.lastAW = aw;
@@ -1555,6 +1594,7 @@ BSWG.control_CompPalette = {
         if (!this.hudObj) {
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 0.05, // z
@@ -1882,6 +1922,7 @@ BSWG.control_TradeWindow = {
         if (!this.hudObj) {
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 this.p.x, this.p.y, // x, y
                 this.w, this.h, // w, h
                 0.05, // z

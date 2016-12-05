@@ -58,6 +58,9 @@ BSWG.componentHoverFn = function(self) {
     if (!BSWG.game.editMode && BSWG.game.storeMode && BSWG.game.scene === BSWG.SCENE_GAME1 && !self.onCC && BSWG.componentList.mouseOver === self) {
         return true;
     }
+    if (self.selected) {
+        return true;
+    }
     if (BSWG.componentList.mouseOver !== self || (!BSWG.game.editMode && !BSWG.game.showControls) || (self.onCC && self.onCC !== BSWG.game.ccblock)) {
         return false;
     }
@@ -68,6 +71,9 @@ BSWG.componentHoverFn = function(self) {
 };
 
 BSWG.componentHoverFnAlpha = function(self) {
+    if (self.selected) {
+        return 1.0;
+    }
     if (BSWG.game.attractorOn === self || BSWG.game.grabbedBlock === self) {
         return 0.6;
     }
@@ -364,6 +370,9 @@ BSWG.component = function (desc, args) {
         }
 
     }
+
+    this.selected = false;
+    this.dragging = false;
 
     BSWG.componentList.add(this);
 
@@ -955,6 +964,14 @@ BSWG.component.prototype.baseUpdate = function(dt) {
     if (this.onCC && this.onCC.lightweight) {
         newMassF *= 0.75;
     }
+
+    if (this.type === 'cc' || !this.selected) {
+        this.dragging = false;
+    }
+    if (this.dragging) {
+        newMassF = 0.0005;
+    }
+
     if (Math.abs(newMassF - this.massFactor) > 0.0001) {
         this.massFactor = newMassF;
         if (this.obj && this.obj.body) {
@@ -2027,6 +2044,80 @@ BSWG.componentList = new function () {
         }
 
         found = null;
+    };
+
+    this.withinBoxExact = function(_x1, _y1, _x2, _y2, static) {
+        var ret = [];
+        this.withinBox(_x1, _y1, _x2, _y2, function(C){
+            if (C.isStatic) {
+                if (static) {
+                    ret.push(C);
+                }
+                return;
+            }
+            var p = C.obj.body.GetWorldCenter();
+            if (p.x >= _x1 && p.x <= _x2 && p.y >= _y1 && p.y <= _y2) {
+                ret.push(C);
+                return;
+            }
+
+            if (BSWG.componentList.atPoint(new b2Vec2(_x1, _y1), C) ||
+                BSWG.componentList.atPoint(new b2Vec2(_x2, _y1), C) ||
+                BSWG.componentList.atPoint(new b2Vec2(_x1, _y2), C) ||
+                BSWG.componentList.atPoint(new b2Vec2(_x2, _y2), C)) {
+                ret.push(C);
+                return;                
+            }
+
+            var raycaster = BSWG.render.raycaster;
+
+            var _dx = _x2 - _x1, _dy = _y2 - _y1;
+
+            var dx = _dx, dy = 0;
+            var vlen = Math.sqrt(dx*dx+dy*dy);
+            raycaster.set(new THREE.Vector3(_x1, _y1, 0.0), new THREE.Vector3(dx/vlen, dy/vlen, 0.0));
+            var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
+            for (var i=0; i<inter.length; i++) {
+                if (inter[i].distance <= vlen) {
+                    ret.push(C);
+                    return;
+                }
+            }
+      
+            var dx = _dx, dy = 0;
+            var vlen = Math.sqrt(dx*dx+dy*dy);
+            raycaster.set(new THREE.Vector3(_x1, _y2, 0.0), new THREE.Vector3(dx/vlen, dy/vlen, 0.0));
+            var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
+            for (var i=0; i<inter.length; i++) {
+                if (inter[i].distance <= vlen) {
+                    ret.push(C);
+                    return;
+                }
+            }
+
+            var dx = 0, dy = _dy;
+            var vlen = Math.sqrt(dx*dx+dy*dy);
+            raycaster.set(new THREE.Vector3(_x1, _y1, 0.0), new THREE.Vector3(dx/vlen, dy/vlen, 0.0));
+            var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
+            for (var i=0; i<inter.length; i++) {
+                if (inter[i].distance <= vlen) {
+                    ret.push(C);
+                    return;
+                }
+            }
+      
+            var dx = 0, dy = _dy;
+            var vlen = Math.sqrt(dx*dx+dy*dy);
+            raycaster.set(new THREE.Vector3(_x2, _y1, 0.0), new THREE.Vector3(dx/vlen, dy/vlen, 0.0));
+            var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
+            for (var i=0; i<inter.length; i++) {
+                if (inter[i].distance <= vlen) {
+                    ret.push(C);
+                    return;
+                }
+            }
+        }, static);
+        return ret;
     };
 
     this.withinRadius = function (p, r, static) {

@@ -808,9 +808,12 @@ BSWG.render = new function() {
                 rz = 0; //(Math.random() - 0.5) * 0.1 * this.screenShake;
             this.cam3D.position.set(cam.x+offset.x + rx, cam.y+offset.y + ry, f/cam.z + rz);
             this.cam3D.lookAt(new THREE.Vector3(cam.x + rx, cam.y + ry, 0.0));
+            this.cam3D.matrixWorldNeedsUpdate = true;
             this.cam3D.updateMatrix(true);
             this.cam3D.updateMatrixWorld(true);
-            this.cam3D.updateProjectionMatrix();
+            this.cam3D.updateProjectionMatrix(true);
+            this.scene.matrixWorldNeedsUpdate = true;
+            this.scene.updateMatrixWorld(true);
             p1 = p2 = null;
         }
     };
@@ -1050,12 +1053,12 @@ BSWG.render = new function() {
         //this.sceneS.add(shadowMesh);
 
         this.scene.add(mesh);
-
         var self = this;
 
         var obj = {
             mesh: mesh,
             mat: material,
+            added: true,
             geom: geom,
             clr: clr,
             pos: pos,
@@ -1063,6 +1066,7 @@ BSWG.render = new function() {
             //shadowMesh: shadowMesh,
             //shadowMat: shadowMat,
             destroy: function() {
+                this.added = false;
                 BSWG.render.scene.remove(this.mesh);
                 //BSWG.render.sceneS.remove(this.shadowMesh);
 
@@ -1088,12 +1092,26 @@ BSWG.render = new function() {
             },
             update: function() {
 
+                if (this.clr[3] <= 0) {
+                    if (this.added) {
+                        this.added = false;
+                        BSWG.render.scene.remove(this.mesh);
+                    }
+                }
+                else {
+                    if (!this.added) {
+                        this.added = true;
+                        BSWG.render.scene.add(this.mesh);
+                    }
+                }
+
                 var lp = BSWG.render.unproject3D(new b2Vec2(BSWG.render.viewport.w*3.0, BSWG.render.viewport.h*0.5), 0.0);
 
                 if (this.pos) {
                     this.mesh.scale.set(this.size/4, this.size/4, this.size/4);
                     this.mesh.position.set(this.pos.x + xOffset*this.size/4, this.pos.y, this.pos.z);
                     this.mesh.updateMatrix();
+                    this.mesh.updateMatrixWorld(true);
                 }
 
                 //this.shadowMesh.scale.set(this.mesh.scale.x, this.mesh.scale.y, this.mesh.scale.z);

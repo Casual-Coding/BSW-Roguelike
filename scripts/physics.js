@@ -866,11 +866,11 @@ BSWG.physics = new function(){
                                         BSWG.render.boom.palette = chadaboom3D.fire_bright;
                                         BSWG.render.boom.add(
                                             cp.particleWrap(0.0),
-                                            0.35*Math.pow(forceMe, 0.125),
+                                            0.35*Math.pow(forceMe/4, 0.125),
                                             32,
                                             0.1*Math.pow(forceMe, 0.33),
                                             4.0,
-                                            new b2Vec2(Math.cos(a)*forceMe*0.005+v.x, Math.sin(a)*forceMe*0.005+v.y).THREE(Math._random()*3.0)
+                                            new b2Vec2(Math.cos(a)*forceMe*0.0005+v.x, Math.sin(a)*forceMe*0.0005+v.y).THREE(Math._random()*3.0)
                                         );
                                         v = null;
                                     }                                

@@ -14,6 +14,276 @@ BSWG.SCENE_TITLE = 1;
 BSWG.SCENE_GAME1 = 2;
 BSWG.SCENE_GAME2 = 3;
 
+BSWG.selection = function(){
+
+    this.startPos = null;
+    this.endPos = null;
+    this.sellC = null;
+    this.sellR = 0.0;
+    this.sellRotC = null;
+    this.sellRotR = 0.0;
+    this.selected = null;
+    this.dragging = false;
+
+};
+
+BSWG.selection.prototype.update = function(dt, mousePos) {
+
+    var sellAdd = BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT);
+    var sellRemove = BSWG.input.KEY_DOWN(BSWG.KEY.CTRL);
+
+    if (!BSWG.game.editMode) {
+        this.deselect();
+        this.sellC = null;
+        this.sellR = 0.0;
+        this.sellHover = false;
+        this.sellRotHover = false;
+        this.sellRotC = null;
+        this.sellRotR = 0.0;
+        this.startPos = this.endPos = this.selected = null;
+        return;
+    }
+
+    if (!this.dragging && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && Math.distVec2(this.sellC, mousePos) < this.sellRotR) {
+        this.dragging = true;
+        this.dragStart = mousePos.clone();
+        this.sellCStart = this.sellC.clone();
+        for (var i=0; i<this.selected.length; i++) {
+            this.selected[i].dragging = true;
+        }
+    } else if (this.dragging && BSWG.input.MOUSE('left')) {
+        var delta = mousePos.clone();
+        delta.x -= this.dragStart.x + (this.sellC.x - this.sellCStart.x);
+        delta.y -= this.dragStart.y + (this.sellC.y - this.sellCStart.y);
+        var len = Math.sqrt(delta.x, delta.y);
+        if (len > 1) {
+            delta.x = (delta.x / len) * 1;
+            delta.y = (delta.y / len) * 1;
+        }
+        for (var i=0; i<this.selected.length; i++) {
+            var C = this.selected[i];
+            if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                continue;
+            }
+            var mass = C.obj.body.GetMass();
+            C.obj.body.SetLinearVelocity(new b2Vec2(delta.x*10, delta.y*10));
+        }
+    } else if (this.dragging) {
+        this.dragging = false;
+        for (var i=0; i<this.selected.length; i++) {
+            var C = this.selected[i];
+            C.dragging = false;
+            if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                continue;
+            }
+            C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
+            C.obj.body.SetAngularVelocity(0);
+        }
+    }
+
+    if (!this.dragging) {
+        if (BSWG.input.MOUSE_PRESSED('left')) {
+            this.startPos = mousePos.clone();
+        }
+
+        if (this.startPos) {
+            this.endPos = mousePos.clone();
+        }
+
+        if (BSWG.input.MOUSE_RELEASED('left') || !BSWG.input.MOUSE('left')) {
+            if (this.startPos && this.endPos) {
+                var newSel = BSWG.componentList.withinBoxExact(
+                    Math.min(this.startPos.x, this.endPos.x),
+                    Math.min(this.startPos.y, this.endPos.y),
+                    Math.max(this.startPos.x, this.endPos.x),
+                    Math.max(this.startPos.y, this.endPos.y)
+                );
+                for (var i=0; i<newSel.length; i++) {
+                    if (newSel[i].onCC && newSel[i].onCC !== BSWG.game.ccblock) {
+                        newSel.splice(i, 1); i--; continue;
+                    }
+                    if (newSel[i].type === 'missile') {
+                        newSel.splice(i, 1); i--; continue;
+                    }
+                }
+                this.startPos = this.endPos = null;
+                this.select(newSel, sellAdd, sellRemove);
+            }
+        }
+    }
+
+    this.sellC = null;
+    this.sellR = 0.0;
+    this.sellHover = false;
+    this.sellRotHover = false;
+    this.sellRotC = null;
+    this.sellRotR = 0.0;
+
+    if (this.selected) {
+        var count = 0;
+        for (var i=0; i<this.selected.length; i++) {
+            var C = this.selected[i];
+            var p = C.p();
+            if (!p || !C.obj || C.type === 'cc') {
+                continue;
+            }
+            if (!this.sellC) {
+                this.sellC = p.clone();
+            }
+            else {
+                this.sellC.x += p.x;
+                this.sellC.y += p.y;
+            }
+            count += 1;
+            p = C = null;
+        }
+        if (this.sellC && count > 0) {
+            this.sellC.x /= count;
+            this.sellC.y /= count;
+
+            this.sellR = 0.0;
+            for (var i=0; i<this.selected.length; i++) {
+                var C = this.selected[i];
+                var p = C.p();
+                if (!p || !C.obj || C.type === 'cc') {
+                    continue;
+                }
+                this.sellR = Math.max(this.sellR, Math.distVec2(this.sellC, p) + C.obj.radius + 1.5);
+                count += 1;
+                p = C = null;
+            }
+
+            var dx = mousePos.x - this.sellC.x, dy = mousePos.y - this.sellC.y;
+            var len = Math.sqrt(dx*dx + dy*dy);
+            if (len < 0.0001) {
+                dx = 1; dy = 0;
+            }
+            else {
+                dx /= len; dy /= len;
+            }
+
+            this.sellRotC = new b2Vec2(this.sellC.x + dx * this.sellR, this.sellC.y + dy * this.sellR);
+            this.sellRotR = 0.75;
+            this.sellRotHover = Math.distVec2(this.sellRotC, mousePos) < this.sellRotR && !this.dragging;
+            this.sellHover = Math.distVec2(this.sellC, mousePos) < this.sellRotR || this.dragging;
+
+        }
+    }
+
+};
+
+BSWG.selection.prototype.deselect = function() {
+
+    if (!this.selected) {
+        return;
+    }
+    for (var i=0; i<this.selected.length; i++) {
+        this.selected[i].selected = false;
+    }
+    this.selected.length = 0;
+    this.selected = null;
+
+};
+
+BSWG.selection.prototype.select = function(list, add, remove) {
+
+    if (add && remove) {
+        remove = false;
+    }
+
+    if (!add && !remove) {
+        this.deselect();
+    }
+
+    if (list && list.length) {
+        if (!this.selected) {
+            this.selected = [];
+        }
+        for (var i=0; i<list.length; i++) {
+            list[i].selected = true;
+            var found = false;
+            for (var j=0; j<this.selected.length; j++) {
+                if (this.selected[j] === list[i]) {
+                    found = true;
+                    if (remove) {
+                        this.selected[j].selected = false;
+                        this.selected.splice(j, 1);
+                    }
+                    break;
+                }
+            }
+            if ((!add || !found) && !remove) {
+                this.selected.push(list[i]);
+            }
+        }
+    }
+
+};
+
+BSWG.selection.prototype.render = function(ctx, dt) {
+
+    if (!BSWG.game.editMode) {
+        return;
+    }
+
+    ctx.lineWidth = 2.0;
+
+    if (this.startPos && this.endPos) {
+        var p1 = BSWG.render.project3D(this.startPos);
+        var p2 = BSWG.render.project3D(this.endPos);
+        var w = Math.abs(p2.x - p1.x), h = Math.abs(p2.y - p1.y);
+        if (w > 2 && h > 2) {
+            var x = Math.min(p1.x, p2.x), y = Math.min(p1.y, p2.y);
+            ctx.fillStyle = '#0f0';
+            ctx.strokeStyle = ctx.fillStyle;
+            ctx.globalAlpha = 0.25;
+            ctx.fillRect(x, y, w, h);
+            ctx.globalAlpha = 1.0;
+            ctx.strokeRect(x, y, w, h);
+        }
+    }
+
+    ctx.lineWidth = 3.5;
+
+    if (this.sellC && this.sellR) {
+        var p = BSWG.render.project3D(this.sellC);
+        var p2 = BSWG.render.project3D(new b2Vec2(this.sellC.x+this.sellR, this.sellC.y));
+        var p3 = BSWG.render.project3D(new b2Vec2(this.sellC.x+this.sellRotR, this.sellC.y));
+        var r = Math.abs(p2.x - p.x);
+        var r2 = Math.abs(p3.x - p.x);
+        ctx.fillStyle = '#0f0';
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,r,0,2*Math.PI);
+        ctx.globalAlpha = 0.5;
+        ctx.stroke();
+
+        p3 = BSWG.render.project3D(this.sellRotC);
+        p2 = BSWG.render.project3D(new b2Vec2(this.sellRotC.x+this.sellRotR, this.sellRotC.y));
+        r = Math.abs(p2.x - p3.x);
+        ctx.fillStyle = '#0f8';
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.beginPath();
+        ctx.arc(p3.x,p3.y,r,0,2*Math.PI);
+        ctx.globalAlpha = this.sellRotHover ? 0.5 : 0.0;
+        ctx.fill();
+        ctx.globalAlpha = this.sellRotHover ? 1.0 : 0.0;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,r2,0,2*Math.PI);
+        ctx.globalAlpha = this.sellHover ? 0.5 : 0.25;
+        ctx.fill();
+        ctx.globalAlpha = this.sellHover ? 1.0 : 0.5;
+        ctx.stroke();
+
+        p = p2 = p3 = r = r2 = null;
+    }
+
+    ctx.lineWidth = 1.0;
+
+};
+
 BSWG.game = new function(){
 
     this.initComponents = [
@@ -210,11 +480,15 @@ BSWG.game = new function(){
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
 
                 self.hudBtn = H.hudBtn;
+                self.hudHM = H;
+                self.hudHM.hx = self.hudX;
+                self.hudHM.hy = self.hudY;
 
             });
 
             this.hudObj = new BSWG.uiPlate3D(
                 this.hudNM,
+                this.hudHM,
                 0, 0, // x, y
                 BSWG.render.viewport.w, BSWG.render.viewport.h, // w, h
                 0.0, // z
@@ -657,14 +931,14 @@ BSWG.game = new function(){
         }
 
         this.dialogPause = false;
-
+        
+        BSWG.specProjList.clear();
         BSWG.render.clearScene();
         BSWG.jpointRenderer.readd();
         BSWG.physics.reset();
         BSWG.componentList.clear();
         BSWG.componentList.clearStatic();
         BSWG.blasterList.clear();
-        BSWG.specProjList.clear();
         BSWG.laserList.clear();
         BSWG.planets.init();
         BSWG.ui.clear();
@@ -675,6 +949,7 @@ BSWG.game = new function(){
         BSWG.orbList.init();
         BSWG.specialList.init();
         BSWG.cloudMap.init();
+        this.selection = new BSWG.selection();
 
         this.modeHistory = [];
         this.minimapZoom = true;
@@ -1982,7 +2257,10 @@ BSWG.game = new function(){
                         }
                         comp = null;
                     }
-                    if (self.editMode && !self.ccblock.destroyed) {
+
+                    self.selection.update(dt, BSWG.render.unproject3D(new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y')), 0.0));
+
+                    /*if (self.editMode && !self.ccblock.destroyed) {
 
                         if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.ui.mouseBlock && !grabbedBlock) {
                             if (BSWG.componentList.mouseOver) {
@@ -2041,7 +2319,7 @@ BSWG.game = new function(){
                         BSWG.physics.endMouseDrag();
                     }
 
-                    self.grabbedBlock = grabbedBlock;
+                    self.grabbedBlock = grabbedBlock;*/
 
                     if (self.ccblock && !self.ccblock.ai && !BSWG.ui_DlgBlock) {
                         if (!self.dialogPause) {
@@ -2546,6 +2824,7 @@ BSWG.game = new function(){
                 self.levelUpBtn.h = self.hudY(self.hudBtn[20][3]) - self.levelUpBtn.p.y - 4;
             }
 
+            self.selection.render(ctx, dt);
             self.updateHUD(dt);
 
             BSWG.ai.update(ctx, dt);
@@ -2607,6 +2886,10 @@ BSWG.game = new function(){
                         }
                     }
                 }
+            }
+
+            if (self.hudObj) {
+                self.hudObj.clear_bg(ctx);
             }
 
             if (self.scene === BSWG.SCENE_GAME2 && !BSWG.ai.runMode) {
@@ -2678,7 +2961,6 @@ BSWG.game = new function(){
                 ctx.globalAlpha = 1.0;
 
                 var img = BSWG.render.procImageCache(self, '_spBar', W, H, null, function(ctx, w, h){
-                    console.log('!!');
                     var grd = ctx.createLinearGradient(0, 0, w, 0);
                     grd.addColorStop(0,"#000");
                     grd.addColorStop(1,'#00b');

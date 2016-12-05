@@ -15,7 +15,7 @@ BSWG.xpDisplay = new (function(){
         this.luT = 0.0;
 
         this.luText = new BSWG.uiControl(BSWG.control_3DTextButton, {
-            x: BSWG.render.viewport.w*0.5, y: BSWG.render.viewport.h * 0.55,
+            x: BSWG.render.viewport.w*0.5, y: BSWG.render.viewport.h * 100,
             w: 800, h: 100,
             vpXCenter: true,
             text: 'Level Up',
@@ -34,10 +34,6 @@ BSWG.xpDisplay = new (function(){
 
         if (!this.xpInfo) {
             return;
-        }
-
-        if (this.luText) {
-            this.luText.p.y = BSWG.render.viewport.h * 0.55;
         }
 
         for (var i=0; i<this.list.length; i++) {
@@ -93,10 +89,12 @@ BSWG.xpDisplay = new (function(){
         }
 
         if (this.luT > 0) {
+            this.luText.p.y = BSWG.render.viewport.h * 0.55;
             this.luT -= dt;
             if (this.luT <= 0) {
                 this.luT = 0.0;
                 this.luText.hide();
+                this.luText.p.y = BSWG.render.viewport.h*2;
             }
             else {
                 this.luText.textColor[3] = this.luText.hoverColor[3] = Math.min(this.luT, 1.0);
