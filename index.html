@@ -39,7 +39,7 @@
 
             jQuery = jQuery.noConflict();
 
-            if (!Detector.webgl) {
+            if (!window.WebGLRenderingContext) {
                 Detector.addGetWebGLMessage();
             }
             else {
