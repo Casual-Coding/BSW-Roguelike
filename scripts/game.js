@@ -67,7 +67,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
                     continue;
                 }
                 C.obj.body.SetLinearVelocity(new b2Vec2(delta.x*10, delta.y*10));
-                C.obj.body.SetAngularVelocity(0.0);
+                C.obj.body.SetAngularVelocity(C.obj.body.GetAngularVelocity()*0.85);
             }
         } else if (this.dragging) {
             this.dragging = false;
@@ -82,24 +82,50 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             }
         }
 
-        if (!this.dragging && !this.draggingRot && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellRotC && Math.distVec2(this.sellRotC, mousePos) < this.sellRotR) {
+        if (!this.dragging && !this.draggingRot && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && this.sellRotC && Math.distVec2(this.sellRotC, mousePos) < this.sellRotR) {
             this.draggingRot = true;
             this.sellRotAStart = this.sellRotA;
-            for (var i=0; i<this.selected.length; i++) {
-                this.selected[i].dragging = true;
-            }        
-        }
-        else if (this.draggingRot && BSWG.input.MOUSE('left')) {
-            var delta = Math.angleDist(this.sellRotA, this.sellRotAStart);
-            if (Math.abs(delta) > Math.PI/8) {
-                delta = (delta / Math.abs(delta)) * Math.PI/8;
-            }
+            this.sellRotTotal = 0.0;
+            this.sellCStart = this.sellC.clone();
             for (var i=0; i<this.selected.length; i++) {
                 var C = this.selected[i];
                 if (C.type === 'cc' || !C.obj || !C.obj.body) {
                     continue;
                 }
-                C.obj.body.SetAngularVelocity(delta*50);
+                C.dragging = true;
+                C._rotStart = C.obj.body.GetWorldCenter().clone();
+                C._rotStart.x -= this.sellCStart.x;
+                C._rotStart.y -= this.sellCStart.y;
+                C._rotStartA = C.obj.body.GetAngle();
+            }
+        }
+        else if (this.draggingRot && BSWG.input.MOUSE('left')) {
+            var delta1 = Math.angleDist(this.sellRotA, this.sellRotAStart);
+            if (Math.abs(delta1) > Math.PI/8) {
+                delta1 = (delta1 / Math.abs(delta1)) * Math.PI/8;
+            }
+            this.sellRotTotal += delta1;
+            for (var i=0; i<this.selected.length; i++) {
+                var C = this.selected[i];
+                if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                    continue;
+                }
+
+                var delta = Math.angleDist(C._rotStartA + this.sellRotTotal, C.obj.body.GetAngle());
+                var av = delta*10;
+                C.obj.body.SetAngularVelocity(av);
+
+                var deltaP = Math.rotVec2(C._rotStart.clone(), this.sellRotTotal);
+                deltaP.x += this.sellCStart.x;
+                deltaP.y += this.sellCStart.y;
+                deltaP.x -= C.obj.body.GetWorldCenter().x;
+                deltaP.y -= C.obj.body.GetWorldCenter().y;
+                var len = Math.sqrt(deltaP.x, deltaP.y);
+                if (len > 1) {
+                    deltaP.x = (deltaP.x / len) * 1;
+                    deltaP.y = (deltaP.y / len) * 1;
+                }
+                C.obj.body.SetLinearVelocity(new b2Vec2(deltaP.x*10, deltaP.y*10));
             }
             this.sellRotAStart = this.sellRotA;
         } else if (this.draggingRot) {
@@ -111,7 +137,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
                     continue;
                 }
                 C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
-                C.obj.body.SetAngularVelocity(0);
+                C.obj.body.SetAngularVelocity(0.0);
             }
         }
     }
@@ -297,7 +323,7 @@ BSWG.selection.prototype.render = function(ctx, dt) {
         p3 = BSWG.render.project3D(this.sellRotC);
         p2 = BSWG.render.project3D(new b2Vec2(this.sellRotC.x+this.sellRotR, this.sellRotC.y));
         r = Math.abs(p2.x - p3.x);
-        ctx.fillStyle = '#0f8';
+        ctx.fillStyle = this.draggingRot ? '#08f' : '#0f8';
         ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.arc(p3.x,p3.y,r,0,2*Math.PI);
@@ -306,6 +332,8 @@ BSWG.selection.prototype.render = function(ctx, dt) {
         ctx.globalAlpha = this.sellRotHover ? 1.0 : 0.0;
         ctx.stroke();
 
+        ctx.fillStyle = this.dragging ? '#08f' : '#0f8';
+        ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.arc(p.x,p.y,r2,0,2*Math.PI);
         ctx.globalAlpha = this.sellHover ? 0.5 : 0.25;
