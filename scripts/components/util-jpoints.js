@@ -145,7 +145,7 @@ BSWG.jpointRenderer = new function() {
                     }
                     else {
                         if (map[j]) {
-                            clr.set(0.1, 1.0, 0.1, 1.0);
+                            clr.set(1.0, 1.0, 1.0, 1.0);
                         }
                         else {
                             if (detacher) {

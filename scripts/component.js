@@ -1509,7 +1509,7 @@ BSWG.componentList = new function () {
             }
         }
 
-        if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && (BSWG.game.editMode || BSWG.game.showControls) && !BSWG.game.grabbedBlock) {
+        if (this.mouseOver && this.mouseOver.openConfigMenu && this.mouseOver.onCC && (!BSWG.game.editMode && BSWG.game.showControls) && !BSWG.game.grabbedBlock) {
             if (BSWG.input.MOUSE_PRESSED('left') && BSWG.input.MOUSE('shift') && !BSWG.ui.mouseBlock) {
                 BSWG.input.EAT_MOUSE('left');
                 this.mouseOver.openConfigMenu();
@@ -1799,16 +1799,16 @@ BSWG.componentList = new function () {
         if (!this.mouseOver) {
             this.mouseOver = this.compHover2;
         }
-        if (this.mouseOver && BSWG.componentHoverFn(this.mouseOver) && (!BSWG.ui.mouseBlock || BSWG.game.grabbedBlock)) {
+        if (!BSWG.game.editMode && this.mouseOver && BSWG.componentHoverFn(this.mouseOver) && (!BSWG.ui.mouseBlock || BSWG.game.grabbedBlock)) {
             if (BSWG.game.storeMode && !BSWG.game.editMode && BSWG.game.scene === BSWG.SCENE_GAME1) {
                 BSWG.render.setCustomCursor(true, 4);
             }
-            else if (this.mouseOver.hasConfig && this.mouseOver.onCC && (BSWG.game.editMode || BSWG.game.showControls) && !BSWG.ui.mouseBlock) {
+            else if (this.mouseOver.hasConfig && this.mouseOver.onCC && (!BSWG.game.editMode && BSWG.game.showControls) && !BSWG.ui.mouseBlock) {
                 BSWG.render.setCustomCursor(true, BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT) ? 6 : 3);
             }
-            else if (BSWG.game.editMode) {
-                BSWG.render.setCustomCursor(true, 2);
-            }
+        }
+        else if (BSWG.game.editMode && BSWG.game.selection && (BSWG.game.selection.sellHover || BSWG.game.selection.sellRotHover)) {
+            BSWG.render.setCustomCursor(true, 2);
         }
         else if (BSWG.game.attractorShowing) {
             BSWG.render.setCustomCursor(true, 4);

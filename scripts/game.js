@@ -44,6 +44,18 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
         return;
     }
 
+    if (BSWG.input.KEY_DOWN(BSWG.KEY.ESC) && this.selected) {
+        this.deselect();
+        this.sellC = null;
+        this.sellR = 0.0;
+        this.sellHover = false;
+        this.sellRotHover = false;
+        this.sellRotC = null;
+        this.sellRotR = 0.0;
+        BSWG.input.EAT_KEY(BSWG.KEY.ESC);
+        return;
+    }
+
     if (!this.startPos) {
         if (!this.draggingRot && !this.dragging && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && Math.distVec2(this.sellC, mousePos) < this.sellRotR) {
             this.dragging = true;
@@ -339,23 +351,28 @@ BSWG.selection.prototype.render = function(ctx, dt) {
         p3 = BSWG.render.project3D(this.sellRotC);
         p2 = BSWG.render.project3D(new b2Vec2(this.sellRotC.x+this.sellRotR, this.sellRotC.y));
         r = Math.abs(p2.x - p3.x);
-        ctx.fillStyle = this.draggingRot ? '#08f' : '#0f8';
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.beginPath();
-        ctx.arc(p3.x,p3.y,r,0,2*Math.PI);
-        ctx.globalAlpha = this.sellRotHover ? 0.5 : 0.0;
-        ctx.fill();
-        ctx.globalAlpha = this.sellRotHover ? 1.0 : 0.0;
-        ctx.stroke();
+        
+        if (!this.sellHover) {
+            ctx.fillStyle = this.draggingRot ? '#08f' : '#0f8';
+            ctx.strokeStyle = ctx.fillStyle;
+            ctx.beginPath();
+            ctx.arc(p3.x,p3.y,r*(this.sellRotHover ? 1.0 : 0.5),0,2*Math.PI);
+            ctx.globalAlpha = this.sellRotHover ? 0.5 : 0.25;
+            ctx.fill();
+            ctx.globalAlpha = this.sellRotHover ? 1.0 : 0.5;
+            ctx.stroke();
+        }
 
-        ctx.fillStyle = this.dragging ? '#08f' : '#0f8';
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,r2,0,2*Math.PI);
-        ctx.globalAlpha = this.sellHover ? 0.5 : 0.25;
-        ctx.fill();
-        ctx.globalAlpha = this.sellHover ? 1.0 : 0.5;
-        ctx.stroke();
+        if (!this.sellRotHover) {
+            ctx.fillStyle = this.dragging ? '#08f' : '#0f8';
+            ctx.strokeStyle = ctx.fillStyle;
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,r2*(this.sellHover ? 1.0 : 0.5),0,2*Math.PI);
+            ctx.globalAlpha = this.sellHover ? 0.5 : 0.25;
+            ctx.fill();
+            ctx.globalAlpha = this.sellHover ? 1.0 : 0.5;
+            ctx.stroke();
+        }
 
         p = p2 = p3 = r = r2 = null;
     }
@@ -1350,6 +1367,8 @@ BSWG.game = new function(){
                         me.selected = !me.selected;
                         self.editMode = me.selected;
                         if (self.editMode) {
+                            self.showControls = false;
+                            self.showControlsBtn.selected = false;
                             self.pushMode('edit');
                         }
                         else {
@@ -1386,6 +1405,8 @@ BSWG.game = new function(){
                         me.selected = !me.selected;
                         self.showControls = me.selected;
                         if (self.showControls) {
+                            self.editMode = false;
+                            self.editBtn.selected = false;
                             self.pushMode('controls');
                         }
                         else {
@@ -2309,6 +2330,8 @@ BSWG.game = new function(){
             BSWG.physics.update(dt);
             BSWG.componentList.update(dt);
 
+            self.selection.update(dt, BSWG.render.unproject3D(new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y')), 0.0));
+
             if (BSWG.input.KEY_PRESSED(BSWG.KEY['ESC'])) {
                 var mode = self.popMode();
                 if (mode && self.modeBtns && self.modeBtns[mode] && self.modeBtns[mode].click) {
@@ -2337,8 +2360,6 @@ BSWG.game = new function(){
                         }
                         comp = null;
                     }
-
-                    self.selection.update(dt, BSWG.render.unproject3D(new b2Vec2(BSWG.input.MOUSE('x'), BSWG.input.MOUSE('y')), 0.0));
 
                     /*if (self.editMode && !self.ccblock.destroyed) {
 
@@ -2846,10 +2867,10 @@ BSWG.game = new function(){
             }
 
             if (self.storeBtn) {
-                self.storeBtn.p.x = self.hudX(self.hudBtn[10][0]) + 2;
-                self.storeBtn.p.y = self.hudY(self.hudBtn[10][1]) + 2;
-                self.storeBtn.w = self.hudX(self.hudBtn[10][2]) - self.storeBtn.p.x - 4;
-                self.storeBtn.h = self.hudY(self.hudBtn[10][3]) - self.storeBtn.p.y - 4;
+                self.storeBtn.p.x = self.hudX(self.hudBtn[9][0]) + 2;
+                self.storeBtn.p.y = self.hudY(self.hudBtn[9][1]) + 2;
+                self.storeBtn.w = self.hudX(self.hudBtn[9][2]) - self.storeBtn.p.x - 4;
+                self.storeBtn.h = self.hudY(self.hudBtn[9][3]) - self.storeBtn.p.y - 4;
             }
 
             if (self.tradeWin && self.tradeBtn && self.inZone && self.inZone.safe && self.inZone.compValList && self.inZone.compValList.length && (!self.dialogPause || self.dialogBtnHighlight === 'trade')) {
@@ -2870,17 +2891,17 @@ BSWG.game = new function(){
             }
 
             if (self.anchorBtn) {
-                self.anchorBtn.p.x = self.hudX(self.hudBtn[7][0]) + 2;
-                self.anchorBtn.p.y = self.hudY(self.hudBtn[7][1]) + 2;
-                self.anchorBtn.w = self.hudX(self.hudBtn[7][2]) - self.anchorBtn.p.x - 4;
-                self.anchorBtn.h = self.hudY(self.hudBtn[7][3]) - self.anchorBtn.p.y - 4;
+                self.anchorBtn.p.x = self.hudX(self.hudBtn[8][0]) + 2;
+                self.anchorBtn.p.y = self.hudY(self.hudBtn[8][1]) + 2;
+                self.anchorBtn.w = self.hudX(self.hudBtn[8][2]) - self.anchorBtn.p.x - 4;
+                self.anchorBtn.h = self.hudY(self.hudBtn[8][3]) - self.anchorBtn.p.y - 4;
             }
 
             if (self.showControlsBtn) {
-                self.showControlsBtn.p.x = self.hudX(self.hudBtn[8][0]) + 2;
-                self.showControlsBtn.p.y = self.hudY(self.hudBtn[8][1]) + 2;
-                self.showControlsBtn.w = self.hudX(self.hudBtn[8][2]) - self.showControlsBtn.p.x - 4;
-                self.showControlsBtn.h = self.hudY(self.hudBtn[8][3]) - self.showControlsBtn.p.y - 4;
+                self.showControlsBtn.p.x = self.hudX(self.hudBtn[7][0]) + 2;
+                self.showControlsBtn.p.y = self.hudY(self.hudBtn[7][1]) + 2;
+                self.showControlsBtn.w = self.hudX(self.hudBtn[7][2]) - self.showControlsBtn.p.x - 4;
+                self.showControlsBtn.h = self.hudY(self.hudBtn[7][3]) - self.showControlsBtn.p.y - 4;
             }
 
             if (self.statsBtn) {
