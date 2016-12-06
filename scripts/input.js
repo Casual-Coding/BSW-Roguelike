@@ -475,6 +475,18 @@ BSWG.input = new function(){
             mouseState.shift = !!e.shiftKey;
         });
 
+        if (BSWG.nwg) {
+            var win = BSWG.nwg.Window.get();
+            win.on('focus', function(){
+                keyMap = {};
+                lkeyMap = {};
+            });
+            win.on('blur', function(){
+                keyMap = {};
+                lkeyMap = {};
+            });
+        }
+
     };
 
     this.mouseWheelKeys = null;

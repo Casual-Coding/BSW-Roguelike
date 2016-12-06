@@ -31,6 +31,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
 
     var sellAdd = BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT);
     var sellRemove = BSWG.input.KEY_DOWN(BSWG.KEY.CTRL);
+    var sellRotate = BSWG.input.KEY_DOWN(BSWG.KEY.ALT);
 
     if (!BSWG.game.editMode) {
         this.deselect();
@@ -104,7 +105,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             BSWG.componentList.weldGroup(group);
         }
 
-        if (!this.dragging && !this.draggingRot && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && this.sellRotC && Math.distVec2(this.sellRotC, mousePos) < this.sellRotR) {
+        if (!this.dragging && !this.draggingRot && (BSWG.input.MOUSE('left') || sellRotate) && !sellAdd && !sellRemove && this.sellC && this.sellRotC && (Math.distVec2(this.sellRotC, mousePos) < this.sellRotR || sellRotate)) {
             this.draggingRot = true;
             this.sellRotAStart = this.sellRotA;
             this.sellRotTotal = 0.0;
@@ -124,7 +125,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             }
             BSWG.componentList.unweldGroup(group);
         }
-        else if (this.draggingRot && BSWG.input.MOUSE('left')) {
+        else if (this.draggingRot && (BSWG.input.MOUSE('left') || sellRotate)) {
             var delta1 = Math.angleDist(this.sellRotA, this.sellRotAStart);
             if (Math.abs(delta1) > Math.PI/8) {
                 delta1 = (delta1 / Math.abs(delta1)) * Math.PI/8;
@@ -816,6 +817,8 @@ BSWG.game = new function(){
     this.dialogBtnHighlight = null;
 
     this.linearDialog = function (desc, anchor) {
+
+        BSWG.input.EAT_ALL();
 
         var self = this;
 
