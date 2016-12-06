@@ -133,43 +133,19 @@ BSWG.jpointRenderer = new function() {
                     }
                     var detacher = comp.jpoints[j].detacher || false;
 
-                    var r = map[j]?(comp.jmhover===j?160:110):80;
-                    if (comp.welds[j] && comp.jmhover !== j) {
-                        r = 110;
-                    }
+                    var r = map[j] ? (comp.welds[j] ? 120 : 200 + Math.sin(BSWG.render.time*Math.PI*2)*40) : 80;
 
                     if (comp.welds[j]) {
-                        if (comp.jmhover === j) {
-                            if (!BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
-                                BSWG.render.setCustomCursor(true, 1, 2.0);
-                            }
-                            clr.set(1.0, 0.1, 0.1, 1.0);
+                        if (detacher) {
+                            clr.set(0.5, 0.5, 1.0, 1.0);
                         }
                         else {
-                            if (detacher) {
-                                clr.set(0.5, 0.5, 1.0, 1.0);
-                            }
-                            else {
-                                clr.set(0.75, 0.75, 1.0, 1.0);
-                            }
+                            clr.set(0.75, 0.75, 1.0, 1.0);
                         }
                     }
                     else {
                         if (map[j]) {
-                            if (comp.jmhover === j) {
-                                if (!comp.canEquip) {
-                                    clr.set(1.0, 0.3, 0.3, 1.0);
-                                }
-                                else {
-                                    if (!BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
-                                        BSWG.render.setCustomCursor(true, 1, 2.0);
-                                    }
-                                    clr.set(0.1, 1.0, 0.1, 1.0);
-                                }
-                            }
-                            else {
-                                clr.set(0.4, 1.0, 0.4, 1.0);
-                            }
+                            clr.set(0.1, 1.0, 0.1, 1.0);
                         }
                         else {
                             if (detacher) {
@@ -187,7 +163,7 @@ BSWG.jpointRenderer = new function() {
                     pos.set(
                         jp[j].x - comp0center.x,
                         jp[j].y - comp0center.y,
-                        comp.obj.body.GetAngle(),
+                        comp.obj.body.GetAngle() + ((map[j] && !comp.welds[j]) ? BSWG.render.time*Math.PI*2 : 0.0),
                         r/1250.0
                     );
 

@@ -49,9 +49,16 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             this.dragging = true;
             this.dragStart = mousePos.clone();
             this.sellCStart = this.sellC.clone();
+            var group = [];
             for (var i=0; i<this.selected.length; i++) {
-                this.selected[i].dragging = true;
+                var C = this.selected[i];
+                if (C.type === 'cc' || !C.obj || !C.obj.body) {
+                    continue;
+                }
+                C.dragging = true;
+                group.push(C);
             }
+            BSWG.componentList.unweldGroup(group);
         } else if (this.dragging && BSWG.input.MOUSE('left')) {
             var delta = mousePos.clone();
             delta.x -= this.dragStart.x + (this.sellC.x - this.sellCStart.x);
@@ -71,6 +78,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             }
         } else if (this.dragging) {
             this.dragging = false;
+            var group = [];
             for (var i=0; i<this.selected.length; i++) {
                 var C = this.selected[i];
                 C.dragging = false;
@@ -79,7 +87,9 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
                 }
                 C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
                 C.obj.body.SetAngularVelocity(0);
+                group.push(C);
             }
+            BSWG.componentList.weldGroup(group);
         }
 
         if (!this.dragging && !this.draggingRot && BSWG.input.MOUSE('left') && !sellAdd && !sellRemove && this.sellC && this.sellRotC && Math.distVec2(this.sellRotC, mousePos) < this.sellRotR) {
@@ -87,6 +97,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             this.sellRotAStart = this.sellRotA;
             this.sellRotTotal = 0.0;
             this.sellCStart = this.sellC.clone();
+            var group = [];
             for (var i=0; i<this.selected.length; i++) {
                 var C = this.selected[i];
                 if (C.type === 'cc' || !C.obj || !C.obj.body) {
@@ -97,7 +108,9 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
                 C._rotStart.x -= this.sellCStart.x;
                 C._rotStart.y -= this.sellCStart.y;
                 C._rotStartA = C.obj.body.GetAngle();
+                group.push(C);
             }
+            BSWG.componentList.unweldGroup(group);
         }
         else if (this.draggingRot && BSWG.input.MOUSE('left')) {
             var delta1 = Math.angleDist(this.sellRotA, this.sellRotAStart);
@@ -130,6 +143,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             this.sellRotAStart = this.sellRotA;
         } else if (this.draggingRot) {
             this.draggingRot = false;
+            var group = [];
             for (var i=0; i<this.selected.length; i++) {
                 var C = this.selected[i];
                 C.dragging = false;
@@ -138,7 +152,9 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
                 }
                 C.obj.body.SetLinearVelocity(new b2Vec2(0, 0));
                 C.obj.body.SetAngularVelocity(0.0);
+                group.push(C);
             }
+            BSWG.componentList.weldGroup(group);
         }
     }
 

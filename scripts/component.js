@@ -1052,28 +1052,30 @@ BSWG.component.prototype.baseUpdate = function(dt) {
     }
 
     if (!this.jpointsw || !this.jmatch) {
+        this.weldGroup = this.unweldGroup = null;
         return;
     }
 
     var doWelds = false;
 
-    if (BSWG.game.editMode) {
-        if (this.jmhover >= 0 && !BSWG.ui.mouseBlock && BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE('shift') && !BSWG.game.grabbedBlock) {
-            doWelds = true;
-        }
-    }
-
     var autos = null;
-
     if (BSWG.componentList.autoWelds) {
         autos = BSWG.componentList.autoWelds;
         doWelds = true;
     }
 
+    var gweld = false;
+    if (this.weldGroup || this.unweldGroup) {
+        doWelds = true;
+        gweld = true;
+    }
+
     if (doWelds) {
         for (var i=0; i<this.jmatch.length; i++) {
-            if (((this.jmatch[i][0] === this.jmhover || this.jmatch[i][5]) && this.jmatch[i][1].id > this.id)) {
-                if (!this.welds[this.jmatch[i][0]]) {
+            var gweldCondition = (this.weldGroup && !this.weldGroup[this.jmatch[i][1].id]) ||
+                                 (this.unweldGroup && !this.unweldGroup[this.jmatch[i][1].id]);
+            if ((this.jmatch[i][5] || gweldCondition) && (this.jmatch[i][1].id > this.id || gweld)) {
+                if (!this.welds[this.jmatch[i][0]] && !this.unweldGroup) {
 
                     var makeWeld = function(self, args, args2) {
                         return function() {
@@ -1167,13 +1169,15 @@ BSWG.component.prototype.baseUpdate = function(dt) {
                             new BSWG.soundSample().play('error', this.obj.body.GetWorldCenter().THREE(0.2), 1.0, 1.5);
                             BSWG.game.berrorMsg('Insufficient level');
                         }
-                        BSWG.input.EAT_MOUSE('left');
+                        if (!gweld) {
+                            BSWG.input.EAT_MOUSE('left');
+                        }
                     }
                     else {
                         makeWeld();
                     }
                 }
-                else if (!autos) {
+                else if (!autos && !this.weldGroup && this.welds[this.jmatch[i][0]]) {
                     BSWG.physics.removeWeld(this.welds[this.jmatch[i][0]].obj);
                     var p = this.jpointsw[this.jmatch[i][0]].particleWrap(0.2);
                     this.welds[this.jmatch[i][0]].other = null;
@@ -1196,11 +1200,15 @@ BSWG.component.prototype.baseUpdate = function(dt) {
                     );
                     p = null;
 
-                    BSWG.input.EAT_MOUSE('left');
+                    if (!gweld) {
+                        BSWG.input.EAT_MOUSE('left');
+                    }
                 }
             }
         }
     }
+
+    this.weldGroup = this.unweldGroup = null;
 
     if (this.welds) {
         for (var k in this.welds) {
@@ -1300,6 +1308,26 @@ BSWG.componentList = new function () {
     };
 
     this.compCached = false;
+
+    this.weldGroup = function (group) {
+        var wset = {};
+        for (var i=0; i<group.length; i++) {
+            wset[group[i].id] = group[i];
+        }
+        for (var i=0; i<group.length; i++) {
+            group[i].weldGroup = wset;
+        }
+    };
+
+    this.unweldGroup = function (group) {
+        var wset = {};
+        for (var i=0; i<group.length; i++) {
+            wset[group[i].id] = group[i];
+        }
+        for (var i=0; i<group.length; i++) {
+            group[i].unweldGroup = wset;
+        }
+    };
 
     this.clear = function () {
 
