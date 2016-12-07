@@ -33,7 +33,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
     var sellRemove = BSWG.input.KEY_DOWN(BSWG.KEY.CTRL);
     var sellRotate = BSWG.input.KEY_DOWN(BSWG.KEY.ALT);
 
-    if (!BSWG.game.editMode) {
+    if (!BSWG.game.editMode || ((this.dragging || this.draggingRot) && (!this.selected || !this.sellC || !this.sellRotC))) {
         this.deselect();
         this.sellC = null;
         this.sellR = 0.0;
@@ -41,6 +41,8 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
         this.sellRotHover = false;
         this.sellRotC = null;
         this.sellRotR = 0.0;
+        this.dragging = false;
+        this.draggingRot = false;
         this.startPos = this.endPos = this.selected = null;
         return;
     }
@@ -53,6 +55,8 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
         this.sellRotHover = false;
         this.sellRotC = null;
         this.sellRotR = 0.0;
+        this.dragging = false;
+        this.draggingRot = false;
         BSWG.input.EAT_KEY(BSWG.KEY.ESC);
         return;
     }
