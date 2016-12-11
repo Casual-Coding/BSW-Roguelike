@@ -163,6 +163,10 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                         type: 't',
                         value: BSWG.render.shadowMap.depthTexture
                     },
+                    shadowDisabled: {
+                        type: 'f',
+                        value: BSWG.options.shadows ? 0.0 : 1.0
+                    },
                     warpIn: {
                         type: 'f',
                         value: 1.0
@@ -365,6 +369,10 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
                     type: 't',
                     value: BSWG.render.shadowMap.depthTexture
                 },
+                shadowDisabled: {
+                    type: 'f',
+                    value: BSWG.options.shadows ? 0.0 : 1.0
+                },
                 warpIn: {
                     type: 'f',
                     value: 1.0
@@ -550,6 +558,7 @@ BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, cen
         }
     }
 
+    uniforms.shadowDisabled.value = BSWG.options.shadows ? 0.0 : 1.0;
     uniforms.warpIn.value -= BSWG.render.dt * 2.0;
     if (uniforms.warpIn.value < 0.0) {
         uniforms.warpIn.value = 0.0;

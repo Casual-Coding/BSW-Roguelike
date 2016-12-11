@@ -18,6 +18,7 @@ uniform vec2 viewport;
 uniform float vreflect;
 uniform vec4 envMapTint;
 uniform vec4 envMapParam;
+uniform float shadowDisabled;
 
 #define _F1 (1./8192.0)
 #define _F2 (1./8192.0)
@@ -82,16 +83,21 @@ void main() {
     envClr = mix(envClr, envMapTint.rgb, envMapTint.a);
     gl_FragColor.rgb = clamp(mix(gl_FragColor.rgb, envClr, clamp(vreflect + envMapParam.x, 0., 0.8)) * 1.25, 0., 1.);
 
-    highp float Z = vShadowCoord.z - 0.001;
-    highp float zval = Z+0.05;
-    if (vShadowCoord.x > 0. && vShadowCoord.y > 0. && vShadowCoord.x < 1. && vShadowCoord.y < 1.) {
-        zval = shadowSample1(vShadowCoord.xy);
-    }
-    gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
-    if (zval < Z) {
-        gl_FragColor.rgb *= (1.0 - 1.0) * 0.7 + 0.3;
+    if (shadowDisabled < 0.5) {
+        highp float Z = vShadowCoord.z - 0.001;
+        highp float zval = Z+0.05;
+        if (vShadowCoord.x > 0. && vShadowCoord.y > 0. && vShadowCoord.x < 1. && vShadowCoord.y < 1.) {
+            zval = shadowSample1(vShadowCoord.xy);
+        }
+        gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
+        if (zval < Z) {
+            gl_FragColor.rgb *= (1.0 - 1.0) * 0.7 + 0.3;
+        }
+        else {
+            gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*10000.0+1.0)) * 0.7 + 0.3;
+        }
     }
     else {
-        gl_FragColor.rgb *= (1.0 - 1.0 / ((zval-Z)*10000.0+1.0)) * 0.7 + 0.3;
+        gl_FragColor.rgb *= l2;
     }
  }
