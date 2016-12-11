@@ -192,31 +192,41 @@ Math.angleDist = function (a,b) {
     return Math.atan2(Math.sin(a-b), Math.cos(a-b));
 };
 
-Math.pointBetween = function(c, a1, a2, p) {
-    a1 = Math.atan2(Math.sin(a1), Math.cos(a1));
-    a2 = Math.atan2(Math.sin(a2), Math.cos(a2));
-    if (a2 <= a1) {
-        a2 += Math.PI * 2.0;
+Math.sideOfLine = function(a,b,p) {
+    var cp = ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x));
+    if (cp < 0) {
+        return -1;
     }
-    if (a2-a1 >= Math.PI * 2.0) {
-        return true;
-    }
-    var ca = (a1+a2)*0.5;
-    var ad = Math.abs(ca - a2);
-    var dx1 = p.x - c.x, dy1 = p.y - c.y;
-    var dx2 = Math.cos(ca), dy2 = Math.sin(ca);
-    var len1 = Math.sqrt(dx1*dx1+dy1*dy1);
-    if (!len1) {
-        return true;
-    }
-    dx1 /= len1; dy1 /= len1;
-    var ad2 = dx1*dx2+dy1*dy2;
-    if (Math.abs(ad2) > Math.cos(ad)) {
-        return true;
+    else if (cp === 0) {
+        return 0;
     }
     else {
-        return false;
+        return 1;
     }
+}
+
+Math.normalizeVec2 = function(p) {
+    var len = Math.sqrt(p.x*p.x+p.y*p.y);
+    if (len > 0.00000001) {
+        return new b2Vec2(p.x/len, p.y/len);
+    }
+    else {
+        return new b2Vec2(1, 0);
+    }
+};
+
+Math.pointBetween = function(c, a1, a2, p) {
+
+    var p1 = new b2Vec2(Math.cos(a1) + c.x, Math.sin(a1) + c.y);
+    var p2 = new b2Vec2(Math.cos(a2) + c.x, Math.sin(a2) + c.y);
+
+    if (Math.sideOfLine(c, p1, p2) < 0) {
+        var tmp = p2;
+        p2 = p1;
+        p1 = tmp;
+    }
+
+    return Math.sideOfLine(c, p1, p) >= 0 && Math.sideOfLine(c, p2, p) <= 0;
 }
 
 Math.rotPoly = function(poly, angle) {
