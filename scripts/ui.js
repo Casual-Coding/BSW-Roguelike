@@ -1061,9 +1061,8 @@ BSWG.control_Menu = {
             this.w = Math.max(this.w, 16 + args.buttons[i].w);
             this.h += args.buttons[i].h + 8;
         }
-
+        
         this.buttons = args.buttons;
-
     },
 
     destroy: function () {
@@ -1083,6 +1082,13 @@ BSWG.control_Menu = {
 
     onremove: function() {
         this.destroy();
+    },
+
+    onadd: function() {
+        for (var i=0; i<this.buttons.length; i++) {
+            this.buttons[i].remove();
+            this.buttons[i].add();
+        }
     },
 
     render: function (ctx, viewport) {
@@ -2834,6 +2840,10 @@ BSWG.uiControl = function (desc, args) {
 
         this._added = true;
         BSWG.ui.add(this);
+
+        if (this.onadd) {
+            this.onadd();
+        }
 
     };
 

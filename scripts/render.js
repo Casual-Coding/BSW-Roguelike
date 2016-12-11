@@ -616,9 +616,9 @@ BSWG.render = new function() {
             while (true) {
                 frameTime = Date.timeStamp();
                 self.actualDt = frameTime - self.lastFrameTime;
-                if (self.actualDt >= (1/66)) {
+                //if (self.actualDt >= (1/66)) {
                     break;
-                }
+                //}
             }
 
             if (self.actualDt > 1/10) {
@@ -691,20 +691,29 @@ BSWG.render = new function() {
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
 
-            self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap);
+            if (BSWG.options.shadows) {
+                self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap);
+            }
 
             self.renderer.sortObjects = true;
 
             self.shadowMatrix.copy(self.cam3DS.projectionMatrix);
             self.shadowMatrix.multiply(self.cam3DS.matrixWorldInverse);
+            if (!BSWG.options.shadows) {
+                self.shadowMatrix.makeTranslation(0,0,100000);
+            }
             
             self.shadowMatrix.CACHE();
             self.cloudColor.CACHE();
             self.envMapTint.CACHE();
             self.envMapParam.CACHE();
 
-            self.composer.render();
-            //self.renderer.render(self.scene, self.cam3D);
+            if (BSWG.options.postProc) {
+                self.composer.render();
+            }
+            else {
+                self.renderer.render(self.scene, self.cam3D);
+            }
 
             self.ctx.save();
 

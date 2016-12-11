@@ -51,11 +51,11 @@ BSWG.generateCloudGeom = function (size) {
         var sz = Math.floor(Math.max(Math.round(C[i].r*12), 5))*3.5;
         var cloud = new THREE.PlaneGeometry(C[i].r*2, C[i].r*2, 1, 1)
         var matrix = new THREE.Matrix4();
-        matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, C[i].z - size).multiply(new THREE.Matrix4().makeRotationZ(Math.random()*Math.PI*2.0));
+        matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, 0.0).multiply(new THREE.Matrix4().makeRotationZ(Math.random()*Math.PI*2.0));
         cloud.applyMatrix(matrix);
         cloud.normalsNeedUpdate = true;
         cloud.needsUpdate = true;
-        cloud.__Z = C[i].z - size;
+        cloud.__Z = 0.0;
         geom.push(cloud);
     }
 
@@ -101,7 +101,7 @@ BSWG.cloud = function (pos, toPos, size, life) {
     this.smesh.rotation.set(0, 0, a, 'ZXY');
 
     BSWG.render.scene.add(this.mesh);
-    BSWG.render.sceneS.add(this.smesh);
+    //BSWG.render.sceneS.add(this.smesh);
 
     BSWG.cloudMap.add(this);
 
@@ -110,7 +110,7 @@ BSWG.cloud = function (pos, toPos, size, life) {
 BSWG.cloud.prototype.destroy = function () {
 
     BSWG.render.scene.remove(this.mesh);
-    BSWG.render.sceneS.remove(this.smesh);
+    //BSWG.render.sceneS.remove(this.smesh);
 
     this.mesh.material = null;
     this.mesh.geometry = null;

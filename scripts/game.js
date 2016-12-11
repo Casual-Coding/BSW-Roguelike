@@ -1918,12 +1918,34 @@ BSWG.game = new function(){
                     new BSWG.uiControl(BSWG.control_Button, {
                         x: 10, y: -1000,
                         w: 250, h: 32,
-                        text: 'VSync ' + (BSWG.options.vsync ? ' Off' : 'On'),
+                        text: 'VSync ' + (!BSWG.options.vsync ? ' Off' : 'On'),
                         selected: false,
                         click: function (me) {
                             BSWG.options.vsync = !BSWG.options.vsync;
                             BSWG.saveOptions();
-                            me.text = 'VSync ' + (BSWG.options.vsync ? ' Off' : 'On');
+                            me.text = 'VSync ' + (!BSWG.options.vsync ? ' Off' : 'On');
+                        }
+                    }),
+                    new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: -1000,
+                        w: 250, h: 32,
+                        text: 'Shadows ' + (!BSWG.options.shadows ? ' Off' : 'On'),
+                        selected: false,
+                        click: function (me) {
+                            BSWG.options.shadows = !BSWG.options.shadows;
+                            BSWG.saveOptions();
+                            me.text = 'Shadows ' + (!BSWG.options.shadows ? ' Off' : 'On');
+                        }
+                    }),
+                    new BSWG.uiControl(BSWG.control_Button, {
+                        x: 10, y: -1000,
+                        w: 250, h: 32,
+                        text: 'Post FX ' + (!BSWG.options.postProc ? ' Off' : 'On'),
+                        selected: false,
+                        click: function (me) {
+                            BSWG.options.postProc = !BSWG.options.postProc;
+                            BSWG.saveOptions();
+                            me.text = 'Post FX ' + (!BSWG.options.postProc ? ' Off' : 'On');
                         }
                     }),
                     new BSWG.uiControl(BSWG.control_Button, {

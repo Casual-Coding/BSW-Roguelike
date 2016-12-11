@@ -4,7 +4,9 @@ var BSWG = new function(){
 
     this.options = {
         fullscreen: false,
-        vsync: false
+        vsync: false,
+        postProc: true,
+        shadows: true
     };
     this.saveOptions = function() {
         window.localStorage = window.localStorage || {};
@@ -12,7 +14,10 @@ var BSWG = new function(){
     };
     this.loadOptions = function() {
         if (window.localStorage && window.localStorage.options) {
-            this.options = JSON.parse(window.localStorage.options);
+            var opts = JSON.parse(window.localStorage.options);
+            for (var key in opts) {
+                this.options[key] = opts[key];
+            }
         }
     };
 
