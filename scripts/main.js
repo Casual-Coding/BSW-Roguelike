@@ -167,6 +167,7 @@ var BSWG = new function(){
             'pRangeVertex',
             'hudVertex',
             'weatherVertex',
+            'exaustVertex'
         ],
         'fragment': [
             'basicFragment',
