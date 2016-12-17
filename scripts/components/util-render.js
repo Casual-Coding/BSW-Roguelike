@@ -133,83 +133,318 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     ctx.restore();
 };
 
-BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
-    if (!BSWG.bpmMatCache) {
-        BSWG.bpmMatCache = new Array(BSWG.bpmMatCacheISize);
-        for (var i=0; i<BSWG.bpmMatCache.length; i++) {
-            BSWG.bpmMatCache[i] = {
-                mat: BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
-                    clr: {
-                        type: 'v4',
-                        value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
-                    },
-                    map: {
-                        type: 't',
-                        value: BSWG.render.images['test_nm'].texture
-                    },
-                    dmgMap: {
-                        type: 't',
-                        value: BSWG.render.images['damage_nm'].texture
-                    },
-                    extra: {
-                        type: 'v4',
-                        value: new THREE.Vector4(1,0,0,0)
-                    },
-                    shadowMatrix: {
-                        type: 'm4',
-                        value: BSWG.render.shadowMatrix
-                    },
-                    shadowMap: {
-                        type: 't',
-                        value: BSWG.render.shadowMap.depthTexture
-                    },
-                    shadowDisabled: {
-                        type: 'f',
-                        value: BSWG.options.shadows ? 0.0 : 1.0
-                    },
-                    warpIn: {
-                        type: 'f',
-                        value: 1.0
-                    },
-                    vreflect: {
-                        type: 'f',
-                        value: BSWG.bpmReflect
-                    },
-                    envMap: {
-                        type: 't',
-                        value: BSWG.render.envMap.texture
-                    },
-                    envMap2: {
-                        type: 't',
-                        value: BSWG.render.envMap2.texture
-                    },
-                    envMapT: {
-                        type: 'f',
-                        value: BSWG.render.envMapT
-                    },
-                    viewport: {
-                        type: 'v2',
-                        value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
-                    },
-                    envMapTint: {
-                        type: 'v4',
-                        value: BSWG.render.envMapTint
-                    },
-                    envMapParam: {
-                        type: 'v4',
-                        value: BSWG.render.envMapParam
-                    },
-                }),
-                matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {
-                    strength: {
-                        type: 'f',
-                        value: 1.0
-                    }                    
-                }),
-                used: false
-            };
-        }
+BSWG.compMultiMesh = function (max_verts) {
+    this.numVerts = max_verts || 32768;
+
+    this.mat = BSWG.render.newMaterial("basicVertex2Multi", "basicFragment2", {
+        map: {
+            type: 't',
+            value: BSWG.render.images['test_nm'].texture
+        },
+        dmgMap: {
+            type: 't',
+            value: BSWG.render.images['damage_nm'].texture
+        },
+        shadowMatrix: {
+            type: 'm4',
+            value: BSWG.render.shadowMatrix
+        },
+        shadowMap: {
+            type: 't',
+            value: BSWG.render.shadowMap.depthTexture
+        },
+        shadowDisabled: {
+            type: 'f',
+            value: BSWG.options.shadows ? 0.0 : 1.0
+        },
+        envMap: {
+            type: 't',
+            value: BSWG.render.envMap.texture
+        },
+        envMap2: {
+            type: 't',
+            value: BSWG.render.envMap2.texture
+        },
+        envMapT: {
+            type: 'f',
+            value: BSWG.render.envMapT
+        },
+        viewport: {
+            type: 'v2',
+            value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
+        },
+        envMapTint: {
+            type: 'v4',
+            value: BSWG.render.envMapTint
+        },
+        envMapParam: {
+            type: 'v4',
+            value: BSWG.render.envMapParam
+        },
+    });
+
+    this.smat = BSWG.render.newMaterial("basicVertexMulti", "shadowFragment", {
+    });
+
+    this.geom = new THREE.BufferGeometry();
+
+    var aClr = new Float32Array(this.numVerts * 4);
+    var aWarpInVReflect = new Float32Array(this.numVerts * 3);
+    var aExtra = new Float32Array(this.numVerts * 4);
+    var aPosRot = new Float32Array(this.numVerts * 4);
+
+    var position = new Float32Array(this.numVerts * 3);
+    var normal = new Float32Array(this.numVerts * 3);
+
+    this.geom.addAttribute( 'aClr', new THREE.BufferAttribute( aClr, 4 ).setDynamic(true) );
+    this.geom.addAttribute( 'aWarpInVReflect', new THREE.BufferAttribute( aWarpInVReflect, 3 ).setDynamic(true) );
+    this.geom.addAttribute( 'aExtra', new THREE.BufferAttribute( aExtra, 4 ).setDynamic(true) );
+    this.geom.addAttribute( 'aPosRot', new THREE.BufferAttribute( aPosRot, 4 ).setDynamic(true) );
+    this.geom.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ).setDynamic(true) );
+    this.geom.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ).setDynamic(true) );
+
+    this.mesh = new THREE.Mesh(this.geom, this.mat);
+    this.smesh = new THREE.Mesh(this.geom, this.smat);
+
+    this.aClr = this.geom.getAttribute('aClr');
+    this.aWarpInVReflect = this.geom.getAttribute('aWarpInVReflect');
+    this.aExtra = this.geom.getAttribute('aExtra');
+    this.aPosRot = this.geom.getAttribute('aPosRot');
+    this.position = this.geom.getAttribute('position');
+    this.normal = this.geom.getAttribute('normal');
+
+    this.cmVerts = 0;
+
+    this.geom.setDrawRange(0, this.cmVerts);
+
+    this.nextMesh = null;
+    this.objects = [];
+
+    this.child = false;
+
+    this.mat.needsUpdate = true;
+    this.geom.needsUpdate = true;
+    this.mesh.frustumCulled = false;
+    this.mesh.needsUpdate = true;
+    this.smesh.frustumCulled = false;
+    this.smesh.needsUpdate = true;
+
+    BSWG.render.scene.add(this.mesh);
+    BSWG.render.sceneS.add(this.smesh);
+};
+
+BSWG.compMultiMesh.prototype.destroy = function() {
+
+    if (this.nextMesh) {
+        this.nextMesh.destroy();
+        this.nextMesh = null;
     }
+
+    BSWG.render.scene.remove(this.mesh);
+    BSWG.render.sceneS.remove(this.smesh);
+    this.geom.setDrawRange(0, 0);
+    this.mesh.geometry = null;
+    this.mesh.material = null;
+    this.smesh.geometry = null;
+    this.smesh.material = null;
+    this.mat.dispose();
+    this.geom.dispose();
+    this.mesh = null;
+    this.smesh = null;
+    this.mat = null;
+    this.geom = null;
+
+};
+
+BSWG.compMultiMesh.prototype.add = function(mesh) {
+
+    obj = {};
+    obj.mesh = mesh;
+    obj.vstart = this.cmVerts;
+    obj.vcount = mesh.geometry.getAttribute('position').array.length / 3;
+
+    if ((obj.vstart + obj.vcount) > (this.geom.getAttribute('position').array.length / 3)) {
+
+        if (!this.nextMesh) {
+            this.nextMesh = new BSWG.compMultiMesh(this.numVerts);
+            this.nextMesh.child = true;
+        }
+
+        return this.nextMesh.add(mesh);
+    }
+
+    obj.parent = this;
+    this.objects.push(obj);
+    this.cmVerts += obj.vcount;
+
+    var cposition = mesh.geometry.getAttribute('position');
+    var cnormal = mesh.geometry.getAttribute('normal');
+
+    var idxv = obj.vstart;
+    var k1, k2;
+    for (var j=0; j<obj.vcount; j++) {
+        k1 = (idxv + j)*3;
+        k2 = j*3;
+        this.position.array[k1 + 0] = cposition.array[k2 + 0];
+        this.position.array[k1 + 1] = cposition.array[k2 + 1];
+        this.position.array[k1 + 2] = cposition.array[k2 + 2];
+        this.normal.array[k1 + 0] = cnormal.array[k2 + 0];
+        this.normal.array[k1 + 1] = cnormal.array[k2 + 1];
+        this.normal.array[k1 + 2] = cnormal.array[k2 + 2];
+    }
+
+    this.position.updateRange.offset = 0;
+    this.position.updateRange.count = this.cmVerts * 3;
+    this.position.needsUpdate = true;
+    this.normal.updateRange.offset = 0;
+    this.normal.updateRange.count = this.cmVerts * 3;
+    this.normal.needsUpdate = true;
+
+    this.geom.setDrawRange(0, this.cmVerts);
+    this.geom.needsUpdate = true;
+
+    this.setArgs(obj, new THREE.Vector4(0.2, 0.2, 0.2, 1.0), 1.0, BSWG.bpmReflect, new THREE.Vector4(1,0,0,0), mesh.position, mesh.rotation.z);
+    return obj;
+
+};
+
+BSWG.compMultiMesh.prototype.remove = function (obj) {
+
+    if (obj.parent !== this) {
+        obj.parent.remove(obj);
+        return;
+    }
+
+    if (!this.geom || !this.mesh) {
+        return;
+    }
+
+    var index = this.objects.indexOf(obj);
+
+    if (index < 0) {
+        console.log('BSWG.compMultiMesh: Remove error');
+        return;
+    }
+
+    this.objects.splice(index, 1);
+
+    var voffset = obj.vcount;
+
+    for (var i=index; i<this.objects.length; i++) {
+
+        var o2 = this.objects[i];
+        var idxv = o2.vstart;
+        var k1, k2;
+        for (var j=0; j<o2.vcount; j++) {
+            k1 = idxv - voffset + j;
+            k2 = idxv + j;
+            this.aClr.array[k1*4 + 0] = this.aClr.array[k2*4 + 0];
+            this.aClr.array[k1*4 + 1] = this.aClr.array[k2*4 + 1];
+            this.aClr.array[k1*4 + 2] = this.aClr.array[k2*4 + 2];
+            this.aClr.array[k1*4 + 3] = this.aClr.array[k2*4 + 3];
+            this.aWarpInVReflect.array[k1*3 + 0] = this.aWarpInVReflect.array[k2*3 + 0];
+            this.aWarpInVReflect.array[k1*3 + 1] = this.aWarpInVReflect.array[k2*3 + 1];
+            this.aWarpInVReflect.array[k1*3 + 2] = this.aWarpInVReflect.array[k2*3 + 2];
+            this.aExtra.array[k1*4 + 0] = this.aExtra.array[k2*4 + 0];
+            this.aExtra.array[k1*4 + 1] = this.aExtra.array[k2*4 + 1];
+            this.aExtra.array[k1*4 + 2] = this.aExtra.array[k2*4 + 2];
+            this.aExtra.array[k1*4 + 3] = this.aExtra.array[k2*4 + 3];
+            this.aPosRot.array[k1*4 + 0] = this.aPosRot.array[k2*4 + 0];
+            this.aPosRot.array[k1*4 + 1] = this.aPosRot.array[k2*4 + 1];
+            this.aPosRot.array[k1*4 + 2] = this.aPosRot.array[k2*4 + 2];
+            this.aPosRot.array[k1*4 + 3] = this.aPosRot.array[k2*4 + 3];
+            this.position.array[k1*3 + 0] = this.position.array[k2*3 + 0];
+            this.position.array[k1*3 + 1] = this.position.array[k2*3 + 1];
+            this.position.array[k1*3 + 2] = this.position.array[k2*3 + 2];
+            this.normal.array[k1*3 + 0] = this.normal.array[k2*3 + 0];
+            this.normal.array[k1*3 + 1] = this.normal.array[k2*3 + 1];
+            this.normal.array[k1*3 + 2] = this.normal.array[k2*3 + 2];
+        }
+        o2.vstart -= voffset;
+    }
+
+    this.cmVerts -= voffset;
+    this.geom.setDrawRange(0, this.cmVerts);
+    this.geom.needsUpdate = true;
+
+    if (this.cmVerts > 0) {
+        this.position.updateRange.offset = 0;
+        this.position.updateRange.count = this.cmVerts * 3;
+        this.position.needsUpdate = true;
+        this.normal.updateRange.offset = 0;
+        this.normal.updateRange.count = this.cmVerts * 3;
+        this.normal.needsUpdate = true;        
+    }
+
+    obj.mesh = obj.parent = null;
+
+};
+
+BSWG.compMultiMesh.prototype.update = function (dt) {
+
+    var uniforms = this.mat.uniforms;
+    uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
+    uniforms.envMapT.value = BSWG.render.envMapT;   
+    uniforms.shadowDisabled.value = BSWG.options.shadows ? 0.0 : 1.0;
+
+    for (var i=0; i<this.objects.length; i++) {
+        var o2 = this.objects[i];
+        o2.mesh.updateMatrix();
+        o2.mesh.updateMatrixWorld(true);
+    }
+
+    if (this.cmVerts > 0) {
+        this.aClr.updateRange.offset = 0;
+        this.aClr.updateRange.count = this.cmVerts * 4;
+        this.aClr.needsUpdate = true;
+        this.aWarpInVReflect.updateRange.offset = 0;
+        this.aWarpInVReflect.updateRange.count = this.cmVerts * 3;
+        this.aWarpInVReflect.needsUpdate = true;
+        this.aExtra.updateRange.offset = 0;
+        this.aExtra.updateRange.count = this.cmVerts * 4;
+        this.aExtra.needsUpdate = true;
+        this.aPosRot.updateRange.offset = 0;
+        this.aPosRot.updateRange.count = this.cmVerts * 4;
+        this.aPosRot.needsUpdate = true;
+    }
+
+    if (this.nextMesh) {
+        this.nextMesh.update(dt);
+    }
+
+};
+
+BSWG.compMultiMesh.prototype.setArgs = function (obj, clr, warpIn, vreflect, extra, pos, angle) {
+
+    if (obj.parent !== this) {
+        obj.parent.setArgs(obj, clr, warpIn, vreflect, extra, pos, angle);
+        return;
+    }
+
+    var idxv = obj.vstart;
+    var k1;
+    for (var j=0; j<obj.vcount; j++) {
+        k1 = idxv + j;
+        this.aClr.array[k1*4 + 0] = clr.x;
+        this.aClr.array[k1*4 + 1] = clr.y;
+        this.aClr.array[k1*4 + 2] = clr.z;
+        this.aClr.array[k1*4 + 3] = clr.w;
+        this.aWarpInVReflect.array[k1*3 + 0] = warpIn;
+        this.aWarpInVReflect.array[k1*3 + 1] = vreflect;
+        this.aWarpInVReflect.array[k1*3 + 2] = 1.0;
+        this.aExtra.array[k1*4 + 0] = extra.x;
+        this.aExtra.array[k1*4 + 1] = extra.y;
+        this.aExtra.array[k1*4 + 2] = extra.z;
+        this.aExtra.array[k1*4 + 3] = extra.w;
+        this.aPosRot.array[k1*4 + 0] = pos.x;
+        this.aPosRot.array[k1*4 + 1] = pos.y;
+        this.aPosRot.array[k1*4 + 2] = pos.z;
+        this.aPosRot.array[k1*4 + 3] = angle;
+    }
+
+};
+
+BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     this.obj = obj;
     this.body = this.obj.body;
@@ -320,11 +555,10 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
         this.geom = new THREE.BufferGeometry().fromGeometry(this.geom);
         this.geom.computeFaceNormals();
-        //if (BSWG.bpmSmoothNormals) {
-            this.geom.computeVertexNormals();
-        //}
+        this.geom.computeVertexNormals();
         this.geom.attributes.normal.needsUpdate = true;
         this.geom.computeBoundingSphere();
+
         this.geom.needsUpdate = true;
         this.geom.__zoffset = this.zoffset;
         BSWG.bpmGeomCache[key] = this.geom;
@@ -334,112 +568,20 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         this.zoffset = this.geom.__zoffset;
     }
 
-    var matIdx = -1;
-    for (var i=0; i<BSWG.bpmMatCache.length; i++) {
-        if (!BSWG.bpmMatCache[i].used) {
-            matIdx = i;
-            break;
-        }
-    }
-    this.reflect = BSWG.bpmReflect;
-    if (matIdx < 0) {
-        BSWG.bpmMatCache.push({
-            mat: BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
-                clr: {
-                    type: 'v4',
-                    value: new THREE.Vector4(0.2, 0.2, 0.2, 1.0)
-                },
-                map: {
-                    type: 't',
-                    value: BSWG.render.images['test_nm'].texture
-                },
-                dmgMap: {
-                    type: 't',
-                    value: BSWG.render.images['damage_nm'].texture
-                },
-                extra: {
-                    type: 'v4',
-                    value: new THREE.Vector4(1,0,0,0)
-                },
-                shadowMatrix: {
-                    type: 'm4',
-                    value: BSWG.render.shadowMatrix
-                },
-                shadowMap: {
-                    type: 't',
-                    value: BSWG.render.shadowMap.depthTexture
-                },
-                shadowDisabled: {
-                    type: 'f',
-                    value: BSWG.options.shadows ? 0.0 : 1.0
-                },
-                warpIn: {
-                    type: 'f',
-                    value: 1.0
-                },
-                vreflect: {
-                    type: 'f',
-                    value: BSWG.bpmReflect
-                },
-                envMap: {
-                    type: 't',
-                    value: BSWG.render.envMap.texture
-                },
-                envMap2: {
-                    type: 't',
-                    value: BSWG.render.envMap2.texture
-                },
-                envMapT: {
-                    type: 'f',
-                    value: BSWG.render.envMapT
-                },
-                viewport: {
-                    type: 'v2',
-                    value: new THREE.Vector2(BSWG.render.viewport.w, BSWG.render.viewport.h)
-                },
-                envMapTint: {
-                    type: 'v4',
-                    value: BSWG.render.envMapTint
-                },
-                envMapParam: {
-                    type: 'v4',
-                    value: BSWG.render.envMapParam
-                },
-            }),
-            matS: BSWG.render.newMaterial("basicVertex", "shadowFragment", {
-            }),
-            used: false
-        });
-        matIdx = BSWG.bpmMatCache.length - 1;
-    }
-
-    this.mat = BSWG.bpmMatCache[matIdx].mat;
-    this.mat.uniforms.envMap.value = BSWG.render.envMap.texture;
-    this.mat.uniforms.vreflect.value = BSWG.bpmReflect;
+    this.mat = BSWG.render.newMaterial("basicVertex", "shadowFragment");
     this.mesh = new THREE.Mesh(this.geom, this.mat);
-
-    this.matS = BSWG.bpmMatCache[matIdx].matS;
-    this.meshS = new THREE.Mesh(this.geom, this.matS);
-
-    BSWG.render.sceneS.add( this.meshS );
-
-    this.mat.uniforms.warpIn.value = 1.0;
-    this.mat.uniforms.clr.value.set(0.2, 0.2, 0.2, 1.0);
-    this.mat.uniforms.extra.value.set(1,0,0,0);
-
-    //this.mat.needsUpdate = true;
     this.mesh.needsUpdate = true;
-    this.meshS.needsUpdate = true;
 
-    BSWG.render.scene.add( this.mesh );
-
-    BSWG.bpmMatCache[matIdx].used = true;
-    this.matIdx = matIdx;
+    this.mobj = BSWG.componentList.compMesh.add(this.mesh);
 
     this.anchorT = 0.0;
-
     this.enemyT = 0.0;
     this.lclr = null;
+    this.clr = new THREE.Vector4(0.2, 0.2, 0.2, 1.0);
+    this.warpIn = 1.0;
+    this.reflect = BSWG.bpmReflect;
+    this.vreflect = BSWG.bpmReflect;
+    this.extra = new THREE.Vector4(1,0,0,0);
 
     this.update();
 
@@ -481,19 +623,9 @@ BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, cen
     mesh.updateMatrix(true);
     mesh.updateMatrixWorld(true);
 
-    var meshS = this.meshS;
-    position = meshS.position;
+    var extra = this.extra;
 
-    position.x = center.x + (offset?offset.x:0);
-    position.y = center.y + (offset?offset.y:0);
-    position.z = this.zoffset;
-    meshS.rotation.z = angle + (exRot || 0);
-    meshS.updateMatrix(true);
-    meshS.updateMatrixWorld(true);
-
-    var uniforms = this.mat.uniforms;
-
-    uniforms.extra.value.x = texScale || 1.0;
+    extra.x = texScale || 1.0;
 
     if (anchor && (!comp || comp.onCC === BSWG.game.ccblock)) {
         this.anchorT += (1.0 - this.anchorT) * 0.25;
@@ -502,14 +634,11 @@ BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, cen
         this.anchorT += (0.0 - this.anchorT) * 0.25;   
     }
 
-    uniforms.extra.value.y = Math.clamp(this.anchorT, 0, 1);
-    uniforms.extra.value.z = BSWG.render.time;
+    extra.y = Math.clamp(this.anchorT, 0, 1);
+    extra.z = BSWG.render.time;
     var dmg = comp ? (1.0 - (comp.hp / comp.maxHP)) : 0.0;
 
-    uniforms.extra.value.w = dmg;
-    uniforms.viewport.value.set(BSWG.render.viewport.w, BSWG.render.viewport.h);
-
-    uniforms.envMapT.value = BSWG.render.envMapT;
+    extra.w = dmg;
 
     if (comp && comp.p && comp.repairing) {
         if (Math.pow(Math._random(), 0.25) < 0.85) {
@@ -558,35 +687,34 @@ BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, cen
         }
     }
 
-    uniforms.shadowDisabled.value = BSWG.options.shadows ? 0.0 : 1.0;
-    uniforms.warpIn.value -= BSWG.render.dt * 2.0;
-    if (uniforms.warpIn.value < 0.0) {
-        uniforms.warpIn.value = 0.0;
+    this.warpIn -= BSWG.render.dt * 2.0;
+    if (this.warpIn < 0.0) {
+        this.warpIn = 0.0;
     }
 
     if (BSWG.game.storeMode && !BSWG.game.editMode && comp && comp.onCC === null && comp.type !== 'missile') {
-        if (uniforms.warpIn.value < 0.25) {
-            uniforms.warpIn.value += 0.6;
+        if (this.warpIn < 0.25) {
+            this.warpIn += 0.6;
         }
     }
 
     if (clr) {
-        uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
+        this.clr.set(clr[0], clr[1], clr[2], clr[3]);
         this.lclr = clr;
     }
 
     if (this.lclr) {
         var t = this.enemyT * 0.5;
-        var clr2 = uniforms.clr.value;
+        var clr2 = this.clr;
         var br = this.lclr[0], bg = this.lclr[1], bb = this.lclr[2];
         var r = 1, g = 0, b = 0;
         if (BSWG.game.bossFight) {
             r = 0.2;
             g = b = -0.07;
-            uniforms.vreflect.value = this.reflect * 0.125;
+            this.vreflect = this.reflect * 0.125;
         }
         else {
-            uniforms.vreflect.value = this.reflect;
+            this.vreflect = this.reflect;
         }
         if (comp && comp.p) {
             if (comp.repairing) {
@@ -642,34 +770,26 @@ BSWG.blockPolyMesh.prototype.update = function(clr, texScale, anchor, exRot, cen
             }
 
         }
-        clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, this.lclr[3]*(1-this.mat.uniforms.warpIn.value));
+        clr2.set(br * (1-t) + t * r, bg * (1-t) + t * g, bb * (1-t) + t * b, this.lclr[3]*(1-this.warpIn));
     }
     else {
-        uniforms.vreflect.value = this.reflect;
-    } 
+        this.vreflect = this.reflect;
+    }
+
+    BSWG.componentList.compMesh.setArgs(this.mobj, this.clr, this.warpIn, this.vreflect, this.extra, mesh.position, mesh.rotation.z);
 
     BSWG.bpmReflect = BSWG.bpmReflectDefault;
 };
 
 BSWG.blockPolyMesh.prototype.destroy = function() {
 
-    BSWG.bpmMatCache[this.matIdx].used = false;
-
-    BSWG.render.scene.remove( this.mesh );
-    BSWG.render.sceneS.remove( this.meshS );
-
-    //this.mesh.geometry.dispose();
-    //this.mesh.material.dispose();
+    BSWG.componentList.compMesh.remove(this.mobj);
+    this.mobj = null;
     this.mesh.geometry = null;
     this.mesh.material = null;
     this.mesh = null;
     this.mat = null;
     this.geom = null;
-
-    //this.meshS.material.dispose();
-    this.meshS.material = null;
-    this.meshS.geometry = null;
-    this.meshS = null;
 
 };
 

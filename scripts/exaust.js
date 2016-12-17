@@ -1,4 +1,5 @@
 BSWG.maxExaust = 384;
+
 BSWG.exaustFire = 1;
 BSWG.exaustBlue = 2;
 BSWG.exaustWhite = 3;

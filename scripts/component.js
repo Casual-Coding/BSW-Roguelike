@@ -1382,6 +1382,11 @@ BSWG.componentList = new function () {
             }
         });
 
+        if (this.compMesh) {
+            this.compMesh.destroy();
+        }
+        this.compMesh = new BSWG.compMultiMesh();
+
         if (!this.compCached) {
             for (var i=0; i<this.sbTypes.length; i++) {
                 var sbadd = this.sbTypes[i].sbadd;
@@ -1406,7 +1411,6 @@ BSWG.componentList = new function () {
         }
 
         this.compRemove.length = 0;
-
     };
 
     this.allCCs = function () {
@@ -1776,6 +1780,10 @@ BSWG.componentList = new function () {
     };
 
     this.render = function (ctx, cam, dt) {
+
+        if (this.compMesh) {
+            this.compMesh.update(dt);
+        }
 
         ctx.save();
 

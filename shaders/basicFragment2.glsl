@@ -6,16 +6,17 @@ varying vec3 vLocal;
 varying mat3 vNormalMatrix;
 varying highp vec4 vShadowCoord;
 
+varying vec4 clr;
+varying vec4 extra;
+varying float warpIn;
+varying float vreflect;
+
 uniform sampler2D map;
 uniform sampler2D dmgMap;
-uniform vec4 clr;
-uniform vec4 extra;
-uniform float warpIn;
 uniform sampler2D shadowMap;
 uniform sampler2D envMap, envMap2;
 uniform float envMapT;
 uniform vec2 viewport;
-uniform float vreflect;
 uniform vec4 envMapTint;
 uniform vec4 envMapParam;
 uniform float shadowDisabled;
