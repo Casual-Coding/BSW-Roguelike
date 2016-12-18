@@ -52,8 +52,9 @@ BSWG.component_DetacherLauncher = {
 
     init: function(args) {
 
-        this.size      = args.size || 2;
-        this.launchKey = args.launchKey || BSWG.KEY.F;
+        this.size         = args.size || 2;
+        this.energyShot   = [4.0, 8.0, 16.0][this.size-1];
+        this.launchKey    = args.launchKey || BSWG.KEY.F;
         this.launchKeyAlt = args.launchKeyAlt || this.launchKey;
         this.dispKeys = {
             'launch': [ '', new b2Vec2(0.0, 0.0) ],
@@ -238,7 +239,7 @@ BSWG.component_DetacherLauncher = {
 
     handleInput: function(keys) {
 
-        if ((keys[this.launchKey] || keys[this.launchKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
+        if ((keys[this.launchKey] || keys[this.launchKeyAlt]) && !this.fireT && this.empDamp > 0.5 && this.onCC && this.onCC.useEnergy(this.energyShot)) {
 
             for (var k=0; k<this.jpoints.length; k++) {
                 if (this.welds[k] && k !== 3) {

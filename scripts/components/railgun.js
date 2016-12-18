@@ -43,6 +43,8 @@ BSWG.component_Railgun = {
 
         this.maxHP = this.hp = 100;
 
+        this.energySecond = 4.0;
+
         var offsetAngle = this.offsetAngle = 0.0;
 
         var size = this.size = (args.size || 1);
@@ -243,7 +245,7 @@ BSWG.component_Railgun = {
     handleInput: function(keys) {
 
         this.charging = false;
-        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5 && this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
             this.charging = true;
         }
 

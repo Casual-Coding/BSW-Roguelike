@@ -3090,6 +3090,13 @@ BSWG.game = new function(){
                 ctx.fillRect(X, Y, W, H);
                 ctx.globalAlpha = 1.0;
 
+                if (self.ccblock.energyCritical) {
+                    ctx.globalAlpha = (Math.sin(BSWG.render.time*Math.PI*3.0) * 0.5 + 0.5) * 0.5;
+                    ctx.fillStyle = '#F00';
+                    ctx.fillRect(X, Y, W, H);
+                    ctx.globalAlpha = 1.0;
+                }
+
                 var img = BSWG.render.procImageCache(self, '_spBar', W, H, null, function(ctx, w, h){
                     var grd = ctx.createLinearGradient(0, 0, w, 0);
                     grd.addColorStop(0,"#000");
@@ -3117,7 +3124,8 @@ BSWG.game = new function(){
                 ctx.strokeStyle = '#00f';
                 ctx.font = (~~(H*0.65)) + 'px Orbitron';
                 ctx.textAlign = 'right';
-                ctx.fillTextB('' + Math.round(self.ccblock.energy) + '/' + Math.round(self.ccblock.maxEnergy), X + W - W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
+                var eUse = Math.round(self.ccblock.energyUse);
+                ctx.fillTextB('(' + (eUse > 0 ? '+' : '') + eUse + '/s) ' + Math.round(self.ccblock.energy) + '/' + Math.round(self.ccblock.maxEnergy), X + W - W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
             }
 
             if (self.xpInfo && self.levelUpBtn) {

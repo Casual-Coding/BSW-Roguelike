@@ -14,7 +14,12 @@ BSWG.MSL_COOLDOWN = {
     0: 1.5/2, // Missile
     1: 6,     // Torpedo
     2: 8,     // EMP
-}
+};
+BSWG.MSL_ENERGY = {
+    0: 2.0,   // Missile
+    1: 8.0,   // Torpedo
+    2: 11.0   // EMP
+};
 
 BSWG.component_MissileLauncher = {
 
@@ -71,6 +76,8 @@ BSWG.component_MissileLauncher = {
     init: function(args) {
 
         this.ltype = args.ltype || 0;
+
+        this.energyShot = BSWG.MSL_ENERGY[this.ltype];
 
         if (this.ltype > 0) {
             this.maxHP *= 4;
@@ -225,7 +232,7 @@ BSWG.component_MissileLauncher = {
 
         var accel = 0;
 
-        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5 && this.onCC && this.onCC.useEnergy(this.energyShot)) {
 
             var pl = new b2Vec2(0.0, this.ltype === BSWG.MSL_TYPE.MISSILE ? 1.5 : 2.25);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;

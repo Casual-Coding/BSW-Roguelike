@@ -64,6 +64,7 @@ var BSWG = new function(){
         'components/shield.js',
         'components/railgun.js',
         'components/razor.js',
+        'components/power-core.js',
         'components/util-jpoints.js',
         'components/util-render.js',
         'specials/specials_base.js',

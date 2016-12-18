@@ -37,6 +37,8 @@ BSWG.component_Laser = {
 
     init: function(args) {
 
+        this.energySecond = 7.5;
+
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = [
@@ -163,7 +165,7 @@ BSWG.component_Laser = {
 
         var accel = 0;
 
-        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && this.empDamp > 0.5) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && this.empDamp > 0.5 && this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
 
             accel = 1;
 

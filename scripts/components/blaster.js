@@ -40,6 +40,7 @@ BSWG.component_Blaster = {
     init: function(args) {
 
         this.size = args.size || 1;
+        this.energyShot = [0.5, 2.0][this.size-1];
 
         var offsetAngle = this.offsetAngle = 0.0;
 
@@ -163,7 +164,7 @@ BSWG.component_Blaster = {
 
         var accel = 0;
 
-        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && !this.fireT && this.empDamp > 0.5 && this.onCC && this.onCC.useEnergy(this.energyShot)) {
 
             var pl = new b2Vec2(0.0, 0.35*this.size);
             var a = this.obj.body.GetAngle() - Math.PI/2.0;

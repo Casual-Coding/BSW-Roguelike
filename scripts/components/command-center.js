@@ -41,6 +41,8 @@ BSWG.component_CommandCenter = {
 
     noGrab: true,
 
+    energyGain: 1.0,
+
     serialize: [
         'aiStr',
         'leftKey',
@@ -202,7 +204,15 @@ BSWG.component_CommandCenter = {
 
         this.maxEnergy = this.calcMaxEnergy();
         this.energy = this.maxEnergy;
-        this.energyRegen = (this === BSWG.game.ccblock) ? .05 : .5;
+        this.lEnergy = this.energy;
+        this.energyUse = 0;
+        this.energyCritical = false;
+        this.eUseArray = [];
+        for (var i=0; i<15; i++) {
+            this.eUseArray.push(0.0);
+        }
+        this.eUsePtr = 0;
+        this.energyRegen = 0.0;
 
         // special effects
         for (var i=0; i<this._spkeys.length; i++) {
@@ -456,6 +466,25 @@ BSWG.component_CommandCenter = {
 
     _spkeys: [ 'fury', 'overpowered', 'defenseScreen', 'speed', 'lightweight', 'massive', 'massive2', 'spinUp', 'doublePunch' ],
 
+    useEnergy: function(amt) {
+        if (amt > 0) {
+            if (this.energy >= amt) {
+                this.energy -= amt;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            this.energy -= amt;
+            if (this.energy > this.maxEnergy) {
+                this.energy = this.maxEnergy;
+            }
+            return true;
+        }
+    },
+
     update: function(dt) {
 
         if (BSWG.game.battleMode && BSWG.game.scene === BSWG.SCENE_GAME2 && self !== BSWG.game.ccblock) {
@@ -468,14 +497,18 @@ BSWG.component_CommandCenter = {
         }
         this.lMaxEnergy = this.maxEnergy;
 
-        this.energyRegen = .05;
-
-        var p = this.p();
-        if (this.lERP) {
-            this.energy = Math.clamp(this.energy + this.energyRegen * (Math.distVec2(p, this.lERP) / 3), 0, this.maxEnergy)
+        this.useEnergy(-this.energyRegen * dt);
+        var energyUse = this.energy - this.lEnergy;
+        this.lEnergy = this.energy;
+        this.eUseArray[this.eUsePtr] = energyUse;
+        this.eUsePtr = (this.eUsePtr + 1) % this.eUseArray.length;
+        this.energyUse = 0.0;
+        for (var i=0; i<this.eUseArray.length; i++) {
+            this.energyUse += this.eUseArray[i];
         }
-        this.lERP = p.clone();
-        p = null;
+        this.energyUse /= this.eUseArray.length;
+        this.energyUse /= dt;
+        this.energyCritical = (this.energy / this.maxEnergy) < 0.2;
 
         for (var i=0; i<this._spkeys.length; i++) {
             var key = this._spkeys[i];

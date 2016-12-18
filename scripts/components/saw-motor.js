@@ -71,6 +71,7 @@ BSWG.component_SawMotor = {
         this.motor  = true;
         this.rotKey = args.rotKey || BSWG.KEY.SPACE;
         this.rotKeyAlt = args.rotKeyAlt || this.rotKey;
+        this.energySecond = [1.0, 3.0, 9.0][this.size-1];
 
         this.maxHP = this.size * 70 / 3;
 
@@ -262,7 +263,9 @@ BSWG.component_SawMotor = {
 
         if (robj) {
             if (keys[this.rotKey] || keys[this.rotKeyAlt]) {
-                this.motorAccel = 33.0 * ((this.onCC && this.onCC.spinUp) ? 2 : 1) * this.empDamp;
+                if (this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
+                    this.motorAccel = 33.0 * ((this.onCC && this.onCC.spinUp) ? 2 : 1) * this.empDamp;
+                }
             }
         }
 

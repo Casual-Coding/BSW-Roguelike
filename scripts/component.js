@@ -248,6 +248,9 @@ BSWG.compImplied = function (a, b) {
     }
 
     switch (a.type) {
+        case 'powercore':
+            return (a.size + (a.armour ? 1 : 0)) <= (b.size + (b.armour ? 1 : 0));
+            break;
         case 'blaster':
             return a.size <= b.size;
             break;
@@ -1364,6 +1367,7 @@ BSWG.componentList = new function () {
             'shield':           BSWG.component_Shield,
             'railgun':          BSWG.component_Railgun,
             'razor':            BSWG.component_Razor,
+            'powercore':        BSWG.component_PowerCore,
         };
 
         this.sbTypes = [];
@@ -1660,11 +1664,13 @@ BSWG.componentList = new function () {
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type == 'cc') {
                 CL[i].totalMass = (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
+                CL[i].energyRegen = CL[i].energyGain;
             }
         }
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type != 'cc') {
                 CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
+                CL[i].energyRegen += Math.max(0, CL[i].energyGain || 0.0);
             }
         }
 

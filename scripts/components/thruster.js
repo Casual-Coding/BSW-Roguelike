@@ -43,6 +43,7 @@ BSWG.component_Thruster = {
         var offsetAngle = this.offsetAngle = 0.0;
 
         this.size = args.size || 1;
+        this.energySecond = [0.25, 1.0][this.size-1];
 
         this.maxHP = this.size * this.size * 125 / 4;
 
@@ -222,7 +223,7 @@ BSWG.component_Thruster = {
 
         var accel = 0;
 
-        if (keys[this.thrustKey] || keys[this.thrustKeyAlt]) accel += 1;
+        if ((keys[this.thrustKey] || keys[this.thrustKeyAlt]) && this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) accel += 1;
 
         accel *= this.empDamp;
 

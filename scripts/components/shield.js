@@ -66,6 +66,7 @@ BSWG.component_Shield = {
         this.maxHP = this.size * 250 / 2.5;
         this.maxShieldEnergy = this.maxHP * BSWG.shieldSizeFactor * 2;
         this.shieldEnergy = this.maxShieldEnergy;
+        this.energySecond = [4.0, 8.0, 16.0][this.size-1];
 
         this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
             width:    this.size,
@@ -306,7 +307,11 @@ BSWG.component_Shield = {
                 }
             }
             else {
-                this.shieldEnergy += dt * this.maxShieldEnergy / 15;
+                if (this.shieldEnergy < this.maxShieldEnergy) {
+                    if (this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
+                        this.shieldEnergy += dt * this.maxShieldEnergy / 15;
+                    }
+                }
             }
         }
         else {

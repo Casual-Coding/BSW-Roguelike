@@ -61,6 +61,8 @@ BSWG.component_Minigun = {
 
         var size = this.size = args.size || 1;
 
+        this.energySecond = [1.0, 4.0][size-1];
+
         var overs = null;
         var verts = Math.smoothPoly(overts = [
             new b2Vec2(size * -0.30 * 1.5, size * -0.125 * 1.5),
@@ -269,7 +271,7 @@ BSWG.component_Minigun = {
         var accel = 0;
 
         this.firing = false;
-        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && this.empDamp > 0.5) {
+        if ((keys[this.fireKey] || keys[this.fireKeyAlt]) && this.empDamp > 0.5 && this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
             this.firing = true;
         }
         

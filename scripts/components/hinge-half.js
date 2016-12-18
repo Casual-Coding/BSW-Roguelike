@@ -68,6 +68,11 @@ BSWG.component_HingeHalf = {
         this.rotKey = args.rotKey ? args.rotKey : (this.motor ? BSWG.KEY.Q : BSWG.KEY.E);
         this.rotKeyAlt = args.rotKeyAlt || this.rotKey;
 
+        this.energySecond = [0.25, 1.0][args.size-1];
+        if (!this.motor) {
+            this.energySecond = 0.0;
+        }
+
         this.maxHP = this.size * 80 / 2;
 
         var verts = [
@@ -254,8 +259,10 @@ BSWG.component_HingeHalf = {
 
         if (robj) {
             if (keys[this.rotKey] || keys[this.rotKeyAlt]) {
-                robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1.5 : 1.5) * this.empDamp);
-                robj.joint.__ms = 1.0 * this.empDamp;
+                if (this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
+                    robj.joint.SetMotorSpeed((robj.objA.id === this.obj.id ? -1.5 : 1.5) * this.empDamp);
+                    robj.joint.__ms = 1.0 * this.empDamp;
+                }
             }
         }
     },
