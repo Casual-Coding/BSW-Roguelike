@@ -284,20 +284,23 @@ BSWG.compMultiMesh.prototype.add = function(mesh) {
     this.objects.push(obj);
     this.cmVerts += obj.vcount;
 
-    var cposition = mesh.geometry.getAttribute('position');
-    var cnormal = mesh.geometry.getAttribute('normal');
+    var cpos = mesh.geometry.getAttribute('position').array;
+    var cnorm = mesh.geometry.getAttribute('normal').array;
 
     var idxv = obj.vstart;
-    var k1, k2;
-    for (var j=0; j<obj.vcount; j++) {
+    var k1=0, k2=0;
+    var pos = this.position.array;
+    var norm = this.normal.array;
+    var j=0, len=obj.vcount;
+    for (; j<len; j++) {
         k1 = (idxv + j)*3;
         k2 = j*3;
-        this.position.array[k1 + 0] = cposition.array[k2 + 0];
-        this.position.array[k1 + 1] = cposition.array[k2 + 1];
-        this.position.array[k1 + 2] = cposition.array[k2 + 2];
-        this.normal.array[k1 + 0] = cnormal.array[k2 + 0];
-        this.normal.array[k1 + 1] = cnormal.array[k2 + 1];
-        this.normal.array[k1 + 2] = cnormal.array[k2 + 2];
+        pos[k1] = cpos[k2];
+        pos[k1+1] = cpos[k2+1];
+        pos[k1+2] = cpos[k2+2];
+        norm[k1] = cnorm[k2];
+        norm[k1+1] = cnorm[k2+1];
+        norm[k1+2] = cnorm[k2+2];
     }
 
     this.position.updateRange.offset = 0;
@@ -336,36 +339,47 @@ BSWG.compMultiMesh.prototype.remove = function (obj) {
     this.objects.splice(index, 1);
 
     var voffset = obj.vcount;
+    var k1=0, k2=0, k13=0, k23=0, len=0; j=0;
+    var aClr = this.aClr.array;
+    var aWarp = this.aWarpInVReflect.array;
+    var aEx = this.aExtra.array;
+    var aPr = this.aPosRot.array;
+    var pos = this.position.array;
+    var norm = this.normal.array;
+    var o2 = null;
+    var idxv = 0;
+    var obs = this.objects;
 
-    for (var i=index; i<this.objects.length; i++) {
-
-        var o2 = this.objects[i];
-        var idxv = o2.vstart;
-        var k1, k2;
-        for (var j=0; j<o2.vcount; j++) {
+    for (var i=index; i<obs.length; i++) {
+        o2 = obs[i];
+        idxv = o2.vstart;
+        len=o2.vcount; j=0;
+        for (; j<len; j++) {
             k1 = idxv - voffset + j;
             k2 = idxv + j;
-            this.aClr.array[k1*4 + 0] = this.aClr.array[k2*4 + 0];
-            this.aClr.array[k1*4 + 1] = this.aClr.array[k2*4 + 1];
-            this.aClr.array[k1*4 + 2] = this.aClr.array[k2*4 + 2];
-            this.aClr.array[k1*4 + 3] = this.aClr.array[k2*4 + 3];
-            this.aWarpInVReflect.array[k1*3 + 0] = this.aWarpInVReflect.array[k2*3 + 0];
-            this.aWarpInVReflect.array[k1*3 + 1] = this.aWarpInVReflect.array[k2*3 + 1];
-            this.aWarpInVReflect.array[k1*3 + 2] = this.aWarpInVReflect.array[k2*3 + 2];
-            this.aExtra.array[k1*4 + 0] = this.aExtra.array[k2*4 + 0];
-            this.aExtra.array[k1*4 + 1] = this.aExtra.array[k2*4 + 1];
-            this.aExtra.array[k1*4 + 2] = this.aExtra.array[k2*4 + 2];
-            this.aExtra.array[k1*4 + 3] = this.aExtra.array[k2*4 + 3];
-            this.aPosRot.array[k1*4 + 0] = this.aPosRot.array[k2*4 + 0];
-            this.aPosRot.array[k1*4 + 1] = this.aPosRot.array[k2*4 + 1];
-            this.aPosRot.array[k1*4 + 2] = this.aPosRot.array[k2*4 + 2];
-            this.aPosRot.array[k1*4 + 3] = this.aPosRot.array[k2*4 + 3];
-            this.position.array[k1*3 + 0] = this.position.array[k2*3 + 0];
-            this.position.array[k1*3 + 1] = this.position.array[k2*3 + 1];
-            this.position.array[k1*3 + 2] = this.position.array[k2*3 + 2];
-            this.normal.array[k1*3 + 0] = this.normal.array[k2*3 + 0];
-            this.normal.array[k1*3 + 1] = this.normal.array[k2*3 + 1];
-            this.normal.array[k1*3 + 2] = this.normal.array[k2*3 + 2];
+            k13 = k1*3; k1 *= 4;
+            k23 = k2*3; k2 *= 4;
+            aClr[k1] = aClr[k2];
+            aClr[k1+1] = aClr[k2+1];
+            aClr[k1+2] = aClr[k2+2];
+            aClr[k1+3] = aClr[k2+3];
+            aWarp[k13] = aWarp[k23];
+            aWarp[k13+1] = aWarp[k23+1];
+            aWarp[k13+2] = aWarp[k23+2];
+            aEx[k1] = aEx[k2];
+            aEx[k1+1] = aEx[k2+1];
+            aEx[k1+2] = aEx[k2+2];
+            aEx[k1+3] = aEx[k2+3];
+            aPr[k1] = aPr[k2];
+            aPr[k1+1] = aPr[k2+1];
+            aPr[k1+2] = aPr[k2+2];
+            aPr[k1+3] = aPr[k2+3];
+            pos[k13] = pos[k23];
+            pos[k13+1] = pos[k23+1];
+            pos[k13+2] = pos[k23+2];
+            norm[k13] = norm[k23];
+            norm[k13+1] = norm[k23+1];
+            norm[k13+2] = norm[k23+2];
         }
         o2.vstart -= voffset;
     }
@@ -396,8 +410,8 @@ BSWG.compMultiMesh.prototype.update = function (dt) {
 
     for (var i=0; i<this.objects.length; i++) {
         var o2 = this.objects[i];
-        o2.mesh.updateMatrix();
-        o2.mesh.updateMatrixWorld(true);
+        //o2.mesh.updateMatrix();
+        //o2.mesh.updateMatrixWorld(true);
     }
 
     if (this.cmVerts > 0) {
@@ -429,24 +443,31 @@ BSWG.compMultiMesh.prototype.setArgs = function (obj, clr, warpIn, vreflect, ext
     }
 
     var idxv = obj.vstart;
-    var k1;
-    for (var j=0; j<obj.vcount; j++) {
+    var k1=0, k2=0, j=0;
+    var aClr = this.aClr.array;
+    var aWarp = this.aWarpInVReflect.array;
+    var aEx = this.aExtra.array;
+    var aPr = this.aPosRot.array;
+    var len = obj.vcount;
+    for (; j<len; j++) {
         k1 = idxv + j;
-        this.aClr.array[k1*4 + 0] = clr.x;
-        this.aClr.array[k1*4 + 1] = clr.y;
-        this.aClr.array[k1*4 + 2] = clr.z;
-        this.aClr.array[k1*4 + 3] = clr.w;
-        this.aWarpInVReflect.array[k1*3 + 0] = warpIn;
-        this.aWarpInVReflect.array[k1*3 + 1] = vreflect;
-        this.aWarpInVReflect.array[k1*3 + 2] = 1.0;
-        this.aExtra.array[k1*4 + 0] = extra.x;
-        this.aExtra.array[k1*4 + 1] = extra.y;
-        this.aExtra.array[k1*4 + 2] = extra.z;
-        this.aExtra.array[k1*4 + 3] = extra.w;
-        this.aPosRot.array[k1*4 + 0] = pos.x;
-        this.aPosRot.array[k1*4 + 1] = pos.y;
-        this.aPosRot.array[k1*4 + 2] = pos.z;
-        this.aPosRot.array[k1*4 + 3] = angle;
+        k2 = k1*3;
+        k1 *= 4;
+        aClr[k1] = clr.x;
+        aClr[k1+1] = clr.y;
+        aClr[k1+2] = clr.z;
+        aClr[k1+3] = clr.w;
+        aWarp[k2] = warpIn;
+        aWarp[k2+1] = vreflect;
+        aWarp[k2+2] = 1.0;
+        aEx[k1] = extra.x;
+        aEx[k1+1] = extra.y;
+        aEx[k1+2] = extra.z;
+        aEx[k1+3] = extra.w;
+        aPr[k1] = pos.x;
+        aPr[k1+1] = pos.y;
+        aPr[k1+2] = pos.z;
+        aPr[k1+3] = angle;
     }
 
 };
@@ -817,8 +838,7 @@ BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 BSWG.compSelMultiMesh = function (max_verts) {
     this.numVerts = max_verts || 32768;
 
-    this.mat = BSWG.render.newMaterial("multiSelectionVertex", "compSelectionFragment", {
-    });
+    this.mat = BSWG.render.newMaterial("multiSelectionVertex", "compSelectionFragment", {});
 
     this.geom = new THREE.BufferGeometry();
 
@@ -897,20 +917,23 @@ BSWG.compSelMultiMesh.prototype.add = function(mesh) {
     this.objects.push(obj);
     this.cmVerts += obj.vcount;
 
-    var cposition = mesh.geometry.getAttribute('position');
-    var cnormal = mesh.geometry.getAttribute('normal');
+    var cpos = mesh.geometry.getAttribute('position').array;
+    var cnorm = mesh.geometry.getAttribute('normal').array;
 
     var idxv = obj.vstart;
-    var k1, k2;
-    for (var j=0; j<obj.vcount; j++) {
+    var k1=0, k2=0;
+    var pos = this.position.array;
+    var norm = this.normal.array;
+    var j=0, len=obj.vcount;
+    for (; j<len; j++) {
         k1 = (idxv + j)*3;
         k2 = j*3;
-        this.position.array[k1 + 0] = cposition.array[k2 + 0];
-        this.position.array[k1 + 1] = cposition.array[k2 + 1];
-        this.position.array[k1 + 2] = cposition.array[k2 + 2];
-        this.normal.array[k1 + 0] = cnormal.array[k2 + 0];
-        this.normal.array[k1 + 1] = cnormal.array[k2 + 1];
-        this.normal.array[k1 + 2] = cnormal.array[k2 + 2];
+        pos[k1] = cpos[k2];
+        pos[k1+1] = cpos[k2+1];
+        pos[k1+2] = cpos[k2+2];
+        norm[k1] = cnorm[k2];
+        norm[k1+1] = cnorm[k2+1];
+        norm[k1+2] = cnorm[k2+2];
     }
 
     this.position.updateRange.offset = 0;
@@ -949,29 +972,38 @@ BSWG.compSelMultiMesh.prototype.remove = function (obj) {
     this.objects.splice(index, 1);
 
     var voffset = obj.vcount;
+    var k1=0, k2=0, k13=0, k23=0, len=0; j=0;
+    var aClr = this.aClr.array;
+    var aPr = this.aPosRot.array;
+    var pos = this.position.array;
+    var norm = this.normal.array;
+    var o2 = null;
+    var idxv = 0;
+    var obs = this.objects;
 
-    for (var i=index; i<this.objects.length; i++) {
-
-        var o2 = this.objects[i];
-        var idxv = o2.vstart;
-        var k1, k2;
-        for (var j=0; j<o2.vcount; j++) {
+    for (var i=index; i<obs.length; i++) {
+        o2 = obs[i];
+        idxv = o2.vstart;
+        len=o2.vcount; j=0;
+        for (; j<len; j++) {
             k1 = idxv - voffset + j;
             k2 = idxv + j;
-            this.aClr.array[k1*4 + 0] = this.aClr.array[k2*4 + 0];
-            this.aClr.array[k1*4 + 1] = this.aClr.array[k2*4 + 1];
-            this.aClr.array[k1*4 + 2] = this.aClr.array[k2*4 + 2];
-            this.aClr.array[k1*4 + 3] = this.aClr.array[k2*4 + 3];
-            this.aPosRot.array[k1*4 + 0] = this.aPosRot.array[k2*4 + 0];
-            this.aPosRot.array[k1*4 + 1] = this.aPosRot.array[k2*4 + 1];
-            this.aPosRot.array[k1*4 + 2] = this.aPosRot.array[k2*4 + 2];
-            this.aPosRot.array[k1*4 + 3] = this.aPosRot.array[k2*4 + 3];
-            this.position.array[k1*3 + 0] = this.position.array[k2*3 + 0];
-            this.position.array[k1*3 + 1] = this.position.array[k2*3 + 1];
-            this.position.array[k1*3 + 2] = this.position.array[k2*3 + 2];
-            this.normal.array[k1*3 + 0] = this.normal.array[k2*3 + 0];
-            this.normal.array[k1*3 + 1] = this.normal.array[k2*3 + 1];
-            this.normal.array[k1*3 + 2] = this.normal.array[k2*3 + 2];
+            k13 = k1*3; k1 *= 4;
+            k23 = k2*3; k2 *= 4;
+            aClr[k1] = aClr[k2];
+            aClr[k1+1] = aClr[k2+1];
+            aClr[k1+2] = aClr[k2+2];
+            aClr[k1+3] = aClr[k2+3];
+            aPr[k1] = aPr[k2];
+            aPr[k1+1] = aPr[k2+1];
+            aPr[k1+2] = aPr[k2+2];
+            aPr[k1+3] = aPr[k2+3];
+            pos[k13] = pos[k23];
+            pos[k13+1] = pos[k23+1];
+            pos[k13+2] = pos[k23+2];
+            norm[k13] = norm[k23];
+            norm[k13+1] = norm[k23+1];
+            norm[k13+2] = norm[k23+2];
         }
         o2.vstart -= voffset;
     }
@@ -1024,17 +1056,20 @@ BSWG.compSelMultiMesh.prototype.setArgs = function (obj, clr, pos, angle) {
     }
 
     var idxv = obj.vstart;
-    var k1;
-    for (var j=0; j<obj.vcount; j++) {
-        k1 = idxv + j;
-        this.aClr.array[k1*4 + 0] = clr.x;
-        this.aClr.array[k1*4 + 1] = clr.y;
-        this.aClr.array[k1*4 + 2] = clr.z;
-        this.aClr.array[k1*4 + 3] = clr.w;
-        this.aPosRot.array[k1*4 + 0] = pos.x;
-        this.aPosRot.array[k1*4 + 1] = pos.y;
-        this.aPosRot.array[k1*4 + 2] = pos.z;
-        this.aPosRot.array[k1*4 + 3] = angle;
+    var k1=0, j=0;
+    var aClr = this.aClr.array;
+    var aPr = this.aPosRot.array;
+    var len = obj.vcount;
+    for (; j<len; j++) {
+        k1 = (idxv + j)*4;
+        aClr[k1] = clr.x;
+        aClr[k1+1] = clr.y;
+        aClr[k1+2] = clr.z;
+        aClr[k1+3] = clr.w;
+        aPr[k1] = pos.x;
+        aPr[k1+1] = pos.y;
+        aPr[k1+2] = pos.z;
+        aPr[k1+3] = angle;
     }
 
 };
