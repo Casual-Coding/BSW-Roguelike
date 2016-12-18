@@ -1387,6 +1387,11 @@ BSWG.componentList = new function () {
         }
         this.compMesh = new BSWG.compMultiMesh();
 
+        if (this.compSelMesh) {
+            this.compSelMesh.destroy();
+        }
+        this.compSelMesh = new BSWG.compSelMultiMesh();
+
         if (!this.compCached) {
             for (var i=0; i<this.sbTypes.length; i++) {
                 var sbadd = this.sbTypes[i].sbadd;
@@ -1783,6 +1788,9 @@ BSWG.componentList = new function () {
 
         if (this.compMesh) {
             this.compMesh.update(dt);
+        }
+        if (this.compSelMesh) {
+            this.compSelMesh.update(dt);
         }
 
         ctx.save();

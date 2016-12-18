@@ -169,7 +169,8 @@ var BSWG = new function(){
             'pRangeVertex',
             'hudVertex',
             'weatherVertex',
-            'exaustVertex'
+            'exaustVertex',
+            'multiSelectionVertex'
         ],
         'fragment': [
             'basicFragment',
@@ -182,6 +183,7 @@ var BSWG = new function(){
             'basicFragmentOptimized',
             'bgFragmentOptimized',
             'selectionFragment',
+            'compSelectionFragment',
             'jpointsFragment',
             'expFragment',
             'expFragmentShadow',

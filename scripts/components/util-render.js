@@ -17,6 +17,8 @@ BSWG.rciPolyCacheBounds = {};
 
 BSWG.renderCompIconRecenter = false;
 
+BSWG.dummyMat = null;
+
 BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB) {
 
     var poly = BSWG.rciPolyCache[key + '|' + BSWG.renderCompIconRecenter];
@@ -132,6 +134,11 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     }
     ctx.restore();
 };
+
+
+
+
+/// COMPONENTS
 
 BSWG.compMultiMesh = function (max_verts) {
     this.numVerts = max_verts || 32768;
@@ -568,7 +575,10 @@ BSWG.blockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
         this.zoffset = this.geom.__zoffset;
     }
 
-    this.mat = BSWG.render.newMaterial("basicVertex", "shadowFragment");
+    if (!BSWG.dummyMat) {
+        BSWG.dummyMat = BSWG.render.newMaterial("basicVertex", "shadowFragment");
+    }
+    this.mat = BSWG.dummyMat;
     this.mesh = new THREE.Mesh(this.geom, this.mat);
     this.mesh.needsUpdate = true;
 
@@ -793,10 +803,239 @@ BSWG.blockPolyMesh.prototype.destroy = function() {
 
 };
 
-
 BSWG.generateBlockPolyMesh = function(obj, iscale, zcenter, zoffset, depth) {
 
     return new BSWG.blockPolyMesh(obj, iscale, zcenter, zoffset, depth);
+
+};
+
+
+
+
+/// SELECTION
+
+BSWG.compSelMultiMesh = function (max_verts) {
+    this.numVerts = max_verts || 32768;
+
+    this.mat = BSWG.render.newMaterial("multiSelectionVertex", "compSelectionFragment", {
+    });
+
+    this.geom = new THREE.BufferGeometry();
+
+    var aClr = new Float32Array(this.numVerts * 4);
+    var aPosRot = new Float32Array(this.numVerts * 4);
+    var position = new Float32Array(this.numVerts * 3);
+    var normal = new Float32Array(this.numVerts * 3);
+
+    this.geom.addAttribute( 'aClr', new THREE.BufferAttribute( aClr, 4 ).setDynamic(true) );
+    this.geom.addAttribute( 'aPosRot', new THREE.BufferAttribute( aPosRot, 4 ).setDynamic(true) );
+    this.geom.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ).setDynamic(true) );
+    this.geom.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ).setDynamic(true) );
+
+    this.mesh = new THREE.Mesh(this.geom, this.mat);
+
+    this.aClr = this.geom.getAttribute('aClr');
+    this.aPosRot = this.geom.getAttribute('aPosRot');
+    this.position = this.geom.getAttribute('position');
+    this.normal = this.geom.getAttribute('normal');
+
+    this.cmVerts = 0;
+
+    this.geom.setDrawRange(0, this.cmVerts);
+
+    this.nextMesh = null;
+    this.objects = [];
+
+    this.child = false;
+
+    this.mat.needsUpdate = true;
+    this.geom.needsUpdate = true;
+    this.mesh.renderOrder = 1400.0;
+    this.mesh.frustumCulled = false;
+    this.mesh.needsUpdate = true;
+
+    BSWG.render.scene.add(this.mesh);
+};
+
+BSWG.compSelMultiMesh.prototype.destroy = function() {
+
+    if (this.nextMesh) {
+        this.nextMesh.destroy();
+        this.nextMesh = null;
+    }
+
+    BSWG.render.scene.remove(this.mesh);
+    this.geom.setDrawRange(0, 0);
+    this.mesh.geometry = null;
+    this.mesh.material = null;
+    this.mat.dispose();
+    this.geom.dispose();
+    this.mesh = null;
+    this.mat = null;
+    this.geom = null;
+
+};
+
+BSWG.compSelMultiMesh.prototype.add = function(mesh) {
+
+    obj = {};
+    obj.mesh = mesh;
+    obj.vstart = this.cmVerts;
+    obj.vcount = mesh.geometry.getAttribute('position').array.length / 3;
+
+    if ((obj.vstart + obj.vcount) > (this.geom.getAttribute('position').array.length / 3)) {
+
+        if (!this.nextMesh) {
+            this.nextMesh = new BSWG.compSelMultiMesh(this.numVerts);
+            this.nextMesh.child = true;
+        }
+
+        return this.nextMesh.add(mesh);
+    }
+
+    obj.parent = this;
+    this.objects.push(obj);
+    this.cmVerts += obj.vcount;
+
+    var cposition = mesh.geometry.getAttribute('position');
+    var cnormal = mesh.geometry.getAttribute('normal');
+
+    var idxv = obj.vstart;
+    var k1, k2;
+    for (var j=0; j<obj.vcount; j++) {
+        k1 = (idxv + j)*3;
+        k2 = j*3;
+        this.position.array[k1 + 0] = cposition.array[k2 + 0];
+        this.position.array[k1 + 1] = cposition.array[k2 + 1];
+        this.position.array[k1 + 2] = cposition.array[k2 + 2];
+        this.normal.array[k1 + 0] = cnormal.array[k2 + 0];
+        this.normal.array[k1 + 1] = cnormal.array[k2 + 1];
+        this.normal.array[k1 + 2] = cnormal.array[k2 + 2];
+    }
+
+    this.position.updateRange.offset = 0;
+    this.position.updateRange.count = this.cmVerts * 3;
+    this.position.needsUpdate = true;
+    this.normal.updateRange.offset = 0;
+    this.normal.updateRange.count = this.cmVerts * 3;
+    this.normal.needsUpdate = true;
+
+    this.geom.setDrawRange(0, this.cmVerts);
+    this.geom.needsUpdate = true;
+
+    this.setArgs(obj, new THREE.Vector4(0.5, 1.0, 0.5, 0.0), mesh.position, mesh.rotation.z);
+    return obj;
+
+};
+
+BSWG.compSelMultiMesh.prototype.remove = function (obj) {
+
+    if (obj.parent !== this) {
+        obj.parent.remove(obj);
+        return;
+    }
+
+    if (!this.geom || !this.mesh) {
+        return;
+    }
+
+    var index = this.objects.indexOf(obj);
+
+    if (index < 0) {
+        console.log('BSWG.compSelMultiMesh: Remove error');
+        return;
+    }
+
+    this.objects.splice(index, 1);
+
+    var voffset = obj.vcount;
+
+    for (var i=index; i<this.objects.length; i++) {
+
+        var o2 = this.objects[i];
+        var idxv = o2.vstart;
+        var k1, k2;
+        for (var j=0; j<o2.vcount; j++) {
+            k1 = idxv - voffset + j;
+            k2 = idxv + j;
+            this.aClr.array[k1*4 + 0] = this.aClr.array[k2*4 + 0];
+            this.aClr.array[k1*4 + 1] = this.aClr.array[k2*4 + 1];
+            this.aClr.array[k1*4 + 2] = this.aClr.array[k2*4 + 2];
+            this.aClr.array[k1*4 + 3] = this.aClr.array[k2*4 + 3];
+            this.aPosRot.array[k1*4 + 0] = this.aPosRot.array[k2*4 + 0];
+            this.aPosRot.array[k1*4 + 1] = this.aPosRot.array[k2*4 + 1];
+            this.aPosRot.array[k1*4 + 2] = this.aPosRot.array[k2*4 + 2];
+            this.aPosRot.array[k1*4 + 3] = this.aPosRot.array[k2*4 + 3];
+            this.position.array[k1*3 + 0] = this.position.array[k2*3 + 0];
+            this.position.array[k1*3 + 1] = this.position.array[k2*3 + 1];
+            this.position.array[k1*3 + 2] = this.position.array[k2*3 + 2];
+            this.normal.array[k1*3 + 0] = this.normal.array[k2*3 + 0];
+            this.normal.array[k1*3 + 1] = this.normal.array[k2*3 + 1];
+            this.normal.array[k1*3 + 2] = this.normal.array[k2*3 + 2];
+        }
+        o2.vstart -= voffset;
+    }
+
+    this.cmVerts -= voffset;
+    this.geom.setDrawRange(0, this.cmVerts);
+    this.geom.needsUpdate = true;
+
+    if (this.cmVerts > 0) {
+        this.position.updateRange.offset = 0;
+        this.position.updateRange.count = this.cmVerts * 3;
+        this.position.needsUpdate = true;
+        this.normal.updateRange.offset = 0;
+        this.normal.updateRange.count = this.cmVerts * 3;
+        this.normal.needsUpdate = true;        
+    }
+
+    obj.mesh = obj.parent = null;
+
+};
+
+BSWG.compSelMultiMesh.prototype.update = function (dt) {
+
+    for (var i=0; i<this.objects.length; i++) {
+        var o2 = this.objects[i];
+        o2.mesh.updateMatrix();
+        o2.mesh.updateMatrixWorld(true);
+    }
+
+    if (this.cmVerts > 0) {
+        this.aClr.updateRange.offset = 0;
+        this.aClr.updateRange.count = this.cmVerts * 4;
+        this.aClr.needsUpdate = true;
+        this.aPosRot.updateRange.offset = 0;
+        this.aPosRot.updateRange.count = this.cmVerts * 4;
+        this.aPosRot.needsUpdate = true;
+    }
+
+    if (this.nextMesh) {
+        this.nextMesh.update(dt);
+    }
+
+};
+
+BSWG.compSelMultiMesh.prototype.setArgs = function (obj, clr, pos, angle) {
+
+    if (obj.parent !== this) {
+        obj.parent.setArgs(obj, clr, pos, angle);
+        return;
+    }
+
+    var idxv = obj.vstart;
+    var k1;
+    for (var j=0; j<obj.vcount; j++) {
+        k1 = idxv + j;
+        this.aClr.array[k1*4 + 0] = clr.x;
+        this.aClr.array[k1*4 + 1] = clr.y;
+        this.aClr.array[k1*4 + 2] = clr.z;
+        this.aClr.array[k1*4 + 3] = clr.w;
+        this.aPosRot.array[k1*4 + 0] = pos.x;
+        this.aPosRot.array[k1*4 + 1] = pos.y;
+        this.aPosRot.array[k1*4 + 2] = pos.z;
+        this.aPosRot.array[k1*4 + 3] = angle;
+    }
 
 };
 
@@ -890,23 +1129,16 @@ BSWG.blockPolyOutline = function(obj, zcenter, oscale) {
         this.geom = cacheGeom;
     }
 
-    this.mat = BSWG.render.newMaterial("basicVertex", "selectionFragment", {
-        clr: {
-            type: 'v4',
-            value: new THREE.Vector4(0.5, 1.0, 0.5, 0.0)
-        },
-        warp: {
-            type: 'v4',
-            value: new THREE.Vector4(0.0, 0.0, 0.0, 0.0)
-        }
-    }, THREE.NormalBlending, false);
+    if (!BSWG.dummyMat) {
+        BSWG.dummyMat = BSWG.render.newMaterial("basicVertex", "shadowFragment");
+    }
+
+    this.mat = BSWG.dummyMat;
     this.mesh = new THREE.Mesh( this.geom, this.mat );
-
-    this.mat.needsUpdate = true;
     this.mesh.needsUpdate = true;
-    this.mesh.renderOrder = 1400.0;
+    this.clr = new THREE.Vector4(0.5, 1.0, 0.5, 0.0);
 
-    BSWG.render.scene.add( this.mesh );
+    this.mobj = BSWG.componentList.compSelMesh.add(this.mesh);
 
     this.update();
 }
@@ -923,39 +1155,26 @@ BSWG.blockPolyOutline.prototype.update = function(clr) {
     this.mesh.position.x = center.x + (offset?offset.x:0);
     this.mesh.position.y = center.y + (offset?offset.y:0);
     this.mesh.position.z = -0.05;
-
     this.mesh.rotation.z = angle;
-
     this.mesh.updateMatrix();
 
     if (clr) {
-        this.mat.uniforms.clr.value.set(clr[0], clr[1], clr[2], clr[3]);
-        if (clr[3] > 0) {
-            this.mesh.visible = true;
-        }
-        else {
-            this.mesh.visible = false;
-        }
+        this.clr.set(clr[0], clr[1], clr[2], clr[3]);
     }
 
     if (this.obj && this.obj.comp && this.obj.comp.onCC && this.obj.comp.onCC.defenseScreen) {
         var t = Math.clamp(this.obj.comp.onCC.defenseScreen, 0, 1);
-        var c = this.mat.uniforms.clr.value;
+        var c = this.clr;
         c.set(c.x*(1-t)+t*0.2, c.y*(1-t)+t*0.2, c.z*(1-t)+t, Math.max(t*0.75, c.w));
-        if (c.w > 0) {
-            this.mesh.visible = true;
-        }
     }
 
-    //this.mat.needsUpdate = true;
+    BSWG.componentList.compSelMesh.setArgs(this.mobj, this.clr, this.mesh.position, this.mesh.rotation.z);
 };
 
 BSWG.blockPolyOutline.prototype.destroy = function() {
 
-    BSWG.render.scene.remove( this.mesh );
-
-    //this.mesh.geometry.dispose();
-    this.mesh.material.dispose();
+    BSWG.componentList.compSelMesh.remove(this.mobj);
+    this.mobj = null;
     this.mesh.geometry = null;
     this.mesh.material = null;
     this.mesh = null;

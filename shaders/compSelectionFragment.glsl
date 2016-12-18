@@ -1,5 +1,4 @@
-uniform vec4 clr;
-uniform vec4 warp;
+varying vec4 clr;
 
 varying vec2 vUv;
 varying vec3 vNormal;
@@ -13,11 +12,6 @@ void main() {
 
     if (gl_FragColor.a < 0.00001) {
         discard;
-    }
-
-    if (warp.x > 0.0) {
-        gl_FragColor.a *= sin(length(vNormal + vPosition.xyz)*4.0 + warp.y*5.0) * 0.25 + 0.75;
-        gl_FragColor.rgb *= clamp(vPosition.z, 0.5, 1.0);
     }
 
 }
