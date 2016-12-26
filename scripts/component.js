@@ -760,10 +760,14 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
         ctx.translate(0, 3);
 
         ctx.globalAlpha = 1.0;
+
+        var img = BSWG.render.images[energy > 0 ? 'power-green' : 'power-red'];
+        ctx.drawImage(img, 0, 0, img.width, img.height, -w*0.5-5, -17, 30, 30);
+
         ctx.fillStyle = '#fff';
         ctx.strokeStyle = '#000';
         ctx.textAlign = 'center';
-        ctx.fillTextB(text, 0, 0);
+        ctx.fillTextB(text, 5, 0);
         ctx.textAlign = 'left';
 
         ctx.restore();
