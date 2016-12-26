@@ -477,11 +477,17 @@ BSWG.game = new function(){
 
                 if (scene !== BSWG.SCENE_TITLE) {
 
+                    var hh = bfr*2 + bsz*2+bsz/3;
+
+                    if (scene === BSWG.SCENE_GAME2) {
+                        var emH = bsz/3;
+                        var sz2 = ((bfr*2+bsz*4)-bfr*2) / 3;
+                        H.plate(w/2-(bfr+bsz*2), h-(bfr*2 + bsz + bsz/3 + bfr/2 + bfr/4), bfr*2+bsz*4, (bfr*2 + bsz + bsz/3), 0.25, 0.5);
+                    }
+
                     H.plate(mmsize*sc-off, h-(bfr*2 + bsz), w-mmsize*sc+off, bfr*2 + bsz, 0.25, 0.5);
                     H.plate(0-off, h-mmsize*sc, mmsize*sc, mmsize*sc, 0.15, 0.5);
                     H.plate(7-off, h-mmsize*sc+7, mmsize*sc-14, mmsize*sc-14, 0.5, 0.15); // 0
-
-                    var hh = bfr*2 + bsz*2+bsz/3;
 
                     self.hudBottomYT = h-(bfr*2 + bsz);
                     self.hudBottomYT2 = h-(bfr*2 + mmsize);
@@ -573,10 +579,20 @@ BSWG.game = new function(){
                     H.plate(w/2-(bfr+bsz*2)+bfr+sz2*2, h-hh+bfr+bsz/3+2+bsz/3, sz2, bsz*(2/3)-bfr/2, 0.5, 0.25); // 20 (level up/points tree)
                     H.plate(w/2-(bfr+bsz*2)+bfr, h-hh+bfr+1+bsz/3, (bfr*2+bsz*4)-bfr*2, bsz/3, 0.5, 0.25); // 21 (energy meter)
                 }
+                else if (scene === BSWG.SCENE_GAME2) {
+                    H.plate(mmsize*sc-off, h-(bfr*2 + bsz), w-mmsize*sc+off, bfr*2 + bsz, 0.25, 0.5);
+                    for (var i=0; i<4; i++) {
+                        H.hudBtn.push([-1000, -1000, 10, 10]); // 17..20
+                    }
+                    var emH = bsz/3;
+                    var sz2 = ((bfr*2+bsz*4)-bfr*2) / 3;
+                    var h1 = h-(bfr*2 + bsz + bsz/3 + bfr/2);
+                    H.plate(w/2-(bfr+bsz*2)+bfr, h1+bfr/4, (bfr*2+bsz*4)-bfr*2, bsz/3, 0.5, 0.25); // 21 (energy meter)
+                }
                 else {
                     for (var i=0; i<5; i++) {
                         H.hudBtn.push([-1000, -1000, 10, 10]); // 17..21
-                    }                   
+                    }   
                 }
 
                 BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
