@@ -136,7 +136,10 @@ var BSWG = new function(){
         'cloud-1': 'cloud-256-1.png',
         'cloud-2': 'cloud-256-2.png',
         'cloud-3': 'cloud-256-3.png',
-        'cloud-4': 'cloud-256-4.png'
+        'cloud-4': 'cloud-256-4.png',
+        'power': 'power.png',
+        'power-red': 'power-red.png',
+        'power-green': 'power-green.png'
     };
     var makeTexture = [
         'test_nm',

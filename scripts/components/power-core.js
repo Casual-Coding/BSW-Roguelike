@@ -66,6 +66,8 @@ BSWG.component_PowerCore = {
         this.size   = args.size || 1;
         this.armour = args.armour || false;
 
+        this.energyGain = this.energyGainBase = [1.0, 3.5, 8.0][this.size-1];
+
         this.maxHP = 2 * this.size * this.size * 250 / 9 * (this.armour ? 4 : 1);
         if (this.triangle) {
             this.maxHP /= 2.0;
@@ -146,6 +148,8 @@ BSWG.component_PowerCore = {
     },
 
     update: function(dt) {
+
+        this.energyGain = this.energyGainBase * this.empDamp;
 
     },
 

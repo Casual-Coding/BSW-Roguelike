@@ -999,6 +999,7 @@ BSWG.game = new function(){
 
         this.buttonBinds = {
             'build': BSWG.KEY.B,
+            'power': BSWG.KEY.P,
             'store': BSWG.KEY.V,
             'anchor': BSWG.KEY.N,
             'controls': BSWG.KEY.M,
@@ -1074,6 +1075,7 @@ BSWG.game = new function(){
         this.storeMode = false;
         this.tradeMode = false;
         this.showControls = false;
+        this.powerMode = false;
         this.modeBtns = null;
         this.specBtns = null;
         this.needsSave = true;
@@ -1418,6 +1420,23 @@ BSWG.game = new function(){
                         }
                         else {
                             self.removeMode('controls');
+                        }
+                    }
+                });
+                this.powerBtn = new BSWG.uiControl(BSWG.control_Button, {
+                    x: 10 + 65 + 10 + 65 + 10, y: 10,
+                    w: 65, h: 65,
+                    text: BSWG.render.images['power'],
+                    selected: this.powerMode,
+                    userKeyBind: 'power',
+                    click: function (me) {
+                        me.selected = !me.selected;
+                        self.powerMode = me.selected;
+                        if (self.showControls) {
+                            self.pushMode('power');
+                        }
+                        else {
+                            self.removeMode('power');
                         }
                     }
                 });
@@ -1785,6 +1804,7 @@ BSWG.game = new function(){
                     'edit': this.editBtn,
                     'anchor': this.anchorBtn,
                     'controls': this.showControlsBtn,
+                    'power': this.powerBtn,
                     'store': this.storeBtn,
                     'trade': this.tradeBtn,
                     'unlock': this.levelUpBtn,
@@ -2689,6 +2709,9 @@ BSWG.game = new function(){
             if (self.showControlsBtn) {
                 self.showControlsBtn.flashing = self.dialogBtnHighlight === 'keys';
             }
+            if (self.powerBtn) {
+                self.powerBtn.flashing = self.dialogBtnHighlight === 'power';
+            }
 
             if (self.scene === BSWG.SCENE_GAME2) {
                 //self.healBtn.p.x = self.showControlsBtn.p.x + self.showControlsBtn.w + 10;
@@ -2933,6 +2956,13 @@ BSWG.game = new function(){
                 self.showControlsBtn.h = self.hudY(self.hudBtn[7][3]) - self.showControlsBtn.p.y - 4;
             }
 
+            if (self.powerBtn) {
+                self.powerBtn.p.x = self.hudX(self.hudBtn[10][0]) + 2;
+                self.powerBtn.p.y = self.hudY(self.hudBtn[10][1]) + 2;
+                self.powerBtn.w = self.hudX(self.hudBtn[10][2]) - self.powerBtn.p.x - 4;
+                self.powerBtn.h = self.hudY(self.hudBtn[10][3]) - self.powerBtn.p.y - 4;
+            }
+
             if (self.statsBtn) {
                 self.statsBtn.p.x = self.hudX(self.hudBtn[18][0]) + 2;
                 self.statsBtn.p.y = self.hudY(self.hudBtn[18][1]) + 2;
@@ -3119,6 +3149,8 @@ BSWG.game = new function(){
                 ctx.font = (~~(H*0.65)) + 'px Orbitron';
                 ctx.textAlign = 'left';
                 ctx.fillTextB('Energy', X + W * 0.01, Y + H * 0.4 + (H*0.65*0.5), true);
+                //var img = BSWG.render.images['power'];
+                //ctx.drawImage(img, 0, 0, img.width, img.height, X + W * 0.01, Y + H * 0.01, H * 0.98, H * 0.98);
 
                 ctx.fillStyle = '#aaa';
                 ctx.strokeStyle = '#00f';

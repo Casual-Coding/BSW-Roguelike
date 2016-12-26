@@ -725,6 +725,51 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
         }
     }
 
+    if ((this.energyGain || this.energyShot || this.energySecond) && BSWG.game.powerMode && (!this.onCC || this.onCC === BSWG.game.ccblock)) {
+
+        var energy = this.energyGain ? this.energyGain : -(this.energyShot ? this.energyShot : this.energySecond);
+        var text = '';
+        if (energy > 0) {
+            text = '+' + (Math.floor(energy*100)/100) + '/s';
+        }
+        else if (energy < 0) {
+            if (this.energySecond) {
+                text = (Math.floor(energy*100)/100) + '/s of use';
+            }
+            else {
+                text = (Math.floor(energy*100)/100) + '/shot';
+            }
+        }
+
+        ctx.font = '11px Orbitron';
+
+        var p = BSWG.render.project3D(this.obj.body.GetWorldCenter().clone(), 0.0);
+        var w = Math.floor(30 + ctx.textWidth(text));
+        ctx.globalAlpha = 1.0;
+        var grad = ctx.createLinearGradient(p.x - w * 0.5, p.y, p.x + w * 0.5, p.y);
+        grad.addColorStop(0,   energy < 0 ? 'rgba(255, 0, 0, 0.0)' : 'rgba(0, 255, 0, 0.0)');
+        grad.addColorStop(0.5, energy < 0 ? 'rgba(255, 0, 0, 0.6)' : 'rgba(0, 255, 0, 0.6)');
+        grad.addColorStop(1,   energy < 0 ? 'rgba(255, 0, 0, 0.0)' : 'rgba(0, 255, 0, 0.0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(p.x - w * 0.5, p.y - 10, w, 20);
+
+        ctx.save();
+
+        ctx.translate(Math.floor(p.x), Math.floor(p.y));
+        ctx.rotate(rot);
+        ctx.translate(0, 3);
+
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillTextB(text, 0, 0);
+        ctx.textAlign = 'left';
+
+        ctx.restore();
+
+    }
+
     if (this.tag && BSWG.ai.editor && !BSWG.game.showControls && this.onCC === BSWG.game.ccblock && BSWG.componentList.compHover2 === this) {
         var text = this.tag;
         var rot = 0.0;
