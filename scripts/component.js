@@ -416,7 +416,7 @@ BSWG.component.prototype.getKey = function () {
 
 };
 
-BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
+BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFriendlyNurf) {
 
     if (!this.onCC) {
         noMin = true;
@@ -436,7 +436,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
 
     if (amt > 0) {
         var isFriendly = false;
-        if (fromC && fromC.onCC && this.onCC) {
+        if (fromC && fromC.onCC && this.onCC && !noFriendlyNurf) {
             if (fromC.onCC.id === this.onCC.id) {
                 amt *= BSWG.friendlyFactor;
                 isFriendly = true;
@@ -571,6 +571,9 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve) {
                 var p2 = new b2Vec2(p.x + Math.cos(a) * r2,
                                     p.y + Math.sin(a) * r2);
                 BSWG.render.boom.palette = disolve ? chadaboom3D.green : chadaboom3D.fire_bright;
+                if (!disolve && this.type === 'powercore') {
+                    BSWG.render.boom.palette = (Math.random() < 0.75) ? chadaboom3D.blue_bright : chadaboom3D.fire_bright;
+                }
                 BSWG.render.boom.add(
                     p2.particleWrap(0.025+Math.random()+0.1),
                     r*(3.5 + 2.5*Math._random()),
@@ -1559,6 +1562,10 @@ BSWG.componentList = new function () {
             var dx = (p2.x - p.x) / d, dy = (p2.y - p.y) / d;
             var mag = Math.pow(r/32, 2.0) / Math.pow(d / r, 2.5);
             cl[i].obj.body.ApplyForceToCenter(new b2Vec2(dx*mag, dy*mag));
+            if (src.chainDestroyHP) {
+                var dmg = src.chainDestroyHP / (d + 0.5);
+                cl[i].takeDamage(dmg, src, false, false, true);
+            }
         }
     },
 
@@ -1719,7 +1726,7 @@ BSWG.componentList = new function () {
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type != 'cc') {
                 CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
-                CL[i].energyRegen += Math.max(0, CL[i].energyGain || 0.0);
+                CL[i].onCC.energyRegen += Math.max(0, CL[i].energyGain || 0.0);
             }
         }
 
