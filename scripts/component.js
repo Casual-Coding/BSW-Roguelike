@@ -344,6 +344,7 @@ BSWG.component = function (desc, args) {
     this.hp = this.maxHP;
     this.healHP = 0;
     this.destroyed = false;
+    this.pushAwayDone = true;
 
     if (this.obj) {
         this.obj.comp = this;
@@ -511,11 +512,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
             this.__shHitSound = new BSWG.soundSample().play('shield-hit', this.p().THREE(0.2), Math.clamp(this.size/2*amt, 0, 5), 2.0 / this.size);
             this.shieldHit += amt * 10;
         }
-        this.shieldEnergy -= amt * 0.5;
-        if (this.shieldEnergy < 0) {
-            damageExtra += -this.shieldEnergy / 0.5;
-        }
-        this.shieldEnergy = Math.clamp(this.shieldEnergy, 0, this.maxShieldEnergy);
+        this.shieldDamage += amt * 0.5;
         
         amt /= 8;
         if (amt < 1 && !noMin) {
@@ -563,7 +560,10 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
                 r *= 1.5;
             }
             if (!disolve) {
-                BSWG.componentList.pushAwayFrom(p.clone(), r*2, this);
+                if (!this.pushAwayDone) {
+                    this.pushAwayDone = true;
+                    BSWG.componentList.pushAwayFrom(p.clone(), r*2, this);
+                }
             }
             for (var i=0; i<(disolve ? 1 : 40); i++) {
                 var a = Math._random() * Math.PI * 2.0;
@@ -622,8 +622,8 @@ BSWG.component.prototype.combinedHP = function() {
         return 0.0;
     }
     var hp = this.hp;
-    if (this.type === 'shield' && this.obj && this.shieldR > this.obj.radius) {
-        hp = this.shieldEnergy;
+    if (this.type === 'shield' && this.obj && this.shieldR > this.obj.radius && this.onCC) {
+        hp = this.onCC.energy / this.energyDamageFactor;
     }
     return Math.max(0, hp);
 };
@@ -1562,7 +1562,7 @@ BSWG.componentList = new function () {
             var dx = (p2.x - p.x) / d, dy = (p2.y - p.y) / d;
             var mag = Math.pow(r/32, 2.0) / Math.pow(d / r, 2.5);
             cl[i].obj.body.ApplyForceToCenter(new b2Vec2(dx*mag, dy*mag));
-            if (src.chainDestroyHP) {
+            if (src && src.chainDestroyHP) {
                 var dmg = src.chainDestroyHP / (d + 0.5);
                 cl[i].takeDamage(dmg, src, false, false, true);
             }

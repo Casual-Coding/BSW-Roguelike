@@ -968,9 +968,9 @@ BSWG.physics = new function(){
         }
         else if ((ca && ca.ghost) || (cb && cb.ghost)) {
             if (contact.IsTouching()) {
+                contact.SetEnabled(false);
                 ba.__lastHit = bb;
                 bb.__lastHit = ba;
-                contact.SetEnabled(false);
             }
         }
         ba = bb = contact = null;
@@ -982,6 +982,9 @@ BSWG.physics = new function(){
 
         var ba = contact.GetFixtureA().GetBody();
         var bb = contact.GetFixtureB().GetBody();
+
+        ba.__lastHit = bb;
+        bb.__lastHit = ba;
 
         if (ba.__comp || bb.__comp) {
 
@@ -1030,10 +1033,6 @@ BSWG.physics = new function(){
                 }
             }
         }
-
-        ba.__lastHit = bb;
-        bb.__lastHit = ba;
-
     };
 
 }();

@@ -91,7 +91,7 @@ BSWG.component_Missile = {
     render: function(ctx, cam, dt) {
 
         if (this.ltype === BSWG.MSL_TYPE.MISSILE) {
-            this.meshObj.update([1.0, 0.9, 0.7, 1], 6);
+            this.meshObj.update([1.0, 0.9, 0.7, this.obj && this.obj.body && this.obj.body.__lastHit ? 0.0 : 1.0], 6);
         }
 
     },
@@ -138,7 +138,7 @@ BSWG.component_Missile = {
             this.exaust.strength = Math.clamp(this.fireT*3.0, 0, 1);
         }
 
-        if (this.fireT > 0 && !this.obj.body.__lastHit && !this.nextDestroy || this.empDamp < 1) {
+        if (this.fireT > 0 && !this.obj.body.__lastHit && !this.nextDestroy && this.empDamp > 0.5) {
 
             var p = Math.rotVec2(new b2Vec2(this.size * 0.6, 0.0));
             var v = this.obj.body.GetLinearVelocityFromLocalPoint(p);

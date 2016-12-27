@@ -64,9 +64,9 @@ BSWG.component_Shield = {
 
         this.size = args.size || 1;
         this.maxHP = this.size * 250 / 2.5;
-        this.maxShieldEnergy = this.maxHP * BSWG.shieldSizeFactor * 2;
-        this.shieldEnergy = this.maxShieldEnergy;
-        this.energySecond = [4.0, 8.0, 16.0][this.size-1];
+        this.energySecond = this.energySecondBase = [4.0, 8.0, 16.0][this.size-1];
+        this.energyDamageFactor = [2.0/2, 1.5/2, 1.0/2][this.size-1];
+        this.shieldDamage = 0;
 
         this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
             width:    this.size,
@@ -204,10 +204,10 @@ BSWG.component_Shield = {
 
     render: function(ctx, cam, dt) {
 
-        this.meshObj.update([0.4, 0.5, this.shieldEnergy / this.maxShieldEnergy, 1], 4, BSWG.compAnchored(this));
+        this.meshObj.update([0.4, 0.5, 0.5, 1], 4, BSWG.compAnchored(this));
         this.selMeshObj.update([0.5, 1.0, 0.5, BSWG.componentHoverFnAlpha(this)]);
 
-        this.meshObj2.update([0.0, (this.shieldEnergy / this.maxShieldEnergy), 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
+        this.meshObj2.update([0.0, 0.5, 0.75, 1], 3, BSWG.compAnchored(this), this.topRot, new b2Vec2(0, 0));
         this.shsmat.uniforms.strength.value = 0.25 * this.shieldAlpha;
 
         this.shmesh.position.set(this.meshObj.mesh.position.x, this.meshObj.mesh.position.y, 0.0);
@@ -300,29 +300,19 @@ BSWG.component_Shield = {
 
         if (this.onCC && !this.destroyed && this.obj && this.obj.body) {
             if (this.shieldOn) {
-                this.shieldEnergy -= dt * this.maxShieldEnergy / 30;
-                if (this.shieldEnergy < this.maxShieldEnergy * (1/3)) {
-                    this.shieldEnergy = 0;
+                if (!this.onCC.useEnergy((this.energySecond * BSWG.render.dt) + (this.shieldDamage*this.energyDamageFactor))) {
                     this.shieldOn = false;
-                }
-            }
-            else {
-                if (this.shieldEnergy < this.maxShieldEnergy) {
-                    if (this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
-                        this.shieldEnergy += dt * this.maxShieldEnergy / 15;
-                    }
                 }
             }
         }
         else {
             this.shieldOn = false;
         }
+        this.shieldDamage = 0.0;
 
         if (this.empDamp < 0.5) {
             this.shieldOn = false;
         }
-
-        this.shieldEnergy = Math.clamp(this.shieldEnergy, 0, this.maxShieldEnergy);
 
         var talpha = 0.0;
 
@@ -331,7 +321,7 @@ BSWG.component_Shield = {
                 this.addShield();
             }
             this.shieldR += ((BSWG.shieldSizeFactor * this.size) - this.shieldR) * Math.min(dt*8, 1.0);
-            talpha = Math.clamp(((this.shieldEnergy / this.maxShieldEnergy) - (1/3)) * 4, 0.1, 1);
+            talpha = 1.0;
         }
         else {
             if (this.shieldObj) {
@@ -345,7 +335,7 @@ BSWG.component_Shield = {
 
         this.shieldAlpha += (talpha - this.shieldAlpha) * Math.min(dt*8, 1.0);
 
-        if (this.shieldEnergy > this.maxShieldEnergy * (1/2.75) && this.empDamp > 0.5 && this.onCC) {
+        if (this.shieldOn && this.empDamp > 0.5 && this.onCC) {
             this.topRotSpeed += (Math.PI * 2 * 4 - this.topRotSpeed) * Math.min(dt*4, 1.0);
         }
         else {
@@ -414,11 +404,9 @@ BSWG.component_Shield = {
             }
             if (control) {
                 for (var i=0; i<cl.length; i++) {
-                    if (cl[i].onCC === this.onCC && cl[i].type === 'shield' && cl[i].onKey === this.onKey) {
+                    if (cl[i].onCC === this.onCC && cl[i].type === 'shield' && cl[i].onKey === this.onKey && this.empDamp > 0.5) {
                         if ((count*2) <= total) {
-                            if (cl[i].shieldEnergy > cl[i].maxShieldEnergy * (1/2.75)) {
-                                cl[i].shieldOn = true;
-                            }
+                            cl[i].shieldOn = true;
                         }
                         else {
                             cl[i].shieldOn = false;
