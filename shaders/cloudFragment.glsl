@@ -45,8 +45,10 @@ void main() {
     vec3 tNormal = normalize(reflect(normalize(vNormalMatrix * (clrw.xyz * 2.0 - vec3(1.0, 1.0, 1.0))), vNormalMatrix * normalize(vLocal)) * vec3(1.0, 1.0, 1.0));
     
     float l = max(dot(tNormal, lightDir), 0.0) * 0.75 + 0.25;
-    gl_FragColor = vec4(clr.rgb*l*pow(clrw.a, 0.2)*0.75, pow(clrw.a, 0.85)*0.625);
+    gl_FragColor = vec4(clr.rgb*l*pow(clrw.a, 0.2)*0.5, pow(clrw.a, 0.85)*0.625);
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
+
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, envMapParam.x);
 
     float Z = vShadowCoord.z - 0.001;
     highp float zval = Z+0.05;
