@@ -119,11 +119,12 @@ Math.random2d = function(x,y) {
     return whole - Math.floor(whole);
 };
 
-var genPerlin = function(sz, min, max, k) {
+var genPerlin = function(sz, min, max, k, exSmooth) {
     var ret = newArr(sz, 0.0);
     var h = max - min;
     var sz2 = sz / 4;
     var l = 0.5;
+    exSmooth = exSmooth || 0;
     while (k--) {
         for (var x=0; x<sz; x++) {
             for (var y=0; y<sz; y++) {
@@ -142,7 +143,7 @@ var genPerlin = function(sz, min, max, k) {
                 ret.inc(x, y, v);
             }
         }
-        for (var j=0; j<((k/2)*(k/2)); j++) {
+        for (var j=0; j<((k/2)*(k/2)+exSmooth); j++) {
             for (var x=0; x<sz; x++) {
                 for (var y=0; y<sz; y++) {
                     ret.setRot(x, y,
@@ -381,15 +382,17 @@ switch (type) {
 
     case 'cloud':
         Math.random2dSeed = Math.random()*40;
-        var p = genPerlin(sz, 0.0, 1.0, 12);
+        var p = genPerlin(sz, 0.0, 1.0, 12, 5);
         var r = sz/2-2;
         for (var x=0; x<sz; x++) {
             for (var y=0; y<sz; y++) {
                 var dx = x-sz/2, dy = y-sz/2;
                 var len = Math.sqrt(dx*dx+dy*dy);
                 if (len <= r) {
-                    var t = Math.pow((1-len/r)*Math.max(p.get(x,y)-0.65, 0), 2.0);
-                    hmap.set(x, y, t);
+                    var t = 1-len/r;
+                    t = Math.sin(t*Math.PI/2);
+                    t = Math.pow(t*(t+(Math.max(p.get(x,y)-0.65, 0))*0.5), 2.0);
+                    hmap.set(x, y, Math.pow(t, 2.5));
                     bmap.set(x, y, t);
                 }
                 else {

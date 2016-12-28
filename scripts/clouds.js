@@ -49,10 +49,12 @@ BSWG.generateCloudGeom = function (size) {
 
     for (var i=0; i<C.length; i++) {
         var sz = Math.floor(Math.max(Math.round(C[i].r*12), 5))*3.5;
-        var cloud = new THREE.PlaneGeometry(C[i].r*2, C[i].r*2, 1, 1)
+        var cloud = new THREE.PlaneGeometry(C[i].r*5, C[i].r*5, 1, 1)
         var matrix = new THREE.Matrix4();
-        matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, 0.0).multiply(new THREE.Matrix4().makeRotationZ(Math.random()*Math.PI*2.0));
+        matrix.makeTranslation(C[i].x - size/2, C[i].y - size/2, 0.0).multiply(new THREE.Matrix4().makeRotationZ(0.0));
         cloud.applyMatrix(matrix);
+        cloud.computeFaceNormals();
+        cloud.computeVertexNormals();
         cloud.normalsNeedUpdate = true;
         cloud.needsUpdate = true;
         cloud.__Z = 0.0;
@@ -256,7 +258,7 @@ BSWG.cloudMap = new function (){
 
         while (this.list.length < count) {
             var p = BSWG.render.cam3D.position.clone();
-            p.z = -5 - Math.random() * 6;
+            p.z = -9 - Math.random() * 6;
             var a = Math.random() * Math.PI * 2.0;
             p.x += Math.cos(a) * 160;
             p.y += Math.sin(a) * 160;
