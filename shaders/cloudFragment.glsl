@@ -48,7 +48,7 @@ void main() {
     gl_FragColor = vec4(clr.rgb*l*pow(clrw.a, 0.2)*0.5, pow(clrw.a, 0.85)*0.625);
     gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
 
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, envMapParam.x);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, envMapTint.rgb, pow(clamp(envMapParam.x, 0., 1.), 3.0));
 
     float Z = vShadowCoord.z - 0.001;
     highp float zval = Z+0.05;

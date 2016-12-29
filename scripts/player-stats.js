@@ -384,6 +384,50 @@ BSWG.playerStats = function(load) {
         return this.inventoryRemove(this.inventory[page][x][y]);
     };
 
+    this.inventoryPage = function (page) {
+        page = page || 0;
+        var ret = [];
+        for (var key in this.invMap) {
+            var it = this.invMap[key];
+            if (it.page === page) {
+                ret.push(it);
+            }
+        }
+        return ret;
+    };
+
+    this.inventoryCount = function (key) {
+        var count = 0;
+        for (var k in this.invMap) {
+            if (this.invMap[k].key === key) {
+                count += 1;
+            }
+        }
+        return count;
+    };
+
+    this.inventoryRemoveKey = function (key, count) {
+        if (!(count > 0)) {
+            count = 1;
+        }
+        while (count > 0) {
+            var found = false;
+            for (var k in this.invMap) {
+                if (this.invMap[k].key === key) {
+                    if (this.inventoryRemove(this.invMap[k].id)) {
+                        count --;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (!found) {
+                return count;
+            }
+        }
+        return 0;
+    }
+
     this.inventoryAt = function (x, y, page) {
         page = page || 0;
         x = x || 0;
