@@ -33,12 +33,14 @@ BSWG.component_Shield = {
 
     category: 'block',
 
-    getIconPoly: function (args) {
+    getIconPoly: function (args, boundsMode) {
         var width    = args.size || 1;
         var height   = args.size || 1;
 
-        width *= 0.5;
-        height *= 0.5;
+        if (!boundsMode) {
+            width *= 0.5;
+            height *= 0.5;
+        }
 
         var verts = [
             new b2Vec2(-width * 0.5, -height * 0.5),
@@ -46,6 +48,10 @@ BSWG.component_Shield = {
             new b2Vec2( width * 0.5,  height * 0.5),
             new b2Vec2(-width * 0.5,  height * 0.5)
         ];
+
+        if (boundsMode) {
+            return [verts];
+        }
 
         var cverts = [   
         ];

@@ -5,6 +5,8 @@ BSWG.compActiveConfMenu = null;
 BSWG.component_minJMatch        = Math.pow(0.15, 2.0);
 BSWG.component_jMatchClickRange = Math.pow(0.15, 2.0);
 
+BSWG.invGridSize = 1.0;
+
 BSWG.friendlyFactor = 1/16;
 // attack/defense bias to level difference
 BSWG.adBiasArr = [1, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
@@ -216,7 +218,7 @@ BSWG.compImplied = function (a, b) {
 
     var parse = function(str) {
         var tok = str.split(',');
-        var ret = new Object();
+        var ret = {};
         ret.type = tok[0];
         for (var i=1; i<tok.length; i++) {
             var kvtok = tok[i].split('=');
@@ -414,6 +416,53 @@ BSWG.component.prototype.getKey = function () {
     }
 
     return key;
+
+};
+
+BSWG.component.prototype.calcInvSize = function () {
+
+    var ret = {
+        min: new b2Vec2( 1000,  1000),
+        max: new b2Vec2(-1000, -1000),
+        w: 1,
+        h: 1
+    };
+
+    var args = {};
+    for (var j=0; j<this.serialize.length; j++) {
+        var key = this.serialize[j];
+        args[key] = this[key];
+    }
+
+    var poly = this.getIconPoly(args, true);
+
+    for (var i=0; i<poly.length; i++) {
+        for (var j=0; j<poly[i].length; j++) {
+            var p = poly[i][j];
+            ret.min.x = Math.min(ret.min.x, p.x);
+            ret.max.x = Math.max(ret.max.x, p.x);
+            ret.min.y = Math.min(ret.min.y, p.y);
+            ret.max.y = Math.max(ret.max.y, p.y);
+        }
+    }
+
+    ret.w = Math.ceil((ret.max.x - ret.min.x) / BSWG.invGridSize);
+    ret.h = Math.ceil((ret.max.y - ret.min.y) / BSWG.invGridSize);
+
+    return ret;
+
+};
+
+BSWG.component.prototype.getInvSize = function () {
+
+    var key = this.getKey();
+    if (BSWG.componentList.inventorySize[key]) {
+        return BSWG.componentList.inventorySize[key];
+    }
+    else {
+        console.log('Shouldn\'t get here (getInvSize)');
+        return BSWG.componentList.inventorySize[key] = this.calcInvSize();
+    }
 
 };
 
@@ -1449,6 +1498,7 @@ BSWG.componentList = new function () {
         this.compSelMesh = new BSWG.compSelMultiMesh();
 
         if (!this.compCached) {
+            this.inventorySize = {};
             for (var i=0; i<this.sbTypes.length; i++) {
                 var sbadd = this.sbTypes[i].sbadd;
                 for (var j=0; j<sbadd.length; j++) {
@@ -1461,6 +1511,7 @@ BSWG.componentList = new function () {
                     args.pos = new b2Vec2(0, 0);
                     args.angle = 0;
                     comp = new BSWG.component(this.sbTypes[i], args);
+                    this.inventorySize[comp.getKey()] = comp.calcInvSize();
                     comp.remove();
                 }
             }
@@ -2526,7 +2577,7 @@ BSWG.componentList = new function () {
                 }
             }
 
-            var args = new Object();
+            var args = {};
             if (C.args) {
                 for (var key in C.args) {
                     args[key] = C.args[key];
@@ -2618,7 +2669,7 @@ BSWG.componentList = new function () {
 
         for (var i=0; i<comps.length; i++) {
             var C  = comps[i];
-            var OC = new Object();
+            var OC = {};
 
             var body = C.obj.body;
             var pos = body.GetPosition();
@@ -2632,7 +2683,7 @@ BSWG.componentList = new function () {
             OC.tag = C.tag ? C.tag : BSWG.generateTag();
             OC.mapTime = (BSWG.game && BSWG.game.map) ? BSWG.game.map.mapTime : 0.0;
 
-            OC.args = new Object();
+            OC.args = {};
             for (var j=0; j<C.serialize.length; j++) {
                 var key = C.serialize[j];
                 OC.args[key] = C[key];
@@ -2643,7 +2694,7 @@ BSWG.componentList = new function () {
                 for (var key in C.welds) {
                     var W = C.welds[key];
                     if (W && W.other) {
-                        var OW = new Object();
+                        var OW = {};
                         OW.other = W.other.id;
                         OW.index = parseInt(key);
                         var jp = C.jpoints[OW.index];
@@ -2656,7 +2707,7 @@ BSWG.componentList = new function () {
             out[i] = OC;
         }
 
-        var ret = new Object();
+        var ret = {};
         ret.list = out;
 
         if (everything) {

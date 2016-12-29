@@ -182,6 +182,9 @@ BSWG.specialsUnlockInfo = {
     }
 };
 
+BSWG.invWidth = 10;
+BSWG.invHeight = 15;
+
 BSWG.playerStats = function(load) {
 
     load = load || {
@@ -194,11 +197,33 @@ BSWG.playerStats = function(load) {
         levelUp:    false,
         money:      100,
         store:      null,
-        pointBonus: 2
+        inventory:  null,
+        invMap:     null,
+        invNextID:  1,
+        pointBonus: 2,
+        invWidth:   BSWG.invWidth,
+        invHeight:  BSWG.invHeight
     };
 
     if (!load.store) {
         load.store = [];
+    }
+    if (!load.inventory) {
+        var newPage = function() {
+            var ret = [];
+            for (var x=0; x<load.invWidth; x++) {
+                var row = [];
+                for (var y=0; y<load.invHeight; y++) {
+                    row.push(null);
+                }
+                ret.push(row);
+            }
+            return ret;
+        };
+        load.inventory = [ newPage(), newPage(), newPage(), newPage() ];
+    }
+    if (!load.invMap) {
+        load.invMap = {};
     }
 
     for (var key in load) {
@@ -228,7 +253,7 @@ BSWG.playerStats = function(load) {
         return (a === b) || (typeof a === 'undefined') || (typeof b === 'undefined');
     };
 
-    this.addStoreKey = function (key, inc) {
+    this.addStoreKey = function (key, inc, page) {
         var tok = key.split(',');
         var type = tok[0];
         var comp = {};
@@ -237,11 +262,162 @@ BSWG.playerStats = function(load) {
             comp[tok2[0]] = eval(tok2[1]); // JSON.parse doesn't like strings?
         }
         comp.type = type;
-        this.addStore(comp, inc);
+        comp.getInvSize = function () {
+            return BSWG.componentList.inventorySize[key];
+        };
+        comp.getKey = function () {
+            return key;
+        };
+        return this.addStore(comp, inc, page);
     };
 
-    this.addStore = function (comp, inc) {
+    this.addInventoryAt = function (comp, page, x, y, rot90) {
+        rot90 = rot90 || false;
+        page = page || 0;
+        x = x || 0;
+        y = y || 0;
+        if (!comp) {
+            return false;
+        }
+        if (comp && comp.combinedHP && comp.combinedHP() <= 0) {
+            return false;
+        }
+        var dim = comp.getInvSize();
+        var inv = this.inventory[page];
+        var w = rot90 ? dim.h : dim.w;
+        var h = rot90 ? dim.w : dim.h;
+        for (var X=0; X<w; X++) {
+            for (var Y=0; Y<h; Y++) {
+                var x1 = x + X, y1 = y + Y;
+                if (x1 < 0 || y1 < 0 || x1 >= this.invWidth || y1 >= this.invHeight) {
+                    return false;
+                }
+                if (inv[x1][y1]) {
+                    return false;
+                }
+            }
+        }
+
+        var wrap = {
+            id: this.invNextID++,
+            x: x,
+            y: y,
+            w: dim.w,
+            h: dim.h,
+            page: page,
+            r90: rot90 || false,
+            key: comp.getKey(),
+            hp: comp.combinedHP ? comp.combinedHP() : null
+        };
+
+        this.invMap[wrap.id] = wrap;
+        
+        for (var X=0; X<w; X++) {
+            for (var Y=0; Y<h; Y++) {
+                var x1 = x + X, y1 = y + Y;
+                inv[x1][y1] = wrap.id;
+            }
+        }
+
+        return true;
+    }
+
+    this.inventoryRemove = function (id) {
+        if (!id || !this.invMap[id]) {
+            return false;
+        }
+        var it = this.invMap[id];
+        var page = it.page;
+        var inv = this.inventory[page];
+        var x = it.x;
+        var y = it.y;
+        var w = it.w;
+        var h = it.h;
+        if (it.r90) {
+            var t = w;
+            w = h;
+            h = t;
+        }
+        if (page >= 0 && page < this.inventory.length) {
+            for (var X=0; X<w; X++) {
+                for (var Y=0; Y<h; Y++) {
+                    var x1 = x + X, y1 = y + Y;
+                    if (x1 >= 0 && y1 >= 0 && x1 < this.invWidth && y1 < this.invHeight) {
+                        inv[x1][y1] = null;
+                    }
+                }
+            }
+        }
+        this.invMap[id] = null;
+        delete this.invMap[id];
+        return it;
+    };
+    this.inventoryRemoveAt = function (x, y, page) {
+        page = page || 0;
+        x = x || 0;
+        y = y || 0;
+        if (page < 0 || x < 0 || y < 0 || page >= this.inventory.length || x >= this.invWidth || y >= this.invHeight) {
+            return false;
+        }
+        if (!this.inventory[page][x][y]) {
+            return false;
+        }
+        return this.inventoryRemove(this.inventory[page][x][y]);
+    };
+
+    this.debugPage = function (page) {
+        page = page || 0;
+
+        var idMap = {};
+        var nextId = 48;
+        for (var x=0; x<this.invWidth; x++) {
+            for (var y=0; y<this.invHeight; y++) {
+                var it = this.inventory[page][x][y];
+                if (it) {
+                    if (!idMap[it]) {
+                        idMap[it] = nextId++;
+                    }
+                }
+            }
+        }
+        
+        for (var y=0; y<this.invHeight; y++) {
+            var str = '';
+            for (var x=0; x<this.invWidth; x++) {
+                var it = this.inventory[page][x][y];
+                if (it) {
+                    str += String.fromCharCode(idMap[it]);
+                }
+                else {
+                    str += '#';
+                }
+            }
+            console.log(str);
+        }
+    };
+
+    this.addStore = function (comp, inc, page) {
+
         inc = inc || 1;
+        page = page || 0;
+
+        for (var i=0; i<inc; i++) {
+            var valid = false;
+            for (var y=0; y<this.invHeight && !valid; y++) {
+                for (var x=0; x<this.invWidth && !valid; x++) {
+                    valid = this.addInventoryAt(comp, page, x, y, false);
+                    if (!valid) {
+                        valid = this.addInventoryAt(comp, page, x, y, true);
+                    }
+                }
+            }
+            if (!valid) {
+                return false;
+            }
+        }
+
+        return true;
+
         var sbt = BSWG.componentList.sbTypes;
         for (var i=0; i<sbt.length; i++) {
             if (sbt[i].type !== comp.type) {

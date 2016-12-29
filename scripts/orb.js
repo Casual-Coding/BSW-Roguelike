@@ -13,7 +13,7 @@ BSWG.orb = function (pos, zone) {
     this.activeT = 0.0;
     this.active = false;
 
-    this.mat = BSWG.render.newMaterial("basicVertex2", "basicFragment2", {
+    this.mat = BSWG.render.newMaterial("basicVertex2", "orbFragment", {
         clr: {
             type: 'v4',
             value: new THREE.Vector4(0.3, 1.0, 0.5, 1.0)
