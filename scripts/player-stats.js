@@ -253,7 +253,7 @@ BSWG.playerStats = function(load) {
         return (a === b) || (typeof a === 'undefined') || (typeof b === 'undefined');
     };
 
-    this.addStoreKey = function (key, inc, page) {
+    this.addStoreKey = function (key, inc, page, hp) {
         var tok = key.split(',');
         var type = tok[0];
         var comp = {};
@@ -268,10 +268,11 @@ BSWG.playerStats = function(load) {
         comp.getKey = function () {
             return key;
         };
+        comp.hp = hp || null;
         return this.addStore(comp, inc, page);
     };
 
-    this.addInventoryAt = function (comp, page, x, y, rot90) {
+    this.canAddInventoryAt = function (comp, page, x, y, rot90) {
         rot90 = rot90 || false;
         page = page || 0;
         x = x || 0;
@@ -279,7 +280,7 @@ BSWG.playerStats = function(load) {
         if (!comp) {
             return false;
         }
-        if (comp && comp.combinedHP && comp.combinedHP() <= 0) {
+        if (comp && comp.hp <= 0) {
             return false;
         }
         var dim = comp.getInvSize();
@@ -297,6 +298,23 @@ BSWG.playerStats = function(load) {
                 }
             }
         }
+        return true;
+    }
+
+    this.addInventoryAt = function (comp, page, x, y, rot90) {
+        rot90 = rot90 || false;
+        page = page || 0;
+        x = x || 0;
+        y = y || 0;
+
+        var dim = comp.getInvSize();
+        var inv = this.inventory[page];
+        var w = rot90 ? dim.h : dim.w;
+        var h = rot90 ? dim.w : dim.h;
+
+        if (!this.canAddInventoryAt(comp, page, x, y, rot90)) {
+            return false;
+        }
 
         var wrap = {
             id: this.invNextID++,
@@ -307,7 +325,7 @@ BSWG.playerStats = function(load) {
             page: page,
             r90: rot90 || false,
             key: comp.getKey(),
-            hp: comp.combinedHP ? comp.combinedHP() : null
+            hp: comp.hp || null
         };
 
         this.invMap[wrap.id] = wrap;
@@ -352,6 +370,7 @@ BSWG.playerStats = function(load) {
         delete this.invMap[id];
         return it;
     };
+
     this.inventoryRemoveAt = function (x, y, page) {
         page = page || 0;
         x = x || 0;
@@ -363,6 +382,20 @@ BSWG.playerStats = function(load) {
             return false;
         }
         return this.inventoryRemove(this.inventory[page][x][y]);
+    };
+
+    this.inventoryAt = function (x, y, page) {
+        page = page || 0;
+        x = x || 0;
+        y = y || 0;
+        if (page < 0 || x < 0 || y < 0 || page >= this.inventory.length || x >= this.invWidth || y >= this.invHeight) {
+            return null;
+        }
+        var id = this.inventory[page][x][y];
+        if (!id) {
+            return null;
+        }
+        return this.invMap[id] || null;
     };
 
     this.debugPage = function (page) {
