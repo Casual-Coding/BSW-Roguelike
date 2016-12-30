@@ -1374,6 +1374,95 @@ BSWG.control_Inventory = {
             ctx.globalAlpha = 1.0;
         }
 
+        if (this.mouseInIt) {
+            var it = this.mouseInIt;
+            var w = it.w * this.cellSize;
+            var h = it.h * this.cellSize;
+            if (it.r90) {
+                var t = w;
+                w = h;
+                h = t;
+            }
+            var xc = it.x * this.cellSize;
+            var yc = it.y * this.cellSize;
+            var cat = BSWG.componentList.getCatKey(it.key);
+            var clr = this.compClr[cat];
+            var w = 300 + 4;
+            var h = 70 + 4;
+            var x = (x1 + xc) - (w + 1);
+            var y = (y1 + yc) - (h+1);
+
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.strokeStyle = 'rgba(128, 128, 128, 0.75)';
+            ctx.fillRect(x+4, y+4, w, h)
+            ctx.fillStyle = 'rgba(64, 64, 64, 0.75)';
+
+            var grd = ctx.createLinearGradient(x, y, x, y+h);
+            grd.addColorStop(0, 'rgba(64, 64, 64, 0.75)');
+            grd.addColorStop(1, 'rgba(96, 96, 96, 0.75)');
+            ctx.fillStyle = grd;
+            grd = null;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#000';
+            ctx.font = '14px Orbitron';
+            ctx.fillTextB(BSWG.componentList.compStrName(it.key), x+9, y+6+14);
+
+            ctx.fillStyle = '#bbb';
+            ctx.strokeStyle = '#000';
+            ctx.font = '12px Orbitron';
+            ctx.fillTextB(it.text || '', x+9, y+6+14+13);
+
+            var clr = this.compClr[cat];
+            ctx.fillStyle = 'rgb(' + Math.floor(clr[0]*255) + ',' + Math.floor(clr[1]*255) + ',' + Math.floor(clr[2]*255) + ')';
+            ctx.strokeStyle = '#000';
+            ctx.font = '12px Orbitron';
+            ctx.textAlign = 'right';
+            ctx.fillTextB('Type: ' + cat.toTitleCase(), x+w-10, y+6+13);
+
+            var damage = it.damage || 0;
+            var l = Math.floor(damage * 255);
+            ctx.fillStyle = 'rgb(' + l + ', ' + (255-l) + ', 0)';
+            ctx.strokeStyle = '#000';
+            ctx.font = '12px Orbitron';
+            ctx.textAlign = 'right';
+            ctx.fillTextB("Damage: " + Math.floor(damage * 100) + '%', x+w-10, y+6+13+13);
+
+            if (BSWG.game.map && BSWG.game.xpInfo) {
+                if (BSWG.game.map.minLevelComp(it.key) > BSWG.game.xpInfo.level) {
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#f00';
+                    ctx.strokeStyle = '#000';
+                    ctx.font = '14px Orbitron';
+                    ctx.fillTextB('Level ' + BSWG.game.map.minLevelComp(it.key) + ' required.', x + w*0.5, y + h - 8);
+                }
+            }
+
+            if (BSWG.game.map && BSWG.game.inZone && BSWG.game.inZone.compValLookup) {
+                var it2 = BSWG.game.inZone.compValLookup[it.key];
+                if (it2) {
+                    var text = "Value here: " + Math.floor(it2.value*100)/100;
+                    ctx.strokeStyle = '#000';
+                    ctx.font = '12px Orbitron';
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = 'rgba(255, 64, 0, 1)';
+                    if (!it2.rare) {
+                        ctx.fillStyle = 'rgba(255, 192, 0, 1)';
+                    }
+                    else {
+                        text += ' (Rare)';
+                    }
+                    ctx.fillTextB(text, x+w-10, y+6+13+13+13);
+                }
+            }
+
+            ctx.textAlign = 'left';            
+        }
+
         if (this.mouseIn && this.dragIt) {
             this.drawDragIt(ctx, this.dragIt.mx + this.dragIt.offx + this.p.x, this.dragIt.my + this.dragIt.offy + this.p.y, this.cellSize);
         }

@@ -2150,7 +2150,7 @@ BSWG.game = new function(){
             var mp = BSWG.render.unproject3D(mps, 0.0);
 
             if (self.scene === BSWG.SCENE_GAME1 || self.scene === BSWG.SCENE_GAME2) {
-                if (!self.grabbedBlock && self.ccblock && !self.editMode && self.storeMode && !BSWG.ui.mouseBlock) {
+                if (!self.grabbedBlock && self.ccblock && !self.editMode && self.storeMode && !BSWG.ui.mouseBlock && (!self.compPal || !self.compPal.dragIt)) {
                     if (self.attractorOn && self.attractorOn.obj && self.attractorOn.obj.body && BSWG.input.MOUSE('left') && !BSWG.ui.mouseBlock) {
                         /*var vec = mp.clone();
                         var vec2 = self.attractorOn.obj.body.GetWorldCenter();
