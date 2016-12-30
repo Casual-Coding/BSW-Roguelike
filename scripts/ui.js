@@ -1224,6 +1224,7 @@ BSWG.control_Inventory = {
 
         this.tabHeight = 36;
         this.curPage = 0;
+        this.pageHover = null;
 
         this.mouseInIt = null;
         this.dragIt = null;
@@ -1358,6 +1359,21 @@ BSWG.control_Inventory = {
             BSWG.renderCompIcon(ctx, it.key, x1 + xc, y1 + yc, this.cellSize * 0.9, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
         }
 
+        var bw = (this.w-this.padding)/4;
+        for (var i=0; i<4; i++) {
+            ctx.fillStyle = this.pageHover === i ? 'rgba(192, 192, 192, 1.0)' : 'rgba(127, 127, 127, 0.75)';
+            ctx.globalAlpha = this.curPage === i ? 1.0 : 0.65;
+            ctx.fillRect(this.padding+(i*bw)+this.p.x+1, this.padding+this.p.y+1, bw-this.padding-2, this.tabHeight-2);
+
+            ctx.fillStyle = '#8f8';
+            ctx.strokeStyle = '#000';
+            ctx.font = (this.tabHeight/2.5)+'px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillTextB("Page " + (i+1), this.padding+(i*bw)+this.p.x + (bw-this.padding)/2, this.padding+this.p.y + this.tabHeight/1.7);
+            ctx.textAlign = 'left';
+            ctx.globalAlpha = 1.0;
+        }
+
         if (this.mouseIn && this.dragIt) {
             this.drawDragIt(ctx, this.dragIt.mx + this.dragIt.offx + this.p.x, this.dragIt.my + this.dragIt.offy + this.p.y, this.cellSize);
         }
@@ -1407,7 +1423,7 @@ BSWG.control_Inventory = {
 
         var toX = BSWG.render.viewport.w+1;
 
-        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode && !BSWG.game.battleMode && BSWG.game.saveHealAdded)) {
+        if (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode) {
             toX = BSWG.render.viewport.w - (this.w-1);
         }
 
@@ -1416,10 +1432,21 @@ BSWG.control_Inventory = {
 
         this.mouseInIt = null;
 
+        this.pageHover = null;
+        var bw = (this.w-this.padding)/4;
+        var mx = BSWG.input.MOUSE('x') - this.p.x;
+        var my = BSWG.input.MOUSE('y') - this.p.y;
+        for (var i=0; i<4; i++) {
+            if (mx >= (this.padding+(i*bw)+1) && my >= (this.padding+1) && mx < (this.padding+(i*bw)+1+(bw-this.padding-2)) && my < (this.padding+1+(this.tabHeight-2))) {
+                this.pageHover = i;
+            }
+        }
+
         if (this.dragIt) {
+            if (typeof this.pageHover === 'number') {
+                this.curPage = this.pageHover;
+            }
             if (this.mouseIn) {
-                var mx = BSWG.input.MOUSE('x') - this.p.x;
-                var my = BSWG.input.MOUSE('y') - this.p.y;
                 this.dragIt.mx = mx;
                 this.dragIt.my = my;
                 var x1 = this.padding + this.p.x;
@@ -1484,10 +1511,10 @@ BSWG.control_Inventory = {
                 }
             }
         }
+        else if (this.mouseIn && (typeof this.pageHover === 'number') && BSWG.input.MOUSE_PRESSED('left')) {
+            this.curPage = this.pageHover;
+        }
         else if (this.mouseIn) {
-
-            var mx = BSWG.input.MOUSE('x') - this.p.x;
-            var my = BSWG.input.MOUSE('y') - this.p.y;
 
             var x0 = this.padding;
             var y0 = this.padding * 2 + this.tabHeight;

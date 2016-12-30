@@ -1395,6 +1395,7 @@ BSWG.game = new function(){
                         me.selected = !me.selected;
                         self.editMode = me.selected;
                         if (self.editMode) {
+                            self.storeBtn.selected = self.storeMode = false;
                             self.showControls = false;
                             self.showControlsBtn.selected = false;
                             self.pushMode('edit');
@@ -1477,6 +1478,8 @@ BSWG.game = new function(){
                                 }
                             }
                             if (self.storeMode) {
+                                self.editMode = false;
+                                self.editBtn.selected = false;
                                 self.pushMode('store');
                             }
                             else {

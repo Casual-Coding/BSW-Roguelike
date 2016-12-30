@@ -521,7 +521,8 @@ BSWG.playerStats = function(load) {
                 }
             }
             if (!valid) {
-                return false;
+                return (page+1) < this.inventory.length ? this.addStore(comp, inc-i, page+1, damage) : false;
+
             }
         }
 
