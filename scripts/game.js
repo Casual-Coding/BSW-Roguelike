@@ -1577,7 +1577,7 @@ BSWG.game = new function(){
                     }
                 });*/
 
-                if (scene === BSWG.SCENE_GAME1 || scene === BSWG.SCENE_GAME2) {
+                if (scene === BSWG.SCENE_GAME2) {
                     this.compPal = new BSWG.uiControl(BSWG.control_CompPalette, {
                         x: 2048, y: 70,
                         w: 128 * 3,
@@ -1619,6 +1619,13 @@ BSWG.game = new function(){
                                 break;
                             }
                         }
+                    });
+                }
+                else if (scene === BSWG.SCENE_GAME1) {
+                    this.compPal = new BSWG.uiControl(BSWG.control_Inventory, {
+                        x: 2048, y: 70,
+                        w: 128 * 3,
+                        h: 650
                     });
                 }
 

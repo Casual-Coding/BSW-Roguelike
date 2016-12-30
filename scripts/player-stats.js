@@ -253,7 +253,7 @@ BSWG.playerStats = function(load) {
         return (a === b) || (typeof a === 'undefined') || (typeof b === 'undefined');
     };
 
-    this.addStoreKey = function (key, inc, page, hp) {
+    this.addStoreKey = function (key, inc, page, damage) {
         var tok = key.split(',');
         var type = tok[0];
         var comp = {};
@@ -268,8 +268,8 @@ BSWG.playerStats = function(load) {
         comp.getKey = function () {
             return key;
         };
-        comp.hp = hp || null;
-        return this.addStore(comp, inc, page);
+        comp.hp = comp.maxHP = 100;
+        return this.addStore(comp, inc, page, damage);
     };
 
     this.canAddInventoryAt = function (comp, page, x, y, rot90) {
@@ -299,13 +299,21 @@ BSWG.playerStats = function(load) {
             }
         }
         return true;
-    }
+    };
 
-    this.addInventoryAt = function (comp, page, x, y, rot90) {
+    this.addInventoryAt = function (comp, page, x, y, rot90, damage) {
         rot90 = rot90 || false;
         page = page || 0;
         x = x || 0;
         y = y || 0;
+        if (!(damage || damage === 0)) {
+            if (comp && (comp.hp || comp.hp === 0) && comp.maxHP) {
+                damage = comp.hp / comp.maxHP;
+            }
+            else {
+                damage = 0;
+            }
+        }
 
         var dim = comp.getInvSize();
         var inv = this.inventory[page];
@@ -325,7 +333,7 @@ BSWG.playerStats = function(load) {
             page: page,
             r90: rot90 || false,
             key: comp.getKey(),
-            hp: comp.hp || null
+            damage: damage
         };
 
         this.invMap[wrap.id] = wrap;
@@ -338,7 +346,7 @@ BSWG.playerStats = function(load) {
         }
 
         return true;
-    }
+    };
 
     this.inventoryRemove = function (id) {
         if (!id || !this.invMap[id]) {
@@ -473,7 +481,7 @@ BSWG.playerStats = function(load) {
         }
     };
 
-    this.addStore = function (comp, inc, page) {
+    this.addStore = function (comp, inc, page, damage) {
 
         inc = inc || 1;
         page = page || 0;
@@ -482,9 +490,9 @@ BSWG.playerStats = function(load) {
             var valid = false;
             for (var y=0; y<this.invHeight && !valid; y++) {
                 for (var x=0; x<this.invWidth && !valid; x++) {
-                    valid = this.addInventoryAt(comp, page, x, y, false);
+                    valid = this.addInventoryAt(comp, page, x, y, false, damage);
                     if (!valid) {
-                        valid = this.addInventoryAt(comp, page, x, y, true);
+                        valid = this.addInventoryAt(comp, page, x, y, true, damage);
                     }
                 }
             }
@@ -495,55 +503,6 @@ BSWG.playerStats = function(load) {
 
         return true;
 
-        var sbt = BSWG.componentList.sbTypes;
-        for (var i=0; i<sbt.length; i++) {
-            if (sbt[i].type !== comp.type) {
-                continue;
-            }
-            for (var j=0; j<sbt[i].sbadd.length; j++) {
-                var obj = sbt[i].sbadd[j];
-                var nobj = {};
-                var eq = true;
-                for (var k=0; sbt[i].sbkey && k<sbt[i].sbkey.length; k++) {
-                    var key = sbt[i].sbkey[k];
-                    if (!EQ(obj[key], comp[key])) {
-                        eq = false;
-                    }
-                    nobj[key] = comp[key];
-                }
-                if (eq) {
-                    nobj.type = comp.type;
-                    obj.count = (obj.count || 0) + inc;
-                    if (obj.count < 0) {
-                        obj.count = 0;
-                    }
-                    while (inc < 0) {
-                        for (var k=0; k<this.store.length; k++) {
-                            if (this.store[k].type === comp.type) {
-                                var eq2 = true;
-                                for (var k2=0; sbt[i].sbkey && k2<sbt[i].sbkey.length; k2++) {
-                                    var key = sbt[i].sbkey[k2];
-                                    if (!EQ(obj[key], this.store[k][key])) {
-                                        eq2 = false;
-                                    }
-                                }
-                                if (eq2) {
-                                    this.store.splice(k, 1);
-                                    break;
-                                }
-                            }
-                        }
-                        inc += 1;
-                    }
-                    while (inc > 0) {
-                        this.store.push(nobj);
-                        inc -= 1;
-                    }
-                    return true;
-                }
-            }
-        }
-        return false;
     };
 
     var ostore = this.store;

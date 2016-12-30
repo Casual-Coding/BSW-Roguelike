@@ -1433,6 +1433,17 @@ BSWG.componentList = new function () {
         }
     };
 
+    this.getCatKey = function (key) {
+        if (!key || !key.split) {
+            return 'block';
+        }
+        key = key.split(',')[0];
+        if (!this.typeMap || !this.typeMap[key]) {
+            return 'block';
+        }
+        return this.typeMap[key].category || 'block';
+    };
+
     this.clear = function () {
 
         for (var key in this.archHash) {

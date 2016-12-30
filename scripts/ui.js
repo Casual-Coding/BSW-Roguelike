@@ -1195,6 +1195,180 @@ window.testCD = function () {
 
 BSWG.ui_DlgBlock = false;
 
+
+BSWG.control_Inventory = {
+
+    noEat: false,
+
+    init: function (args) {
+
+        this.compClr = {
+            'weapon': [1, .5, 0],
+            'block': [.7, .7, .7],
+            'movement': [0, 1, .25]
+        };
+        this.compClrBg = {
+            'weapon': 'rgb(255, 127, 0)',
+            'block': 'rgb(175, 175, 175)',
+            'movement': 'rgb(0, 255, 63)'
+        };
+
+        if (args.clickInner) {
+            this.clickInner = args.clickInner;
+        }
+
+        this.cellSize = 32;
+        this.padding = 6;
+        this.invWidth = BSWG.game.xpInfo.invWidth;
+        this.invHeight = BSWG.game.xpInfo.invHeight;
+
+        this.tabHeight = 36;
+        this.curPage = 0;
+
+    },
+
+    destroy: function () {
+        if (this.hudNM) {
+            this.hudNM.destroy();
+            this.hudNM = null;
+        }
+        if (this.hudObj) {
+            this.hudObj.remove();
+            this.hudObj = null;
+        }
+    },
+
+    render: function (ctx, viewport) {
+
+        this.cellSize = BSWG.render.viewport.h / 25.0;
+        this.padding = BSWG.render.viewport.h / 180.0;
+
+        this.w = this.cellSize * this.invWidth + this.padding*2;
+        this.h = this.cellSize * this.invHeight + this.padding*3 + this.tabHeight;
+
+        var aw = this.w, ah = this.h;
+
+        if (!this.hudNM || aw !== this.lastAW || ah !== this.lastAH) {
+
+            if (this.hudNM) {
+                this.hudNM.destroy();
+            }
+
+            var max = Math.max(this.w, this.h);
+            var sz = 64;
+            while (sz < max && sz < 2048) {
+                sz *= 2;
+            }
+
+            var self = this;
+
+            this.hudNM = BSWG.render.proceduralImage(sz, sz, function(ctx, w, h){
+
+                var H = BSWG.ui_HM(w, h, aw, ah);
+                H.plate(H.l(0), H.t(0), H.r(0) - H.l(0), H.b(0) - H.t(0), 0.15, 0.35);
+
+                var ww = Math.abs(H.r(0) - H.l(0));
+                var hh = Math.abs(H.b(0) - H.t(0));
+                var ux = ww / self.w;
+                var uy = hh / self.h;
+
+                var bw = (self.w-self.padding)/4;
+
+                for (var i=0; i<4; i++) {
+                    H.plate(H.l(ux*(self.padding+(i*bw))), H.t(uy*self.padding), ux*(bw-self.padding), uy*self.tabHeight, 0.3, 0.25);
+                }
+
+                H.plate(H.l(ux*(self.padding)), H.t(uy*(self.padding*2+self.tabHeight)), ux*(self.w-self.padding*2), uy*(self.h-self.padding-(self.padding*2+self.tabHeight)), 0.3, 0.25);
+
+                BSWG.render.heightMapToNormalMap(H.H, ctx, w, h);
+
+                this.hudHM = H;
+
+            });
+
+            this.lastAW = aw;
+            this.lastAH = ah;
+
+            if (this.hudObj) {
+                this.hudObj.set_nm(this.hudNM);
+            }
+        }
+
+        if (!this.hudObj) {
+            this.hudObj = new BSWG.uiPlate3D(
+                this.hudNM,
+                this.hudHM,
+                this.p.x, this.p.y, // x, y
+                this.w, this.h, // w, h
+                0.05, // z
+                [.9,.9,1.1,1], // color
+                false, // split
+                true // moving
+            );
+        }
+
+        if (this.hudObj) {
+            this.hudObj.set_pos(this.p.x, this.p.y);
+            this.hudObj.set_size(this.w, this.h);
+            ctx.clearRect(this.p.x, this.p.y, this.w, this.h);
+        }
+
+        if (this.p.x > BSWG.render.viewport.w || this.p.y > BSWG.render.viewport.h) {
+            return;
+        }
+
+        ctx.font = '16px Orbitron';
+
+        ctx.fillStyle = 'rgba(50,50,50,0.5)';
+
+        var x1 = this.padding + this.p.x;
+        var y1 = this.padding * 2 + this.tabHeight + this.p.y;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        for (var x=0; x<this.invWidth; x++) {
+            for (var y=0; y<this.invHeight; y++) {
+                ctx.fillRect(x1 + x * this.cellSize,
+                             y1 + y * this.cellSize,
+                             this.cellSize-1, this.cellSize-1);
+            }
+        }
+
+        var page = BSWG.game.xpInfo.inventoryPage(this.curPage);
+
+        for (var i=0; i<page.length; i++) {
+            var it = page[i];
+            var w = it.w * this.cellSize;
+            var h = it.h * this.cellSize;
+            if (it.r90) {
+                var t = w;
+                w = h;
+                h = t;
+            }
+            var xc = it.x * this.cellSize + w * 0.5;
+            var yc = it.y * this.cellSize + h * 0.5;
+            var clr = this.compClr[BSWG.componentList.getCatKey(it.key)];
+            var light = 0.5;
+            BSWG.renderCompIconRecenter = true;
+            BSWG.renderCompIcon(ctx, it.key, x1 + xc, y1 + yc, this.cellSize * 0.9, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
+        }
+
+    },
+
+    update: function () {
+
+        var toX = BSWG.render.viewport.w+1;
+
+        if ((BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.editMode) || (BSWG.game.scene === BSWG.SCENE_GAME1 && BSWG.game.storeMode && !BSWG.game.battleMode && BSWG.game.saveHealAdded)) {
+            toX = BSWG.render.viewport.w - (this.w-1);
+        }
+
+        this.p.x += (toX - this.p.x) * BSWG.render.dt * 4.0;
+        this.p.y = BSWG.game.hudBottomY - this.h;
+
+    },
+
+};
+
+
 BSWG.control_Dialogue = {
 
     init: function (args) {

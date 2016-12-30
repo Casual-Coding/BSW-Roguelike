@@ -27,7 +27,7 @@
   "dependencies": {
   },
   "js-flags": "--max_inlined_source_size=16384",
-  "chromium-args": "--in-process-gpu --winhttp-proxy-resolver --process-per-site --single-process --enable-gpu-rasterization --enable-native-gpu-memory-buffers --ignore-gpu-blacklist",
+  "chromium-args": "--in-process-gpu --winhttp-proxy-resolver --process-per-site --single-process --enable-gpu-rasterization --enable-native-gpu-memory-buffers --ignore-gpu-blacklist --enable-logging --v=1",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",

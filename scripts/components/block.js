@@ -88,7 +88,7 @@ BSWG.component_Block = {
 
         this.maxHP = this.width * this.height * 250 / 9 * (this.armour ? 4 : 1);
         if (this.triangle) {
-            this.maxHP /= 2.0;
+            this.maxHP /= 1.5;
         }
 
         this.obj = BSWG.physics.createObject('box', args.pos, args.angle || 0, {
