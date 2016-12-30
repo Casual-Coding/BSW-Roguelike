@@ -51,6 +51,7 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
                 for (var j=0; j<poly[i].length; j++) {
                     poly[i][j].x -= ox;
                     poly[i][j].y -= oy;
+                    poly[i][j].y = -poly[i][j].y;
                 }
             }
         }

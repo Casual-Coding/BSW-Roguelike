@@ -1490,7 +1490,7 @@ BSWG.control_Inventory = {
                         var arr = BSWG.componentList.compStrTypeArgs(this.dragIt.key);
                         var args = arr[1];
                         args.pos = this.dragIt.wp.clone();
-                        args.angle = this.dragIt.r90 ? Math.PI/2 : 0;
+                        args.angle = this.dragIt.r90 ? -Math.PI/2 : 0;
                         args.damage = this.dragIt.damage;
                         var comp = new BSWG.component(arr[2], args);
                         if (self.scene === BSWG.SCENE_GAME1) {
@@ -2849,7 +2849,7 @@ BSWG.control_TradeWindow = {
             new BSWG.soundSample().play('trade', null, 0.15, (Math.random() * 0.01 + 0.99));
             BSWG.game.xpInfo.addStoreKey(this.want.key, this.wantCount);
             for (var i=0; i<this.give.length; i++) {
-                BSWG.game.xpInfo.addStoreKey(this.give[i].key, -this.give[i].count);
+                BSWG.game.xpInfo.inventoryRemoveKey(this.give[i].key, this.give[i].count);
             }
             this.reset("Thank you! Need anything else?");
         }

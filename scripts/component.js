@@ -2424,6 +2424,9 @@ BSWG.componentList = new function () {
         if (!found) {
             value = tdesc.sbadd[0].count || 0;
         }
+        if (BSWG.game.xpInfo) {
+            value = BSWG.game.xpInfo.inventoryCount(str);
+        }
         return value;
     };
 
