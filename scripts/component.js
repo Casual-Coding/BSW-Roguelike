@@ -387,6 +387,9 @@ BSWG.component = function (desc, args) {
     this.baseUpdate(1/60);
     this.update(1/60);
 
+    if (args.damage > 0) {
+        this.hp = (1 - Math.clamp(args.damage, 0.0, 0.9)) * this.maxHP;
+    }
 };
 
 BSWG.component.prototype.directlyConnectedTo = function(b) {

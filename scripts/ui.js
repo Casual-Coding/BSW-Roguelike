@@ -1349,6 +1349,7 @@ BSWG.control_Inventory = {
             var yc = it.y * this.cellSize + h * 0.5;
             var clr = this.compClr[BSWG.componentList.getCatKey(it.key)];
             var light = this.mouseInIt === it ? 0.5 : 0.3;
+            light *= 1 - (it.damage * 0.5);
             BSWG.renderCompIconRecenter = true;
             if (this.mouseInIt === it) {
                 ctx.fillStyle = 'rgba(0, 127, 0, 0.35)';
@@ -1380,7 +1381,8 @@ BSWG.control_Inventory = {
         var xic = it.x * this.cellSize + w * 0.5;
         var yic = it.y * this.cellSize + h * 0.5;
         var clr = it.canDrop ? [ 0, 1, 0 ] : [ 1, 0, 0 ];
-        var light = this.mouseInIt === it ? 0.5 : 0.3;
+        var light = 0.5;
+        light *= 1 - (it.damage * 0.5);
         BSWG.renderCompIconRecenter = true;
         if (it.canDrop) {
             ctx.fillStyle = 'rgba(0, 168, 0, 0.5)';
@@ -1388,7 +1390,16 @@ BSWG.control_Inventory = {
         else {
             ctx.fillStyle = 'rgba(168, 0, 0, 0.5)';
         }
-        ctx.fillRect(x1 + xic - w*0.5 + 1, y1 + yic - h*0.5 + 1, w-2, h-2);
+        if (this.mouseIn) {
+            ctx.fillRect(x1 + xic - w*0.5 + 1, y1 + yic - h*0.5 + 1, w-2, h-2);    
+        }
+        else {
+            ctx.beginPath();
+            ctx.arc(xc,yc,it.r*scale,0,2*Math.PI);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
         BSWG.renderCompIcon(ctx, it.key, xc, yc, scale, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
     },
 
@@ -1440,9 +1451,27 @@ BSWG.control_Inventory = {
                 }
             }
             else {
-                this.dragIt.canDrop = false;
+                this.dragIt.mx = BSWG.input.MOUSE('x');
+                this.dragIt.my = BSWG.input.MOUSE('y');
+                this.dragIt.r = Math.sqrt(Math.pow(Math.max(this.dragIt.w, this.dragIt.h)/2, 2.0)*2) * 1.1;
+                this.dragIt.wp = BSWG.render.unproject3D(new b2Vec2(this.dragIt.mx, this.dragIt.my), 0.0);
+                var tmp = BSWG.componentList.withinRadius(this.dragIt.wp.clone(), this.dragIt.r);
+                this.dragIt.canDrop = !tmp || tmp.length === 0;
+
                 if (BSWG.input.MOUSE_RELEASED('left')) {
                     if (this.dragIt.canDrop) {
+                        var arr = BSWG.componentList.compStrTypeArgs(this.dragIt.key);
+                        var args = arr[1];
+                        args.pos = this.dragIt.wp.clone();
+                        args.angle = this.dragIt.r90 ? Math.PI/2 : 0;
+                        args.damage = this.dragIt.damage;
+                        var comp = new BSWG.component(arr[2], args);
+                        if (self.scene === BSWG.SCENE_GAME1) {
+                            self.xpInfo.addStore(comp, -1);
+                            new BSWG.soundSample().play('store-2', p.THREE(0.2), 0.85, 0.45);
+                        }
+                        p = null;
+                        comp = null;
                         this.dragIt = null;
                     }
                     else {

@@ -269,7 +269,7 @@ BSWG.playerStats = function(load) {
             return key;
         };
         comp.hp = comp.maxHP = 100;
-        return this.addStore(comp, inc, page, damage);
+        return this.addStore(comp, inc, page, damage||0);
     };
 
     this.inventoryBoxEmpty = function (page, x, y, w, h, r90) {
@@ -332,7 +332,7 @@ BSWG.playerStats = function(load) {
         y = y || 0;
         if (!(damage || damage === 0)) {
             if (comp && (comp.hp || comp.hp === 0) && comp.maxHP) {
-                damage = comp.hp / comp.maxHP;
+                damage = 1 - comp.hp / comp.maxHP;
             }
             else {
                 damage = 0;

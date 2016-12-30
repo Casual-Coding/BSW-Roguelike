@@ -2523,6 +2523,10 @@ BSWG.game = new function(){
             BSWG.orbList.updateRender(dt);
             BSWG.cloudMap.updateRender(dt);
 
+            if (self.compPal && self.compPal.dragIt && !self.compPal.mouseIn) {
+                self.compPal.drawDragIt(ctx, self.compPal.dragIt.mx, self.compPal.dragIt.my, self.cam.toScreenSize(viewport, 1.0));
+            }
+
             if (self.tileMap) {
                 self.tileMap.update(dt);
             }
