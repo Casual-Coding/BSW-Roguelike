@@ -1225,6 +1225,8 @@ BSWG.control_Inventory = {
         this.tabHeight = 36;
         this.curPage = 0;
 
+        this.mouseInIt = null;
+        this.dragIt = null;
     },
 
     destroy: function () {
@@ -1346,11 +1348,48 @@ BSWG.control_Inventory = {
             var xc = it.x * this.cellSize + w * 0.5;
             var yc = it.y * this.cellSize + h * 0.5;
             var clr = this.compClr[BSWG.componentList.getCatKey(it.key)];
-            var light = 0.5;
+            var light = this.mouseInIt === it ? 0.5 : 0.3;
             BSWG.renderCompIconRecenter = true;
+            if (this.mouseInIt === it) {
+                ctx.fillStyle = 'rgba(0, 127, 0, 0.35)';
+                ctx.fillRect(x1 + xc - w*0.5 + 1, y1 + yc - h*0.5 + 1, w-2, h-2);
+            }
             BSWG.renderCompIcon(ctx, it.key, x1 + xc, y1 + yc, this.cellSize * 0.9, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
         }
 
+        if (this.mouseIn && this.dragIt) {
+            this.drawDragIt(ctx, this.dragIt.mx + this.dragIt.offx + this.p.x, this.dragIt.my + this.dragIt.offy + this.p.y, this.cellSize);
+        }
+
+    },
+
+    drawDragIt: function (ctx, xc, yc, scale) {
+        if (!this.dragIt) {
+            return;
+        }
+        var it = this.dragIt;
+        var w = it.w * this.cellSize;
+        var h = it.h * this.cellSize;
+        if (it.r90) {
+            var t = w;
+            w = h;
+            h = t;
+        }
+        var x1 = this.padding + this.p.x;
+        var y1 = this.padding * 2 + this.tabHeight + this.p.y;
+        var xic = it.x * this.cellSize + w * 0.5;
+        var yic = it.y * this.cellSize + h * 0.5;
+        var clr = it.canDrop ? [ 0, 1, 0 ] : [ 1, 0, 0 ];
+        var light = this.mouseInIt === it ? 0.5 : 0.3;
+        BSWG.renderCompIconRecenter = true;
+        if (it.canDrop) {
+            ctx.fillStyle = 'rgba(0, 168, 0, 0.5)';
+        }
+        else {
+            ctx.fillStyle = 'rgba(168, 0, 0, 0.5)';
+        }
+        ctx.fillRect(x1 + xic - w*0.5 + 1, y1 + yic - h*0.5 + 1, w-2, h-2);
+        BSWG.renderCompIcon(ctx, it.key, xc, yc, scale, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
     },
 
     update: function () {
@@ -1363,6 +1402,100 @@ BSWG.control_Inventory = {
 
         this.p.x += (toX - this.p.x) * BSWG.render.dt * 4.0;
         this.p.y = BSWG.game.hudBottomY - this.h;
+
+        this.mouseInIt = null;
+
+        if (this.dragIt) {
+            if (this.mouseIn) {
+                var mx = BSWG.input.MOUSE('x') - this.p.x;
+                var my = BSWG.input.MOUSE('y') - this.p.y;
+                this.dragIt.mx = mx;
+                this.dragIt.my = my;
+                var x1 = this.padding + this.p.x;
+                var y1 = this.padding * 2 + this.tabHeight + this.p.y;
+                var w = this.dragIt.w * this.cellSize;
+                var h = this.dragIt.h * this.cellSize;
+                if (this.dragIt.r90) {
+                    var t = w;
+                    w = h;
+                    h = t;
+                }
+                var xc = this.dragIt.mx + this.dragIt.offx + this.p.x;
+                var yc = this.dragIt.my + this.dragIt.offy + this.p.y;
+                this.dragIt.x = Math.round(((xc-w*0.5)-x1) / this.cellSize);
+                this.dragIt.y = Math.round(((yc-h*0.5)-y1) / this.cellSize);
+
+                this.dragIt.canDrop = BSWG.game.xpInfo.inventoryBoxEmpty(this.curPage, this.dragIt.x, this.dragIt.y, this.dragIt.w, this.dragIt.h, this.dragIt.r90);
+                if (BSWG.input.MOUSE_RELEASED('left')) {
+                    if (this.dragIt.canDrop && BSWG.game.xpInfo.addInventoryItAt(this.dragIt, this.curPage, this.dragIt.x, this.dragIt.y, this.dragIt.r90)) {
+                        this.dragIt = null;
+                    }
+                    else {
+                        BSWG.game.xpInfo.addInventoryItAt(this.dragIt, this.dragIt.opage, this.dragIt.ox, this.dragIt.oy, this.dragIt.or90);
+                        this.dragIt = null;
+                    }
+                }
+                else if (BSWG.input.MOUSE_PRESSED('right')) {
+                    this.dragIt.r90 = !this.dragIt.r90;
+                }
+            }
+            else {
+                this.dragIt.canDrop = false;
+                if (BSWG.input.MOUSE_RELEASED('left')) {
+                    if (this.dragIt.canDrop) {
+                        this.dragIt = null;
+                    }
+                    else {
+                        BSWG.game.xpInfo.addInventoryItAt(this.dragIt, this.dragIt.opage, this.dragIt.ox, this.dragIt.oy, this.dragIt.or90);
+                        this.dragIt = null;
+                    }
+                }
+                else if (BSWG.input.MOUSE_PRESSED('right')) {
+                    this.dragIt.r90 = !this.dragIt.r90;
+                }
+            }
+        }
+        else if (this.mouseIn) {
+
+            var mx = BSWG.input.MOUSE('x') - this.p.x;
+            var my = BSWG.input.MOUSE('y') - this.p.y;
+
+            var x0 = this.padding;
+            var y0 = this.padding * 2 + this.tabHeight;
+
+            var page = BSWG.game.xpInfo.inventoryPage(this.curPage);
+
+            for (var i=0; i<page.length; i++) {
+                var it = page[i];
+                var w = it.w * this.cellSize;
+                var h = it.h * this.cellSize;
+                if (it.r90) {
+                    var t = w;
+                    w = h;
+                    h = t;
+                }
+                var x1 = it.x * this.cellSize + x0;
+                var y1 = it.y * this.cellSize + y0;
+
+                if (mx >= x1 && mx < (x1 + w) && my >= y1 && my < (y1 + h)) {
+                    this.mouseInIt = it;
+                    if (BSWG.input.MOUSE_PRESSED('left') && !BSWG.input.MOUSE_RELEASED('left')) {
+                        BSWG.game.xpInfo.inventoryRemove(it.id);
+                        it.ox = it.x;
+                        it.oy = it.y;
+                        it.or90 = it.r90;
+                        it.opage = it.page;
+                        this.dragIt = it;
+                        this.dragIt.canDrop = BSWG.game.xpInfo.inventoryBoxEmpty(this.curPage, it.x, it.y, it.w, it.h, it.rot90);
+                        this.dragIt.offx = (x1+w*0.5) - mx;
+                        this.dragIt.offy = (y1+h*0.5) - my;
+                        this.dragIt.mx = mx;
+                        this.dragIt.my = my;
+                    }
+                    break;
+                }
+            }
+        }
 
     },
 

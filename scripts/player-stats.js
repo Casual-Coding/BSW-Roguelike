@@ -272,21 +272,13 @@ BSWG.playerStats = function(load) {
         return this.addStore(comp, inc, page, damage);
     };
 
-    this.canAddInventoryAt = function (comp, page, x, y, rot90) {
-        rot90 = rot90 || false;
-        page = page || 0;
-        x = x || 0;
-        y = y || 0;
-        if (!comp) {
-            return false;
+    this.inventoryBoxEmpty = function (page, x, y, w, h, r90) {
+        if (r90) {
+            var t = w;
+            w = h;
+            h = t;
         }
-        if (comp && comp.hp <= 0) {
-            return false;
-        }
-        var dim = comp.getInvSize();
         var inv = this.inventory[page];
-        var w = rot90 ? dim.h : dim.w;
-        var h = rot90 ? dim.w : dim.h;
         for (var X=0; X<w; X++) {
             for (var Y=0; Y<h; Y++) {
                 var x1 = x + X, y1 = y + Y;
@@ -299,6 +291,38 @@ BSWG.playerStats = function(load) {
             }
         }
         return true;
+    };
+
+    this.canAddInventoryAt = function (comp, page, x, y, rot90) {
+        rot90 = rot90 || false;
+        page = page || 0;
+        x = x || 0;
+        y = y || 0;
+        if (!comp) {
+            return false;
+        }
+        if (comp && comp.hp <= 0) {
+            return false;
+        }
+        var dim = comp.getInvSize();
+        var w = rot90 ? dim.h : dim.w;
+        var h = rot90 ? dim.w : dim.h;
+        return this.inventoryBoxEmpty(page, x, y, w, h);
+    };
+
+    this.addInventoryItAt = function (it, page, x, y, rot90) {
+        var comp = {
+            getKey: function() {
+                return it.key;
+            },
+            getInvSize: function() {
+                return {
+                    w: it.w,
+                    h: it.h
+                };
+            }
+        };
+        return this.addInventoryAt (comp, page||0, x||0, y||0, rot90||false, it.damage||0);
     };
 
     this.addInventoryAt = function (comp, page, x, y, rot90, damage) {
