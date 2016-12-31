@@ -1326,7 +1326,7 @@ BSWG.control_Inventory = {
 
         var x1 = this.padding + this.p.x;
         var y1 = this.padding * 2 + this.tabHeight + this.p.y;
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         for (var x=0; x<this.invWidth; x++) {
             for (var y=0; y<this.invHeight; y++) {
                 ctx.fillRect(x1 + x * this.cellSize,
@@ -1356,7 +1356,7 @@ BSWG.control_Inventory = {
                 ctx.fillStyle = 'rgba(0, 127, 0, 0.35)';
                 ctx.fillRect(x1 + xc - w*0.5 + 1, y1 + yc - h*0.5 + 1, w-2, h-2);
             }
-            BSWG.renderCompIcon(ctx, it.key, x1 + xc, y1 + yc, this.cellSize * 0.9, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
+            BSWG.renderCompIcon(ctx, it.key, x1 + xc, y1 + yc, this.cellSize * 0.85, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
         }
 
         var bw = (this.w-this.padding)/4;

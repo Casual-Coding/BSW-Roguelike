@@ -85,9 +85,9 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     var g4 = Math.floor(Math.clamp((baseG||0.35) * 3.5, 0, 1)*255);
     var b4 = Math.floor(Math.clamp((baseB||0.3) * 3.5, 0, 1)*255);
 
-    var r3 = Math.floor(Math.clamp((baseR||0.3) * 1.35, 0, 1)*255);
-    var g3 = Math.floor(Math.clamp((baseG||0.3) * 1.35, 0, 1)*255);
-    var b3 = Math.floor(Math.clamp((baseB||0.3) * 1.35, 0, 1)*255);
+    var r3 = Math.floor(Math.clamp((baseR||0.3) * 1.5, 0, 1)*255);
+    var g3 = Math.floor(Math.clamp((baseG||0.3) * 1.5, 0, 1)*255);
+    var b3 = Math.floor(Math.clamp((baseB||0.3) * 1.5, 0, 1)*255);
 
     var c1 = 'rgb(' + r + ',' + g + ',' + b + ')';
     var c2 = 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
@@ -99,7 +99,7 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     ctx.scale(scale, scale);
     ctx.rotate(angle);
     for (var j=0; j<poly.length; j++) {
-        ctx.lineWidth = 2 / scale;
+        ctx.lineWidth = 3.5 / scale;
         ctx.strokeStyle = c3;
         ctx.beginPath();
         ctx.moveTo(poly[j][0].x, poly[j][0].y);
@@ -111,7 +111,7 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
     }
     for (var j=0; j<poly.length; j++) {
         ctx.fillStyle = j === 0 ? c1 : c2;
-        var a = Math.rotVec2(new b2Vec2(bnd[0], (bnd[1]+bnd[3])*0.5), -angle);
+        /*var a = Math.rotVec2(new b2Vec2(bnd[0], (bnd[1]+bnd[3])*0.5), -angle);
         var b = Math.rotVec2(new b2Vec2(bnd[2], (bnd[1]+bnd[3])*0.5), -angle);
         var grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         a = b = null;
@@ -124,7 +124,7 @@ BSWG.renderCompIcon = function(ctx, key, x, y, scale, angle, baseR, baseG, baseB
             grd.addColorStop(1, c4);
         }
         ctx.fillStyle = grd;
-        grd = null;
+        grd = null;*/
         ctx.beginPath();
         ctx.moveTo(poly[j][0].x, poly[j][0].y);
         for (var i=1; i<poly[j].length; i++) {

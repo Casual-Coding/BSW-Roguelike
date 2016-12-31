@@ -9,12 +9,11 @@ var BSWG = new function(){
         shadows: true
     };
     this.saveOptions = function() {
-        window.localStorage = window.localStorage || {};
-        window.localStorage.options = JSON.stringify(this.options);
+        BSWG.storage.save('options', this.options);
     };
     this.loadOptions = function() {
-        if (window.localStorage && window.localStorage.options) {
-            var opts = JSON.parse(window.localStorage.options);
+        if (BSWG.storage.hasKey('options')) {
+            var opts = BSWG.storage.load('options');
             for (var key in opts) {
                 this.options[key] = opts[key];
             }
@@ -46,6 +45,7 @@ var BSWG = new function(){
         'orb.js',
         'clouds.js',
         'special-projectile.js',
+        'storage.js',
        ['ai/ai_template.js', 'ai_Template'],
         'components/blaster.js',
         'components/minigun.js',

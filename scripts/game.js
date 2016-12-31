@@ -815,7 +815,7 @@ BSWG.game = new function(){
 
     this.saveGame = function () {
 
-        if (this.scene === BSWG.SCENE_GAME1 && window.localStorage && this.ccblock && !this.ccblock.destroyed) {
+        if (this.scene === BSWG.SCENE_GAME1 && this.ccblock && !this.ccblock.destroyed) {
 
             // SAVE
 
@@ -826,10 +826,9 @@ BSWG.game = new function(){
             obj.specials = BSWG.specialList.serialize();
             obj.buttonBinds = this.buttonBinds;
 
-            localStorage.game_save = JSON.stringify(obj);
+            BSWG.storage.save('game_save', obj);
 
             this.lastSave = Date.timeStamp();
-
             this.berrorMsg('Game saved.');
 
         }
@@ -1169,8 +1168,8 @@ BSWG.game = new function(){
                     this.newGameBtn.add();
                     this.loadGameBtn.add();
                     this.sandBoxBtn.add();
-                    this.loadGameBtn.color = localStorage.game_save ? [0.35, 0.6, 1., 1.0] : [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0];
-                    this.loadGameBtn.hoverColor = localStorage.game_save ? [0.95, 0.95, 0.95, 1.0] : [0.3, 0.3, 0.3, 1.0];
+                    this.loadGameBtn.color = BSWG.storage.hasKey('game_save') ? [0.35, 0.6, 1., 1.0] : [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0];
+                    this.loadGameBtn.hoverColor = BSWG.storage.hasKey('game_save') ? [0.95, 0.95, 0.95, 1.0] : [0.3, 0.3, 0.3, 1.0];
                 }
                 else {
                     var yoff = 42/(BSWG.render.viewport.h/1080);
@@ -1214,12 +1213,12 @@ BSWG.game = new function(){
                         w: 400, h: 70,
                         vpXCenter: true,
                         text: "Load Game",
-                        color: localStorage.game_save ? [0.35, 0.6, 1., 1.0] : [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0],
-                        hoverColor: localStorage.game_save ? [0.95, 0.95, 0.95, 1.0] : [0.3, 0.3, 0.3, 1.0],
+                        color: BSWG.storage.hasKey('game_save') ? [0.35, 0.6, 1., 1.0] : [0.35*0.5, 0.6*0.5, 1.*0.5, 1.0],
+                        hoverColor: BSWG.storage.hasKey('game_save') ? [0.95, 0.95, 0.95, 1.0] : [0.3, 0.3, 0.3, 1.0],
                         noDestroy: true,
                         click: function (me) {
-                            if (localStorage.game_save) {
-                                self.changeScene(BSWG.SCENE_GAME1, {load: JSON.parse(localStorage.game_save)}, '#000', 0.75);
+                            if (BSWG.storage.hasKey('game_save')) {
+                                self.changeScene(BSWG.SCENE_GAME1, {load: BSWG.storage.load('game_save')}, '#000', 0.75);
                             }
                         }
                     });
@@ -3409,8 +3408,8 @@ BSWG.game = new function(){
                 var t = Math.clamp(((time - self.deathTime) - 1.0) / 3.0, 0., 2.);
                 if (t >= 2 && !self.deathDone) {
                     self.deathDone = true;
-                    if (localStorage.game_save) {
-                        self.changeScene(BSWG.SCENE_GAME1, {load: JSON.parse(localStorage.game_save)}, '#000', 0.75);
+                    if (BSWG.storage.hasKey('game_save')) {
+                        self.changeScene(BSWG.SCENE_GAME1, {load: BSWG.storage.load('game_save')}, '#000', 0.75);
                     }
                     else {
                         self.changeScene(BSWG.SCENE_TITLE, {}, '#000', 0.75);

@@ -227,7 +227,7 @@ BSWG.playerStats = function(load) {
     }
 
     for (var key in load) {
-        this[key] = load[key];
+        this[key] = deepcopy(load[key]);
     }
 
     if (!this.pointBonus) {
@@ -239,7 +239,7 @@ BSWG.playerStats = function(load) {
         for (var key in load) {
             ret[key] = this[key];
         }
-        return ret;
+        return deepcopy(ret);
     };
 
     var sbt = BSWG.componentList.sbTypes;
