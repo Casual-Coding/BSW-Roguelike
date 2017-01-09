@@ -31,7 +31,7 @@ BSWG.storage = new (function(){
 
     this.save = function(key, value) {
         var file = path.join(appData, 'bswr-' + key + '.json');
-        fs.writeFile(file, JSON.stringify(value, null, 4), function (err) {
+        fs.writeFile(file, JSON.stringify(value), function (err) {
             if (err) {
                 console.info('Error saving file');
                 console.error(err);

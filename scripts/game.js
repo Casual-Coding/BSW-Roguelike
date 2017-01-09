@@ -109,7 +109,7 @@ BSWG.selection.prototype.update = function(dt, mousePos) {
             BSWG.componentList.weldGroup(group);
         }
 
-        if (!this.dragging && !this.draggingRot && (BSWG.input.MOUSE('left') || sellRotate) && !sellAdd && !sellRemove && this.sellC && this.sellRotC && (Math.distVec2(this.sellRotC, mousePos) < this.sellRotR || sellRotate)) {
+        if (!this.dragging && !this.draggingRot && sellRotate && !sellAdd && !sellRemove && this.sellC && this.sellRotC && (Math.distVec2(this.sellRotC, mousePos) < this.sellRotR || sellRotate)) {
             this.draggingRot = true;
             this.sellRotAStart = this.sellRotA;
             this.sellRotTotal = 0.0;
@@ -357,7 +357,7 @@ BSWG.selection.prototype.render = function(ctx, dt) {
         p2 = BSWG.render.project3D(new b2Vec2(this.sellRotC.x+this.sellRotR, this.sellRotC.y));
         r = Math.abs(p2.x - p3.x);
         
-        if (!this.sellHover) {
+        if (!this.sellHover && this.draggingRot) {
             ctx.fillStyle = this.draggingRot ? '#08f' : '#0f8';
             ctx.strokeStyle = ctx.fillStyle;
             ctx.beginPath();
@@ -366,6 +366,13 @@ BSWG.selection.prototype.render = function(ctx, dt) {
             ctx.fill();
             ctx.globalAlpha = this.sellRotHover ? 1.0 : 0.5;
             ctx.stroke();
+        }
+        else if (!this.sellHover) {
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#000';
+            ctx.font = '11px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillTextB('ALT to rotate', p3.x,p3.y);
         }
 
         if (!this.sellRotHover) {
@@ -1394,7 +1401,9 @@ BSWG.game = new function(){
                         me.selected = !me.selected;
                         self.editMode = me.selected;
                         if (self.editMode) {
-                            self.storeBtn.selected = self.storeMode = false;
+                            if (self.storeBtn) {
+                                self.storeBtn.selected = self.storeMode = false;
+                            }
                             self.showControls = false;
                             self.showControlsBtn.selected = false;
                             self.pushMode('edit');

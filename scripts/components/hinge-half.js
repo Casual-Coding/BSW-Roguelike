@@ -206,11 +206,6 @@ BSWG.component_HingeHalf = {
 
     update: function(dt) {
 
-        if (!this.sound && this.motor) {
-            this.sound = new BSWG.soundSample();
-            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
-        }
-
         if (this.dispKeys) {
             if (this.rotKey !== this.rotKeyAlt) {
                 this.dispKeys['rotate'][0] = BSWG.KEY_NAMES[this.rotKey].toTitleCase() + ' / ' + BSWG.KEY_NAMES[this.rotKeyAlt].toTitleCase();
@@ -236,14 +231,18 @@ BSWG.component_HingeHalf = {
             robj.joint.__ms *= 0.25;
         }
 
-        if (this.sound && this.onCC && robj && robj.objA && robj.objA.comp && robj.objA.comp.onCC && robj.objB && robj.objB.comp && robj.objB.comp.onCC && isFinite(robj.joint.__ms)) {
-            this.sound.volume(Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.025, 0, 1));
+        var hingeOn = this.onCC && robj && robj.objA && robj.objA.comp && robj.objA.comp.onCC && robj.objB && robj.objB.comp && robj.objB.comp.onCC && isFinite(robj.joint.__ms) && robj.joint.__ms;
+        if (!this.sound && this.motor && hingeOn) {
+            this.sound = new BSWG.soundSample();
+            this.sound.play('hinge', this.obj.body.GetWorldCenter().THREE(0.2), 0.1 * this.size, Math._random()*0.1+1.0/(this.size*0.5+0.5), true);
+        }
+        else if (this.sound && hingeOn) {
+            this.sound.volume(0.1 * this.size);//Math.clamp(Math.pow(robj.joint.__ms, 0.1)*0.025, 0, 1));
+            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
         }
         else if (this.sound) {
-            this.sound.volume(0);
-        }
-        if (this.sound) {
-            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+            this.sound.stop();
+            this.sound = null;
         }
     },
 

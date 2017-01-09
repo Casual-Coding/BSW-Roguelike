@@ -1950,7 +1950,7 @@ BSWG.componentList = new function () {
                 BSWG.render.setCustomCursor(true, BSWG.input.KEY_DOWN(BSWG.KEY.SHIFT) ? 6 : 3);
             }
         }
-        else if (BSWG.game.editMode && BSWG.game.selection && (BSWG.game.selection.sellHover || BSWG.game.selection.sellRotHover)) {
+        else if (BSWG.game.editMode && BSWG.game.selection && (BSWG.game.selection.sellHover)) {
             BSWG.render.setCustomCursor(true, 2);
         }
         else if (BSWG.game.storeMode && (BSWG.game.compPal.mouseInIt || BSWG.game.compPal.dragIt)) {

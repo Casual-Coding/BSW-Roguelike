@@ -285,13 +285,13 @@ BSWG.component_Shield = {
     update: function(dt) {
 
         if (!this.sound) {
-            this.sound = new BSWG.soundSample();
-            this.sound.play('shield-spin', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, 0.1, true);
+            //this.sound = new BSWG.soundSample();
+            //this.sound.play('shield-spin', this.obj.body.GetWorldCenter().THREE(0.2), 0.0, 0.1, true);
         }
         else {
-            this.sound.volume(Math.clamp(this.size/9*this.topRotSpeed*0.01, 0, 1));
-            this.sound.rate(Math.clamp(this.topRotSpeed*0.1/this.size, 0.1, 20));
-            this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
+            //this.sound.volume(Math.clamp(this.size/9*this.topRotSpeed*0.01, 0, 1));
+            //this.sound.rate(Math.clamp(this.topRotSpeed*0.1/this.size, 0.1, 20));
+            //this.sound.position(this.obj.body.GetWorldCenter().THREE(0.2));
         }
 
         if (this.dispKeys) {
