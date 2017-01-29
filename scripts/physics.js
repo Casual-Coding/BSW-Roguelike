@@ -809,26 +809,19 @@ BSWG.physics = new function(){
                                      compB ? compB.hp / compB.maxHP : 1.0);
             mwf *= (Math.pow(minHealth, 1/atts)-0.15);
             if (Math.max(tn, fn) > mwf) {
+                if (compA && compB && (compA.hp/compA.maxHP) < (compB.hp/compB.maxHP)) {
+                    compA.takeDamage(100000, compA.lastDamageSource);
+                }
+                else if (compA && compB && (compB.hp/compB.maxHP) < (compA.hp/compA.maxHP)) {
+                    compB.takeDamage(100000, compB.lastDamageSource);
+                }
                 this.welds[i].broken = true;
             }
-            /*if (this.welds[i].age > 10 && this.welds[i].age < 20 && !this.welds[i].revolute) {
-                var ref = this.welds[i].jointDef.referenceAngle;
-                var aref = this.welds[i].joint.GetBodyB().GetAngle() - this.welds[i].joint.GetBodyA().GetAngle();
-                var diff = Math.abs(Math.atan2(Math.sin(aref-ref), Math.cos(aref-ref)));
-                if (diff > (Math.PI/360.0)) {
-                    this.welds[i].broken = true;
-                }
-            }*/
             this.welds[i].age += 1;
         }
 
         this.physicsDT = dt;
-        //this.dtACC += dt;
-        //var count = Math.floor(this.dtACC / this.physicsDT);
-        //while (this.dtACC >= this.physicsDT) {
         this.world.Step(this.physicsDT, this.positionIterations, this.velocityIterations);
-        //    this.dtACC -= this.physicsDT;
-        //}
 
         if (!(this.framen % 4)) {
 

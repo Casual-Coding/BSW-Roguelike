@@ -346,7 +346,7 @@ BSWG.component = function (desc, args) {
     this.hp = this.maxHP;
     this.healHP = 0;
     this.destroyed = false;
-    this.pushAwayDone = true;
+    this.pushAwayDone = false;
 
     if (this.obj) {
         this.obj.comp = this;
@@ -379,6 +379,7 @@ BSWG.component = function (desc, args) {
 
     this.selected = false;
     this.dragging = false;
+    this.lastDamageSource = null;
 
     BSWG.componentList.add(this);
 
@@ -474,6 +475,8 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
     if (!this.onCC) {
         noMin = true;
     }
+
+    this.lastDamageSource = fromC;
 
     if (this.onCC && !disolve && this.onCC !== BSWG.game.ccblock && !BSWG.game.battleMode && fromC && fromC.onCC === BSWG.game.ccblock) {
         BSWG.game.battleMode = true;
@@ -581,7 +584,6 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
     }
     if (amt > 0 && this.hp <= 0 && !this.destroyed) {
 
-
         if (this.obj && this.obj.body) {
 
             var p = this.obj.body.GetWorldCenter();
@@ -608,14 +610,12 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
 
             var v = this.obj.body.GetLinearVelocity();
             var r = this.obj.radius;
-            if (this.type === 'cc') {
+            if (this.type === 'cc' || this.type === 'powercore') {
                 r *= 1.5;
             }
-            if (!disolve) {
-                if (!this.pushAwayDone) {
-                    this.pushAwayDone = true;
-                    BSWG.componentList.pushAwayFrom(p.clone(), r*2, this);
-                }
+            if (!disolve && !this.pushAwayDone && this.type === 'powercore') {
+                this.pushAwayDone = true;
+                BSWG.componentList.pushAwayFrom(p.clone(), r*4, this);
             }
             for (var i=0; i<(disolve ? 1 : 40); i++) {
                 var a = Math._random() * Math.PI * 2.0;
