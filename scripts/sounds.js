@@ -12,10 +12,10 @@ BSWG.soundBase = function (desc) {
         pos = pos || new THREE.Vector3(0, 0, 0);
         amp = (!amp && amp !== 0) ? 0.1 : amp;
         var panner = BSWG.music.audioCtx.createPanner();
-        panner.panningModel = 'HRTF';
+        panner.panningModel = 'equalpower';
         panner.distanceModel = 'inverse';
         panner.refDistance = 1;
-        panner.maxDistance = 100 * amp * 2.0;
+        panner.maxDistance = Math.max(0, 100 * amp * 2.0) + 0.1;
         panner.rolloffFactor = 1;
         panner.coneInnerAngle = 360;
         panner.coneOuterAngle = 0;
@@ -30,10 +30,10 @@ BSWG.soundBase = function (desc) {
         pos = pos || new THREE.Vector3(0, 0, 0);
         amp = (!amp && amp !== 0) ? 0.1 : amp;
         var panner = BSWG.music.audioCtx.createPanner();
-        panner.panningModel = 'HRTF';
+        panner.panningModel = 'equalpower';
         panner.distanceModel = 'inverse';
         panner.refDistance = 1;
-        panner.maxDistance = 10000 * amp * 2.0;
+        panner.maxDistance = Math.max(0, 10000 * amp * 2.0) + 0.1;
         panner.rolloffFactor = 0.01;
         panner.coneInnerAngle = 360;
         panner.coneOuterAngle = 0;
@@ -116,7 +116,7 @@ BSWG.soundSample = BSWG.soundBase({
         this.source = audioCtx.createBufferSource();
         this.source.loop = !!loop;
         this.source.buffer = BSWG.soundBuffers[name];
-        rate = Math.clamp(rate || 1, 0.1, 10.0);
+        rate = Math.clamp(rate || 1, 0.1, 10.0) * 0.925;
         this.source.playbackRate.value = rate;
 
         this.gain = audioCtx.createGain();
@@ -179,7 +179,7 @@ BSWG.soundSample = BSWG.soundBase({
     rate: function (val) {
         //try {
         if (this.playing && isFinite(val)) {
-            val = Math.clamp(val || 1, 0.1, 10.0);
+            val = Math.clamp(val || 1, 0.1, 10.0) * 0.925;
             if (!val || Math.abs(this.source.playbackRate.value - val) > 0.01) {
                 this.source.playbackRate.value = val;
             }
