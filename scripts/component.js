@@ -615,7 +615,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
             }
             if (!disolve && !this.pushAwayDone && this.type === 'powercore') {
                 this.pushAwayDone = true;
-                BSWG.componentList.pushAwayFrom(p.clone(), r*4, this);
+                BSWG.componentList.pushAwayFrom(p.clone(), r, this);
             }
             for (var i=0; i<(disolve ? 1 : 40); i++) {
                 var a = Math._random() * Math.PI * 2.0;

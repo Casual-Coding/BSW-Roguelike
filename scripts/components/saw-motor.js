@@ -89,7 +89,7 @@ BSWG.component_SawMotor = {
 
         this.obj = BSWG.physics.createObject('polygon', args.pos, args.angle || 0, {
             verts:   verts,
-            density: 3.0,
+            density: 6.0,
             smooth:  0.05
         });
 
@@ -264,7 +264,7 @@ BSWG.component_SawMotor = {
         if (robj) {
             if (keys[this.rotKey] || keys[this.rotKeyAlt]) {
                 if (this.onCC && this.onCC.useEnergy(this.energySecond * BSWG.render.dt)) {
-                    this.motorAccel = 33.0 * ((this.onCC && this.onCC.spinUp) ? 2 : 1) * this.empDamp;
+                    this.motorAccel = 65.0 * ((this.onCC && this.onCC.spinUp) ? 2 : 1) * this.empDamp;
                 }
             }
         }
