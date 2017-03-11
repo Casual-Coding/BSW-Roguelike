@@ -34,27 +34,25 @@ void main() {
     vec4 nm2;
 
     if (extra.z < 0.5) {
-        nm2 = texture2D(texNm, gl_FragCoord.xy/1024.0);
+        nm2 = texture2D(texNm, gl_FragCoord.xy/218.0);
     }
     else {
-        nm2 = texture2D(texNm, vec2(p.x, p.y/aspect)/2.5+vec2(0.5, 0.5));
+        nm2 = texture2D(texNm, vec2(p.x, p.y/aspect)*4.0+vec2(0.5, 0.5));
     }
 
     vec3 tNormal = normalize(nm.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
     vec3 tNormal2 = normalize(nm2.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
-    tNormal.z = -tNormal.z;
-    tNormal2.z = -tNormal2.z;
-    tNormal = normalize(tNormal*1.1 + tNormal2 * 0.35);
+    tNormal = reflect(normalize((tNormal2+tNormal)*0.5), normalize(tNormal));
     vec3 lightDir = normalize(vec3(1.2, 0.5, 0.0) - vec3(p.x, p.y, nm.a));
 
-    float l0 = (nm.a * 0.75 + nm2.a * 0.25) * 0.25 + 0.75;
-    float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 0.7);
+    float l0 = (nm.a * 0.5 + nm2.a * 0.4) * 0.5 + 0.2;
+    float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 1.7);
     float l = min(l0 * (l1*0.8+0.6) * 1.0, 1.0) + 0.2;
     l = (pow(max(l, 0.0), 1.5) + 0.2) * nm.a * 0.5;
 
     nm2.a = pow(max(nm2.a, 0.0), 6.0);
 
-    gl_FragColor = vec4(l+nm2.a * l * 0.05, l-nm2.a * l * 0.155, l-nm2.a * l * 0.2, min(nm.a*16.0, 1.0));
-    gl_FragColor = clamp(clr * gl_FragColor, 0., 1.);
+    gl_FragColor = vec4(l, l, l, min(nm.a*16.0, 1.0));
+    gl_FragColor = clamp((clr+vec4(1.,1.,1.,1.)) * 0.5 * gl_FragColor, 0., 1.);
 
 }

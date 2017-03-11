@@ -258,7 +258,7 @@ BSWG.render = new function() {
         this.effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
         this.effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight );
         this.composer.addPass( this.effectFXAA );
-        this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.4, 0.4, 0.85);
+        this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.3, 0.75);
         this.composer.addPass( this.bloomPass );
         this.copyShader = new THREE.ShaderPass(THREE.CopyShader);
         this.copyShader.renderToScreen = true;

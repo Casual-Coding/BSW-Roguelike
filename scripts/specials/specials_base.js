@@ -745,6 +745,8 @@ BSWG.renderSpecialIcon = function(ctx, key, x, y, scale, angle, who, nobg) {
 
     var oAlpha = ctx.globalAlpha;
 
+    ctx.globalAlpha *= 0.8;
+
     if (who && !nobg) {
         if (!who.hasSpecial(key)) {
             saturation = 0.0;

@@ -470,6 +470,73 @@ switch (type) {
         }
 
         break;
+
+    case 'death-metal-hud':
+
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                var h = 0.0;
+                h += Math.pow(2, -1) * Math.random2d(Math.floor(x/64), Math.floor(y/64));
+                h += Math.pow(2, -2) * Math.random2d(Math.floor(x/23), Math.floor(y/23));
+                //h += Math.pow(2, -4) * Math.random2d(Math.floor(x/6), Math.floor(y/6));
+                hmap.set(x, y, h);
+                bmap.set(x, y, h)
+            }
+        }
+
+        for (var i=0; i<75*Math.pow(sz/256, 1.5); i++) {
+
+            var w = Math.pow(Math.random(), 3.0) * 3 + 1;
+
+            var x = Math.floor(Math.random() * sz / (8)) * (8);
+            var y = Math.floor(Math.random() * sz / (8)) * (8);
+
+            w = (w-1) * 2 + 1;
+
+            var r = Math.random();
+            var dx = r <  0.5 ? (Math.random() < 0.5 ? -1 : 1) : 0;
+            var dy = r >= 0.5 ? (Math.random() < 0.5 ? -1 : 1) : 0;
+            
+            var dent = Math.random() < 0.2 ? -1 : 1;
+
+            var len = Math.floor(Math.pow(Math.random(),0.1)*sz);
+
+            for (var j=0; j<len; j++) {
+
+                for (var w0=0; w0<=w; w0++) {
+
+                    var x0 = x + dx * j + w0 * dy,
+                        y0 = y + dy * j + w0 * dx;
+                    var x1 = x + dx * j - w0 * dy,
+                        y1 = y + dy * j - w0 * dx;
+                    var h = w/(w0+1)*0.05;
+                    if (dent < 0) {
+                        h *= -0.5;
+                        hmap.set(x0, y0, Math.min(hmap.get(x0, y0), h));
+                        hmap.set(x1, y1, Math.min(hmap.get(x1, y1), h));
+                        bmap.set(x0, y0, Math.min(hmap.get(x0, y0), h));
+                        bmap.set(x1, y1, Math.min(hmap.get(x1, y1), h));
+                    }
+                    else {
+                        h += 1.0;
+                        hmap.set(x0, y0, Math.max(hmap.get(x0, y0), h));
+                        hmap.set(x1, y1, Math.max(hmap.get(x1, y1), h));
+                        bmap.set(x0, y0, Math.max(hmap.get(x0, y0), h));
+                        bmap.set(x1, y1, Math.max(hmap.get(x1, y1), h));
+                    }
+                }
+            }
+
+        }
+
+        for (var x=0; x<sz; x++) {
+            for (var y=0; y<sz; y++) {
+                bmap.set(x, y, Math.pow(bmap.get(x, y), 1.0))
+            }
+        }
+
+        break;
+
     default:
         break;
 }

@@ -1805,6 +1805,7 @@ BSWG.game = new function(){
                                         var key = self.ccblock.equippedSpecialNo(idx);
                                         if (key) {
                                             var scale = Math.min(w, h) * 0.95;
+                                            ctx.globalAlpha = 0.8;
                                             BSWG.renderSpecialIcon(ctx, key, x+w/2, y+h/2, scale, 0.0 + ((hover && self.ccblock.canUseSpecial(key)) || BSWG.specialList.curCont() === key ? BSWG.render.time : 0.0), self.ccblock);
                                             ctx.fillStyle = self.ccblock.canUseSpecial(key) ? '#99f' : '#45458f';
                                             ctx.strokeStyle = '#000';
@@ -1812,6 +1813,7 @@ BSWG.game = new function(){
                                             ctx.textAlign = 'right';
                                             ctx.fillTextB(BSWG.specialsInfo[key].energy + '', x+w-7, y+h-7);
                                             ctx.textAlign = 'left';
+                                            ctx.globalAlpha = 1.0;
                                         }
                                     }
                                 };

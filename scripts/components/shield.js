@@ -268,12 +268,10 @@ BSWG.component_Shield = {
         if (!this.shieldObj) {
             return;
         }
-        else if (this.shieldObj && !this.shieldObj.body) {
-            this.shieldObj = null;
-            return;
+        
+        if (this.shieldObj.body) {
+            BSWG.physics.removeObject(this.shieldObj);
         }
-
-        BSWG.physics.removeObject(this.shieldObj);
 
         this.shieldObj = null;
         this.shieldWeld = null;
@@ -281,7 +279,9 @@ BSWG.component_Shield = {
         if (this.udsound) {
             this.udsound.stop();
         }
-        this.udsound = new BSWG.soundSample().play('shield-down', this.p().THREE(0.2), 1.0*this.size, (2.0+Math._random()*0.1+0.35)/this.size);
+        if (this.p()) {
+            this.udsound = new BSWG.soundSample().play('shield-down', this.p().THREE(0.2), 1.0*this.size, (2.0+Math._random()*0.1+0.35)/this.size);
+        }
 
         BSWG.componentList.removeQueryable(this, this.shmesh, true);  
     },
