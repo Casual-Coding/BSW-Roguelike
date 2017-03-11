@@ -131,12 +131,15 @@ BSWG.xpInfo = {
     }
 };
 
+BSWG.xpiLastLevel = 0;
+
 (function() {
     for (var i=0; i<100; i++) {
         if (BSWG.xpInfo[i]) {
             BSWG.xpInfo[i].xp = (BSWG.xpInfo[i-1] ? BSWG.xpInfo[i-1].xp : 0) + BSWG.xpInfo[i].xpi;
             BSWG.xpInfo[i].points = (BSWG.xpInfo[i-1] ? BSWG.xpInfo[i-1].points : 0) + BSWG.xpInfo[i].pointsi;
             BSWG.enemyLevelInfo[i].buff = BSWG.xpInfo[i].buff + (BSWG.enemyLevelInfo[i].buffi || 0);
+            BSWG.xpiLastLevel = Math.max(BSWG.xpiLastLevel, i);
         }
     }
 })();
@@ -229,6 +232,9 @@ BSWG.playerStats = function(load) {
     for (var key in load) {
         this[key] = deepcopy(load[key]);
     }
+    for (var key in this.invMap) {
+        this.invMap[key].level = this.invMap[key].level || 0;
+    }
 
     if (!this.pointBonus) {
         this.pointBonus = 0;
@@ -320,6 +326,9 @@ BSWG.playerStats = function(load) {
                     w: it.w,
                     h: it.h
                 };
+            },
+            level: function() {
+                return it.level || 0;
             }
         };
         return this.addInventoryAt (comp, page||0, x||0, y||0, rot90||false, it.damage||0);
@@ -357,7 +366,8 @@ BSWG.playerStats = function(load) {
             page: page,
             r90: rot90 || false,
             key: comp.getKey(),
-            damage: damage
+            damage: damage,
+            level: comp.level() || 0
         };
 
         this.invMap[wrap.id] = wrap;
@@ -549,8 +559,9 @@ BSWG.playerStats = function(load) {
         return Math.max(0, this.points() - this.pointsUsed());
     };
 
-    this.buff = function() {
-        var xpi = BSWG.xpInfo[this.level];
+    this.buff = function(compLevel) {
+        var level = Math.clamp((compLevel || compLevel === 0) ? compLevel : this.level, 0, BSWG.xpiLastLevel);
+        var xpi = BSWG.xpInfo[level];
         return xpi.buff;
     };
 

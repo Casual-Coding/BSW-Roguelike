@@ -230,7 +230,7 @@ BSWG.uiPlate3D = function(hudNM, hudHM, x, y, w, h, z, clr, split, moving) {
             this.split ? 1.0 : 0.0,
             flag ? 1.0 : 0.0,
             moving ? 1.0 : 0.0,
-            0.0
+            this.hudMat.uniforms.extra.value.w
         );
         //this.hudMat.needsUpdate = true;
     }
@@ -299,6 +299,7 @@ BSWG.uiPlate3D = function(hudNM, hudHM, x, y, w, h, z, clr, split, moving) {
 
             this.hudMat.uniforms.scale.value.set(this.w/vp.w, this.h/vp.h, x/vp.w*2.0, y/vp.h*2.0);
             this.hudMat.uniforms.vp.value.set(this.w, this.h);
+            this.hudMat.uniforms.extra.value.w = BSWG.render.time;
             //this.hudMat.needsUpdate = true;
         }
 
@@ -1357,6 +1358,12 @@ BSWG.control_Inventory = {
                 ctx.fillRect(x1 + xc - w*0.5 + 1, y1 + yc - h*0.5 + 1, w-2, h-2);
             }
             BSWG.renderCompIcon(ctx, it.key, x1 + xc, y1 + yc, this.cellSize * 0.85, it.r90 ? Math.PI/2 : 0, clr[0]*light, clr[1]*light, clr[2]*light);
+            ctx.fillStyle = (BSWG.game.ccblock && Math.floor(it.level) <= BSWG.game.ccblock.level()) ? '#4f4' : '#f44';
+            ctx.strokeStyle = '#000';
+            ctx.font = (this.tabHeight/3.5)+'px Orbitron';
+            ctx.textAlign = 'right';
+            ctx.fillTextB("" + it.level, x1 + xc + w * 0.5 - 3, y1 + yc - h * 0.5 + (this.tabHeight/3.5));
+            ctx.textAlign = 'left';
         }
 
         var bw = (this.w-this.padding)/4;
@@ -1433,13 +1440,16 @@ BSWG.control_Inventory = {
             ctx.fillTextB("Damage: " + Math.floor(damage * 100) + '%', x+w-10, y+6+13+13);
 
             if (BSWG.game.map && BSWG.game.xpInfo) {
-                if (BSWG.game.map.minLevelComp(it.key) > BSWG.game.xpInfo.level) {
-                    ctx.textAlign = 'center';
-                    ctx.fillStyle = '#f00';
-                    ctx.strokeStyle = '#000';
-                    ctx.font = '14px Orbitron';
-                    ctx.fillTextB('Level ' + BSWG.game.map.minLevelComp(it.key) + ' required.', x + w*0.5, y + h - 8);
+                if (Math.floor(it.level) > BSWG.game.xpInfo.level) {
+                    ctx.fillStyle = '#f44';
                 }
+                else {
+                    ctx.fillStyle = '#4f4';
+                }
+                ctx.textAlign = 'left';
+                ctx.strokeStyle = '#000';
+                ctx.font = '12px Orbitron';
+                ctx.fillTextB('Level ' + it.level, x+9, y+6+14+14);
             }
 
             if (BSWG.game.map && BSWG.game.inZone && BSWG.game.inZone.compValLookup) {
@@ -1581,6 +1591,7 @@ BSWG.control_Inventory = {
                         args.pos = this.dragIt.wp.clone();
                         args.angle = this.dragIt.r90 ? -Math.PI/2 : 0;
                         args.damage = this.dragIt.damage;
+                        args.compLevel = this.dragIt.level;
                         var comp = new BSWG.component(arr[2], args);
                         if (self.scene === BSWG.SCENE_GAME1) {
                             self.xpInfo.addStore(comp, -1);

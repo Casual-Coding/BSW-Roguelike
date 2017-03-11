@@ -338,51 +338,6 @@ BSWG.component_CommandCenter = {
 
     },
 
-    level: function() {
-        if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
-            if (BSWG.game.xpInfo) {
-                return BSWG.game.xpInfo.level;
-            }
-            else {
-                return 0;
-            }
-        }
-        else {
-            return this.enemyLevel || 0;
-        }
-    },
-
-    buff: function() {
-        if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
-            if (BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.battleMode && BSWG.xpInfo[BSWG.ai.playerTestLevel]) {
-                return BSWG.xpInfo[BSWG.ai.playerTestLevel].buff;
-            }
-            else if (BSWG.game.xpInfo) {
-                return BSWG.game.xpInfo.buff();
-            }
-            else {
-                return 0;
-            }
-        }
-        else {
-            var level = this.enemyLevel || 0;
-            var inc = 0;
-            var eli1 = BSWG.enemyLevelInfo[Math.floor(level)];
-            var eli2 = BSWG.enemyLevelInfo[Math.floor(level)+1];
-
-            if (eli1 && eli2) {
-                var t = level - Math.floor(level);
-                return (eli1.buff || 0) * (1-t) + (eli2.buff || 0) * (t) + inc;
-            }
-            else if (eli1) {
-                return (eli1.buff || 0) + inc;
-            }
-            else {
-                return 0 + inc;
-            }
-        }
-    },
-
     destroy: function() {
 
         if (this.sound) {

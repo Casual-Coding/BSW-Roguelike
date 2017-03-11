@@ -806,6 +806,14 @@ BSWG.game = new function(){
                             window.setTimeout(function(ais){
                                 return function() {
                                     ais.reloadAI();
+                                    if (BSWG.game.scene === BSWG.SCENE_GAME1) {
+                                        for (var i=0; i<BSWG.componentList.compList.length; i++) {
+                                            var C = BSWG.componentList.compList[i];
+                                            if (C && ais && C.onCC === ais && C.type !== 'cc') {
+                                                C.compLevel = Math.max(0, Math.floor((aiship.enemyLevel + Math.random()*0.5-0.25)*10)/10);
+                                            }
+                                        }
+                                    }
                                 };
                             }(aiship), 111);
                         }

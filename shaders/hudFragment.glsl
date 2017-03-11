@@ -42,8 +42,10 @@ void main() {
 
     vec3 tNormal = normalize(nm.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
     vec3 tNormal2 = normalize(nm2.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
-    tNormal = reflect(normalize((tNormal2+tNormal)*0.5), normalize(tNormal));
-    vec3 lightDir = normalize(vec3(1.2, 0.5, 0.0) - vec3(p.x, p.y, nm.a));
+    vec2 V = vec2(pow(sin(gl_FragCoord.x/32.+extra.w/8.),2.0), pow(sin(gl_FragCoord.y/32.+extra.w/8.),2.0));
+    float Vt = V.x * V.y * 0.5 + 0.5;
+    tNormal = reflect(normalize(tNormal2*Vt+tNormal*(1.-Vt)), normalize(tNormal));
+    vec3 lightDir = normalize(vec3(1.2+V.x, 0.5+V.y, 0.0) - vec3(p.x, p.y, nm.a));
 
     float l0 = (nm.a * 0.5 + nm2.a * 0.4) * 0.5 + 0.2;
     float l1 = pow(max(dot(normalize(tNormal), lightDir), 0.0), 1.7);
@@ -53,6 +55,6 @@ void main() {
     nm2.a = pow(max(nm2.a, 0.0), 6.0);
 
     gl_FragColor = vec4(l, l, l, min(nm.a*16.0, 1.0));
-    gl_FragColor = clamp((clr+vec4(1.,1.,1.,1.)) * 0.5 * gl_FragColor, 0., 1.);
+    gl_FragColor = clamp((clr+vec4(1.,1.,1.,1.)) * Vt * gl_FragColor, 0., 1.);
 
 }

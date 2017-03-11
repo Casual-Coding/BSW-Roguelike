@@ -336,6 +336,11 @@ BSWG.component = function (desc, args) {
 
     this.massFactor = 1.0;
 
+    this.compLevel = 0;
+    if (args && args.compLevel) {
+        this.compLevel = args.compLevel;
+    }
+
     BSWG.blockPolySmooth = null;
     this.init(args);
 
@@ -390,6 +395,56 @@ BSWG.component = function (desc, args) {
 
     if (args.damage > 0) {
         this.hp = (1 - Math.clamp(args.damage, 0.0, 0.9)) * this.maxHP;
+    }
+};
+
+BSWG.component.prototype.level = function() {
+    if (this.type === 'cc') {
+        if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
+            if (BSWG.game.xpInfo) {
+                return (this.compLevel = BSWG.game.xpInfo.level);
+            }
+            else {
+                return (this.compLevel = 0);
+            }
+        }
+        else {
+            return (this.compLevel = (this.enemyLevel || 0));
+        }
+    }
+    else {
+        return (this.compLevel = (this.compLevel || 0));
+    }
+};
+
+BSWG.component.prototype.buff = function() {
+    if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
+        if (BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.battleMode && BSWG.xpInfo[BSWG.ai.playerTestLevel]) {
+            return BSWG.xpInfo[BSWG.ai.playerTestLevel].buff;
+        }
+        else if (BSWG.game.xpInfo) {
+            return BSWG.game.xpInfo.buff(this.type !== 'cc' ? this.compLevel : null);
+        }
+        else {
+            return 0;
+        }
+    }
+    else {
+        var level = this.enemyLevel || 0;
+        var inc = 0;
+        var eli1 = BSWG.enemyLevelInfo[Math.floor(level)];
+        var eli2 = BSWG.enemyLevelInfo[Math.floor(level)+1];
+
+        if (eli1 && eli2) {
+            var t = level - Math.floor(level);
+            return (eli1.buff || 0) * (1-t) + (eli2.buff || 0) * (t) + inc;
+        }
+        else if (eli1) {
+            return (eli1.buff || 0) + inc;
+        }
+        else {
+            return 0 + inc;
+        }
     }
 };
 
@@ -514,9 +569,8 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
 
         if (this.onCC && !isFriendly) {
             // Level bias
-            var enemyCC = fromC ? fromC.onCC : null;
-            var enemyBuff = enemyCC ? enemyCC.buff() : this.onCC.buff();
-            var myBuff = this.onCC.buff();
+            var enemyBuff = fromC ? fromC.buff() : this.buff();
+            var myBuff = this.buff();
             amt *= BSWG.adBias(myBuff, enemyBuff);
 
             // Weight bias
@@ -732,13 +786,23 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
         return;
     }
 
-    if (!this.onCC && this.type !== 'missile' && BSWG.game.editMode && !this.canEquip && ('minLevelEquip' in this)) {
+    if (!this.onCC && this.type !== 'missile' && BSWG.game.editMode && !this.canEquip && BSWG.game.ccblock) {
         ctx.font = '15px Orbitron';
         ctx.fillStyle = '#f00';
         ctx.strokeStyle = '#000';
         ctx.textAlign = 'center';
         var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
-        ctx.fillTextB("Lvl. " + this.minLevelEquip, p.x, p.y+7);
+        ctx.fillTextB("lv. " + this.level(), p.x, p.y+7);
+        ctx.textAlign = 'left';
+        p = null;
+    }
+    else if (this.type !== 'missile' && BSWG.game.storeMode && BSWG.game.ccblock && BSWG.game.scene === BSWG.SCENE_GAME1) {
+        ctx.font = '15px Orbitron';
+        ctx.fillStyle = this.canEquip ? '#4f4' : '#f44';
+        ctx.strokeStyle = '#000';
+        ctx.textAlign = 'center';
+        var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
+        ctx.fillTextB("lv. " + this.level(), p.x, p.y+7);
         ctx.textAlign = 'left';
         p = null;
     }
@@ -1099,7 +1163,7 @@ BSWG.component.prototype.baseUpdate = function(dt) {
     }
 
     if (BSWG.game.xpInfo && ('minLevelEquip' in this)) {
-        if (this.minLevelEquip > BSWG.game.xpInfo.level && !this.onCC) {
+        if (Math.floor(this.level()) > BSWG.game.xpInfo.level && !this.onCC) {
             this.canEquip = false;
         }
     }
@@ -2715,6 +2779,7 @@ BSWG.componentList = new function () {
                 var key = C.serialize[j];
                 OC.args[key] = C[key];
             }
+            OC.args.compLevel = C.compLevel || 0;
 
             OC.welds = [];
             if (C.welds) {
