@@ -1732,10 +1732,17 @@ BSWG.componentList = new function () {
 
         this.playerComps.length = 0;
 
-        var len = this.compList.length;
+        var len = this.compRemove.length;
+        for (var i=0; i<len; i++) {
+            this.remove(this.compRemove[i]);
+        }
+        this.compRemove.length = 0;
+
+        len = this.compList.length;
         for (var i=0; i<len; i++) {
 
             var C = this.compList[i];
+
             var p = C.obj.body.GetWorldCenter();
             var r = Math.max(C.obj.radius, C.shieldR||0) * 1.25;
             var x1 = this.hashXY(p.x - r), y1 = this.hashXY(p.y - r),

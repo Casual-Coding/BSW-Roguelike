@@ -268,6 +268,10 @@ BSWG.component_Shield = {
         if (!this.shieldObj) {
             return;
         }
+        else if (this.shieldObj && !this.shieldObj.body) {
+            this.shieldObj = null;
+            return;
+        }
 
         BSWG.physics.removeObject(this.shieldObj);
 
