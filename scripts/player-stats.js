@@ -561,8 +561,19 @@ BSWG.playerStats = function(load) {
 
     this.buff = function(compLevel) {
         var level = Math.clamp((compLevel || compLevel === 0) ? compLevel : this.level, 0, BSWG.xpiLastLevel);
-        var xpi = BSWG.xpInfo[level];
-        return xpi.buff;
+        var l0 = Math.floor(level), l1 = Math.floor(level) + 1;
+        var xp0 = BSWG.xpInfo[l0];
+        var xp1 = BSWG.xpInfo[l1];
+        if (!xp0) {
+            return 0;
+        }
+        else if (!xp1) {
+            return xp0.buff;
+        }
+        else {
+            var t = level - l0;
+            return xp0.buff * (1-t) + xp1.buff * t;
+        }
     };
 
     this.usePoint = function (on, ccblock) {

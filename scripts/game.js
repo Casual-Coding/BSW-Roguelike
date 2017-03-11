@@ -2102,7 +2102,7 @@ BSWG.game = new function(){
             if ((ctime - self.lastNote) > (60/self.musicBPM)*0.5) {
                 Math.seedrandom(Math.floor((self.noteIndex%8)/4) + Math.floor(time/(60/self.musicBPM*16)));
                 if (self.scene === BSWG.SCENE_TITLE || (self.ccblock && !self.ccblock.destroyed)) {
-                    new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
+                    new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, -5 + Math.floor(Math.random()*8) + 3 * (self.noteIndex%3), 1, musicHappy, nextBeat, ((self.inZone ? self.inZone.id : 0) % 12) - 6);
                 }
                 new BSWG.noteSample().play((self.scene === BSWG.SCENE_TITLE || self.bossFight ? 0.01 : 0.0035) * 3.25, 0, 1, musicHappy, nextBeat, -12, 'kick');
                 if (self.scene === BSWG.SCENE_TITLE || self.battleMode) {

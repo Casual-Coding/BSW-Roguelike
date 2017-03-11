@@ -399,6 +399,9 @@ BSWG.component = function (desc, args) {
 };
 
 BSWG.component.prototype.level = function() {
+    if (this.compLevel) {
+        this.compLevel = Math.floor(this.compLevel * 10) / 10;
+    }
     if (this.type === 'cc') {
         if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
             if (BSWG.game.xpInfo) {
@@ -418,19 +421,19 @@ BSWG.component.prototype.level = function() {
 };
 
 BSWG.component.prototype.buff = function() {
-    if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
+    if (BSWG.game.ccblock && this.onCC && this.onCC.id === BSWG.game.ccblock.id) {
         if (BSWG.game.scene === BSWG.SCENE_GAME2 && BSWG.game.battleMode && BSWG.xpInfo[BSWG.ai.playerTestLevel]) {
             return BSWG.xpInfo[BSWG.ai.playerTestLevel].buff;
         }
         else if (BSWG.game.xpInfo) {
-            return BSWG.game.xpInfo.buff(this.type !== 'cc' ? this.compLevel : null);
+            return BSWG.game.xpInfo.buff(this.level());
         }
         else {
             return 0;
         }
     }
     else {
-        var level = this.enemyLevel || 0;
+        var level = this.level();
         var inc = 0;
         var eli1 = BSWG.enemyLevelInfo[Math.floor(level)];
         var eli2 = BSWG.enemyLevelInfo[Math.floor(level)+1];
@@ -786,25 +789,29 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
         return;
     }
 
-    if (!this.onCC && this.type !== 'missile' && BSWG.game.editMode && !this.canEquip && BSWG.game.ccblock) {
-        ctx.font = '15px Orbitron';
+    var showingLevel = false;
+
+    if (!this.onCC && this.type !== 'missile' && this.type !== 'cc' && BSWG.game.editMode && !this.canEquip && BSWG.game.ccblock) {
+        ctx.font = '12px Orbitron';
         ctx.fillStyle = '#f00';
         ctx.strokeStyle = '#000';
         ctx.textAlign = 'center';
         var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
-        ctx.fillTextB("lv. " + this.level(), p.x, p.y+7);
+        ctx.fillTextB("l. " + this.level(), p.x, p.y+7);
         ctx.textAlign = 'left';
         p = null;
+        showingLevel = true;
     }
-    else if (this.type !== 'missile' && BSWG.game.storeMode && BSWG.game.ccblock && BSWG.game.scene === BSWG.SCENE_GAME1) {
-        ctx.font = '15px Orbitron';
+    else if (this.type !== 'missile' && this.type !== 'cc' && (BSWG.game.storeMode || BSWG.game.editMode) && BSWG.game.ccblock && BSWG.game.scene === BSWG.SCENE_GAME1) {
+        ctx.font = '12px Orbitron';
         ctx.fillStyle = this.canEquip ? '#4f4' : '#f44';
         ctx.strokeStyle = '#000';
         ctx.textAlign = 'center';
         var p = BSWG.render.project3D(this.obj.body.GetWorldCenter(), 0.0);
-        ctx.fillTextB("lv. " + this.level(), p.x, p.y+7);
+        ctx.fillTextB("l. " + this.level(), p.x, p.y+7);
         ctx.textAlign = 'left';
         p = null;
+        showingLevel = true;
     }
 
     if (this.dispKeys && BSWG.game.showControls && this.onCC === BSWG.game.ccblock) {
@@ -924,6 +931,9 @@ BSWG.component.prototype.baseRenderOver = function(ctx, cam, dt) {
         var sz = Math.max(BSWG.render.viewport.w, BSWG.render.viewport.h) / 150;
         ctx.globalAlpha = Math.clamp(this.orphanTimeLeft, 0, 1) * (1 - Math.clamp((this.orphanTimeLeft-30), 0, 1));
         var t = this.orphanTimeLeft / BSWG.orphanTimeLive;
+        if (showingLevel) {
+            p.y += 15;
+        }
         ctx.fillStyle = 'rgba(' + Math.floor((1-t)*255) + ',' + Math.floor(Math.pow(t, 0.25)*255) + ',92,1)';
         ctx.strokeStyle = 'rgba(0,0,0,0.5)';
         ctx.font = sz + 'px Orbitron';
