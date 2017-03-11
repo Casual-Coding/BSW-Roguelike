@@ -402,6 +402,9 @@ BSWG.component.prototype.level = function() {
     if (this.compLevel) {
         this.compLevel = Math.floor(this.compLevel * 10) / 10;
     }
+    if (BSWG.game.scene !== BSWG.SCENE_GAME1 & this.onCC && this.type !== 'cc') {
+        this.compLevel = this.onCC.level();
+    }
     if (this.type === 'cc') {
         if (BSWG.game.ccblock && this.id === BSWG.game.ccblock.id) {
             if (BSWG.game.xpInfo) {
