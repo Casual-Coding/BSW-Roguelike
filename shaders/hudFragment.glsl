@@ -34,15 +34,17 @@ void main() {
     vec4 nm2;
 
     if (extra.z < 0.5) {
-        nm2 = texture2D(texNm, gl_FragCoord.xy/218.0);
+        nm2 = texture2D(texNm, gl_FragCoord.xy*vec2(-1.,1.)/218.0);
     }
     else {
-        nm2 = texture2D(texNm, vec2(p.x, p.y/aspect)*4.0+vec2(0.5, 0.5));
+        nm2 = texture2D(texNm, vec2(p.x, p.y/aspect)*vec2(-1.,1.)*4.0+vec2(0.5, 0.5));
     }
+
+    vec4 lightNm = texture2D(texNm, gl_FragCoord.xy/1024.0+vec2(extra.w/1024., extra.w/1024.));
 
     vec3 tNormal = normalize(nm.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
     vec3 tNormal2 = normalize(nm2.xyz) * 2.0 - vec3(1.0, 1.0, 1.0);
-    vec2 V = vec2(pow(sin(gl_FragCoord.x/32.+extra.w/8.),2.0), pow(sin(gl_FragCoord.y/32.+extra.w/8.),2.0));
+    vec2 V = vec2(pow(sin(gl_FragCoord.x/32.+extra.w/8.+lightNm.x*lightNm.y),2.0), pow(sin(gl_FragCoord.y/32.+extra.w/8.+lightNm.y*lightNm.z),2.0));
     float Vt = V.x * V.y * 0.5 + 0.5;
     tNormal = reflect(normalize(tNormal2*Vt+tNormal*(1.-Vt)), normalize(tNormal));
     vec3 lightDir = normalize(vec3(1.2+V.x, 0.5+V.y, 0.0) - vec3(p.x, p.y, nm.a));

@@ -749,17 +749,25 @@ BSWG.control_UnlockTree = {
 
             var text = BSWG.specialsUnlockInfo[this.cats[i]].title;
             var clr = this.catClr[this.cats[i]];
-            ctx.fillStyle = clr;
+            
             ctx.globalAlpha = 0.75;
+            var grd = ctx.createLinearGradient(x, y+5, x, y+h-5);
+            grd.addColorStop(0, 'rgba(255,255,255,0)');
+            grd.addColorStop(0.1, clr);
+            grd.addColorStop(0.5, clr);
+            grd.addColorStop(0.75, clr);
+            grd.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grd;
             ctx.fillRect(x+5, y+5, w-10, h-10);
             ctx.globalAlpha = 1.0;
             ctx.fillStyle = '#fff';
             ctx.strokeStyle = '#000';
             ctx.textAlign = 'center';
             ctx.font = '14px Orbitron';
-            ctx.fillTextB(text, x+w/2, y+h/2+14/2);
+            ctx.fillTextB(text, x+w/2, y+h/2+14/2-14/2);
             ctx.textAlign = 'left';
             x += w;
+            grd = null;
         }
 
         //ctx.save();
