@@ -135,7 +135,7 @@ BSWG.component_Missile = {
             if (!this.exaust) {
                 this.exaust = new BSWG.exaust(this.obj.body, new b2Vec2(0.15, 0.0), 0.35, 0, 0.05, BSWG.exaustFire);
             }
-            this.exaust.strength = Math.clamp(this.fireT*3.0, 0, 1);
+            this.exaust.strength = Math.clamp(this.fireT*3.0 * (this.obj && this.obj.body && this.obj.body.__lastHit ? 0.0 : 1.0), 0, 1);
         }
 
         if (this.fireT > 0 && !this.obj.body.__lastHit && !this.nextDestroy && this.empDamp > 0.5) {
