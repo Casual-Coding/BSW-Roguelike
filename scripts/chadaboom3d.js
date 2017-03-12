@@ -377,9 +377,9 @@ chadaboom3D.prototype.add = function(posFn, sizeFn, res, life, attack, vel, noSu
             var v2 = {
                 x: vel.x + Math.cos(a) * len,
                 y: vel.y + Math.sin(a) * len,
-                z: vel.z
+                z: vel.z + Math.random() * 8 - 4
             };
-            this.add(pos, size*0.15*0.5, 32, life * 1.0, attack, v2, true);
+            this.add(pos, size*0.15*0.5, 32, life * 5.0, attack, v2, true);
             v2 = null;
         }
     }
