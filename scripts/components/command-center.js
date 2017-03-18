@@ -532,88 +532,10 @@ BSWG.component_CommandCenter = {
 
     },
 
-    aiPause: function(time) {
-
-        if (this.ai) {
-            if (!this.aiCmdBfr) {
-                this.aiCmdBfr = new Array();
-            }
-            this.aiCmdBfr.push({
-                type: 'pause',
-                t: time
-            });
-        }
-
-    },
-
-    aiHold: function(time) {
-
-        if (this.ai) {
-            if (!this.aiCmdBfr) {
-                this.aiCmdBfr = new Array();
-            }
-            this.aiCmdBfr.push({
-                type: 'hold',
-                t: time
-            });
-        }
-
-    },
-
-    aiSub: function(time, fn) {
-
-        if (this.ai) {
-            if (!this.aiCmdBfr) {
-                this.aiCmdBfr = new Array();
-            }
-            this.aiCmdBfr.push({
-                type: 'sub',
-                fn: fn,
-                t: time,
-                t0: 0.0
-            });
-        }
-
-    },
-
     updateAI: function(dt) {
 
-        if (this.aiLoadID) {
-
-            try {
-                var ai = BSWG.newAI[this.aiLoadID];
-                if (ai) {
-                    try {
-                        BSWG.newAI[this.aiLoadID] = null;
-                        delete BSWG.newAI[this.aiLoadID];
-                        this.aiLoadID = null;
-                        var head = document.getElementsByTagName("head")[0];
-                        head.removeChild(this.aiScriptTag);
-                        this.aiScriptTag = null;
-                    } catch (e) { }
-                    this.ai = new BSWG.aiBase(this);
-                    for (var key in ai) {
-                        this.ai[key] = ai[key];
-                    }
-                    this.ai.init(this);
-                    ai = null;
-                }
-            } catch (e) {
-                BSWG.ai.logError("Error initializing AI script:");
-                BSWG.ai.logError(e.stack);
-                this.ai = null;
-                this.aiPaused = true;
-                try {
-                    BSWG.newAI[this.aiLoadID] = null;
-                    delete BSWG.newAI[this.aiLoadID];
-                    this.aiLoadID = null;
-                    var head = document.getElementsByTagName("head")[0];
-                    head.removeChild(this.aiScriptTag);
-                    this.aiScriptTag = null;
-                } catch (e) { }
-                return null;
-            }
-
+        if (this.aiLoadNetwork) {
+            this.aiNN = new BSWG.neuralAI(this.aiLoadNetwork.shipBlocks, this.aiLoadNetwork.networkJSON);
         }
 
         var patrolOnly = BSWG.game.scene !== BSWG.SCENE_TITLE && (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body || BSWG.game.ccblock.destroyed);
@@ -634,79 +556,11 @@ BSWG.component_CommandCenter = {
             return {};
         }
 
-        if (this.ai && !this.aiPaused) {
-
-            var cmd = this.aiCmdBfr ? this.aiCmdBfr[0] : null;
-            if (cmd && cmd.t) {
-                cmd.t -= dt;
-                if (typeof cmd.t0 === 'number') {
-                    cmd.t0 += dt;
-                }
-                if (!(cmd.t > 0)) {
-                    this.aiCmdBfr.splice(0, 1);
-                    cmd = this.aiCmdBfr ? this.aiCmdBfr[0] : null;
-                }
-            }
+        if (this.aiNN && !this.aiPaused) {
 
             var keys = new Object();
-
-            if (BSWG.game.scene === BSWG.SCENE_GAME2) {
-                try {
-                    if (cmd && cmd.type === 'hold') {
-                        for (var k in this.aiLastKeys) {
-                            keys[k] = this.aiLastKeys[k];
-                        }
-                    }
-                    else if (cmd && cmd.type === 'pause') {
-                        // keys should be empty
-                    }
-                    else if (cmd && cmd.type === 'sub') {
-                        if (cmd.fn(dt, keys, cmd.t0)) {
-                            cmd.t = 0;
-                        }
-                    }
-                    else {
-                        if (!patrolOnly && BSWG.game.battleMode) {
-                            this.ai.update(dt, keys);
-                        }
-                        else {
-                            this.ai.patrol(dt, keys);
-                        }
-                        this.aiLastKeys = keys;
-                    }
-                    return keys;
-                } catch (e) {
-                    BSWG.ai.logError("Error in AI script frame update:");
-                    BSWG.ai.logError(e.stack);
-                    this.aiPaused = true;
-                    return null;
-                }
-            }
-            else {
-                if (cmd && cmd.type === 'hold') {
-                    for (var k in this.aiLastKeys) {
-                        keys[k] = this.aiLastKeys[k];
-                    }
-                }
-                else if (cmd && cmd.type === 'pause') {
-                    // keys should be empty
-                }
-                else if (cmd && cmd.type === 'sub') {
-                    if (cmd.fn(dt, keys, cmd.t0)) {
-                        cmd.t = 0;
-                    }
-                }
-                else {
-                    if (!patrolOnly && (BSWG.game.battleMode || BSWG.game.scene === BSWG.SCENE_TITLE)) {
-                        this.ai.update(dt, keys);
-                    }
-                    else {
-                        this.ai.patrol(dt, keys);
-                    }
-                    this.aiLastKeys = keys;
-                }
-                return keys;                
-            }
+            this.aiNN.getKeys(keys);
+            return keys;
 
         }
 
@@ -761,63 +615,20 @@ BSWG.component_CommandCenter = {
 
     removeAI: function () {
 
-        if (this.aiScriptTag) {
-            var head = document.getElementsByTagName("head")[0];
-            head.removeChild(this.aiScriptTag);
-            this.aiScriptTag = null;
+        this.aiLoadNetwork = null;
+        if (this.aiNN) {
+            this.aiNN.destroy();
+            this.aiNN = null;
         }
-
-        this.aiLoadID = null;
-        this.ai = null;
         this.aiPaused = true;
-        this.aiCmdBfr = null;
 
     },
 
-    reloadAI: function (paused) {
+    reloadAI: function (aiLoadNetwork, paused) {
 
-        if (this.aiScriptTag) {
-            var head = document.getElementsByTagName("head")[0];
-            head.removeChild(this.aiScriptTag);
-            this.aiScriptTag = null;
-        }
-
-        this.aiLoadID = null;
-        this.aiCmdBfr = null;
-
-        if (!this.aiStr) {
-            BSWG.ai.logError("No AI code set for this ship.");
-            this.ai = null;
-            return false;
-        }
-
-        this.ai = null;
-
-        var ai = null;
-
-        var head = document.getElementsByTagName("head")[0],
-            script = document.createElement("script");
-
-        head.insertBefore(script, head.lastChild);
-        this.aiScriptTag = script;
-
-        // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-        function guid() {
-            function s4() {
-                return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-            }
-            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-        }
-        this.aiLoadID = guid();
-
-        BSWG.newAI[this.aiLoadID] = null;
-
-        script.src = "data:text/javascript;base64," + btoa(
-            "try { BSWG.newAI[\"" + this.aiLoadID + "\"] = " + this.aiStr + "; } catch (e) { BSWG.ai.logError('Error parsing AI script:'); BSWG.ai.logError(e.stack); }"
-        );
-
+        this.removeAI();
+        this.aiLoadNetwork = aiLoadNetwork;
         this.aiPaused = !!paused;
-
         return true;
 
     }

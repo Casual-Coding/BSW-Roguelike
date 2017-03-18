@@ -799,7 +799,7 @@ BSWG.game = new function(){
                             p2 = new b2Vec2(Math.cos(_a) * 32, Math.sin(_a) * 32);
                         }
 
-                        aiship = BSWG.componentList.load(list[i][0], {p: p2});
+                        aiship = BSWG.componentList.load(list[i][0], {p: p2, a: Math._random() * 2.0 * Math.PI});
                         if (aiship) {
                             aiship.enemyLevel = list[i][1];
                             aiship.title = list[i][0].title;
@@ -1746,8 +1746,8 @@ BSWG.game = new function(){
                                 BSWG.componentList.clear();
                                 BSWG.blasterList.clear();
                                 BSWG.laserList.clear();
-                                self.ccblock = BSWG.componentList.load(obj, {p: new b2Vec2(0, -50)});
-                                self.aiship = BSWG.componentList.load(this.backup, {p: new b2Vec2(0, 0)});
+                                self.ccblock = BSWG.componentList.load(obj, {p: new b2Vec2(0, -50), a: Math.random() * Math.PI * 2.0});
+                                self.aiship = BSWG.componentList.load(this.backup, {p: new b2Vec2(0, 0), a: Math.random() * Math.PI * 2.0});
                                 window.setTimeout(function(){
                                     self.aiship.reloadAI();
                                 },10);                                

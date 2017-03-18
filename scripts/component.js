@@ -2622,7 +2622,7 @@ BSWG.componentList = new function () {
     this.autoWelds = null;
     this.load = function(obj, spawn, noArch, archRadCheck, timeCheck, noCheck) {
 
-        var comps = obj.list;
+        var comps = spawn ? deepcopy(obj.list) : obj.list;
         var cc = null;
 
         var shipOnly = !!spawn;
@@ -2633,13 +2633,28 @@ BSWG.componentList = new function () {
         this.autoWelds = this.autoWelds || [];
 
         if (shipOnly) {
+            var CCC = null;
             for (var i=0; i<comps.length; i++) {
                 var C = comps[i];
                 if (C.type === 'cc') {
+                    CCC = C;
                     offset.x -= C.pos.x;
                     offset.y -= C.pos.y;
+                    angle -= C.angle;
                     break;
                 }
+            }
+            if (CCC) {
+                var ccp = new b2Vec2(CCC.pos.x, CCC.pos.y);
+                for (var i=0; i<comps.length; i++) {
+                    var C = comps[i];
+                    var p = Math.rotVec2(new b2Vec2(C.pos.x - ccp.x, C.pos.y - ccp.y), angle);
+                    C.pos.x = p.x + ccp.x;
+                    C.pos.y = p.y + ccp.y;
+                    C.angle += angle;
+                    p = null;
+                }
+                ccp = null;
             }
         }
 
@@ -2662,7 +2677,7 @@ BSWG.componentList = new function () {
             else if (!noCheck) {
                 if (this.withinRadius(pos, 6, true).length) {
                     return null;
-                }               
+                }
             }
         }
 
