@@ -203,6 +203,9 @@ BSWG.component_CommandCenter = {
             smooth: 0.02
         });
 
+        this.pain = 0;
+        this.pleasure = 0;
+
         this.leftKey = args.leftKey || BSWG.KEY.A;
         this.rightKey = args.rightKey || BSWG.KEY.D;
         this.upKey = args.upKey || BSWG.KEY.W;
@@ -570,7 +573,8 @@ BSWG.component_CommandCenter = {
 
         if (this.aiNN && !this.aiPaused) {
 
-            this.aiNN.update(dt, 0.0, 0.0); // dt, pain, pleasure
+            this.aiNN.update(dt, this.pain, this.pleasure);
+            this.pain = this.pleasure = 0.0;
 
             var keys = new Object();
             this.aiNN.getKeys(keys);

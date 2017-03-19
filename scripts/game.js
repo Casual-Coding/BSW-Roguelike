@@ -2264,6 +2264,12 @@ BSWG.game = new function(){
                         p.x /= 2;//3.0;
                         p.y /= 2;//3.0;
                         self.cam.panTo(dt*10.0, p);
+                        if (ret[0].aiNN) {
+                            ret[0].aiNN.setEnemy(ret[1]);
+                        }
+                        if (ret[1].aiNN) {
+                            ret[1].aiNN.setEnemy(ret[0]);
+                        }
                     }
 
                     var h = (350+140+80) - 42;

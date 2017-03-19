@@ -543,13 +543,15 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
         BSWG.game.battleMode = true;
     }
 
-    if (BSWG.game.scene === BSWG.SCENE_TITLE || this.type === 'missile') {
+    if (/*BSWG.game.scene === BSWG.SCENE_TITLE || */this.type === 'missile') {
         return amt;
     }
 
     if (!fromC || !fromC.onCC || fromC.destroyed || !fromC.obj || !fromC.obj.body) {
         fromC = null;
     }
+
+    var lastHP = this.hp || 0;
 
     if (amt > 0) {
         var isFriendly = false;
@@ -723,6 +725,22 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
         this.destroyed = true;
         this.onCC = null;
         this.removeSafe();
+    }
+
+    var totalMaxHP = this.onCC ? this.onCC.totalMaxHP : (this.maxHP || 1);
+    var pain = (lastHP - (this.hp || 0)) / totalMaxHP;
+    if (this.onCC) {
+        if (pain > 0) {
+            this.onCC.pain += pain;
+        }
+        else {
+            this.onCC.pleasure += -pain;
+        }
+    }
+    if (fromC && fromC.onCC && fromC.onCC !== this.onCC && fromC !== this) {
+        if (pain > 0) {
+            fromC.onCC.pleasure += pain;
+        }
     }
 
     return damageExtra;
@@ -1880,6 +1898,7 @@ BSWG.componentList = new function () {
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type == 'cc') {
                 CL[i].totalMass = (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
+                CL[i].totalMaxHP = CL[i].maxHP || 0;
                 CL[i].energyRegen = CL[i].energyGain;
             }
         }
@@ -1887,6 +1906,7 @@ BSWG.componentList = new function () {
             if (CL[i].onCC && CL[i].type != 'cc') {
                 CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
                 CL[i].onCC.energyRegen += Math.max(0, CL[i].energyGain || 0.0);
+                CL[i].onCC.totalMaxHP += CL[i].maxHP || 0;
             }
         }
 

@@ -115,15 +115,18 @@ BSWG.getEnemy = function(type, statsOnly) {
 
 BSWG.NNAI = {
     PAIN_THRESHOLD: 0.1,        // measured in hp/total ship max hp
-    PLEASURE_THRESHOLD: 0.05,   // measured in hp/total ship max hp
-    CONSTANT_PAIN: 0.005,
+    PLEASURE_THRESHOLD: 0.01,   // measured in hp/total ship max hp
+    CONSTANT_PAIN: 0.005,       // per/second
+    RANGE_PAIN_MUL: 5,          //
+    CLOSE_PLEASURE: 0.005,
+    CLOSE_RANGE: 30,
 
     HISTORY_LEN: 60,            // in frames,
     THINK_SKIP: 3,              // in frames
 
     SENSOR_RANGE: 100,          // in world units
 
-    PROP_MAX: 8                 // maximum propogation for pain & pleasure
+    LEARN_RATE: 0.05
 };
 
 
@@ -153,7 +156,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
     }
 
     this.outputLength = this.keyList.length;
-    this.inputLength = 4 * 6 + this.shipBlocks.length * 3;
+    this.inputLength = 2 + 3 + 6;
 
     this.network = null;
     this.history = null;
@@ -168,6 +171,10 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
         this.reinit();
     }
 
+    if (this.network) {
+        this.network.optimize();
+    }
+
 };
 
 BSWG.neuralAI.prototype.reinit = function() {
@@ -177,14 +184,33 @@ BSWG.neuralAI.prototype.reinit = function() {
 
 };
 
-BSWG.neuralAI.prototype.load = function(networkJSON) {
+BSWG.neuralAI.prototype.load = function(obj) {
 
-    if (!networkJSON) {
+    if (!obj) {
         return false;
     }
 
-    if (typeof networkJSON === 'string') {
-        networkJSON = JSON.parse(networkJSON);
+    if (typeof obj === 'string') {
+        obj = JSON.parse(obj);
+    }
+
+    if (obj) {
+        if (this.inputLength !== obj.inputLength) {
+            console.warn("NN: inputLength !== inputLength");
+        }
+        if (this.outputLength !== obj.outputLength) {
+            console.warn("NN: outputLength !== outputLength");
+        }
+        if (obj.networkJSON) {
+            this.network = synaptic.Network.fromJSON(obj.networkJSON);
+        }
+        else {
+            console.warn("NN: network not loaded");
+            return false;
+        }
+    }
+    else {
+        return false;
     }
 
     this.history = [];
@@ -196,7 +222,11 @@ BSWG.neuralAI.prototype.load = function(networkJSON) {
 
 BSWG.neuralAI.prototype.serialize = function() {
 
-    var obj = {};
+    var obj = {
+        inputLength: this.inputLength,
+        outputLength: this.outputLength,
+        networkJSON: this.network.toJSON()
+    };
     return obj;
 
 };
@@ -217,52 +247,121 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         return;
     }
 
+    var mul = 1;
+    if (this.enemyCC && this.enemyCC.p() && Math.distVec2(this.enemyCC.p(), this.ccblock.p()) > BSWG.NNAI.SENSOR_RANGE) {
+        mul = BSWG.NNAI.RANGE_PAIN_MUL;
+    }
+
+    if (this.enemyCC && this.enemyCC.p() && Math.distVec2(this.enemyCC.p(), this.ccblock.p()) < BSWG.NNAI.CLOSE_RANGE) {
+        this.pleasure += BSWG.NNAI.CLOSE_PLEASURE * dt;
+    }
+
+    this.pain += pain + BSWG.NNAI.CONSTANT_PAIN * dt * mul;
+    this.pleasure += pleasure;
+
     this.frameN += 1;
     if (this.frameN <= BSWG.NNAI.THINK_SKIP) {
         return;
     }
     this.frameN = 0;
 
-    this.pain += pain + BSWG.NNAI.CONSTANT_PAIN;
-    this.pleasure += pleasure;
+    var inPain = this.pain > BSWG.NNAI.PAIN_THRESHOLD;
+    var inPleasure = this.pleasure > BSWG.NNAI.PLEASURE_THRESHOLD;
 
-    if (pain > BSWG.NNAI.PAIN_THRESHOLD) {
-
-        this.pain = 0.0;
+    if (inPain && inPleasure) {
+        if (this.pleasure > this.pain) {
+            inPain = false;
+        }
+        else {
+            inPleasure = false;
+        }
     }
 
-    if (pleasure > BSWG.NNAI.PLEASURE_THRESHOLD) {
+    if (inPain) {
+
+        var K = (Math.clamp(this.pain*5, 0, 20) + 3) * 5;
+        var rand = new Array(this.outputLength);
+        for (var i=this.history.length-1; i>=0; i--) {
+            for (var f=0; f<K; f++) {
+                for (var k=0; k<this.outputLength; k++) {
+                    rand[k] = Math._random();
+                }
+                this.network.activate(this.history[i][0]);
+                this.network.propagate(BSWG.NNAI.LEARN_RATE, rand);
+            }
+            K *= 0.95;
+        }
+        rand = null;
+
+        console.log(this.ccblock.id + ' PAIN: ' + this.pain);
+
+        this.pain = 0.0;
+        this.pleasure = 0.0;
+        this.history.length = 0;
+    }
+
+    if (inPleasure) {
+
+        var K = (Math.clamp(this.pleasure*5, 20, 1) + 3) * 15;
+        for (var i=this.history.length-1; i>=0; i--) {
+            for (var f=0; f<K; f++) {
+                this.network.activate(this.history[i][0]);
+                this.network.propagate(BSWG.NNAI.LEARN_RATE, this.history[i][1]);
+            }
+            K *= 0.95;
+        }
+
+        console.log(this.ccblock.id + ' PLEASURE: ' + this.pleasure);
 
         this.pleasure = 0.0;
+        this.pain = 0.0;
+        this.history.length = 0;
     }
 
     var input = [];
+
+    // Cheating
+
+    var p1 = null, p2 = null;
+    if (this.enemyCC && (p1=this.enemyCC.p()) && (p2=this.ccblock.p())) {
+        input.push(Math.clamp(Math.distVec2(p1, p2) / BSWG.NNAI.SENSOR_RANGE, 0, 1));
+        input.push(Math.angleBetween(p1, p2) / (Math.PI * 2) + 0.5);
+    }
+    else {
+        input.push(0);
+        input.push(0);
+    }
+    p1 = p2 = null;
 
     // Ship status
 
     var energy = this.ccblock.energy / this.ccblock.maxEnergy;
     input.push(energy ? energy : 0.0);
     var ccAngle = this.ccblock.obj.body.GetAngle();
-
+    var totalHP = 0, totalMaxHP = .01;
+    var totalEMP = 0, totalMaxEMP = .01;
     for (var i=0; i<this.shipBlocks.length; i++) {
         var C = this.shipBlocks[i];
+        if (C) {
+            totalMaxHP += (C.maxHP || 1);
+            totalMaxEMP += 1;
+        }
         if (!C || C.destroyed || !C.obj || !C.obj.body) {
-            input.push(1.0);
-            input.push(0.0);
-            input.push(0.0);
+
         }
         else {
-            var health = C.hp / C.maxHP;
-            input.push(1. - (health ? health : 0.));
-            input.push(Math.clamp(C.empDamp || 0., 0., 1.));
-            input.push(Math.angleDist(C.obj.body.GetAngle(), ccAngle));
+            totalHP += C.hp || 0;
+            totalEMP += Math.clamp(C.empDamp || 0., 0., 1.);
         }
     }
 
+    input.push(Math.clamp(totalHP / totalMaxHP, 0, 1));
+    input.push(Math.clamp(totalEMP / totalMaxEMP, 0, 1));
+
     // Sensors
 
-    for (var i=0; i<4; i++) {
-        var angle = (i / 4) * Math.PI * 2.0 + ccAngle;
+    for (var i=0; i<1; i++) {
+        var angle = this.ccblock.obj.body.GetAngle() + this.ccblock.frontOffset; //(i / 4) * Math.PI * 2.0 + ccAngle;
         var dx = Math.cos(angle), dy = Math.sin(angle);
         var p = this.ccblock.obj.body.GetWorldCenter().clone();
         var p2 = new b2Vec2(p.x + dx * BSWG.NNAI.SENSOR_RANGE, p.y + dy * BSWG.NNAI.SENSOR_RANGE);
