@@ -113,14 +113,252 @@ BSWG.getEnemy = function(type, statsOnly) {
     };
 };
 
+BSWG.NNAI = {
+    PAIN_THRESHOLD: 0.1,        // measured in hp/total ship max hp
+    PLEASURE_THRESHOLD: 0.05,   // measured in hp/total ship max hp
+    CONSTANT_PAIN: 0.005,
+
+    HISTORY_LEN: 60,            // in frames,
+    THINK_SKIP: 3,              // in frames
+
+    SENSOR_RANGE: 100,          // in world units
+
+    PROP_MAX: 8                 // maximum propogation for pain & pleasure
+};
+
 
 BSWG.neuralAI = function(shipBlocks, networkJSON) {
 
-    this.shipBlocks = shipBlocks || null;
+    this.shipBlocks = shipBlocks || [];
+    this.ccblock = null;
+    this.allKeys = {};
+    for (var i=0; i<this.shipBlocks.length; i++) {
+        var C = this.shipBlocks[i];
+        if (C && C.type === 'cc') {
+            this.ccblock = C;
+        }
+        if (C && C.allKeys) {
+            for (var j=0; j<C.allKeys.length; j++) {
+                this.allKeys[C[C.allKeys[j]]] = true;
+            }
+        }
+    }
+    this.keyList = [];
+    for (var key in this.allKeys) {
+        this.keyList.push(parseInt(key));
+    }
+    this.keyList.sort();
+    if (!this.keyList.length) {
+        this.keyList.push(BSWG.KEY.W);
+    }
+
+    this.outputLength = this.keyList.length;
+    this.inputLength = 4 * 6 + this.shipBlocks.length * 3;
+
+    this.network = null;
+    this.history = null;
+    this.enemyCC = null;
+    this.keys = {};
+    this.frameN = 0;
+
+    this.pain = 0;
+    this.pleasure = 0;
+
+    if (!this.load(networkJSON)) {
+        this.reinit();
+    }
+
+};
+
+BSWG.neuralAI.prototype.reinit = function() {
+
+    this.history = [];
+    this.network = new synaptic.Architect.LSTM(this.inputLength, 4, this.outputLength);
+
+};
+
+BSWG.neuralAI.prototype.load = function(networkJSON) {
+
+    if (!networkJSON) {
+        return false;
+    }
+
+    if (typeof networkJSON === 'string') {
+        networkJSON = JSON.parse(networkJSON);
+    }
+
+    this.history = [];
+    this.keys = {};
+
+    return true;
+
+};
+
+BSWG.neuralAI.prototype.serialize = function() {
+
+    var obj = {};
+    return obj;
+
+};
+
+BSWG.neuralAI.prototype.setEnemy = function(ccblock) {
+
+    this.enemyCC = ccblock;
 
 };
 
 BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
+
+    if (!this.network) {
+        return;
+    }
+
+    if (!this.ccblock || this.ccblock.destroyed || !this.ccblock.obj || !this.ccblock.obj.body) {
+        return;
+    }
+
+    this.frameN += 1;
+    if (this.frameN <= BSWG.NNAI.THINK_SKIP) {
+        return;
+    }
+    this.frameN = 0;
+
+    this.pain += pain + BSWG.NNAI.CONSTANT_PAIN;
+    this.pleasure += pleasure;
+
+    if (pain > BSWG.NNAI.PAIN_THRESHOLD) {
+
+        this.pain = 0.0;
+    }
+
+    if (pleasure > BSWG.NNAI.PLEASURE_THRESHOLD) {
+
+        this.pleasure = 0.0;
+    }
+
+    var input = [];
+
+    // Ship status
+
+    var energy = this.ccblock.energy / this.ccblock.maxEnergy;
+    input.push(energy ? energy : 0.0);
+    var ccAngle = this.ccblock.obj.body.GetAngle();
+
+    for (var i=0; i<this.shipBlocks.length; i++) {
+        var C = this.shipBlocks[i];
+        if (!C || C.destroyed || !C.obj || !C.obj.body) {
+            input.push(1.0);
+            input.push(0.0);
+            input.push(0.0);
+        }
+        else {
+            var health = C.hp / C.maxHP;
+            input.push(1. - (health ? health : 0.));
+            input.push(Math.clamp(C.empDamp || 0., 0., 1.));
+            input.push(Math.angleDist(C.obj.body.GetAngle(), ccAngle));
+        }
+    }
+
+    // Sensors
+
+    for (var i=0; i<4; i++) {
+        var angle = (i / 4) * Math.PI * 2.0 + ccAngle;
+        var dx = Math.cos(angle), dy = Math.sin(angle);
+        var p = this.ccblock.obj.body.GetWorldCenter().clone();
+        var p2 = new b2Vec2(p.x + dx * BSWG.NNAI.SENSOR_RANGE, p.y + dy * BSWG.NNAI.SENSOR_RANGE);
+
+        var ret = BSWG.componentList.withRay(p.THREE(0.0), p2.THREE(0.0), null, this.ccblock);
+
+        if (!ret || !ret.comp || ret.comp.destroyed || !ret.comp.obj || !ret.comp.obj.body) {
+            input.push(0.0);
+            input.push(0.5);
+            input.push(0.5);
+            input.push(0.0);
+            input.push(1.0);
+            input.push(0.0);
+        }
+        else {
+            var C = ret.comp;
+
+            // hit
+            input.push(1.0);
+
+            // enemy, static, neutral, friendly
+            if (C.onCC === this.enemyCC) {
+                input.push(1.0);
+            }
+            else if (C.isStatic) {
+                input.push(0.4);
+            }
+            else if (!C.onCC) {
+                input.push(0.6);
+            }
+            else {
+                input.push(0.0);
+            }
+
+            // level difference
+            if (C.isStatic) {
+                input.push(0.5);
+            }
+            else {
+                var levelDiff = Math.clamp((this.ccblock.buff() - C.buff()) / 5. + 0.5, 0.0, 1.0);
+                input.push(levelDiff);
+            }
+
+            // damage
+            if (C.isStatic) {
+                input.push(0.0);
+            }
+            else {
+                var health = (C.hp / C.maxHP) || 0.;
+                input.push(1. - health);
+            }
+
+            // distance
+            input.push(ret.d / BSWG.NNAI.SENSOR_RANGE);
+
+            // target value
+            if (C.isStatic || C.onCC !== this.enemyCC || !this.enemyCC) {
+                input.push(0.0);
+            }
+            else {
+                if (C === this.enemyCC) {
+                    input.push(1.0);
+                }
+                else if (C.energyGain) {
+                    input.push(0.75);
+                }
+                else if (C.category === 'weapon') {
+                    input.push(0.5);
+                }
+                else {
+                    input.push(0.25);
+                }
+            }
+        }
+
+        p = p2 = ret = null;
+    }
+
+    var output = this.network.activate(deepcopy(input));
+
+    this.history.push([
+        input,
+        deepcopy(output)
+    ]);
+
+    while (this.history.length > BSWG.NNAI.HISTORY_LEN) {
+        this.history.splice(0, 1);
+    }
+
+    for (var i=0; i<output.length; i++) {
+        if (i < this.keyList.length) {
+            this.keys[this.keyList[i]] = output[i] > 0.5 ? true : false;
+        }
+    }
+
+    input = output = null;
 
 };
 
@@ -130,11 +368,19 @@ BSWG.neuralAI.prototype.debugRender = function(ctx, dt) {
 
 BSWG.neuralAI.prototype.getKeys = function(keys) {
 
+    if (this.keys) {
+        for (var key in this.keys) {
+            keys[key] = this.keys[key];
+        }
+    }
+
 };
 
 BSWG.neuralAI.prototype.destroy = function() {
 
     this.shipBlocks = null;
+    this.network = null;
+    this.keys = {};
 
 };
 

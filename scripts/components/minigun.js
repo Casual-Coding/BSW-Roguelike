@@ -16,6 +16,10 @@ BSWG.component_Minigun = {
         'fireKey', 'fireKeyAlt'
     ],
 
+    allKeys: [
+        'fireKey', 'fireKeyAlt'
+    ],
+
     sbkey: [
         'size'
     ],

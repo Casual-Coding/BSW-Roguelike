@@ -56,6 +56,17 @@ BSWG.component_CommandCenter = {
         'specials'
     ],
 
+    allKeys: [
+        'leftKey',
+        'rightKey',
+        'upKey',
+        'downKey',
+        'leftKeyAlt',
+        'rightKeyAlt',
+        'upKeyAlt',
+        'downKeyAlt',
+    ],
+
     frontOffset: -Math.PI/2,
 
     category: 'block',
@@ -536,6 +547,7 @@ BSWG.component_CommandCenter = {
 
         if (this.aiLoadNetwork) {
             this.aiNN = new BSWG.neuralAI(this.aiLoadNetwork.shipBlocks, this.aiLoadNetwork.networkJSON);
+            this.aiLoadNetwork = null;
         }
 
         var patrolOnly = BSWG.game.scene !== BSWG.SCENE_TITLE && (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body || BSWG.game.ccblock.destroyed);
@@ -557,6 +569,8 @@ BSWG.component_CommandCenter = {
         }
 
         if (this.aiNN && !this.aiPaused) {
+
+            this.aiNN.update(dt, 0.0, 0.0); // dt, pain, pleasure
 
             var keys = new Object();
             this.aiNN.getKeys(keys);
@@ -628,6 +642,15 @@ BSWG.component_CommandCenter = {
 
         this.removeAI();
         this.aiLoadNetwork = aiLoadNetwork;
+        if (!aiLoadNetwork) {
+            this.aiLoadNetwork = {
+                shipBlocks: BSWG.componentList.shipBlocks(this),
+                networkJSON: null
+            }
+        }
+        else {
+            this.aiLoadNetwork.shipBlocks = BSWG.componentList.shipBlocks(this);
+        }
         this.aiPaused = !!paused;
         return true;
 

@@ -16,6 +16,11 @@ BSWG.component_Laser = {
         'fireKeyAlt'
     ],
 
+    allKeys: [
+        'fireKey',
+        'fireKeyAlt'
+    ],
+
     sbadd: [
         { title: 'Add', value: 50 }
     ],

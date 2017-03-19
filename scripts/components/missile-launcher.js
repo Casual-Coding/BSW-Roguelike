@@ -38,6 +38,10 @@ BSWG.component_MissileLauncher = {
         'ltype'
     ],
 
+    allKeys: [
+        'fireKey', 'fireKeyAlt'
+    ],
+
     sbkey: [
         'ltype'
     ],

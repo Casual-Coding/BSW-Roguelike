@@ -17,6 +17,10 @@ BSWG.component_Railgun = {
         'fireKey', 'fireKeyAlt'
     ],
 
+    allKeys: [
+        'fireKey', 'fireKeyAlt'
+    ],
+
     sbadd: [
         { title: 'Add', value: 150 }
     ],

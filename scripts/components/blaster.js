@@ -15,6 +15,10 @@ BSWG.component_Blaster = {
         'fireKey', 'fireKeyAlt', 'size'
     ],
 
+    allKeys: [
+        'fireKey', 'fireKeyAlt'
+    ],
+
     sbadd: [
         { title: 'Size 1', size: 1, value: 10 },
         { title: 'Size 2', size: 2, value: 40 }

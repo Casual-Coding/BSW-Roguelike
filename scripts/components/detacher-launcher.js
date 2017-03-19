@@ -15,6 +15,11 @@ BSWG.component_DetacherLauncher = {
         'launchKeyAlt'
     ],
 
+    allKeys: [
+        'launchKey',
+        'launchKeyAlt'
+        ],
+
     sbkey: [
         'size'
     ],

@@ -15,6 +15,11 @@ BSWG.component_SawMotor = {
         'rotKeyAlt'
     ],
 
+    allKeys: [
+        'rotKey',
+        'rotKeyAlt'
+    ],
+
     sbadd: [
         { title: 'Size 1', size: 1, value: 5 },
         { title: 'Size 2', size: 2, value: 10 },

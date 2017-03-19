@@ -14,6 +14,11 @@ BSWG.component_Thruster = {
         'thrustKeyAlt',
         'size'
     ],
+
+    allKeys: [
+        'thrustKey',
+        'thrustKeyAlt'
+    ],
     
     sbkey: [
         'size',

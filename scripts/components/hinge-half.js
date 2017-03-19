@@ -16,6 +16,11 @@ BSWG.component_HingeHalf = {
         'motor'
     ],
 
+    allKeys: [
+        'rotKey',
+        'rotKeyAlt'
+    ],
+
     sbkey: [
         'size',
         'motor'

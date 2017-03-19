@@ -19,6 +19,11 @@ BSWG.component_Shield = {
         'size'
     ],
 
+    allKeys: [
+        'onKey',
+        'onKeyAlt'
+    ],
+
     sbkey: [
         'size'
     ],

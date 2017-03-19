@@ -1627,6 +1627,17 @@ BSWG.componentList = new function () {
         return ret;
     };
 
+    this.shipBlocks = function (CC) {
+        var len = this.compList.length;
+        var ret = [];
+        for (var i=0; i<len; i++) {
+            if (this.compList[i] === CC || this.compList[i].onCC === CC) {
+                ret.push(this.compList[i]);
+            }
+        }
+        return ret;
+    };
+
     this.add = function (comp) {
 
         this.compList.push(comp);
@@ -2171,7 +2182,7 @@ BSWG.componentList = new function () {
         found = null;
     };
 
-    this.withRay = function (p, p2, shieldFilterSource) {
+    this.withRay = function (p, p2, shieldFilterSource, selfFilterCC) {
 
         var raycaster = BSWG.render.raycaster;
 
@@ -2190,6 +2201,9 @@ BSWG.componentList = new function () {
                 return;
             }
             if (C && C.combinedHP && C.combinedHP() <= 0) {
+                return;
+            }
+            if (C && selfFilterCC && C.onCC === selfFilterCC) {
                 return;
             }
             var inter = raycaster.intersectObjects(C.queryMeshes.constructor === Array ? C.queryMeshes : [ C.queryMeshes ]);
