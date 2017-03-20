@@ -116,7 +116,7 @@ BSWG.getEnemy = function(type, statsOnly) {
 BSWG.NNAI = {
     PAIN_THRESHOLD: 0.1,        // measured in hp/total ship max hp
     PLEASURE_THRESHOLD: 0.01,   // measured in hp/total ship max hp
-    CONSTANT_PAIN: 0.005,       // per/second
+    CONSTANT_PAIN: 0.001,       // per/second
     RANGE_PAIN_MUL: 5,          //
     CLOSE_PLEASURE: 0.005,
     CLOSE_RANGE: 30,
@@ -281,15 +281,15 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
         var K = (Math.clamp(this.pain*5, 0, 20) + 3) * 5;
         var rand = new Array(this.outputLength);
-        for (var i=this.history.length-1; i>=0; i--) {
-            for (var f=0; f<K; f++) {
+        for (var f=0; f<K; f++) {
+            var hlen = this.history.length;
+            for (var i=0; i<hlen; i++) {
                 for (var k=0; k<this.outputLength; k++) {
                     rand[k] = Math._random();
                 }
                 this.network.activate(this.history[i][0]);
                 this.network.propagate(BSWG.NNAI.LEARN_RATE, rand);
             }
-            K *= 0.95;
         }
         rand = null;
 
@@ -303,12 +303,12 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     if (inPleasure) {
 
         var K = (Math.clamp(this.pleasure*5, 20, 1) + 3) * 15;
-        for (var i=this.history.length-1; i>=0; i--) {
-            for (var f=0; f<K; f++) {
+        for (var f=0; f<K; f++) {
+            var hlen = this.history.length;
+            for (var i=0; i<hlen; i++) {
                 this.network.activate(this.history[i][0]);
                 this.network.propagate(BSWG.NNAI.LEARN_RATE, this.history[i][1]);
             }
-            K *= 0.95;
         }
 
         console.log(this.ccblock.id + ' PLEASURE: ' + this.pleasure);
