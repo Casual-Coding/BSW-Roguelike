@@ -385,7 +385,7 @@ BSWG.soundUpdate = function () {
         if (!BSWG.mixer) {
             BSWG.mixer = new BSWG.soundMixerClass();
         }
-        BSWG.mixer.setVolume(BSWG.soundVolume);
+        BSWG.mixer.setVolume(BSWG.soundVolume * (BSWG.render.aiTrainMode ? 0 : 1));
         BSWG.music.audioCtx.listener.setPosition(p.x, p.y, p.z);
     }
 

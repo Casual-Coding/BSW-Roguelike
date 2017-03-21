@@ -184,6 +184,7 @@ BSWG.render = new function() {
     this.envMapParam = /*THREE.CACHE(*/new THREE.Vector4(0,0,0,0);//);
     this.envMapT = this.tileDark = 0.0;
     this.screenShake = 0.0;
+    this.aiTrainMode = true;
 
     var old = THREE.Math.generateUUID;
     THREE.Math.generateUUID = function() {
@@ -563,6 +564,8 @@ BSWG.render = new function() {
         }
     };
 
+    this.frameSkip = 0;
+
     this.customCursor = true;
     this.cursorNo = 0;
     this.cursorScale = 1.0;
@@ -603,12 +606,12 @@ BSWG.render = new function() {
 
             var lvsync = BSWG.options.vsync;
 
-            if (BSWG.options.vsync) {
+            if (BSWG.options.vsync && !self.aiTrainMode) {
                 self.animFrameID = window.requestAnimationFrame(renderFrame);
                 self.lastAF = true;
             }
             else {
-                self.animFrameID = window.setTimeout(renderFrame, 16);
+                self.animFrameID = window.setTimeout(renderFrame, self.aiTrainMode ? 1 : 16);
                 self.lastAF = false;
             }
 
@@ -643,6 +646,11 @@ BSWG.render = new function() {
             var targetDt = 1/(Math.round((1/avg)/5)*5);
 
             self.dt = targetDt;
+
+            if (self.aiTrainMode) {
+                self.dt = 1/30;
+            }
+
             self.time += self.dt;
 
             self.sizeViewport();
@@ -691,7 +699,7 @@ BSWG.render = new function() {
             self.cam3DS.updateMatrix();
             self.cam3DS.updateMatrixWorld(true);
 
-            if (BSWG.options.shadows) {
+            if (BSWG.options.shadows && !self.aiTrainMode) {
                 self.renderer.render(self.sceneS, self.cam3DS, self.shadowMap);
             }
 
@@ -708,11 +716,13 @@ BSWG.render = new function() {
             self.envMapTint.CACHE();
             self.envMapParam.CACHE();*/
 
-            if (BSWG.options.postProc) {
-                self.composer.render();
-            }
-            else {
-                self.renderer.render(self.scene, self.cam3D);
+            if (!self.aiTrainMode || !((this.frameSkip++)%10)) {
+                if (BSWG.options.postProc) {
+                    self.composer.render();
+                }
+                else {
+                    self.renderer.render(self.scene, self.cam3D);
+                }
             }
 
             self.ctx.save();
@@ -772,12 +782,12 @@ BSWG.render = new function() {
             }
         };
 
-        if (BSWG.options.vsync) {
+        if (BSWG.options.vsync && !self.aiTrainMode) {
             this.animFrameID = window.requestAnimationFrame(renderFrame);
             this.lastAF = true;
         }
         else {
-            this.animFrameID = window.setTimeout(renderFrame, 16);
+            this.animFrameID = window.setTimeout(renderFrame, self.aiTrainMode ? 1 : 16);
             this.lastAF = false;
         }
     };

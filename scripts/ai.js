@@ -121,8 +121,8 @@ BSWG.NNAI = {
     CLOSE_PLEASURE: 0.005,
     CLOSE_RANGE: 30,
 
-    HISTORY_LEN: 60,            // in frames,
-    THINK_SKIP: 3,              // in frames
+    HISTORY_LEN: 300,           // in frames (60=4s)
+    THINK_SKIP: 3,              // in frames (3 = 1/4)
 
     SENSOR_RANGE: 100,          // in world units
 
@@ -260,7 +260,11 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     this.pleasure += pleasure;
 
     this.frameN += 1;
-    if (this.frameN <= BSWG.NNAI.THINK_SKIP) {
+    var thinkSkip = BSWG.NNAI.THINK_SKIP;
+    if (BSWG.render.aiTrainMode) {
+        thickSkip = (thinkSkip + 1) / 2 - 1;
+    }
+    if (this.frameN <= thinkSkip) {
         return;
     }
     this.frameN = 0;
