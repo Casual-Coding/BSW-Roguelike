@@ -24,6 +24,8 @@ BSWG.storage = new (function(){
     var path = require('path');
     var appData = BSWG.app.dataPath;
 
+    console.log(appData);
+
     this.hasKey = function(key) {
         var file = path.join(appData, 'bswr-' + key + '.json');
         return !!fs.existsSync(file);

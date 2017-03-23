@@ -645,16 +645,10 @@ BSWG.component_CommandCenter = {
     reloadAI: function (aiLoadNetwork, paused) {
 
         this.removeAI();
-        this.aiLoadNetwork = aiLoadNetwork;
-        if (!aiLoadNetwork) {
-            this.aiLoadNetwork = {
-                shipBlocks: BSWG.componentList.shipBlocks(this),
-                networkJSON: null
-            }
-        }
-        else {
-            this.aiLoadNetwork.shipBlocks = BSWG.componentList.shipBlocks(this);
-        }
+        this.aiLoadNetwork = {
+            shipBlocks: BSWG.componentList.shipBlocks(this),
+            networkJSON: aiLoadNetwork || null
+        };
         this.aiPaused = !!paused;
         return true;
 

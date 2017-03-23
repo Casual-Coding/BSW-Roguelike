@@ -560,7 +560,7 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
                 amt *= BSWG.friendlyFactor;
                 isFriendly = true;
             }
-            else if (BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
+            else if (!BSWG.NNActiveTourny && BSWG.game.ccblock && this.onCC.id !== BSWG.game.ccblock.id && fromC.onCC.id !== BSWG.game.ccblock.id) {
                 amt *= BSWG.friendlyFactor;
                 isFriendly = true;
             }

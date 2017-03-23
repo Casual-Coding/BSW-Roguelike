@@ -71,6 +71,7 @@ BSWG.getEnemy = function(type, statsOnly) {
     }
 
     eobj.title = title;
+    eobj.enemy_type_id = type;
 
     return {
         obj: eobj,
@@ -114,11 +115,11 @@ BSWG.getEnemy = function(type, statsOnly) {
 };
 
 BSWG.NNAI = {
-    PAIN_THRESHOLD: 0.1,        // measured in hp/total ship max hp
+    PAIN_THRESHOLD: 0.05,        // measured in hp/total ship max hp
     PLEASURE_THRESHOLD: 0.01,   // measured in hp/total ship max hp
     CONSTANT_PAIN: 0.001,       // per/second
     RANGE_PAIN_MUL: 5,          //
-    CLOSE_PLEASURE: 0.005,
+    CLOSE_PLEASURE: 0.0001,
     CLOSE_RANGE: 30,
 
     HISTORY_LEN: 300,           // in frames (60=4s)
@@ -126,7 +127,9 @@ BSWG.NNAI = {
 
     SENSOR_RANGE: 100,          // in world units
 
-    LEARN_RATE: 0.05
+    LEARN_RATE: 0.05,
+
+    BUTTON_ACTIVIATION: 0.5
 };
 
 
@@ -156,7 +159,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
     }
 
     this.outputLength = this.keyList.length;
-    this.inputLength = 2 + 3 + 6;
+    this.inputLength = 2 + 3 + 3;
 
     this.network = null;
     this.history = null;
@@ -166,6 +169,9 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
 
     this.pain = 0;
     this.pleasure = 0;
+    this.totalPain = 0;
+
+    this.history = [];
 
     if (!this.load(networkJSON)) {
         this.reinit();
@@ -180,7 +186,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
 BSWG.neuralAI.prototype.reinit = function() {
 
     this.history = [];
-    this.network = new synaptic.Architect.LSTM(this.inputLength, 4, this.outputLength);
+    this.network = new synaptic.Architect.LSTM(this.inputLength, 10, this.outputLength);
 
 };
 
@@ -196,9 +202,11 @@ BSWG.neuralAI.prototype.load = function(obj) {
 
     if (obj) {
         if (this.inputLength !== obj.inputLength) {
+            obj.networkJSON = null;
             console.warn("NN: inputLength !== inputLength");
         }
         if (this.outputLength !== obj.outputLength) {
+            obj.networkJSON = null;
             console.warn("NN: outputLength !== outputLength");
         }
         if (obj.networkJSON) {
@@ -237,6 +245,12 @@ BSWG.neuralAI.prototype.setEnemy = function(ccblock) {
 
 };
 
+BSWG.neuralAI.prototype.varPower = function (val, variance, power) {
+
+    return Math.clamp(Math.pow(val, power) + Math.random() * variance - 0.5 * variance, 0., 1.);
+
+};
+
 BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     if (!this.network) {
@@ -248,15 +262,16 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     }
 
     var mul = 1;
-    if (this.enemyCC && this.enemyCC.p() && Math.distVec2(this.enemyCC.p(), this.ccblock.p()) > BSWG.NNAI.SENSOR_RANGE) {
-        mul = BSWG.NNAI.RANGE_PAIN_MUL;
-    }
+    var t = (this.enemyCC && this.enemyCC.p()) ? (Math.distVec2(this.enemyCC.p(), this.ccblock.p()) / BSWG.NNAI.SENSOR_RANGE) : 0;
+    mul = BSWG.NNAI.RANGE_PAIN_MUL * t + 1;
 
     if (this.enemyCC && this.enemyCC.p() && Math.distVec2(this.enemyCC.p(), this.ccblock.p()) < BSWG.NNAI.CLOSE_RANGE) {
         this.pleasure += BSWG.NNAI.CLOSE_PLEASURE * dt;
     }
 
-    this.pain += pain + BSWG.NNAI.CONSTANT_PAIN * dt * mul;
+    var _pain = pain + BSWG.NNAI.CONSTANT_PAIN * dt * mul;
+    this.totalPain += _pain;
+    this.pain += _pain;
     this.pleasure += pleasure;
 
     this.frameN += 1;
@@ -283,7 +298,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     if (inPain) {
 
-        var K = (Math.clamp(this.pain*5, 0, 20) + 3) * 5;
+        var K = (Math.clamp(this.pain*5, 0, 20) + 3) * 2;
         var rand = new Array(this.outputLength);
         for (var f=0; f<K; f++) {
             var hlen = this.history.length;
@@ -306,7 +321,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     if (inPleasure) {
 
-        var K = (Math.clamp(this.pleasure*5, 20, 1) + 3) * 15;
+        var K = (Math.clamp(this.pleasure*5, 20, 1) + 3) * 6;
         for (var f=0; f<K; f++) {
             var hlen = this.history.length;
             for (var i=0; i<hlen; i++) {
@@ -328,8 +343,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     var p1 = null, p2 = null;
     if (this.enemyCC && (p1=this.enemyCC.p()) && (p2=this.ccblock.p())) {
-        input.push(Math.clamp(Math.distVec2(p1, p2) / BSWG.NNAI.SENSOR_RANGE, 0, 1));
-        input.push(Math.angleBetween(p1, p2) / (Math.PI * 2) + 0.5);
+        input.push(this.varPower(Math.clamp(Math.distVec2(p1, p2) / BSWG.NNAI.SENSOR_RANGE, 0, 1), 0.08, 0.3));
+        input.push(this.varPower(Math.angleBetween(p1, p2) / (Math.PI * 2) + 0.5, 0.15, 0.25));
     }
     else {
         input.push(0);
@@ -340,7 +355,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     // Ship status
 
     var energy = this.ccblock.energy / this.ccblock.maxEnergy;
-    input.push(energy ? energy : 0.0);
+    input.push(this.varPower(energy ? energy : 0.0, 0.05, 0.5));
     var ccAngle = this.ccblock.obj.body.GetAngle();
     var totalHP = 0, totalMaxHP = .01;
     var totalEMP = 0, totalMaxEMP = .01;
@@ -350,7 +365,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
             totalMaxHP += (C.maxHP || 1);
             totalMaxEMP += 1;
         }
-        if (!C || C.destroyed || !C.obj || !C.obj.body) {
+        if (!C || C.destroyed || !C.obj || !C.obj.body || (C.onCC !== this.ccblock)) {
 
         }
         else {
@@ -359,8 +374,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         }
     }
 
-    input.push(Math.clamp(totalHP / totalMaxHP, 0, 1));
-    input.push(Math.clamp(totalEMP / totalMaxEMP, 0, 1));
+    input.push(this.varPower(Math.clamp(totalHP / totalMaxHP, 0, 1), 0.05, 0.5));
+    input.push(this.varPower(Math.clamp(totalEMP / totalMaxEMP, 0, 1), 0.05, 0.5));
 
     // Sensors
 
@@ -375,10 +390,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         if (!ret || !ret.comp || ret.comp.destroyed || !ret.comp.obj || !ret.comp.obj.body) {
             input.push(0.0);
             input.push(0.5);
-            input.push(0.5);
-            input.push(0.0);
             input.push(1.0);
-            input.push(0.0);
         }
         else {
             var C = ret.comp;
@@ -400,45 +412,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
                 input.push(0.0);
             }
 
-            // level difference
-            if (C.isStatic) {
-                input.push(0.5);
-            }
-            else {
-                var levelDiff = Math.clamp((this.ccblock.buff() - C.buff()) / 5. + 0.5, 0.0, 1.0);
-                input.push(levelDiff);
-            }
-
-            // damage
-            if (C.isStatic) {
-                input.push(0.0);
-            }
-            else {
-                var health = (C.hp / C.maxHP) || 0.;
-                input.push(1. - health);
-            }
-
             // distance
-            input.push(ret.d / BSWG.NNAI.SENSOR_RANGE);
-
-            // target value
-            if (C.isStatic || C.onCC !== this.enemyCC || !this.enemyCC) {
-                input.push(0.0);
-            }
-            else {
-                if (C === this.enemyCC) {
-                    input.push(1.0);
-                }
-                else if (C.energyGain) {
-                    input.push(0.75);
-                }
-                else if (C.category === 'weapon') {
-                    input.push(0.5);
-                }
-                else {
-                    input.push(0.25);
-                }
-            }
+            input.push(this.varPower(ret.d / BSWG.NNAI.SENSOR_RANGE, 0.08, 0.3));
         }
 
         p = p2 = ret = null;
@@ -457,7 +432,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     for (var i=0; i<output.length; i++) {
         if (i < this.keyList.length) {
-            this.keys[this.keyList[i]] = output[i] > 0.5 ? true : false;
+            this.keys[this.keyList[i]] = output[i] > BSWG.NNAI.BUTTON_ACTIVIATION ? true : false;
         }
     }
 
@@ -486,6 +461,233 @@ BSWG.neuralAI.prototype.destroy = function() {
     this.keys = {};
 
 };
+
+
+///
+
+BSWG.NNTourny = function(shipIDs, args) {
+
+    if (BSWG.NNActiveTourny) {
+        BSWG.NNActiveTourny.stop();
+    }
+
+    this.shipIDs = deepcopy(shipIDs);
+
+    this.args = args || {};
+
+    if (this.args.resetFirst) {
+        this.resetAI();
+    }
+
+    this.autoSave = this.args.autoSave !== undefined ? !!this.args.autoSave : true;
+    this.iterations = this.args.iterations || 10; // Total matches: (# of ships ^ 2) * # of iterations
+    this.matchLength = this.args.matchLength || (5 * 60); // Default 5 minutes max match length
+    this.escapeDistance = this.args.escapeDistance || (BSWG.NNAI.SENSOR_RANGE * 1.5); // Maximum distance ships can pull apart before match is ended
+    this.minLevel = this.args.minLevel || 0;
+    this.maxLevel = this.args.maxLevel || 4;
+
+    // Generate testing sequence
+
+    this.sequence = [];
+    for (var k=0; k<this.iterations; k++) {
+        for (var i=0; i<this.shipIDs.length; i++) {
+            for (var j=0; j<this.shipIDs.length; j++) {
+                this.sequence.push([i, j]);
+            }
+        }
+    }
+
+    //
+
+    this.inBattle = false;
+    this.ready = false;
+
+    BSWG.NNActiveTourny = this;
+    BSWG.render.aiTrainMode = true;
+    BSWG.game.changeScene(BSWG.SCENE_GAME2, {}, '#000', 0.25);
+
+    this.lastTime = Date.timeStamp();
+    this.time = 0.0;
+    this.dt = 1/60;
+};
+
+BSWG.NNTourny.prototype.update = function() {
+
+    var newTime = Date.timeStamp();
+    this.dt = Math.clamp(newTime - this.lastTime, 0, 1);
+    this.lastTime = newTime;
+
+    if (!this.ready) {
+        return;
+    }
+
+    if (!this.inBattle) {
+        this.curSeq = this.sequence[0];
+        this.ccblocks = new Array(this.curSeq.length);
+        this.ccsLoaded = 0;
+        this.matchTime = 0.0;
+        this.startBattle(this.curSeq);
+        this.sequence.splice(0, 1);
+    }
+
+    if (this.inBattle && this.ccsLoaded === this.ccblocks.length) {
+
+        this.matchTime += this.dt;
+
+        var ended = false;
+
+        if (this.ccblocks[0].destroyed || this.ccblocks[1].destroyed) {
+            console.log("Ended: 1 or both destroyed");
+            ended = true;
+        }
+        else if (this.ccblocks[0].p() && this.ccblocks[1].p() && Math.distVec2(this.ccblocks[0].p(), this.ccblocks[1].p()) > this.escapeDistance) {
+            console.log("Ended: Escape");
+            ended = true;
+        }
+        else if (this.matchTime >= this.matchLength) {
+            console.log("Ended: Time limit");
+            ended = true;
+        }
+
+        if (ended) {
+            var winner = -1;
+            if (this.ccblocks[0].destroyed) {
+                winner = 1;
+                if (this.ccblocks[0].aiNN) {
+                    this.ccblocks[0].aiNN.update(1/30, 1, 0);
+                }
+                else if (this.ccblocks[1].aiNN) {
+                    this.ccblocks[1].aiNN.update(1/30, 0, 1);
+                }
+            }
+            else if (this.ccblocks[1].destroyed) {
+                winner = 0;
+                if (this.ccblocks[1].aiNN) {
+                    this.ccblocks[1].aiNN.update(1/30, 1, 0);
+                }
+                else if (this.ccblocks[1].aiNN) {
+                    this.ccblocks[1].aiNN.update(1/30, 0, 1);
+                }
+            }
+            else {
+                if (this.ccblocks[0].aiNN) {
+                    this.ccblocks[0].aiNN.update(1/30, 0.5, 0);
+                }
+                if (this.ccblocks[1].aiNN) {
+                    this.ccblocks[1].aiNN.update(1/30, 0.5, 0);
+                }
+                if (this.ccblocks[0].aiNN && !this.ccblocks[1].aiNN) {
+                    winner = 0;
+                }
+                else if (!this.ccblocks[0].aiNN && this.ccblocks[1].aiNN) {
+                    winner = 1;
+                }
+                else if (this.ccblocks[0].aiNN && this.ccblocks[1].aiNN) {
+                    winner = this.ccblocks[0].aiNN.totalPain < this.ccblocks[1].aiNN.totalPain ? 0 : 1;
+                }
+            }
+
+            if (this.curSeq[0] === this.curSeq[1]) {
+                if (winner > -1) {
+                    if (this.ccblocks[winner].aiNN) {
+                        this.saveAI(this.shipIDs[this.curSeq[winner]], this.ccblocks[winner].aiNN.serialize());
+                    }
+                }
+            }
+            else {
+                if (this.ccblocks[0].aiNN) {
+                    this.saveAI(this.shipIDs[this.curSeq[0]], this.ccblocks[0].aiNN.serialize());
+                }
+                if (this.ccblocks[1].aiNN) {
+                    this.saveAI(this.shipIDs[this.curSeq[1]], this.ccblocks[1].aiNN.serialize());
+                }
+            }
+
+            this.inBattle = false;
+        }
+        else if (this.ccblocks[0].aiNN && this.ccblocks[1].aiNN) {
+            this.ccblocks[0].aiNN.setEnemy(this.ccblocks[1]);
+            this.ccblocks[1].aiNN.setEnemy(this.ccblocks[0]);
+        }
+
+    }
+
+};
+
+BSWG.NNTourny.prototype.shipLoaded = function(ccblock) {
+
+    if (!this.curSeq) {
+        return;
+    }
+
+    if (this.ccsLoaded >= this.ccblocks.length) {
+        console.log("NNTourny: Too many ships loaded");
+        return;
+    }
+
+    for (var i=0; i<this.ccblocks.length; i++) {
+        if (!this.ccblocks[i] && ccblock.enemy_type_id === this.shipIDs[this.curSeq[i]]) {
+            this.ccsLoaded += 1;
+            this.ccblocks[i] = ccblock;
+            break;
+        }
+    }
+
+};
+
+BSWG.NNTourny.prototype.getAI = function(ship) {
+
+    var defaultObj = null;
+
+    var obj = BSWG.storage.load('nnai-' + ship) || defaultObj;
+
+    return obj;
+
+};
+
+BSWG.NNTourny.prototype.saveAI = function(ship, json) {
+
+    BSWG.storage.save('nnai-' + ship, json);
+
+};
+
+BSWG.NNTourny.prototype.startBattle = function(shipIndexes) {
+
+    var spawns = [];
+    for (var i=0; i<shipIndexes.length; i++) {
+        var e = BSWG.getEnemy(this.shipIDs[shipIndexes[i]]);
+        if (e && e.obj) {
+            spawns.push([e.obj, Math.random()*(this.maxLevel - this.minLevel) + this.minLevel])    
+        }
+        else {
+            return;
+        }
+    }
+    
+    BSWG.componentList.clear();
+    BSWG.game.spawnEnemies(spawns);
+    BSWG.game.battleMode = true;
+    this.inBattle = true;
+
+};
+
+BSWG.NNTourny.prototype.resetAI = function() {
+
+    // ??? delete files instead?
+
+};
+
+BSWG.NNTourny.prototype.stop = function () {
+
+    BSWG.NNActiveTourny = null;
+    BSWG.render.aiTrainMode = false;
+    BSWG.game.changeScene(BSWG.SCENE_GAME2, {}, '#000', 0.25);
+
+};
+
+BSWG.NNActiveTourny = null;
+
+///
 
 
 BSWG.ai = new function() {

@@ -749,11 +749,11 @@ BSWG.game = new function(){
             return;
         }
 
-        if (this.scene !== BSWG.SCENE_TITLE && (!this.ccblock || this.ccblock.destroyed)) {
+        if (this.scene !== BSWG.SCENE_TITLE && (!this.ccblock || this.ccblock.destroyed) && !BSWG.NNActiveTourny) {
             return;
         }
 
-        var p = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetWorldCenter().clone() : new b2Vec2(0, 0);
+        var p = this.scene !== BSWG.SCENE_TITLE && !BSWG.NNActiveTourny ? this.ccblock.obj.body.GetWorldCenter().clone() : new b2Vec2(0, 0);
         var arange = Math.PI / 4;
         var minr = 40.0, maxr = 67.5;
 
@@ -765,7 +765,7 @@ BSWG.game = new function(){
         if (this.scene === BSWG.SCENE_TITLE) {
             minr = maxr = 0;
         }
-        var v = this.scene !== BSWG.SCENE_TITLE ? this.ccblock.obj.body.GetLinearVelocity().clone() : new b2Vec2(0, 0);
+        var v = this.scene !== BSWG.SCENE_TITLE && !BSWG.NNActiveTourny ? this.ccblock.obj.body.GetLinearVelocity().clone() : new b2Vec2(0, 0);
         var a = Math.atan2(v.y, v.x);
 
         var self = this;
@@ -798,14 +798,23 @@ BSWG.game = new function(){
                             var _a = (i/1) * Math.PI;
                             p2 = new b2Vec2(Math.cos(_a) * 32, Math.sin(_a) * 32);
                         }
+                        else if (BSWG.NNActiveTourny) {
+                            var _a = (i/1) * Math.PI;
+                            var _r = Math.random() * 30;
+                            p2 = new b2Vec2(Math.cos(_a) * _r, Math.sin(_a) * _r);
+                        }
 
                         aiship = BSWG.componentList.load(list[i][0], {p: p2, a: Math._random() * 2.0 * Math.PI});
                         if (aiship) {
                             aiship.enemyLevel = list[i][1];
                             aiship.title = list[i][0].title;
+                            aiship.enemy_type_id = list[i][0].enemy_type_id;
                             window.setTimeout(function(ais){
                                 return function() {
-                                    ais.reloadAI();
+                                    ais.reloadAI(BSWG.NNActiveTourny ? BSWG.NNActiveTourny.getAI(ais.enemy_type_id) : null);
+                                    if (BSWG.NNActiveTourny) {
+                                        BSWG.NNActiveTourny.shipLoaded(ais);
+                                    }
                                     if (BSWG.game.scene === BSWG.SCENE_GAME1) {
                                         for (var i=0; i<BSWG.componentList.compList.length; i++) {
                                             var C = BSWG.componentList.compList[i];
@@ -2081,6 +2090,10 @@ BSWG.game = new function(){
 
         BSWG.render.startRenderer(function(dt, time){
 
+            if (BSWG.NNActiveTourny) {
+                BSWG.NNActiveTourny.update();
+            }
+
             if (self.inZone && self.inZone.bossDefeated) {
                 self.inZone.safe = true;
             }
@@ -2291,6 +2304,19 @@ BSWG.game = new function(){
 
                 case BSWG.SCENE_GAME1:
                 case BSWG.SCENE_GAME2:
+                    if (BSWG.NNActiveTourny) {
+                        self.panPosTime -= dt;
+                        var ret = BSWG.componentList.allCCs();
+                        if (ret.length >= 1) {
+                            var p = ret[0].p().clone();
+                            //p.x += ret[1].p().x;// + ret[2].p().x;
+                            //p.y += ret[1].p().y;// + ret[2].p().y;
+                            //p.x /= 2;//3.0;
+                            //p.y /= 2;//3.0;
+                            self.cam.panTo(dt*10.0, p);
+                        }
+                        break;
+                    }
                     self.editCam = self.ccblock && (self.editMode || self.storeMode);
                     if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause)) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
@@ -3488,6 +3514,7 @@ BSWG.game = new function(){
                     BSWG.render.setCustomCursor(true);
                     ss.newScene = null
                     t = 1.0;
+
                 }
                 else if (ss.timeIn > 0) {
                     ss.timeIn -= dt;
@@ -3498,6 +3525,9 @@ BSWG.game = new function(){
                 }
                 else {
                     self.switchScene = null;
+                    if (BSWG.NNActiveTourny) {
+                        BSWG.NNActiveTourny.ready = true;
+                    }
                 }
 
                 if (t > 0.0) {

@@ -184,7 +184,7 @@ BSWG.render = new function() {
     this.envMapParam = /*THREE.CACHE(*/new THREE.Vector4(0,0,0,0);//);
     this.envMapT = this.tileDark = 0.0;
     this.screenShake = 0.0;
-    this.aiTrainMode = true;
+    this.aiTrainMode = false;
 
     var old = THREE.Math.generateUUID;
     THREE.Math.generateUUID = function() {
