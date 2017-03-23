@@ -768,6 +768,10 @@ BSWG.game = new function(){
         var v = this.scene !== BSWG.SCENE_TITLE && !BSWG.NNActiveTourny ? this.ccblock.obj.body.GetLinearVelocity().clone() : new b2Vec2(0, 0);
         var a = Math.atan2(v.y, v.x);
 
+        if (BSWG.NNActiveTourny) {
+            a = Math.random() * Math.PI * 2;
+        }
+
         var self = this;
 
         this.spawnCount += list.length;
@@ -799,7 +803,7 @@ BSWG.game = new function(){
                             p2 = new b2Vec2(Math.cos(_a) * 32, Math.sin(_a) * 32);
                         }
                         else if (BSWG.NNActiveTourny) {
-                            var _a = (i/1) * Math.PI;
+                            var _a = a + (i/1) * Math.PI;
                             var _r = Math.random() * 30;
                             p2 = new b2Vec2(Math.cos(_a) * _r, Math.sin(_a) * _r);
                         }

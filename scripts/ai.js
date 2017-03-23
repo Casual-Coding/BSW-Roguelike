@@ -523,6 +523,10 @@ BSWG.NNTourny.prototype.update = function() {
 
     if (!this.inBattle) {
         this.curSeq = this.sequence[0];
+        if (!this.curSeq) {
+            this.stop();
+            return;
+        }
         this.ccblocks = new Array(this.curSeq.length);
         this.ccsLoaded = 0;
         this.matchTime = 0.0;
