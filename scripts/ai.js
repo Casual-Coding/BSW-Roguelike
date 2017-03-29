@@ -114,30 +114,299 @@ BSWG.getEnemy = function(type, statsOnly) {
     };
 };
 
+//////
+
+BSWG.aiController = function (type, args) {
+
+    for (var key in args) {
+        this[key] = args[key];
+    }
+
+    this.type = type;
+    this.lastDT = 1.0/60.0;
+    this.tracker = false;
+
+    switch (type) {
+
+        case 'turret':
+            this.oradius = this.radius || this.comp.obj.radius;
+            this.forwardOffset = this.forwardOffset || 0.0;
+            this.reverse = this.reverse || false;
+            this.limit = this.limit || Math.PI/2.05;
+            break;
+
+        case 'tracker':
+            this.tracker = true;
+        case 'movement':
+            this.hinge = this.hinge || false;
+            this.oradius = this.radius || this.comp.obj.radius;
+            this.revRadius = this.revRadius || (this.oradius * 2.0);
+            this.forwardOffset = this.forwardOffset || 0.0;
+            this.charge = this.charge || false;
+            this.exclusive = this.exclusive || false;
+            this.predComp = this.predComp || this.comp;
+
+            this.reached = false;
+            this.spinner = this.spinner || false;
+
+            this.aDists = [];
+            this.pDists = [];
+            break;
+
+        case 'radius':
+            this.list = [];
+            this.first = null;
+            this.found = false;
+            break;
+
+        default:
+            break;
+    }
+
+}
+
+BSWG.aiController.prototype.track = function (p, keyDown, left, right, keyFire) { // Stateless
+
+    if (!this.comp || !this.comp.obj || !this.comp.obj.body || !p) {
+        return;
+    }
+
+    this.lastDT = BSWG.render.dt;
+
+    left = left || BSWG.KEY.LEFT;
+    right = right || BSWG.KEY.RIGHT;
+
+    var mp = this.comp.obj.body.GetWorldCenter();
+    var distance = Math.distVec2(mp, p);
+    var radius = this.oradius;
+
+    var angDiff = Math.angleBetween(mp, p) - (this.comp.obj.body.GetAngleWrapped() + this.comp.frontOffset + this.forwardOffset);
+    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
+
+    if (angDiff > 0.0) {
+        keyDown[left] = true;
+    }
+    else if (angDiff < 0.0) {
+        keyDown[right] = true;
+    }
+    if (keyFire) {
+        keyDown[keyFire] = true;
+    }
+
+};
+
+BSWG.aiController.prototype.computeVel = function(dists) {
+    if (dists.length < 2) {
+        return 0.0;
+    }
+    else {
+        var vels = 0, count = 0;
+        for (var i=1; i<dists.length; i++) {
+            vels += (dists[i] - dists[i-1]) / this.lastDT;
+            count += 1.0;
+        }
+        return vels / count;
+    }
+};
+
+BSWG.aiController.prototype.timeStop = function (tmag, ptype) {
+
+    var mag = Math.abs(this.computeVel(ptype === 'vel' ? this.pDists : this.aDists));
+
+    var damping = this.comp.obj.body.GetAngularDamping();
+    if (!ptype || ptype === 'vel') {
+        damping = this.comp.obj.body.GetLinearDamping();
+    }
+
+    damping = (1/(1 + damping));
+
+    if (mag < 0.000001 || tmag < 0.000001) {
+        return 1000000.0;
+    }
+
+    var ret = Math.log(tmag/mag) / Math.log(damping);
+    if (isNaN(ret) || !(ret>0)) {
+        return 1500000.0;
+    }
+    return ret;
+
+};
+
+BSWG.aiController.prototype.timeTarget = function (dist, ptype) {
+
+    var mag = Math.abs(this.computeVel(ptype === 'vel' ? this.pDists : this.aDists));
+
+    var damping = this.comp.obj.body.GetAngularDamping();
+    if (!ptype || ptype === 'vel') {
+        damping = this.comp.obj.body.GetLinearDamping();
+    }
+
+    damping = (1/(1 + damping));
+
+    if (Math.abs(mag) < 0.001) {
+        return 1500000.0;
+    }
+
+    var ld = Math.log(damping);
+    var ret = Math.log(dist*ld/mag + 1.0) / ld;
+    if (isNaN(ret) || !(ret>0)) {
+        return 1500000.0;
+    }
+    return ret;
+};
+
+BSWG.aiController.prototype.predict = function (t, ptype) {
+
+    var mag = this.computeVel(ptype === 'vel' ? this.pDists : this.aDists);
+
+    var damping = this.comp.obj.body.GetAngularDamping();
+    if (!ptype || ptype === 'vel') {
+        damping = this.comp.obj.body.GetLinearDamping();
+    }
+
+    damping = (1/(1 + damping));
+
+    return mag * (Math.pow(damping, t) - 1.0) / Math.log(damping);
+
+};
+
+BSWG.aiController.prototype.moveTo = function (p, keyDown, left, right, forward, reverse) {
+
+    this.lastDT = BSWG.render.dt;
+
+    if (!this.comp || !this.comp.obj || !this.comp.obj.body || !p) {
+        return;
+    }
+
+    left = left || BSWG.KEY.LEFT;
+    right = right || BSWG.KEY.RIGHT;
+    if (!this.tracker) {
+        forward = forward || BSWG.KEY.UP;
+    }
+
+    var doReverse = false;
+    var mp = this.comp.obj.body.GetWorldCenter();
+    var distance = Math.distVec2(mp, p);
+
+    if (this.charge) {
+        p = p.clone();
+        p.x += (p.x - mp.x) / distance * this.oradius * 2;
+        p.y += (p.y - mp.y) / distance * this.oradius * 2;
+        distance = Math.distVec2(mp, p);
+    }
+
+    var radius = this.oradius;
+
+    this.distance = distance;
+
+    var vel = this.predComp.obj.body.GetLinearVelocity().clone();
+    var vlen = Math.lenVec2(vel);
+
+    if (vlen > 1.0) {
+        vel.x /= vlen;
+        vel.y /= vlen;
+
+        var t = Math.min(4, this.timeTarget(distance, 'vel'));
+        if (this.charge) {
+            t = Math.max(t, 1);
+        }
+        var len2 = this.predict(t, 'vel');
+
+        vel.x = p.x + vel.x * len2;
+        vel.y = p.y + vel.y * len2;
+    }
+    else {
+        vel.x = p.x;
+        vel.y = p.y;
+    }
+
+    var angDiff = Math.angleBetween(mp, vel) - (this.comp.obj.body.GetAngleWrapped() + this.comp.frontOffset + this.forwardOffset);
+    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff));
+    if (Math.abs(angDiff) > Math.PI*0.5 && reverse && distance < this.revRadius && !this.tracker) {
+        doReverse = true;
+        angDiff = Math.atan2(Math.sin(angDiff+Math.PI), Math.cos(angDiff+Math.PI));
+    }
+
+    this.angleDistance = angDiff;
+
+    this.aDists.push(angDiff);
+    this.pDists.push(distance);
+    while (this.aDists.length > 10) {
+        this.aDists.splice(0, 1);
+    }
+    while (this.pDists.length > 10) {
+        this.pDists.splice(0, 1);
+    }
+
+    this.reached = this.tracker ? (Math.abs(angDiff) < Math.PI/90) : (distance <= radius);
+
+    if (distance > radius || this.tracker) {
+        if (this.spinner) {
+            if (this.computeVel(this.aDists) > 0) {
+                keyDown[right] = true;
+            }
+            else {
+                keyDown[left] = true;
+            }
+        }
+        else if (Math.abs(angDiff) > Math.PI/45) {
+            var ad2 = angDiff + this.predict(1.0, 'ang');
+            if (ad2 > 0.0) {
+                keyDown[left] = true;
+            }
+            else if (ad2 < 0.0) {
+                keyDown[right] = true;
+            }
+        }
+        if (!this.tracker && (!(this.exclusive && (keyDown[left] || keyDown[right])) || this.spinner)) {
+            var tt = this.timeTarget(distance, 'vel');
+            if (Math.abs(angDiff) < Math.PI/4 && (tt > this.timeStop(0.2, 'vel') || (tt>10.0 && Math.abs(angDiff) < Math.PI/12) || this.charge)) {
+                keyDown[doReverse ? reverse : forward] = true;
+            }
+        }
+    }
+
+    this.angDist = angDiff;
+
+};
+
+
+//////
+
 BSWG.NNAI = {
     PAIN_THRESHOLD: 0.05,        // measured in hp/total ship max hp
     PLEASURE_THRESHOLD: 0.01,   // measured in hp/total ship max hp
     CONSTANT_PAIN: 0.001,       // per/second
     RANGE_PAIN_MUL: 5,          //
-    CLOSE_PLEASURE: 0.0001,
-    CLOSE_RANGE: 30,
 
-    HISTORY_LEN: 300,           // in frames (60=4s)
+    HISTORY_LEN: 60,            // in frames (60=4s)
     THINK_SKIP: 3,              // in frames (3 = 1/4)
 
     SENSOR_RANGE: 100,          // in world units
 
-    LEARN_RATE: 0.05,
+    LEARN_RATE: 0.3,
 
-    BUTTON_ACTIVIATION: 0.5
+    DEFAULT_KEY_PROB: 0.5
 };
 
 
-BSWG.neuralAI = function(shipBlocks, networkJSON) {
+BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
 
     this.shipBlocks = shipBlocks || [];
     this.ccblock = null;
     this.allKeys = {};
+    
+    this.aiDesc = deepcopy(aiDesc || {});
+    this.states = this.aiDesc.states || [];
+
+    var keyProb = this.aiDesc.keyProbability || {}
+    this.keyProb = {};
+    for (var key in keyProb) {
+        if (BSWG.KEY[key]) {
+            this.keyProb[BSWG.KEY[key]] = keyProb[key];
+        }
+    }
+
     for (var i=0; i<this.shipBlocks.length; i++) {
         var C = this.shipBlocks[i];
         if (C && C.type === 'cc') {
@@ -154,12 +423,82 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
         this.keyList.push(parseInt(key));
     }
     this.keyList.sort();
-    if (!this.keyList.length) {
-        this.keyList.push(BSWG.KEY.W);
+
+    var totalProb = 0;
+    this.maxStateProb = 0;
+    for (var i=0; i<this.states.length; i++) {
+        var S = this.states[i];
+        totalProb += S.probability;
+        this.maxStateProb = Math.max(this.maxStateProb, S.probability);
+        S.accProb = totalProb;
+        S.controller = null;
+        if (S.type === 'movement') {
+            S.controller = new BSWG.aiController(
+                'movement',
+                {
+                    comp: this.ccblock,
+                    radius: S.radius || 5,
+                    charge: true,
+                    hinge: true
+                }
+            );
+            S.maxDistance = S.maxDistance || 30.0;
+            S.minDistance = S.minDistance || 0.0;
+            if (S.left && BSWG.KEY[S.left]) {
+                this.keyProb[BSWG.KEY[S.left]] = 0.0;
+            }
+            if (S.right && BSWG.KEY[S.right]) {
+                this.keyProb[BSWG.KEY[S.right]] = 0.0;
+            }
+            if (S.forward && BSWG.KEY[S.forward]) {
+                this.keyProb[BSWG.KEY[S.forward]] = 0.0;
+            }
+            if (S.reverse && BSWG.KEY[S.reverse]) {
+                this.keyProb[BSWG.KEY[S.reverse]] = 0.0;
+            }
+        }
+        else if (S.type === 'tracker') {
+            S.controller = new BSWG.aiController(
+                'turret',
+                {
+                    comp: this.ccblock,
+                    limit: Math.PI * 2
+                }
+            );
+            S.maxDistance = S.maxDistance || 5.0;
+            S.minDistance = S.minDistance || 0.0;
+            if (S.left && BSWG.KEY[S.left]) {
+                this.keyProb[BSWG.KEY[S.left]] = 0.0;
+            }
+            if (S.right && BSWG.KEY[S.right]) {
+                this.keyProb[BSWG.KEY[S.right]] = 0.0;
+            }
+            if (S.fire && BSWG.KEY[S.fire]) {
+                this.keyProb[BSWG.KEY[S.fire]] = 0.0;
+            }
+        }
+        else if (S.type === 'back-up') {
+            if (S.reverse && BSWG.KEY[S.reverse]) {
+                this.keyProb[BSWG.KEY[S.reverse]] = 0.0;
+            }
+        }
+    }
+    if (totalProb > 0) {
+        for (var i=0; i<this.states.length; i++) {
+            this.states[i].accProb /= totalProb;
+        }
     }
 
-    this.outputLength = this.keyList.length;
-    this.inputLength = 2 + 3 + 3;
+    for (var i=0; i<this.keyList.length; i++) {
+        if (this.keyProb[this.keyList[i]] <= 0.001) {
+            this.keyList.splice(i, 1);
+            i --;
+            continue;
+        }
+    }
+
+    this.outputLength = this.keyList.length + 2 + this.states.length;
+    this.inputLength = 2 + 2 + 2 + 3 + 3;
 
     this.network = null;
     this.history = null;
@@ -170,6 +509,9 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
     this.pain = 0;
     this.pleasure = 0;
     this.totalPain = 0;
+
+    this.recentPain = 0;
+    this.recentPleasure = 0;
 
     this.history = [];
 
@@ -186,7 +528,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON) {
 BSWG.neuralAI.prototype.reinit = function() {
 
     this.history = [];
-    this.network = new synaptic.Architect.LSTM(this.inputLength, 10, this.outputLength);
+    this.network = new synaptic.Architect.Perceptron(this.inputLength, this.inputLength, 10, this.outputLength, this.outputLength);
 
 };
 
@@ -247,7 +589,15 @@ BSWG.neuralAI.prototype.setEnemy = function(ccblock) {
 
 BSWG.neuralAI.prototype.varPower = function (val, variance, power) {
 
-    return Math.clamp(Math.pow(val, power) + Math.random() * variance - 0.5 * variance, 0., 1.);
+    if (val instanceof Array) {
+        var ret = new Array(val.length);
+        for (var i=0; i<ret.length; i++) {
+            ret[i] = this.varPower(val[i], variance, power);
+        }
+        return ret;
+    }
+    
+    return Math.clamp(Math.pow(val, power) + Math._random() * variance - 0.5 * variance, 0., 1.);
 
 };
 
@@ -265,10 +615,6 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     var t = (this.enemyCC && this.enemyCC.p()) ? (Math.distVec2(this.enemyCC.p(), this.ccblock.p()) / BSWG.NNAI.SENSOR_RANGE) : 0;
     mul = BSWG.NNAI.RANGE_PAIN_MUL * t + 1;
 
-    if (this.enemyCC && this.enemyCC.p() && Math.distVec2(this.enemyCC.p(), this.ccblock.p()) < BSWG.NNAI.CLOSE_RANGE) {
-        this.pleasure += BSWG.NNAI.CLOSE_PLEASURE * dt;
-    }
-
     var _pain = pain + BSWG.NNAI.CONSTANT_PAIN * dt * mul;
     this.totalPain += _pain;
     this.pain += _pain;
@@ -284,29 +630,24 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     }
     this.frameN = 0;
 
+    this.recentPain = this.pain * 0.1 + this.recentPain * 0.9;
+    this.recentPleasure = this.pleasure * 0.1 + this.recentPleasure * 0.9;
+
     var inPain = this.pain > BSWG.NNAI.PAIN_THRESHOLD;
     var inPleasure = this.pleasure > BSWG.NNAI.PLEASURE_THRESHOLD;
 
-    if (inPain && inPleasure) {
-        if (this.pleasure > this.pain) {
-            inPain = false;
-        }
-        else {
-            inPleasure = false;
-        }
-    }
-
     if (inPain) {
 
-        var K = (Math.clamp(this.pain*5, 0, 20) + 3) * 2;
+        var K = (Math.clamp(this.pain*5, 0, 20) + 3) * 10;
+        var F = Math.pow(this.pain * 2, 0.5) * this.history.length + 1;
         var rand = new Array(this.outputLength);
         for (var f=0; f<K; f++) {
-            var hlen = this.history.length;
-            for (var i=0; i<hlen; i++) {
+            var hlen = Math.floor(Math.min(F, this.history.length));
+            for (var i=(this.history.length-hlen); i<this.history.length; i++) {
                 for (var k=0; k<this.outputLength; k++) {
                     rand[k] = Math._random();
                 }
-                this.network.activate(this.history[i][0]);
+                this.network.activate(this.varPower(this.history[i][0], 0.0, 1));
                 this.network.propagate(BSWG.NNAI.LEARN_RATE, rand);
             }
         }
@@ -315,17 +656,16 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         console.log(this.ccblock.id + ' PAIN: ' + this.pain);
 
         this.pain = 0.0;
-        this.pleasure = 0.0;
-        this.history.length = 0;
     }
 
     if (inPleasure) {
 
-        var K = (Math.clamp(this.pleasure*5, 20, 1) + 3) * 6;
+        var K = (Math.clamp(this.pleasure*5, 20, 1) + 3) * 15;
+        var F = Math.pow(this.pleasure * 2, 0.5) * this.history.length + 1;
         for (var f=0; f<K; f++) {
-            var hlen = this.history.length;
-            for (var i=0; i<hlen; i++) {
-                this.network.activate(this.history[i][0]);
+            var hlen = Math.floor(Math.min(F, this.history.length));
+            for (var i=(this.history.length-hlen); i<this.history.length; i++) {
+                this.network.activate(this.varPower(this.history[i][0], 0.0, 1));
                 this.network.propagate(BSWG.NNAI.LEARN_RATE, this.history[i][1]);
             }
         }
@@ -333,8 +673,6 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         console.log(this.ccblock.id + ' PLEASURE: ' + this.pleasure);
 
         this.pleasure = 0.0;
-        this.pain = 0.0;
-        this.history.length = 0;
     }
 
     var input = [];
@@ -343,16 +681,25 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     var p1 = null, p2 = null;
     if (this.enemyCC && (p1=this.enemyCC.p()) && (p2=this.ccblock.p())) {
-        input.push(this.varPower(Math.clamp(Math.distVec2(p1, p2) / BSWG.NNAI.SENSOR_RANGE, 0, 1), 0.08, 0.3));
-        input.push(this.varPower(Math.angleBetween(p1, p2) / (Math.PI * 2) + 0.5, 0.15, 0.25));
+        input.push(this.varPower(Math.clamp(Math.distVec2(p1, p2) / BSWG.NNAI.SENSOR_RANGE, 0, 1), 0.01, 0.75));
+        input.push(this.varPower(Math.angleDist(Math.angleBetween(p1, p2), this.ccblock.obj.body.GetAngle()) / (Math.PI * 2) + 0.5, 0.01, 0.75));
+        var v1 = this.enemyCC.obj.body.GetLinearVelocity();
+        var v2 = this.ccblock.obj.body.GetLinearVelocity();
+        input.push(Math.clamp((v1.x - v2.x) / 30 + 0.5, 0, 1));
+        input.push(Math.clamp((v1.y - v2.y) / 30 + 0.5, 0, 1));
     }
     else {
+        input.push(0);
+        input.push(0);
         input.push(0);
         input.push(0);
     }
     p1 = p2 = null;
 
     // Ship status
+
+    input.push(Math.clamp(this.recentPain, 0, 1));
+    input.push(Math.clamp(this.recentPleasure, 0, 1));
 
     var energy = this.ccblock.energy / this.ccblock.maxEnergy;
     input.push(this.varPower(energy ? energy : 0.0, 0.05, 0.5));
@@ -374,8 +721,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         }
     }
 
-    input.push(this.varPower(Math.clamp(totalHP / totalMaxHP, 0, 1), 0.05, 0.5));
-    input.push(this.varPower(Math.clamp(totalEMP / totalMaxEMP, 0, 1), 0.05, 0.5));
+    input.push(this.varPower(Math.clamp(totalHP / totalMaxHP, 0, 1), 0.01, 0.5));
+    input.push(this.varPower(Math.clamp(totalEMP / totalMaxEMP, 0, 1), 0.01, 0.5));
 
     // Sensors
 
@@ -413,7 +760,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
             }
 
             // distance
-            input.push(this.varPower(ret.d / BSWG.NNAI.SENSOR_RANGE, 0.08, 0.3));
+            input.push(this.varPower(ret.d / BSWG.NNAI.SENSOR_RANGE, 0.01, 1.0));
         }
 
         p = p2 = ret = null;
@@ -430,9 +777,65 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         this.history.splice(0, 1);
     }
 
-    for (var i=0; i<output.length; i++) {
-        if (i < this.keyList.length) {
-            this.keys[this.keyList[i]] = output[i] > BSWG.NNAI.BUTTON_ACTIVIATION ? true : false;
+    output = this.varPower(output, 0.0, 0.65);
+
+    for (var key in this.keys) {
+        this.keys[key] = false;
+    }
+
+    for (var i=0; i<output.length && i<this.keyList.length; i++) {
+        var key = this.keyList[i];
+        var prob = this.keyProb[key] >= 0 ? this.keyProb[key] : BSWG.NNAI.DEFAULT_KEY_PROB;
+        this.keys[key] = output[i] > (1-prob) ? true : false;
+    }
+
+    var K = this.keyList.length;
+    var ep = this.enemyCC.p();
+    this._tpos = null;
+    var state = 0;
+    for (var i=0; i<this.states.length; i++) {
+        if (output[K+i]*(this.states[i].probability / this.maxStateProb) > output[K+state]*(this.states[state].probability / this.maxStateProb)) {
+            state = i;
+        }
+    }
+
+    var S = this.states[state];
+    if (S) {
+        var K2 = K + this.states.length;
+        if ((S.type === 'movement') && ep) {
+            var a = output[K2+0] * Math.PI * 2.0;
+            var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
+            S.controller.moveTo(
+                this._tpos = new b2Vec2(
+                    ep.x + Math.cos(a) * r,
+                    ep.y + Math.sin(a) * r
+                ),
+                this.keys,
+                BSWG.KEY[S.left] || null,
+                BSWG.KEY[S.right] || null,
+                BSWG.KEY[S.forward] || null,
+                BSWG.KEY[S.reverse] || null
+            );
+        }
+        else if ((S.type === 'tracker') && ep) {
+            var a = output[K2+0] * Math.PI * 2.0;
+            var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
+            S.controller.track(
+                this._tpos = new b2Vec2(
+                    ep.x + Math.cos(a) * r,
+                    ep.y + Math.sin(a) * r
+                ),
+                this.keys,
+                BSWG.KEY[S.left] || null,
+                BSWG.KEY[S.right] || null,
+                BSWG.KEY[S.fire] || null
+            );
+        }
+        else if ((S.type === 'back-up') && ep) {
+            var key = BSWG.KEY[S.reverse] || null;
+            if (key) {
+                this.keys[key] = true;
+            }
         }
     }
 
@@ -441,6 +844,35 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 };
 
 BSWG.neuralAI.prototype.debugRender = function(ctx, dt) {
+
+    var p1 = null, p2 = null;
+    if (this._tpos) {
+        p1 = BSWG.game.cam.toScreen(BSWG.render.viewport, this._tpos.clone());
+    }
+    if (this.ccblock && this.ccblock.p()) {
+        p2 = BSWG.game.cam.toScreen(BSWG.render.viewport, this.ccblock.p().clone());
+    }
+
+    if (p1 && p2) {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = '#f00';
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    if (p2 && this.history.length > 0) {
+        var str = [];
+        var input = this.history[this.history.length-1][0];
+        for (var i=0; i<input.length; i++) {
+            str.push(Math.floor(input[i]*100));
+        }
+        str = str.join(", ");
+        ctx.font = '11px Orbitron';
+        ctx.fillStyle = '#f0f';
+        ctx.fillText(str, p2.x, p2.y);
+    }
 
 };
 
@@ -459,6 +891,13 @@ BSWG.neuralAI.prototype.destroy = function() {
     this.shipBlocks = null;
     this.network = null;
     this.keys = {};
+    for (var i=0; i<this.states.length; i++) {
+        this.states[i].controller = null;
+        this.states[i] = null;
+    }
+    this.states = null;
+    this.keyProb = null;
+    this.aiDesc = null;
 
 };
 
@@ -661,7 +1100,7 @@ BSWG.NNTourny.prototype.startBattle = function(shipIndexes) {
     for (var i=0; i<shipIndexes.length; i++) {
         var e = BSWG.getEnemy(this.shipIDs[shipIndexes[i]]);
         if (e && e.obj) {
-            spawns.push([e.obj, Math.random()*(this.maxLevel - this.minLevel) + this.minLevel])    
+            spawns.push([e.obj, Math._random()*(this.maxLevel - this.minLevel) + this.minLevel])    
         }
         else {
             return;

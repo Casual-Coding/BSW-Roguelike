@@ -400,6 +400,10 @@ BSWG.component_CommandCenter = {
         else {
             this.usedSpecial = this.usedSpecialT = this.usedSpecialClr = this.usedSpecialName = null;
         }
+
+        if (this.aiNN && BSWG.game.scene === BSWG.SCENE_GAME2) {
+            this.aiNN.debugRender(ctx, dt);
+        }
     },
 
     warpOut: function(slow) {
@@ -548,11 +552,6 @@ BSWG.component_CommandCenter = {
 
     updateAI: function(dt) {
 
-        if (this.aiLoadNetwork) {
-            this.aiNN = new BSWG.neuralAI(this.aiLoadNetwork.shipBlocks, this.aiLoadNetwork.networkJSON);
-            this.aiLoadNetwork = null;
-        }
-
         var patrolOnly = BSWG.game.scene !== BSWG.SCENE_TITLE && (!BSWG.game.ccblock || !BSWG.game.ccblock.obj || !BSWG.game.ccblock.obj.body || BSWG.game.ccblock.destroyed);
 
         if (this === BSWG.game.ccblock && BSWG.game.battleMode && BSWG.game.bossFight) {
@@ -572,6 +571,10 @@ BSWG.component_CommandCenter = {
         }
 
         if (this.aiNN && !this.aiPaused) {
+
+            if (BSWG.game.ccblock && !BSWG.NNActiveTourny && BSWG.game.scene !== BSWG.SCENE_TITLE) {
+                this.aiNN.setEnemy(BSWG.game.ccblock);
+            }
 
             this.aiNN.update(dt, this.pain, this.pleasure);
             this.pain = this.pleasure = 0.0;
@@ -645,10 +648,21 @@ BSWG.component_CommandCenter = {
     reloadAI: function (aiLoadNetwork, paused) {
 
         this.removeAI();
-        this.aiLoadNetwork = {
-            shipBlocks: BSWG.componentList.shipBlocks(this),
-            networkJSON: aiLoadNetwork || null
-        };
+        var aiDesc = null;
+        try {
+            aiDesc = JSON.parse((this.aiStr||"").replace(/\n/g, " ").replace(/\r/g, " ").replace(/\t/g, " ")) || null;
+        }
+        catch (e) {
+            console.log(this.aiStr);
+            BSWG.ai.logError("Error parsing AI JSON:");
+            BSWG.ai.logError(e.stack);
+            aiDesc = null;
+        }
+        this.aiNN = new BSWG.neuralAI(
+            BSWG.componentList.shipBlocks(this),
+            aiLoadNetwork || null,
+            aiDesc
+        );
         this.aiPaused = !!paused;
         return true;
 

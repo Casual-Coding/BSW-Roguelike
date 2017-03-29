@@ -2322,7 +2322,7 @@ BSWG.game = new function(){
                         break;
                     }
                     self.editCam = self.ccblock && (self.editMode || self.storeMode);
-                    if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause)) {
+                    if (self.ccblock && !self.ccblock.destroyed && !(self.bossFight && self.dialogPause) && self.ccblock.p()) {
                         var wheel = BSWG.input.MOUSE_WHEEL_ABS() - wheelStart;
                         var toZ = Math.clamp(0.1 * Math.pow(1.25, wheel), 0.01, 0.25);
 
