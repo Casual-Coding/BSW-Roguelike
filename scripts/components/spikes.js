@@ -90,6 +90,8 @@ BSWG.component_Spikes = {
         this.toothSize = [0.8, 1.6, 2.8, 4.0][this.size-1];
         this.pike      = args.pike || false;
 
+        this.mwepRating = this.size * this.size;
+
         this.maxHP = this.size * 90 / 3;
 
         if (this.pike) {

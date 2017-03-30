@@ -46,6 +46,8 @@ BSWG.component_Blaster = {
         this.size = args.size || 1;
         this.energyShot = [0.5, 2.0][this.size-1];
 
+        this.pwepRating = this.size * this.size;
+
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = Math.scalePolyZC([

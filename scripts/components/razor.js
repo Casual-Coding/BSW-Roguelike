@@ -52,6 +52,8 @@ BSWG.component_Razor = {
 
         var size = this.size = args.size || 1;
 
+        this.mwepRating = this.size * 2;
+
         this.maxHP = 60 * this.size;
 
         var verts1 = [

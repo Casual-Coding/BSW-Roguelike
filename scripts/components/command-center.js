@@ -236,6 +236,7 @@ BSWG.component_CommandCenter = {
         //
 
         this.totalMass = this.obj.body.GetMass();
+        this.speedRating = 0.25;
 
         this.dispKeys = {
             'left': [ 'Left', new b2Vec2(0.3 * this.width, 0.0) ],

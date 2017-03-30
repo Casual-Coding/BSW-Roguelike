@@ -49,6 +49,8 @@ BSWG.component_Railgun = {
 
         this.energySecond = 4.0;
 
+        this.pwepRating = this.energySecond * this.railgunChargeTime;
+
         var offsetAngle = this.offsetAngle = 0.0;
 
         var size = this.size = (args.size || 1);

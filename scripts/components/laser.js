@@ -44,6 +44,8 @@ BSWG.component_Laser = {
 
         this.energySecond = 7.5;
 
+        this.pwepRating = 8;
+
         var offsetAngle = this.offsetAngle = 0.0;
 
         var verts = [

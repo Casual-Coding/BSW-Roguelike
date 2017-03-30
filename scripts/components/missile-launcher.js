@@ -83,6 +83,8 @@ BSWG.component_MissileLauncher = {
 
         this.energyShot = BSWG.MSL_ENERGY[this.ltype];
 
+        this.pwepRating = this.energyShot;
+
         if (this.ltype > 0) {
             this.maxHP *= 4;
         }

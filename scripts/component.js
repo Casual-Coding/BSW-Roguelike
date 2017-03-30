@@ -1897,16 +1897,24 @@ BSWG.componentList = new function () {
         var CL = this.compList;
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type == 'cc') {
+                CL[i].speedRating = 0.25;
                 CL[i].totalMass = (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
                 CL[i].totalMaxHP = CL[i].maxHP || 0;
                 CL[i].energyRegen = CL[i].energyGain;
+                CL[i].pwepRating = 0;
+                CL[i].mwepRating = 0;
             }
         }
         for (var i=0; i<len; i++) {
             if (CL[i].onCC && CL[i].type != 'cc') {
+                if (CL[i].type === 'thruster') {
+                    CL[i].onCC.speedRating += CL[i].size * CL[i].size;
+                }
                 CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
                 CL[i].onCC.energyRegen += Math.max(0, CL[i].energyGain || 0.0);
                 CL[i].onCC.totalMaxHP += CL[i].maxHP || 0;
+                CL[i].pwepRating += CL[i].pwepRating || 0;
+                CL[i].mwepRating += CL[i].mwepRating || 0;
             }
         }
 

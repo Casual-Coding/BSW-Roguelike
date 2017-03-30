@@ -64,6 +64,8 @@ BSWG.component_SawBlade = {
         this.nteeth    = [7, 8, 9][this.size-1];
         this.toothSize = [0.4, 0.8, 1.4][this.size-1];
 
+        this.mwepRating = 3 * this.size * this.size;
+
         var wheelVerts = new Array(this.nteeth);
         for (var i=0; i<this.nteeth; i++) {
             var a = i/this.nteeth * Math.PI * 2.0;

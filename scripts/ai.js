@@ -374,22 +374,10 @@ BSWG.aiController.prototype.moveTo = function (p, keyDown, left, right, forward,
 //////
 
 BSWG.NNAI = {
-    PAIN_THRESHOLD: 0.05,        // measured in hp/total ship max hp
-    PLEASURE_THRESHOLD: 0.01,   // measured in hp/total ship max hp
-    CONSTANT_PAIN: 0.001,       // per/second
-    RANGE_PAIN_MUL: 5,          //
-
-    HISTORY_LEN: 60,            // in frames (60=4s)
-    THINK_SKIP: 3,              // in frames (3 = 1/4)
-
-    SENSOR_RANGE: 100,          // in world units
-
-    LEARN_RATE: 0.025,
-    LEARN_ITERATIONS: 1000
-
-    DEFAULT_KEY_PROB: 0.5
+    SENSOR_RANGE: 100, // in world units
+    LEARN_RATE: 0.1,
+    LEARN_ITERATIONS: 5000
 };
-
 
 BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
 
@@ -471,7 +459,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     }
 
     this.outputLength = this.states.length + 2;
-    this.inputLength = 2 + 2 + 2 + 3 + 3;
+    this.inputLength = 11;
 
     this.network = null;
     this.enemyCC = null;
@@ -488,6 +476,8 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     this.lastInput = null;
     this.lastOutput = null;
 
+    this.doneThisCount = 0;
+
     if (!this.load(networkJSON)) {
         this.reinit();
     }
@@ -500,7 +490,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
 
 BSWG.neuralAI.prototype.reinit = function() {
 
-    this.network = new synaptic.Architect.Perceptron(this.inputLength, this.inputLength, 10, this.outputLength, this.outputLength);
+    this.network = new synaptic.Architect.Perceptron(this.inputLength, 10, 10, 10, this.outputLength);
 
 };
 
@@ -582,15 +572,15 @@ BSWG.neuralAI.prototype.varPower = function (val, variance, power) {
 
 };
 
-Array.prototype.flatEqual = function(b) {
-    if (!b) {
+BSWG.ArrayFlatEqual = function(a, b) {
+    if (!b || !a) {
         return false;
     }
-    if (this.length !== b.length) {
+    if (a.length !== b.length) {
         return false;
     }
-    for (var i=0; i<this.length; i++) {
-        if (this[i] !== b[i]) {
+    for (var i=0; i<a.length; i++) {
+        if (a[i] !== b[i]) {
             return false;
         }
     }
@@ -603,7 +593,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         return;
     }
 
-    if (!this.ccblock || this.ccblock.destroyed || !this.ccblock.obj || !this.ccblock.obj.body) {
+    if (!this.ccblock || this.ccblock.destroyed || !this.ccblock.obj || !this.ccblock.obj.body || !this.enemyCC || this.enemyCC.destroyed || !this.enemyCC.obj || !this.enemyCC.obj.body) {
         return;
     }
 
@@ -613,23 +603,134 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     var input = [];
 
-    
+    // Enemy ship masses
+    var CC_MASS = this.enemyCC.obj.body.GetMass();
+    var mass = this.enemyCC.totalMass / CC_MASS;
+    if (!(mass > 2)) {
+        input.push(0.0);
+    }
+    else if (mass < 6) {
+        input.push(0.5);
+    }
+    else {
+        input.push(1.0);
+    }
 
+    // Enemy speed ratings
+    var tratio = this.enemyCC.speedRating / mass;
+    if (!(tratio > 1/16)) {
+        input.push(0.0);
+    }
+    else if (tratio < 1/6) {
+        input.push(0.5);
+    }
+    else {
+        input.push(1.0);
+    }
+
+    // Enemy projectile weapon ratings
+    var pwratio = (this.enemyCC.pwepRating + 1) / (this.ccblock.pwepRating + 1);
+    if (!(pwratio > 0.25)) {
+        input.push(0.0);
+    }
+    else if (pwratio < 1.0) {
+        input.push(0.5);
+    }
+    else {
+        input.push(1.0);
+    }
+
+    // Enemy mele weapon ratings
+    var mwratio = (this.enemyCC.mwepRating + 1) / (this.ccblock.mwepRating + 1);
+    if (!(mwratio > 0.25)) {
+        input.push(0.0);
+    }
+    else if (mwratio < 1.0) {
+        input.push(0.5);
+    }
+    else {
+        input.push(1.0);
+    }
+
+    // Enemy mele weapon ratings
+    var angDiff = Math.angleBetween(this.ccblock.p(), this.enemyCC.p()) + Math.PI / 4;
+    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff)) / (Math.PI * 2.0) + 0.5;
+    input.push(Math.floor(angDiff*4)/4);
+
+    // Relative velocities
+    var v1 = this.ccblock.obj.body.GetLinearVelocity().clone();
+    var v2 = this.enemyCC.obj.body.GetLinearVelocity().clone();
+    var angDiff = Math.angleBetween(v1, v2) + Math.PI / 4;
+    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff)) / (Math.PI * 2.0) + 0.5;
+    input.push(Math.floor(angDiff*4)/4);
+
+    var mag = Math.lenVec2(new b2Vec2(v1.x-v2.x, v1.y-v2.y));
+    if (!(mag > 1)) {
+        input.push(0.0);
+    }
+    else {
+        input.push(1.0);
+    }
+
+    // Ranges
+    var mag = Math.distVec2(this.ccblock.p(), this.enemyCC.p());
+    if (!(mag > 4)) {
+        input.push(0.0);
+    }
+    else if (mag < 16) {
+        input.push(0.5);
+    }
+    else if (mag < 46) {
+        input.push(1.0);
+    }
+
+    // Recent good/bad results
+    var rating = Math.clamp(((this.pain * 0.25 + this.pleasure) * 20 + 1) / 4, 0, 1);
+    rating = Math.floor(rating / 4) * 4;
+    input.push(rating);
+
+    // Self damage %
+    var totalMax = 0;
+    var total = 0;
+    for (var i=0; i<this.shipBlocks.length; i++) {
+        totalMax += this.shipBlocks[i].maxHP;
+        if (this.shipBlocks[i].onCC === this.ccblock) {
+            total += this.shipBlocks[i].hp;
+        }
+    }
+    input.push(1 - (Math.floor(Math.clamp(total / totalMax, 0, 1) * 5) / 5));
+
+    // Done this
+    input.push(Math.clamp(Math.floor((this.doneThisCount / (30 * 4)) / 4), 0, 1) * 4);
+
+    // Activate
     var output = this.network.activate(input);
 
-    if (this.lastInput && !input.flatEqual(this.lastInput) && this.lastOutput) {
-        var score = Math.clamp(pain + pleasure, -1, 1);
-        var K = BSWG.NNAI.LEARN_ITERATIONS * Math.abs(score);
+    // Learning
+    if (this.lastInput && !BSWG.ArrayFlatEqual(input, this.lastInput) && this.lastOutput) {
+        var score = Math.clamp(pain * 4 + pleasure * 16, -1, 1);
+        var K = BSWG.NNAI.LEARN_ITERATIONS * (Math.abs(score)+0.5);
+        console.log("Train: " + Math.floor(K) + "(" + score + ")");
         for (var k=0; k<K; k++) {
             this.network.activate(this.lastInput);
             this.network.propagate(BSWG.NNAI.LEARN_RATE, score > 0 ? this.lastOutput : this.randOutput());
         }
         this.pain = 0;
-        this.pleasure = pleasure;
+        this.pleasure = 0;
+        this.doneThisCount = 0;
+    }
+    else {
+        this.doneThisCount += 1;
     }
 
     this.lastInput = deepcopy(input);
     this.lastOutput = deepcopy(output);
+
+    // Action
+
+    for (var key in this.keys) {
+        this.keys[key] = false;
+    }
 
     var K = 0;
     var ep = this.enemyCC.p();

@@ -67,6 +67,8 @@ BSWG.component_Minigun = {
 
         this.energySecond = [1.0, 4.0][size-1];
 
+        this.pwepRating = 1.5 * this.size * this.size;
+
         var overs = null;
         var verts = Math.smoothPoly(overts = [
             new b2Vec2(size * -0.30 * 1.5, size * -0.125 * 1.5),
