@@ -387,6 +387,8 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     
     this.aiDesc = deepcopy(aiDesc || {});
     this.states = this.aiDesc.states || [];
+    this.groups = {};
+    this.groups[0] = [];
 
     for (var i=0; i<this.shipBlocks.length; i++) {
         var C = this.shipBlocks[i];
@@ -405,14 +407,17 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     }
     this.keyList.sort();
 
-    var totalProb = 0;
-    this.maxStateProb = 0;
+    this.maxStateProb = {};
     for (var i=0; i<this.states.length; i++) {
         var S = this.states[i];
-        totalProb += S.probability;
-        this.maxStateProb = Math.max(this.maxStateProb, S.probability);
-        S.accProb = totalProb;
         S.controller = null;
+        S.group = S.group || 0;
+        S.index = i;
+        this.maxStateProb[S.group] = Math.max(this.maxStateProb[S.group] || 0, S.probability);
+        if (!this.groups[S.group]) {
+            this.groups[S.group] = [];
+        }
+        this.groups[S.group].push(S);
         if (S.type === 'movement') {
             S.controller = new BSWG.aiController(
                 'movement',
@@ -452,13 +457,13 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
             // S.keysBlock
         }
     }
-    if (totalProb > 0) {
-        for (var i=0; i<this.states.length; i++) {
-            this.states[i].accProb /= totalProb;
-        }
+
+    this.numGroups = 0;
+    for (var group in this.groups) {
+        this.numGroups += 1;
     }
 
-    this.outputLength = this.states.length + 2;
+    this.outputLength = this.states.length + 2 * this.numGroups;
     this.inputLength = 11;
 
     this.network = null;
@@ -732,72 +737,87 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         this.keys[key] = false;
     }
 
-    var K = 0;
-    var ep = this.enemyCC.p();
     this._tpos = null;
-    var state = 0;
-    for (var i=0; i<this.states.length; i++) {
-        if (output[K+i]*(this.states[i].probability / this.maxStateProb) > output[K+state]*(this.states[state].probability / this.maxStateProb)) {
-            state = i;
-        }
-    }
 
-    var S = this.states[state];
-    if (S) {
-        var K2 = K + this.states.length;
-        if ((S.type === 'movement') && ep) {
-            var a = output[K2+0] * Math.PI * 2.0;
-            var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
-            S.controller.moveTo(
-                this._tpos = new b2Vec2(
-                    ep.x + Math.cos(a) * r,
-                    ep.y + Math.sin(a) * r
-                ),
-                this.keys,
-                BSWG.KEY[S.left] || null,
-                BSWG.KEY[S.right] || null,
-                BSWG.KEY[S.forward] || null,
-                BSWG.KEY[S.reverse] || null
-            );
+    var G = 0;
+    for (var _G in this.groups) {
+
+        var group = parseInt(_G);
+        var states = this.groups[_G];
+
+        if (!states.length) {
+            continue;
         }
-        else if ((S.type === 'tracker') && ep) {
-            var a = output[K2+0] * Math.PI * 2.0;
-            var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
-            S.controller.track(
-                this._tpos = new b2Vec2(
-                    ep.x + Math.cos(a) * r,
-                    ep.y + Math.sin(a) * r
-                ),
-                this.keys,
-                BSWG.KEY[S.left] || null,
-                BSWG.KEY[S.right] || null,
-                BSWG.KEY[S.fire] || null
-            );
-        }
-        else if ((S.type === 'back-up') && ep) {
-            var key = BSWG.KEY[S.reverse] || null;
-            if (key) {
-                this.keys[key] = true;
+
+        var K = 0;
+        var ep = this.enemyCC.p();
+        var state = states[0].index;
+        for (var i=0; i<states.length; i++) {
+            var j = states[i].index;
+            if (output[K+j]*(states[i].probability / this.maxStateProb[group]) > output[K+state]*(this.states[state].probability / this.maxStateProb[group])) {
+                state = j;
             }
         }
-        else if ((S.type === 'key-press') & ep) {
-            var key = BSWG.KEY[S.key] || null;
-            if (key) {
-                this.keys[key] = true;
+
+        var S = this.states[state];
+        if (S) {
+            var K2 = this.states.length + G * 2;
+            if ((S.type === 'movement') && ep) {
+                var a = output[K2+0] * Math.PI * 2.0;
+                var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
+                S.controller.moveTo(
+                    this._tpos = new b2Vec2(
+                        ep.x + Math.cos(a) * r,
+                        ep.y + Math.sin(a) * r
+                    ),
+                    this.keys,
+                    BSWG.KEY[S.left] || null,
+                    BSWG.KEY[S.right] || null,
+                    BSWG.KEY[S.forward] || null,
+                    BSWG.KEY[S.reverse] || null
+                );
             }
-            for (var i=0; S.keys && i<S.keys.length; i++) {
-                var key = BSWG.KEY[S.keys[i]] || null;
+            else if ((S.type === 'tracker') && ep) {
+                var a = output[K2+0] * Math.PI * 2.0;
+                var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
+                S.controller.track(
+                    this._tpos = new b2Vec2(
+                        ep.x + Math.cos(a) * r,
+                        ep.y + Math.sin(a) * r
+                    ),
+                    this.keys,
+                    BSWG.KEY[S.left] || null,
+                    BSWG.KEY[S.right] || null,
+                    BSWG.KEY[S.fire] || null
+                );
+            }
+            else if ((S.type === 'back-up') && ep) {
+                var key = BSWG.KEY[S.reverse] || null;
                 if (key) {
                     this.keys[key] = true;
                 }
             }
-            for (var i=0; S.keysBlock && i<S.keysBlock.length; i++) {
-                var key = BSWG.KEY[S.keysBlock[i]] || null;
+            else if ((S.type === 'key-press') && ep) {
+                var key = BSWG.KEY[S.key] || null;
                 if (key) {
-                    this.keysBlock[key] = true;
+                    this.keys[key] = true;
+                }
+                for (var i=0; S.keys && i<S.keys.length; i++) {
+                    var key = BSWG.KEY[S.keys[i]] || null;
+                    if (key) {
+                        this.keys[key] = true;
+                    }
+                }
+                for (var i=0; S.keysBlock && i<S.keysBlock.length; i++) {
+                    var key = BSWG.KEY[S.keysBlock[i]] || null;
+                    if (key) {
+                        this.keysBlock[key] = true;
+                    }
                 }
             }
         }
+
+        G += 1;
     }
 
     input = output = null;
