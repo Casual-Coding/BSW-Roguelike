@@ -1913,8 +1913,8 @@ BSWG.componentList = new function () {
                 CL[i].onCC.totalMass += (CL[i].obj && CL[i].obj.body) ? CL[i].obj.body.GetMass() : 0.0;
                 CL[i].onCC.energyRegen += Math.max(0, CL[i].energyGain || 0.0);
                 CL[i].onCC.totalMaxHP += CL[i].maxHP || 0;
-                CL[i].pwepRating += CL[i].pwepRating || 0;
-                CL[i].mwepRating += CL[i].mwepRating || 0;
+                CL[i].onCC.pwepRating += CL[i].pwepRating || 0;
+                CL[i].onCC.mwepRating += CL[i].mwepRating || 0;
             }
         }
 

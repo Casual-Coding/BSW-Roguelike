@@ -625,10 +625,10 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 
     // Enemy speed ratings
     var tratio = this.enemyCC.speedRating / mass;
-    if (!(tratio > 1/16)) {
+    if (!(tratio > 1)) {
         input.push(0.0);
     }
-    else if (tratio < 1/6) {
+    else if (tratio < 6) {
         input.push(0.5);
     }
     else {
@@ -636,7 +636,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     }
 
     // Enemy projectile weapon ratings
-    var pwratio = (this.enemyCC.pwepRating + 1) / (this.ccblock.pwepRating + 1);
+    var pwratio = (this.enemyCC.pwepRating) / (this.ccblock.pwepRating + 1);
     if (!(pwratio > 0.25)) {
         input.push(0.0);
     }
@@ -648,7 +648,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     }
 
     // Enemy mele weapon ratings
-    var mwratio = (this.enemyCC.mwepRating + 1) / (this.ccblock.mwepRating + 1);
+    var mwratio = (this.enemyCC.mwepRating) / (this.ccblock.mwepRating + 1);
     if (!(mwratio > 0.25)) {
         input.push(0.0);
     }
@@ -658,6 +658,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     else {
         input.push(1.0);
     }
+
+    console.log(pwratio, mwratio, tratio);
 
     // Directions
     var angDiff = Math.angleBetween(this.ccblock.p(), this.enemyCC.p()) + Math.PI / 4 + this.ccblock.obj.body.GetAngleWrapped();
