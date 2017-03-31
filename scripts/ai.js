@@ -464,7 +464,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     }
 
     this.outputLength = this.states.length + 2 * this.numGroups;
-    this.inputLength = 11;
+    this.inputLength = 12;
 
     this.network = null;
     this.enemyCC = null;
@@ -482,6 +482,9 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     this.lastOutput = null;
 
     this.doneThisCount = 0;
+
+    this.inputNames = [ "MASS", "SPD", "PROJ", "MELE", "DIRE", "DIRM", "RVA", "RVM", "RNG", "GOOD", "DMG", "REP" ];
+    this.groupOutput = {};
 
     if (!this.load(networkJSON)) {
         this.reinit();
@@ -529,7 +532,10 @@ BSWG.neuralAI.prototype.load = function(obj) {
             console.warn("NN: outputLength !== outputLength");
         }
         if (obj.networkJSON) {
+            this.lastInput = null;
+            this.lastOutput = null;
             this.network = synaptic.Network.fromJSON(obj.networkJSON);
+            return true;
         }
         else {
             console.warn("NN: network not loaded");
@@ -539,10 +545,6 @@ BSWG.neuralAI.prototype.load = function(obj) {
     else {
         return false;
     }
-
-    this.keys = {};
-
-    return true;
 
 };
 
@@ -657,8 +659,12 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         input.push(1.0);
     }
 
-    // Enemy mele weapon ratings
-    var angDiff = Math.angleBetween(this.ccblock.p(), this.enemyCC.p()) + Math.PI / 4;
+    // Directions
+    var angDiff = Math.angleBetween(this.ccblock.p(), this.enemyCC.p()) + Math.PI / 4 + this.ccblock.obj.body.GetAngleWrapped();
+    angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff)) / (Math.PI * 2.0) + 0.5;
+    input.push(Math.floor(angDiff*4)/4);
+
+    var angDiff = Math.angleBetween(this.ccblock.p(), this.enemyCC.p()) + Math.PI / 4 + this.enemyCC.obj.body.GetAngleWrapped();
     angDiff = Math.atan2(Math.sin(angDiff), Math.cos(angDiff)) / (Math.PI * 2.0) + 0.5;
     input.push(Math.floor(angDiff*4)/4);
 
@@ -685,7 +691,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     else if (mag < 16) {
         input.push(0.5);
     }
-    else if (mag < 46) {
+    else {
         input.push(1.0);
     }
 
@@ -708,6 +714,16 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     // Done this
     input.push(Math.clamp(Math.floor((this.doneThisCount / (30 * 4)) / 4), 0, 1) * 4);
 
+    // Sanitize input
+    for (var i=0; i<input.length; i++) {
+        if (isNaN(input[i])) {
+            input[i] = 0;
+        }
+        else {
+            input[i] = Math.clamp(input[i], 0, 1);
+        }
+    }
+
     // Activate
     var output = this.network.activate(input);
 
@@ -717,8 +733,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         var K = BSWG.NNAI.LEARN_ITERATIONS * (Math.abs(score)+0.5);
         console.log("Train: " + Math.floor(K) + "(" + score + ")");
         for (var k=0; k<K; k++) {
-            this.network.activate(this.lastInput);
-            this.network.propagate(BSWG.NNAI.LEARN_RATE, score > 0 ? this.lastOutput : this.randOutput());
+            this.network.activate(deepcopy(this.lastInput));
+            this.network.propagate(BSWG.NNAI.LEARN_RATE, score > 0 ? deepcopy(this.lastOutput) : this.randOutput());
         }
         this.pain = 0;
         this.pleasure = 0;
@@ -737,7 +753,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         this.keys[key] = false;
     }
 
-    this._tpos = null;
+    this._tpos = {};
 
     var G = 0;
     for (var _G in this.groups) {
@@ -760,13 +776,15 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         }
 
         var S = this.states[state];
+        this.groupOutput[group] = "G" + group + ": " + state + " (" + S.type + ")";
+
         if (S) {
             var K2 = this.states.length + G * 2;
             if ((S.type === 'movement') && ep) {
                 var a = output[K2+0] * Math.PI * 2.0;
                 var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
                 S.controller.moveTo(
-                    this._tpos = new b2Vec2(
+                    this._tpos[group] = new b2Vec2(
                         ep.x + Math.cos(a) * r,
                         ep.y + Math.sin(a) * r
                     ),
@@ -781,7 +799,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
                 var a = output[K2+0] * Math.PI * 2.0;
                 var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
                 S.controller.track(
-                    this._tpos = new b2Vec2(
+                    this._tpos[group] = new b2Vec2(
                         ep.x + Math.cos(a) * r,
                         ep.y + Math.sin(a) * r
                     ),
@@ -827,32 +845,42 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
 BSWG.neuralAI.prototype.debugRender = function(ctx, dt) {
 
     var p1 = null, p2 = null;
-    if (this._tpos) {
-        p1 = BSWG.game.cam.toScreen(BSWG.render.viewport, this._tpos.clone());
-    }
     if (this.ccblock && this.ccblock.p()) {
         p2 = BSWG.game.cam.toScreen(BSWG.render.viewport, this.ccblock.p().clone());
     }
 
-    if (p1 && p2) {
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.strokeStyle = '#f00';
-        ctx.closePath();
-        ctx.stroke();
+    for (var G in this._tpos) {
+        var p1 = null;
+        if (this._tpos[G]) {
+            p1 = BSWG.game.cam.toScreen(BSWG.render.viewport, this._tpos[G].clone());
+        }
+        if (p1 && p2) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = '#f00';
+            ctx.closePath();
+            ctx.stroke();
+        }
     }
 
     if (p2 && this.lastInput) {
         var str = [];
         var input = this.lastInput;
         for (var i=0; i<input.length; i++) {
-            str.push(Math.floor(input[i]*100));
+            str.push(this.inputNames[i] + ": " + Math.floor(input[i]*100));
         }
         str = str.join(", ");
-        ctx.font = '11px Orbitron';
+        ctx.font = '10px Orbitron';
         ctx.fillStyle = '#f0f';
         ctx.fillText(str, p2.x, p2.y);
+        var y = p2.y;
+        for (var G in this.groupOutput) {
+            y += 11;
+            ctx.font = '10px Orbitron';
+            ctx.fillStyle = '#f0f';
+            ctx.fillText(this.groupOutput[G], p2.x, y);
+        }
     }
 
 };
