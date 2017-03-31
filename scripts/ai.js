@@ -659,7 +659,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         input.push(1.0);
     }
 
-    console.log(pwratio, mwratio, tratio);
+    //console.log(pwratio, mwratio, tratio);
 
     // Directions
     var angDiff = Math.angleBetween(this.ccblock.p(), this.enemyCC.p()) + Math.PI / 4 + this.ccblock.obj.body.GetAngleWrapped();
