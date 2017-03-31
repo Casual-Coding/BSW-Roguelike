@@ -422,7 +422,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
             S.controller = new BSWG.aiController(
                 'movement',
                 {
-                    comp: this.ccblock,
+                    comp: (S.origin ? this.getCompByTag(S.origin) : null) || this.ccblock,
                     radius: S.radius || 5,
                     charge: true,
                     hinge: true
@@ -435,11 +435,11 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
             // S.forward
             // S.reverse
         }
-        else if (S.type === 'tracker') {
+        else if (S.type === 'tracker' || S.type === 'turret') {
             S.controller = new BSWG.aiController(
                 'turret',
                 {
-                    comp: this.ccblock,
+                    comp: (S.origin ? this.getCompByTag(S.origin) : null) || this.ccblock,
                     limit: Math.PI * 2
                 }
             );
@@ -795,7 +795,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
                     BSWG.KEY[S.reverse] || null
                 );
             }
-            else if ((S.type === 'tracker') && ep) {
+            else if ((S.type === 'tracker' || S.type === 'turret') && ep) {
                 var a = output[K2+0] * Math.PI * 2.0;
                 var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
                 S.controller.track(
@@ -890,6 +890,17 @@ BSWG.neuralAI.prototype.getKeys = function(keys) {
     if (this.keys) {
         for (var key in this.keys) {
             keys[key] = this.keys[key];
+        }
+    }
+
+};
+
+BSWG.neuralAI.prototype.getCompByTag = function(tag) {
+
+    for (var i=0; i<BSWG.componentList.compList.length; i++) {
+        var comp = BSWG.componentList.compList[i];
+        if (this.ccblock && comp && comp.onCC === this.ccblock && comp.tag === tag) {
+            return comp;
         }
     }
 
