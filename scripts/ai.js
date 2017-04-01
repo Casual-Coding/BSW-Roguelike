@@ -616,8 +616,14 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     if (!(mass > 2)) {
         input.push(0.0);
     }
-    else if (mass < 6) {
+    else if (mass < 5) {
+        input.push(0.25);
+    }
+    else if (mass < 10) {
         input.push(0.5);
+    }
+    else if (mass < 15) {
+        input.push(0.75);
     }
     else {
         input.push(1.0);
@@ -690,9 +696,15 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     if (!(mag > 4)) {
         input.push(0.0);
     }
-    else if (mag < 16) {
+    else if (mag < 18) {
+        input.push(0.25);
+    }
+    else if (mag < 40) {
         input.push(0.5);
     }
+    else if (mag < 70) {
+        input.push(0.75);
+    } 
     else {
         input.push(1.0);
     }
