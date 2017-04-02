@@ -375,7 +375,7 @@ BSWG.aiController.prototype.moveTo = function (p, keyDown, left, right, forward,
 
 BSWG.NNAI = {
     SENSOR_RANGE: 100, // in world units
-    LEARN_RATE: 0.1,
+    LEARN_RATE: 0.3,
     LEARN_ITERATIONS: 5000
 };
 
@@ -464,7 +464,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
     }
 
     this.outputLength = this.states.length + 2 * this.numGroups;
-    this.inputLength = 12;
+    this.inputLength = 11;
 
     this.network = null;
     this.enemyCC = null;
@@ -483,7 +483,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
 
     this.doneThisCount = 0;
 
-    this.inputNames = [ "MASS", "SPD", "PROJ", "MELE", "DIRE", "DIRM", "RVA", "RVM", "RNG", "GOOD", "DMG", "REP" ];
+    this.inputNames = [ "MASS", "SPD", "PROJ", "MELE", "DIRE", "DIRM", "RVA", "RVM", "RNG", "GOOD", "DMG" ];
     this.groupOutput = {};
 
     if (!this.load(networkJSON)) {
@@ -594,7 +594,7 @@ BSWG.ArrayFlatEqual = function(a, b) {
     return true;
 };
 
-BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
+BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
 
     if (!this.network) {
         return;
@@ -710,8 +710,8 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     }
 
     // Recent good/bad results
-    var rating = Math.clamp(((this.pain * 0.25 + this.pleasure) * 20 + 1) / 4, 0, 1);
-    rating = Math.floor(rating / 4) * 4;
+    var rating = Math.clamp(((this.pleasure * 4 - this.pain) * 20 + 0.5), 0, 1);
+    rating = Math.floor(rating * 4) / 4;
     input.push(rating);
 
     // Self damage %
@@ -724,9 +724,6 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
         }
     }
     input.push(1 - (Math.floor(Math.clamp(total / totalMax, 0, 1) * 5) / 5));
-
-    // Done this
-    input.push(Math.clamp(Math.floor((this.doneThisCount / (30 * 4)) / 4), 0, 1) * 4);
 
     // Sanitize input
     for (var i=0; i<input.length; i++) {
@@ -741,14 +738,22 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure) {
     // Activate
     var output = this.network.activate(input);
 
+    // A little pain for monotony
+    while (this.doneThisCount > 30) {
+        this.pain += 0.05;
+        this.doneThisCount -= 30;
+    }
+
     // Learning
-    if (this.lastInput && !BSWG.ArrayFlatEqual(input, this.lastInput) && this.lastOutput) {
-        var score = Math.clamp(pain * 4 + pleasure * 16, -1, 1);
-        var K = BSWG.NNAI.LEARN_ITERATIONS * (Math.abs(score)+0.5);
-        console.log("Train: " + Math.floor(K) + "(" + score + ")");
-        for (var k=0; k<K; k++) {
-            this.network.activate(deepcopy(this.lastInput));
-            this.network.propagate(BSWG.NNAI.LEARN_RATE, score > 0 ? deepcopy(this.lastOutput) : this.randOutput());
+    if (this.lastInput && (!BSWG.ArrayFlatEqual(input, this.lastInput) || GG) && this.lastOutput) {
+        if (BSWG.NNActiveTourny) {
+            var score = Math.clamp((this.pleasure*2 - this.pain), -1, 1);
+            var K = BSWG.NNAI.LEARN_ITERATIONS * (Math.abs(score)+0.5);
+            console.log("Train: " + Math.floor(K) + "(" + score + ")");
+            for (var k=0; k<K; k++) {
+                this.network.activate(deepcopy(this.lastInput));
+                this.network.propagate(BSWG.NNAI.LEARN_RATE, score > 0 ? deepcopy(this.lastOutput) : this.randOutput());
+            }
         }
         this.pain = 0;
         this.pleasure = 0;
@@ -1030,27 +1035,27 @@ BSWG.NNTourny.prototype.update = function() {
             if (this.ccblocks[0].destroyed) {
                 winner = 1;
                 if (this.ccblocks[0].aiNN) {
-                    this.ccblocks[0].aiNN.update(1/30, 1, 0);
+                    this.ccblocks[0].aiNN.update(1/30, 1, 0, true);
                 }
                 else if (this.ccblocks[1].aiNN) {
-                    this.ccblocks[1].aiNN.update(1/30, 0, 1);
+                    this.ccblocks[1].aiNN.update(1/30, 0, 1, true);
                 }
             }
             else if (this.ccblocks[1].destroyed) {
                 winner = 0;
                 if (this.ccblocks[1].aiNN) {
-                    this.ccblocks[1].aiNN.update(1/30, 1, 0);
+                    this.ccblocks[1].aiNN.update(1/30, 1, 0, true);
                 }
                 else if (this.ccblocks[1].aiNN) {
-                    this.ccblocks[1].aiNN.update(1/30, 0, 1);
+                    this.ccblocks[1].aiNN.update(1/30, 0, 1, true);
                 }
             }
             else {
                 if (this.ccblocks[0].aiNN) {
-                    this.ccblocks[0].aiNN.update(1/30, 0.5, 0);
+                    this.ccblocks[0].aiNN.update(1/30, 0.5, 0, true);
                 }
                 if (this.ccblocks[1].aiNN) {
-                    this.ccblocks[1].aiNN.update(1/30, 0.5, 0);
+                    this.ccblocks[1].aiNN.update(1/30, 0.5, 0, true);
                 }
                 if (this.ccblocks[0].aiNN && !this.ccblocks[1].aiNN) {
                     winner = 0;
