@@ -373,6 +373,210 @@ BSWG.aiController.prototype.moveTo = function (p, keyDown, left, right, forward,
 
 //////
 
+// Adaptive Decision Tree
+BSWG.ADTree = function(inputLength, groups, states, load) {
+
+    this.inputs = [];
+    this.tree = { tree: {} };
+    this.inputLength = inputLength;
+    this.groups = deepcopy(groups);
+    this.states = deepcopy(states);
+    this.lkey = '';
+
+    this.loaded = !load;
+
+    if (load) {
+        if (load.inputLength !== this.inputLength) {
+            console.warn('inputLength mismatch');
+        }
+        else if (JSON.stringify(this.groups) !== JSON.stringify(load.groups)) {
+            console.warn('groups mismatch');
+        }
+        else if (JSON.stringify(this.states) !== JSON.stringify(load.states)) {
+            console.warn('states mismatch');
+        }
+        else if (!load.tree) {
+            console.warn('tree missing');
+        }
+        else if (!load.inputs) {
+            console.warn('inputs missing');
+        }
+        else {
+            this.inputs = deepcopy(load.inputs);
+            this.tree = deepcopy(load.tree);
+            this.loaded = true;
+        }
+    }
+
+};
+
+BSWG.ADTree.prototype.key = function(v) {
+    return ~~(v * 100);
+};
+
+BSWG.ADTree.prototype.ikey = function(k) {
+    return k / 100;
+};
+
+BSWG.ADTree.prototype.translateOutput = function(output) {
+
+};
+
+BSWG.ADTree.prototype.randomOutput = function() {
+
+    this.lkey = '';
+
+    var ret = {};
+    for (var key in this.groups) {
+        ret[key] = this.randomState(parseInt(key));
+    }
+    ret.key = this.lkey;
+    return ret;
+
+};
+
+BSWG.ADTree.prototype.randomState = function(group) {
+
+    var states = this.groups[group];
+    var state = null;
+    var r = Math.random();
+    for (var i=0; i<states.length; i++) {
+        var S = this.states[states[i]];
+        if (r <= S.probability) {
+            state = S;
+            break;
+        }
+    }
+
+    if (!state) {
+        console.warn('no state for group ' + group);
+        return null;
+    }
+
+    var oIndex = (~~(Math.random()*10000000)) % state.outputs.length;
+    var output = state.outputs[oIndex] || [];
+
+    this.lkey += '-' + (state.index + oIndex * states.length);
+
+    var ret = [
+        state.index
+    ];
+
+    for (var i=0; i<output.length; i++) {
+        ret.push(output[i]);
+    }
+
+    return ret;
+
+};
+
+BSWG.ADTree.prototype.think = function(input, experiment) {
+
+    if (!input || input.length !== this.inputLength) {
+        console.warn('.think input error');
+        return null;
+    }
+
+    var node = this.tree;
+    var sumError = 0;
+
+    for (var i=0; i<this.inputLength && node; i++) {
+        var minVal = null;
+        var minError = 1.01;
+        for (var key in node.tree) {
+            var error = Math.abs(node.tree[key].value - input[i]);
+            if (error < minError || !minVal) {
+                minVal = node.tree[key];
+                minError = error;
+            }
+        }
+        if (minVal) {
+            sumError += minError;
+            node = minVal;
+        }
+        else {
+            return this.randomOutput();
+        }
+    }
+
+    if (!node.output) {
+        console.warn('.think error: node has no output');
+        return null;
+    }
+
+    var avgError = sumError / input.length;
+    var probability = (1 - avgError) - (experiment ? Math.clamp(1 - node.score * 5, 0, 1) : 0);
+
+    if (Math._random() > probability) {
+        return this.randomOutput();
+    }
+
+    return deepcopy(node.output);
+
+};
+
+BSWG.ADTree.prototype.remember = function (input, output, score) {
+
+    if (!input || input.length !== this.inputLength) {
+        console.warn('.think input error');
+        return null;
+    }
+
+    var node = this.tree;
+    var sumError = 0;
+
+    for (var i=0; i<this.inputLength && node; i++) {
+        var k = this.key(input[i]);
+        if (!node.tree) {
+            node.tree = {};
+        }
+        if (!node.tree[k]) {
+            node.tree[k] = {
+                value: input[i]
+            }
+        }
+        node = node.tree[k];
+    }
+
+    if (!node.output || (score > node.score)) {
+        node.output = deepcopy(output);
+        node.score = score;
+    }
+
+};
+
+BSWG.ADTree.prototype.serialize = function() {
+
+    return {
+        inputLength: this.inputLength,
+        groups: deepcopy(this.groups),
+        states: deepcopy(this.states),
+        tree: deepcopy(this.tree),
+        inputs: deepcopy(this.inputs)
+    };
+
+};
+
+BSWG.ChopCircle = function(minDist, maxDist, divSize) {
+
+    var ret = [];
+    var sub = Math.ceil(maxDist / divSize);
+    var p = null, len = 0;
+    for (var x=-sub; x<=sub; x++) {
+        for (var y=-sub; y<=sub; y++) {
+            p = new b2Vec2(x * divSize, y * divSize);
+            len = Math.lenVec2(p);
+            if (len >= minDist && len <= maxDist) {
+                ret.push( [p.x, p.y] );
+            }
+        }
+    }
+    return ret;
+
+};
+
+//////
+
 BSWG.NNAI = {
     SENSOR_RANGE: 100, // in world units
     LEARN_RATE: 0.3,
@@ -413,6 +617,9 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
         S.controller = null;
         S.group = S.group || 0;
         S.index = i;
+        if (!S.probability && S.probability !== 0) {
+            S.probability = 1.0;
+        }
         this.maxStateProb[S.group] = Math.max(this.maxStateProb[S.group] || 0, S.probability);
         if (!this.groups[S.group]) {
             this.groups[S.group] = [];
@@ -430,6 +637,7 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
             );
             S.maxDistance = S.maxDistance || 30.0;
             S.minDistance = S.minDistance || 0.0;
+            S.possibleOutputs = BSWG.ChopCircle(S.minDistance, S.maxDistance, 4.0);
             // S.left
             // S.right
             // S.forward
@@ -445,16 +653,19 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
             );
             S.maxDistance = S.maxDistance || 5.0;
             S.minDistance = S.minDistance || 0.0;
+            S.possibleOutputs = BSWG.ChopCircle(S.minDistance, S.maxDistance, 2.0);
             // S.left
             // S.right
             // S.fire
         }
         else if (S.type === 'back-up') {
             // S.reverse
+            S.possibleOutputs = [ [] ];
         }
         else if (S.type === 'key-press') {
             // S.keys || S.key
             // S.keysBlock
+            S.possibleOutputs = [ [] ];
         }
     }
 
@@ -490,15 +701,47 @@ BSWG.neuralAI = function(shipBlocks, networkJSON, aiDesc) {
         this.reinit();
     }
 
-    if (this.network) {
-        this.network.optimize();
-    }
-
 };
 
-BSWG.neuralAI.prototype.reinit = function() {
+BSWG.neuralAI.prototype.reinit = function(load) {
 
-    this.network = new synaptic.Architect.Perceptron(this.inputLength, 10, 10, 10, this.outputLength);
+    var sumProb = {};
+    var stateProb = {};
+
+    var groups = {};
+    for (var key in this.groups) {
+        groups[key] = [];
+        sumProb[key] = 0;
+        for (var i=0; i<this.groups[key].length; i++) {
+            groups[key].push(this.groups[key][i].index);
+            sumProb[key] += this.groups[key][i].probability;
+            stateProb[this.groups[key][i].index] = sumProb[key];
+        }
+    }
+
+    var states = [];
+    for (var i=0; i<this.states.length; i++) {
+        var S = this.states[i];
+        var state = {
+            index: i,
+            probability: (stateProb[i] || 0) / Math.max(0.001, sumProb[S.group || 0]),
+            group: S.group || 0,
+            outputs: deepcopy(S.possibleOutputs || [[]])
+        };
+        states.push(state);
+    }
+
+    this.lscore = 0;
+    this.tree = new BSWG.ADTree(this.inputLength, groups, states, load);
+    
+    var loaded = this.tree.loaded;
+    if (!loaded) {
+        this._badtree = this.tree;
+        this.tree = null;
+        return false;
+    }
+
+    return true;
 
 };
 
@@ -514,48 +757,18 @@ BSWG.neuralAI.prototype.randOutput = function() {
 
 BSWG.neuralAI.prototype.load = function(obj) {
 
-    if (!obj) {
-        return false;
-    }
-
-    if (typeof obj === 'string') {
-        obj = JSON.parse(obj);
-    }
-
-    if (obj) {
-        if (this.inputLength !== obj.inputLength) {
-            obj.networkJSON = null;
-            console.warn("NN: inputLength !== inputLength");
-        }
-        if (this.outputLength !== obj.outputLength) {
-            obj.networkJSON = null;
-            console.warn("NN: outputLength !== outputLength");
-        }
-        if (obj.networkJSON) {
-            this.lastInput = null;
-            this.lastOutput = null;
-            this.network = synaptic.Network.fromJSON(obj.networkJSON);
-            return true;
-        }
-        else {
-            console.warn("NN: network not loaded");
-            return false;
-        }
-    }
-    else {
-        return false;
-    }
+    return this.reinit(obj);
 
 };
 
 BSWG.neuralAI.prototype.serialize = function() {
 
-    var obj = {
-        inputLength: this.inputLength,
-        outputLength: this.outputLength,
-        networkJSON: this.network.toJSON()
-    };
-    return obj;
+    if (this.tree) {
+        return this.tree.serialize();
+    }
+    else {
+        console.warn('serialize: no ADTree');
+    }
 
 };
 
@@ -596,7 +809,7 @@ BSWG.ArrayFlatEqual = function(a, b) {
 
 BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
 
-    if (!this.network) {
+    if (!this.tree) {
         return;
     }
 
@@ -736,7 +949,10 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
     }
 
     // Activate
-    var output = this.network.activate(input);
+    var output = this.tree.think(input, this.doneThisCount === 0);
+    if (this.doneThisCount > 0) {
+        output = deepcopy(this.lastOutput);
+    }
 
     // A little pain for monotony
     while (this.doneThisCount > 30) {
@@ -746,18 +962,13 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
 
     // Learning
     if (this.lastInput && (!BSWG.ArrayFlatEqual(input, this.lastInput) || GG) && this.lastOutput) {
-        if (BSWG.NNActiveTourny) {
-            var score = Math.clamp((this.pleasure*2 - this.pain), -1, 1);
-            var K = BSWG.NNAI.LEARN_ITERATIONS * (Math.abs(score)+0.5);
-            console.log("Train: " + Math.floor(K) + "(" + score + ")");
-            for (var k=0; k<K; k++) {
-                this.network.activate(deepcopy(this.lastInput));
-                this.network.propagate(BSWG.NNAI.LEARN_RATE, score > 0 ? deepcopy(this.lastOutput) : this.randOutput());
-            }
-        }
+        var score = Math.clamp((this.pleasure*2 - this.pain), -1, 1);
+        var deltaScore = score - this.lscore;
+        this.tree.remember(this.lastInput, this.lastOutput, Math.clamp(score+deltaScore*5, -1, 1));
         this.pain = 0;
         this.pleasure = 0;
         this.doneThisCount = 0;
+        this.lscore = score;
     }
     else {
         this.doneThisCount += 1;
@@ -766,7 +977,7 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
     this.lastInput = deepcopy(input);
     this.lastOutput = deepcopy(output);
 
-    // Action
+    // Action  
 
     for (var key in this.keys) {
         this.keys[key] = false;
@@ -774,38 +985,31 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
 
     this._tpos = {};
 
-    var G = 0;
-    for (var _G in this.groups) {
-
-        var group = parseInt(_G);
-        var states = this.groups[_G];
-
-        if (!states.length) {
+    for (var _G in output) {
+        if (_G === 'key') {
             continue;
         }
 
-        var K = 0;
-        var ep = this.enemyCC.p();
-        var state = states[0].index;
-        for (var i=0; i<states.length; i++) {
-            var j = states[i].index;
-            if (output[K+j]*(states[i].probability / this.maxStateProb[group]) > output[K+state]*(this.states[state].probability / this.maxStateProb[group])) {
-                state = j;
-            }
+        var group = parseInt(_G);
+        var V = output[_G];
+        if (!V || !V.length) {
+            continue;
         }
-
+        var state = V[0];
         var S = this.states[state];
+        if (!S) {
+            continue;
+        }
         this.groupOutput[group] = "G" + group + ": " + state + " (" + S.type + ")";
 
+        var ep = this.enemyCC.p();
+
         if (S) {
-            var K2 = this.states.length + G * 2;
             if ((S.type === 'movement') && ep) {
-                var a = output[K2+0] * Math.PI * 2.0;
-                var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
                 S.controller.moveTo(
                     this._tpos[group] = new b2Vec2(
-                        ep.x + Math.cos(a) * r,
-                        ep.y + Math.sin(a) * r
+                        ep.x + V[1],
+                        ep.y + V[2]
                     ),
                     this.keys,
                     BSWG.KEY[S.left] || null,
@@ -815,12 +1019,10 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
                 );
             }
             else if ((S.type === 'tracker' || S.type === 'turret') && ep) {
-                var a = output[K2+0] * Math.PI * 2.0;
-                var r = output[K2+1] * (S.maxDistance - S.minDistance) + S.minDistance;
                 S.controller.track(
                     this._tpos[group] = new b2Vec2(
-                        ep.x + Math.cos(a) * r,
-                        ep.y + Math.sin(a) * r
+                        ep.x + V[1],
+                        ep.y + V[2]
                     ),
                     this.keys,
                     BSWG.KEY[S.left] || null,
@@ -853,8 +1055,6 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
                 }
             }
         }
-
-        G += 1;
     }
 
     input = output = null;
@@ -1071,16 +1271,16 @@ BSWG.NNTourny.prototype.update = function() {
             if (this.curSeq[0] === this.curSeq[1]) {
                 if (winner > -1) {
                     if (this.ccblocks[winner].aiNN) {
-                        this.saveAI(this.shipIDs[this.curSeq[winner]], this.ccblocks[winner].aiNN.serialize());
+                        BSWG.NNTourny.saveAI(this.shipIDs[this.curSeq[winner]], this.ccblocks[winner].aiNN.serialize());
                     }
                 }
             }
             else {
                 if (this.ccblocks[0].aiNN) {
-                    this.saveAI(this.shipIDs[this.curSeq[0]], this.ccblocks[0].aiNN.serialize());
+                    BSWG.NNTourny.saveAI(this.shipIDs[this.curSeq[0]], this.ccblocks[0].aiNN.serialize());
                 }
                 if (this.ccblocks[1].aiNN) {
-                    this.saveAI(this.shipIDs[this.curSeq[1]], this.ccblocks[1].aiNN.serialize());
+                    BSWG.NNTourny.saveAI(this.shipIDs[this.curSeq[1]], this.ccblocks[1].aiNN.serialize());
                 }
             }
 
@@ -1116,7 +1316,7 @@ BSWG.NNTourny.prototype.shipLoaded = function(ccblock) {
 
 };
 
-BSWG.NNTourny.prototype.getAI = function(ship) {
+BSWG.NNTourny.getAI = function(ship) {
 
     var defaultObj = null;
 
@@ -1126,7 +1326,7 @@ BSWG.NNTourny.prototype.getAI = function(ship) {
 
 };
 
-BSWG.NNTourny.prototype.saveAI = function(ship, json) {
+BSWG.NNTourny.saveAI = function(ship, json) {
 
     BSWG.storage.save('nnai-' + ship, json);
 

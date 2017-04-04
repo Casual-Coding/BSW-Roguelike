@@ -815,7 +815,7 @@ BSWG.game = new function(){
                             aiship.enemy_type_id = list[i][0].enemy_type_id;
                             window.setTimeout(function(ais){
                                 return function() {
-                                    ais.reloadAI(BSWG.NNActiveTourny ? BSWG.NNActiveTourny.getAI(ais.enemy_type_id) : null);
+                                    ais.reloadAI(BSWG.NNTourny.getAI(ais.enemy_type_id));
                                     if (BSWG.NNActiveTourny) {
                                         BSWG.NNActiveTourny.shipLoaded(ais);
                                     }
@@ -1751,7 +1751,7 @@ BSWG.game = new function(){
 
                         if (obj) {
                             this.backup = BSWG.componentList.serialize(null, true);
-                            BSWG.ai.aiTestLevel = 0;
+                            BSWG.ai.aiTestLevel = 2;
                             BSWG.ai.playerTestLevel = 0;
                             try {
                                 self.ccblock = null;
