@@ -954,12 +954,6 @@ BSWG.neuralAI.prototype.update = function(dt, pain, pleasure, GG) {
         output = deepcopy(this.lastOutput);
     }
 
-    // A little pain for monotony
-    while (this.doneThisCount > 30) {
-        this.pain += 0.05;
-        this.doneThisCount -= 30;
-    }
-
     // Learning
     if (this.lastInput && (!BSWG.ArrayFlatEqual(input, this.lastInput) || GG) && this.lastOutput) {
         var score = Math.clamp((this.pleasure*2 - this.pain), -1, 1);

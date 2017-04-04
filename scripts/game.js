@@ -1763,6 +1763,12 @@ BSWG.game = new function(){
                                 self.aiship = BSWG.componentList.load(this.backup, {p: new b2Vec2(0, 0), a: Math.random() * Math.PI * 2.0});
                                 window.setTimeout(function(){
                                     self.aiship.reloadAI();
+                                    for (var i=0; i<BSWG.componentList.compList.length; i++) {
+                                        var C = BSWG.componentList.compList[i];
+                                        if (C && C.onCC && C.type !== 'cc') {
+                                            C.compLevel = Math.max(0, Math.floor(((C.onCC === self.ccblock ? BSWG.ai.playerTestLevel : BSWG.ai.aiTestLevel) + Math.random()*0.5-0.25)*10)/10);
+                                        }
+                                    }
                                 },10);                                
                                 if (!self.ccblock || !self.aiship) {
                                     throw "no cc";
