@@ -729,6 +729,9 @@ BSWG.component.prototype.takeDamage = function (amt, fromC, noMin, disolve, noFr
 
     var totalMaxHP = this.onCC ? this.onCC.totalMaxHP : (this.maxHP || 1);
     var pain = (lastHP - (this.hp || 0)) / totalMaxHP;
+    if (this.type === 'cc') {
+        pain *= 8.0;
+    }
     if (this.onCC) {
         if (pain > 0) {
             this.onCC.pain += pain;
